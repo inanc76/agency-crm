@@ -42,6 +42,22 @@ class RestoreSourceData extends Command
                 'updatedAt' => 'updated_at'
             ]);
 
+            $this->restoreTable('reference_categories', ['id', 'key', 'name', 'description', 'is_active', 'created_at', 'updated_at'], [
+                'isActive' => 'is_active',
+                'createdAt' => 'created_at',
+                'updatedAt' => 'updated_at'
+            ]);
+
+            $this->restoreTable('reference_items', ['id', 'category_key', 'key', 'display_label', 'description', 'sort_order', 'is_active', 'is_default', 'metadata', 'created_at', 'updated_at'], [
+                'categoryKey' => 'category_key',
+                'displayLabel' => 'display_label',
+                'sortOrder' => 'sort_order',
+                'isActive' => 'is_active',
+                'isDefault' => 'is_default',
+                'createdAt' => 'created_at',
+                'updatedAt' => 'updated_at'
+            ]);
+
             // Priority 2: Users & Cities
             $this->restoreTable('users', ['id', 'email', 'name', 'password', 'role_id', 'created_at', 'updated_at'], [
                 'roleId' => 'role_id',

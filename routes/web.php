@@ -38,6 +38,10 @@ Volt::route('dashboard/settings/profile', 'settings.profile')
     ->middleware(['auth', 'verified'])
     ->name('settings.profile');
 
+Volt::route('dashboard/settings/variables', 'variables.index')
+    ->middleware(['auth', 'verified'])
+    ->name('settings.variables');
+
 
 
 

@@ -181,25 +181,25 @@ new
 
             {{-- Form --}}
             <div class="grid grid-cols-1 gap-6">
-                {{-- Bucket Name --}}
-                <div>
-                    <x-mary-input label="Bucket Adı" wire:model="bucket_name"
-                        hint="Dosyaların saklanacağı bucket adı. Yoksa otomatik oluşturulur." />
+                {{-- Bucket Name, Port & SSL --}}
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-start">
+                    <div class="md:col-span-6">
+                        <x-mary-input label="Bucket Adı" wire:model="bucket_name"
+                            hint="Dosyaların saklanacağı bucket adı. Yoksa otomatik oluşturulur." />
+                    </div>
+                    <div class="md:col-span-2">
+                        <x-mary-input label="Port" type="number" wire:model="port" />
+                    </div>
+                    <div class="md:col-span-4 self-center pt-4">
+                        <x-mary-checkbox label="SSL Kullan (HTTPS)" wire:model="use_ssl"
+                            hint="Güvenli bağlantı için önerilir" />
+                    </div>
                 </div>
 
                 {{-- Endpoint --}}
                 <div>
                     <x-mary-input label="Endpoint" wire:model="endpoint"
                         hint="Minio sunucunuzun adresi (http/https olmadan)" placeholder="minio.example.com" />
-                </div>
-
-                {{-- Port & SSL --}}
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
-                    <x-mary-input label="Port" type="number" wire:model="port" />
-                    <div class="pb-3">
-                        <x-mary-checkbox label="SSL Kullan (HTTPS)" wire:model="use_ssl"
-                            hint="Güvenli bağlantı için önerilir" />
-                    </div>
                 </div>
 
                 {{-- Access Key --}}

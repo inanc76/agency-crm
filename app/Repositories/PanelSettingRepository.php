@@ -62,10 +62,10 @@ class PanelSettingRepository
             'site_name' => 'MEDIACLICK',
             'logo_scale' => 1.0,
             'header_bg_color' => '#3D3373',
-            'menu_bg_color' => 'rgba(255, 255, 255, 0.1)',
+            'menu_bg_color' => '#3D3373',
             'menu_text_color' => '#ffffff',
             'header_icon_color' => '#ffffff',
-            'header_border_color' => 'transparent',
+            'header_border_color' => '#000000',
             'header_border_width' => 0,
         ]);
     }

@@ -23,7 +23,7 @@ new
                 'subtitle' => 'Sistem değişkenlerini ve referans verilerini yönetin',
                 'icon' => 'o-tag',
                 'color' => 'bg-rose-50 text-rose-500',
-                'link' => '#'
+                'link' => route('settings.variables')
             ],
             [
                 'title' => 'Depolama Ayarları',
