@@ -12,6 +12,35 @@ Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
+// Müşteri Yönetimi
+Route::get('dashboard/customers', function () {
+    if (!request()->has('tab')) {
+        return redirect()->to(url()->current() . '?tab=customers');
+    }
+    return view('customers.index');
+})->middleware(['auth', 'verified'])->name('customers.index');
+
+// Ayarlar
+// Ayarlar
+Volt::route('dashboard/settings', 'settings.index')
+    ->middleware(['auth', 'verified'])
+    ->name('settings.index');
+
+Volt::route('dashboard/settings/storage', 'settings.storage')
+    ->middleware(['auth', 'verified'])
+    ->name('settings.storage');
+
+Volt::route('dashboard/settings/panel', 'settings.panel')
+    ->middleware(['auth', 'verified'])
+    ->name('settings.panel');
+
+Volt::route('dashboard/settings/profile', 'settings.profile')
+    ->middleware(['auth', 'verified'])
+    ->name('settings.profile');
+
+
+
+
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');
 
@@ -23,7 +52,7 @@ Route::middleware(['auth'])->group(function () {
         ->middleware(
             when(
                 Features::canManageTwoFactorAuthentication()
-                    && Features::optionEnabled(Features::twoFactorAuthentication(), 'confirmPassword'),
+                && Features::optionEnabled(Features::twoFactorAuthentication(), 'confirmPassword'),
                 ['password.confirm'],
                 [],
             ),

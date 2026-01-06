@@ -151,6 +151,53 @@ class RestoreSourceData extends Command
                 'updatedAt' => 'updated_at'
             ]);
 
+            $this->restoreTable('offers', [
+                'id',
+                'number',
+                'customer_id',
+                'status',
+                'title',
+                'description',
+                'total_amount',
+                'original_amount',
+                'discount_percentage',
+                'discounted_amount',
+                'currency',
+                'valid_until',
+                'pdf_url',
+                'tracking_token',
+                'created_at',
+                'updated_at'
+            ], [
+                'customerId' => 'customer_id',
+                'totalAmount' => 'total_amount',
+                'originalAmount' => 'original_amount',
+                'discountPercentage' => 'discount_percentage',
+                'discountedAmount' => 'discounted_amount',
+                'validUntil' => 'valid_until',
+                'pdfUrl' => 'pdf_url',
+                'trackingToken' => 'tracking_token',
+                'createdAt' => 'created_at',
+                'updatedAt' => 'updated_at'
+            ]);
+
+            $this->restoreTable('sales', [
+                'id',
+                'customer_id',
+                'offer_id',
+                'currency',
+                'sale_date',
+                'amount',
+                'created_at',
+                'updated_at'
+            ], [
+                'customerId' => 'customer_id',
+                'offerId' => 'offer_id',
+                'saleDate' => 'sale_date',
+                'createdAt' => 'created_at',
+                'updatedAt' => 'updated_at'
+            ]);
+
         } finally {
             DB::statement("SET session_replication_role = 'origin';");
         }

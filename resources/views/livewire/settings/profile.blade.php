@@ -2,13 +2,17 @@
 
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
 use Livewire\Volt\Component;
 
 new class extends Component {
     public string $name = '';
     public string $email = '';
+    public string $new_password = '';
+    public string $new_password_confirmation = '';
 
     /**
      * Mount the component.
@@ -28,7 +32,6 @@ new class extends Component {
 
         $validated = $this->validate([
             'name' => ['required', 'string', 'max:255'],
-
             'email' => [
                 'required',
                 'string',
@@ -37,15 +40,28 @@ new class extends Component {
                 'max:255',
                 Rule::unique(User::class)->ignore($user->id)
             ],
+            'new_password' => ['nullable', 'string', Password::defaults(), 'confirmed'],
         ]);
 
-        $user->fill($validated);
+        $user->fill([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+        ]);
 
         if ($user->isDirty('email')) {
             $user->email_verified_at = null;
         }
 
+        // Update password if provided
+        if (!empty($validated['new_password'])) {
+            $user->password = Hash::make($validated['new_password']);
+        }
+
         $user->save();
+
+        // Clear password fields after successful update
+        $this->new_password = '';
+        $this->new_password_confirmation = '';
 
         $this->dispatch('profile-updated', name: $user->name);
     }
@@ -72,14 +88,14 @@ new class extends Component {
 <section class="w-full">
     @include('partials.settings-heading')
 
-    <x-settings.layout :heading="__('Profile')" :subheading="__('Update your name and email address')">
+    <x-settings.layout :heading="__('Hesabım')" :subheading="__('Profil bilgilerinizi ve şifrenizi güncelleyin')">
         <form wire:submit="updateProfileInformation" class="my-6 w-full space-y-6">
-            <flux:input wire:model="name" :label="__('Name')" type="text" required autofocus autocomplete="name" />
+            <flux:input wire:model="name" label="Ad Soyad" type="text" required autofocus autocomplete="name" />
 
             <div>
-                <flux:input wire:model="email" :label="__('Email')" type="email" required autocomplete="email" />
+                <flux:input wire:model="email" label="Email" type="email" required autocomplete="email" />
 
-                @if (auth()->user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail &&! auth()->user()->hasVerifiedEmail())
+                @if (auth()->user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! auth()->user()->hasVerifiedEmail())
                     <div>
                         <flux:text class="mt-4">
                             {{ __('Your email address is unverified.') }}
@@ -98,19 +114,25 @@ new class extends Component {
                 @endif
             </div>
 
+            <div class="border-t border-gray-200 pt-6">
+                <h3 class="text-sm font-medium text-gray-900 mb-4">Şifre Değiştir</h3>
+                <div class="space-y-4">
+                    <flux:input wire:model="new_password" label="Yeni Şifre" type="password" autocomplete="new-password" />
+                    <flux:input wire:model="new_password_confirmation" label="Yeni Şifre (Tekrar)" type="password" autocomplete="new-password" />
+                </div>
+            </div>
+
             <div class="flex items-center gap-4">
                 <div class="flex items-center justify-end">
                     <flux:button variant="primary" type="submit" class="w-full" data-test="update-profile-button">
-                        {{ __('Save') }}
+                        {{ __('Kaydet') }}
                     </flux:button>
                 </div>
 
                 <x-action-message class="me-3" on="profile-updated">
-                    {{ __('Saved.') }}
+                    {{ __('Kaydedildi.') }}
                 </x-action-message>
             </div>
         </form>
-
-        <livewire:settings.delete-user-form />
     </x-settings.layout>
 </section>

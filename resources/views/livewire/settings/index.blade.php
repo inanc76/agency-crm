@@ -1,0 +1,158 @@
+<?php
+
+use Livewire\Volt\Component;
+use Livewire\Attributes\Layout;
+
+new
+    #[Layout('components.layouts.app', ['title' => 'Ayarlar'])]
+    class extends Component {
+    public string $search = '';
+
+    public function cards(): array
+    {
+        $allCards = [
+            [
+                'title' => 'Aktivite Logları',
+                'subtitle' => 'Sistem aktivitelerini ve loglarını görüntüleyin',
+                'icon' => 'o-list-bullet',
+                'color' => 'bg-amber-50 text-amber-500',
+                'link' => '#'
+            ],
+            [
+                'title' => 'Değişken Yönetimi',
+                'subtitle' => 'Sistem değişkenlerini ve referans verilerini yönetin',
+                'icon' => 'o-tag',
+                'color' => 'bg-rose-50 text-rose-500',
+                'link' => '#'
+            ],
+            [
+                'title' => 'Depolama Ayarları',
+                'subtitle' => 'Minio (S3) depolama alanı bağlantı ayarları',
+                'icon' => 'o-archive-box',
+                'color' => 'bg-pink-50 text-pink-500',
+                'link' => route('settings.storage')
+            ],
+            [
+                'title' => 'Fiyat Tanımları',
+                'subtitle' => 'Hizmet fiyat tanımlarını oluşturun ve düzenleyin',
+                'icon' => 'o-banknotes',
+                'color' => 'bg-yellow-50 text-yellow-600',
+                'link' => '#'
+            ],
+            [
+                'title' => 'Kullanıcılar',
+                'subtitle' => 'Sistem kullanıcılarını ve rollerini yönetin',
+                'icon' => 'o-users',
+                'color' => 'bg-orange-50 text-orange-500',
+                'link' => '#'
+            ],
+            [
+                'title' => 'Mail Ayarları',
+                'subtitle' => 'SMTP ve Mailgun ayarlarını yapılandırın',
+                'icon' => 'o-cog-6-tooth',
+                'color' => 'bg-purple-50 text-purple-500',
+                'link' => '#'
+            ],
+            [
+                'title' => 'Mail Şablonları',
+                'subtitle' => 'E-posta şablonlarını oluşturun ve yönetin',
+                'icon' => 'o-envelope',
+                'color' => 'bg-orange-50 text-orange-500',
+                'link' => '#'
+            ],
+            [
+                'title' => 'Tema Ayarları',
+                'subtitle' => 'Tema renklerini ve görünümü özelleştirin',
+                'icon' => 'o-adjustments-horizontal',
+                'color' => 'bg-blue-50 text-blue-600',
+                'link' => '/dashboard/settings/panel'
+            ],
+            [
+                'title' => 'Teklif Şablonu',
+                'subtitle' => 'Teklif PDF şablonunu ve ayarlarını özelleştirin',
+                'icon' => 'o-document-text',
+                'color' => 'bg-blue-50 text-blue-500',
+                'link' => '#'
+            ],
+            [
+                'title' => 'Veri Aktarımı',
+                'subtitle' => 'Verileri toplu olarak içe ve dışa aktarın',
+                'icon' => 'o-arrow-up-tray',
+                'color' => 'bg-orange-50 text-orange-500',
+                'link' => '#'
+            ],
+            [
+                'title' => 'Zamanlanmış Görevler',
+                'subtitle' => 'Otomatik görevleri ve zamanlamalarını yönetin',
+                'icon' => 'o-clock',
+                'color' => 'bg-pink-50 text-pink-500',
+                'link' => '#'
+            ],
+        ];
+
+        if (empty($this->search)) {
+            return $allCards;
+        }
+
+        return array_filter($allCards, function ($card) {
+            return str_contains(strtolower($card['title']), strtolower($this->search)) ||
+                str_contains(strtolower($card['subtitle']), strtolower($this->search));
+        });
+    }
+}; ?>
+
+<div class="p-6 bg-gray-50 min-h-screen">
+    {{-- Page Header --}}
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Ayarlar</h1>
+            <p class="text-gray-600 text-sm mt-1">Sistem ayarlarını ve konfigürasyonları yönetin</p>
+        </div>
+        <div class="w-full md:w-72">
+            <x-mary-input placeholder="Ayarlarda ara..." icon="o-magnifying-glass"
+                class="!bg-white border-gray-200 focus:ring-primary/20 transition-all rounded-xl shadow-sm h-11"
+                wire:model.live.debounce.300ms="search" />
+        </div>
+    </div>
+
+    {{-- Settings Grid --}}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+        @forelse($this->cards() as $card)
+            <a href="{{ $card['link'] }}" class="group block h-full">
+                <x-mary-card shadow
+                    class="bg-white border border-gray-100 hover:border-primary/20 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 rounded-2xl h-full overflow-hidden">
+                    <div class="flex items-start gap-4 h-full relative p-1">
+                        {{-- Icon Box --}}
+                        <div
+                            class="flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center {{ $card['color'] }} transition-transform duration-300 group-hover:scale-110">
+                            <x-mary-icon :name="$card['icon']" class="w-6 h-6" />
+                        </div>
+
+                        {{-- Text Content --}}
+                        <div class="flex-grow pt-0.5">
+                            <h3
+                                class="font-bold text-gray-900 text-[15px] group-hover:text-primary transition-colors duration-300 mb-1">
+                                {{ $card['title'] }}
+                            </h3>
+                            <p class="text-gray-500 text-[13px] leading-relaxed line-clamp-2 pr-4">
+                                {{ $card['subtitle'] }}
+                            </p>
+                        </div>
+
+                        {{-- Corner Arrow --}}
+                        <div class="absolute bottom-0 right-0 p-1">
+                            <x-mary-icon name="o-arrow-right"
+                                class="w-4 h-4 text-gray-300 group-hover:text-primary group-hover:translate-x-1 transition-all duration-300" />
+                        </div>
+                    </div>
+                </x-mary-card>
+            </a>
+        @empty
+            <div
+                class="col-span-full py-12 flex flex-col items-center justify-center text-gray-400 bg-white rounded-2xl border border-dashed border-gray-200">
+                <x-mary-icon name="o-magnifying-glass-circle" class="w-12 h-12 mb-3 opacity-20" />
+                <p class="font-medium">Aradığınız kriterlere uygun ayar bulunamadı.</p>
+            </div>
+        @endforelse
+    </div>
+</div>
