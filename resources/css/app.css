@@ -95,9 +95,10 @@ select:focus[data-flux-control] {
 
 /* Custom Utility Classes from Next.js */
 @layer components {
-    .btn-primary {
-        @apply bg-[var(--color-success)] text-white px-4 py-2 rounded-[var(--radius-input)] font-medium hover:opacity-90 transition-opacity;
-    }
+
+
+    /* Note: .btn-success and .btn-cancel are defined using CSS variables in the 
+       "Granular Button Strategies" section below for theme consistency */
 
     .card {
         @apply bg-[var(--color-card)] rounded-[var(--radius-card)] shadow-sm hover:shadow-md transition-shadow;
@@ -210,15 +211,36 @@ select:focus[data-flux-control] {
     .input,
     .textarea,
     .select {
-        @apply !border-slate-200 !shadow-sm !rounded-xl;
+        @apply !bg-white !shadow-sm !text-sm;
+        border-color: var(--input-border) !important;
+        border-radius: var(--input-radius) !important;
+        padding-top: var(--input-padding-y) !important;
+        padding-bottom: var(--input-padding-y) !important;
     }
 
     .input:focus,
     .textarea:focus,
     .select:focus {
-        @apply !outline-none !ring-1 !ring-primary/50 !border-primary/50;
-        box-shadow: 0 0 0 1px rgba(var(--color-primary), 0.5);
-        /* Fallback/Addition */
+        @apply !outline-none !shadow-sm;
+        border-color: var(--input-focus-ring) !important;
+        box-shadow: 0 0 0 1px var(--input-focus-ring) !important;
+    }
+
+    .input-error,
+    .textarea-error,
+    .select-error,
+    .input.error,
+    .textarea.error,
+    .select.error {
+        border-color: var(--input-error-border) !important;
+        color: var(--input-error-text) !important;
+    }
+
+    .input-error:focus,
+    .textarea-error:focus,
+    .select-error:focus {
+        border-color: var(--input-error-border) !important;
+        box-shadow: 0 0 0 1px var(--input-error-ring) !important;
     }
 
     /* Remove default daisyui focus outline if needed */
@@ -228,19 +250,335 @@ select:focus[data-flux-control] {
         outline-offset: 0;
     }
 
-    /* Ensure cards have consistent radius */
-    .card {
-        @apply !rounded-xl;
+    /* Ensure cards have consistent radius and bg */
+    /* Granular Button Strategies - Robust Overrides */
+
+    /* Ekle (Create) */
+    .btn-create {
+        background-color: var(--btn-create-bg) !important;
+        color: var(--btn-create-text) !important;
+        border-color: var(--btn-create-border) !important;
+        border-radius: var(--input-radius) !important;
+        @apply px-4 py-2 font-medium transition-colors duration-200 shadow-sm border;
+    }
+
+    .btn-create:hover {
+        background-color: var(--btn-create-hover) !important;
+        border-color: var(--btn-create-hover) !important;
+    }
+
+    /* Kaydet (Save) */
+    .btn-save {
+        background-color: var(--btn-save-bg) !important;
+        color: var(--btn-save-text) !important;
+        border-color: var(--btn-save-border) !important;
+        border-radius: var(--input-radius) !important;
+        @apply px-4 py-2 font-medium transition-colors duration-200 shadow-sm border;
+    }
+
+    .btn-save:hover {
+        background-color: var(--btn-save-hover) !important;
+        border-color: var(--btn-save-hover) !important;
+    }
+
+    /* Düzenle (Edit) */
+    .btn-edit {
+        background-color: var(--btn-edit-bg) !important;
+        color: var(--btn-edit-text) !important;
+        border-color: var(--btn-edit-border) !important;
+        border-radius: var(--input-radius) !important;
+        @apply px-4 py-2 font-medium transition-colors duration-200 shadow-sm border;
+    }
+
+    .btn-edit:hover {
+        background-color: var(--btn-edit-hover) !important;
+        border-color: var(--btn-edit-hover) !important;
+    }
+
+    /* Sil (Delete) */
+    .btn-delete {
+        background-color: var(--btn-delete-bg) !important;
+        color: var(--btn-delete-text) !important;
+        border-color: var(--btn-delete-border) !important;
+        border-radius: var(--input-radius) !important;
+        @apply px-4 py-2 font-medium transition-colors duration-200 shadow-sm border;
+    }
+
+    .btn-delete:hover {
+        background-color: var(--btn-delete-hover) !important;
+        border-color: var(--btn-delete-hover) !important;
+    }
+
+    /* İptal (Cancel) */
+    .btn-cancel {
+        background-color: var(--btn-cancel-bg) !important;
+        color: var(--btn-cancel-text) !important;
+        border-color: var(--btn-cancel-border) !important;
+        border-radius: var(--input-radius) !important;
+        @apply px-4 py-2 font-medium transition-colors duration-200 shadow-sm border;
+    }
+
+    .btn-cancel:hover {
+        background-color: var(--btn-cancel-hover) !important;
+        border-color: var(--btn-cancel-hover) !important;
+    }
+
+    /* Success (Alias to Save for backwards compatibility) */
+    .btn-success {
+        background-color: var(--btn-save-bg) !important;
+        color: var(--btn-save-text) !important;
+        border-color: var(--btn-save-border) !important;
+        border-radius: var(--input-radius) !important;
+        @apply px-4 py-2 font-medium transition-colors duration-200 shadow-sm border;
+    }
+
+    .btn-success:hover {
+        background-color: var(--btn-save-hover) !important;
+        border-color: var(--btn-save-hover) !important;
+    }
+
+    /* Override .btn-primary as requested by User */
+    .btn-primary {
+        background-color: var(--primary-color) !important;
+        border-color: var(--primary-color) !important;
+        border-radius: var(--input-radius) !important;
+        /* Ensure text color is readable, assuming white for primary usually, or use var if mapped */
+        color: #ffffff !important;
+        @apply px-4 py-2 font-medium shadow-sm;
+    }
+
+    .btn-primary:hover {
+        filter: brightness(90%);
+        /* Also apply standard hover if valid */
+        /* background-color: var(--btn-create-hover) !important; */
+    }
+
+    /* Re-map .btn-secondary to Cancel for legacy support, but robustly */
+    .btn-secondary {
+        background-color: transparent !important;
+        border: 1px solid var(--btn-cancel-bg) !important;
+        color: var(--color-text-base) !important;
+        border-radius: var(--input-radius) !important;
+        @apply px-4 py-2 font-medium shadow-sm transition-colors;
+    }
+
+    .btn-secondary:hover {
+        background-color: var(--btn-cancel-bg) !important;
+        color: var(--btn-cancel-text) !important;
+    }
+
+
+    /* ===== STATE SYNCHRONIZATION ===== */
+
+    /* Active State - All Buttons */
+    .btn-create:active,
+    .btn-save:active,
+    .btn-edit:active,
+    .btn-delete:active,
+    .btn-cancel:active,
+    .btn-primary:active,
+    .btn-secondary:active {
+        transform: scale(0.98);
+        filter: brightness(95%);
+    }
+
+    /* Disabled State - Grayscale + No Pointer */
+    .btn-create:disabled,
+    .btn-save:disabled,
+    .btn-edit:disabled,
+    .btn-delete:disabled,
+    .btn-cancel:disabled,
+    .btn-primary:disabled,
+    .btn-secondary:disabled,
+    .btn-create[disabled],
+    .btn-save[disabled],
+    .btn-edit[disabled],
+    .btn-delete[disabled],
+    .btn-cancel[disabled],
+    .btn-primary[disabled],
+    .btn-secondary[disabled] {
+        opacity: 0.5 !important;
+        cursor: not-allowed !important;
+        pointer-events: none !important;
+    }
+
+    /* Livewire Loading State - Only opacity change, NO color change */
+    [wire\:loading].btn-create,
+    [wire\:loading].btn-save,
+    [wire\:loading].btn-edit,
+    [wire\:loading].btn-delete,
+    [wire\:loading].btn-cancel,
+    [wire\:loading].btn-primary,
+    [wire\:loading].btn-secondary,
+    .btn-create[wire\:loading],
+    .btn-save[wire\:loading],
+    .btn-edit[wire\:loading],
+    .btn-delete[wire\:loading],
+    .btn-cancel[wire\:loading],
+    .btn-primary[wire\:loading],
+    .btn-secondary[wire\:loading] {
+        opacity: 0.7 !important;
+        /* Preserve original colors, only reduce opacity */
+    }
+
+    /* Focus Ring for Accessibility */
+    .btn-create:focus-visible,
+    .btn-save:focus-visible,
+    .btn-edit:focus-visible,
+    .btn-delete:focus-visible,
+    .btn-cancel:focus-visible,
+    .btn-primary:focus-visible,
+    .btn-secondary:focus-visible {
+        outline: 2px solid var(--input-focus-ring) !important;
+        outline-offset: 2px !important;
+    }
+
+    /* ===== DAISYUI / MARYUI ABSOLUTE OVERRIDE ===== */
+
+    /* Override DaisyUI's .btn base class when used with our semantic classes */
+    .btn.btn-create,
+    .btn.btn-save,
+    .btn.btn-edit,
+    .btn.btn-delete,
+    .btn.btn-cancel,
+    .btn.btn-primary,
+    .btn.btn-secondary {
+        /* Reset DaisyUI defaults */
+        --btn-color: initial;
+        --fallback-b1: initial;
+    }
+
+    .btn.btn-create {
+        background-color: var(--btn-create-bg) !important;
+        color: var(--btn-create-text) !important;
+        border-color: var(--btn-create-border) !important;
+    }
+
+    .btn.btn-save {
+        background-color: var(--btn-save-bg) !important;
+        color: var(--btn-save-text) !important;
+        border-color: var(--btn-save-border) !important;
+    }
+
+    .btn.btn-edit {
+        background-color: var(--btn-edit-bg) !important;
+        color: var(--btn-edit-text) !important;
+        border-color: var(--btn-edit-border) !important;
+    }
+
+    .btn.btn-delete {
+        background-color: var(--btn-delete-bg) !important;
+        color: var(--btn-delete-text) !important;
+        border-color: var(--btn-delete-border) !important;
+    }
+
+    .btn.btn-cancel {
+        background-color: var(--btn-cancel-bg) !important;
+        color: var(--btn-cancel-text) !important;
+        border-color: var(--btn-cancel-border) !important;
+    }
+
+    .btn.btn-primary {
+        background-color: var(--primary-color) !important;
+        color: #ffffff !important;
+        border-color: var(--primary-color) !important;
+    }
+
+    /* Hover states for DaisyUI buttons */
+    .btn.btn-create:hover {
+        background-color: var(--btn-create-hover) !important;
+    }
+
+    .btn.btn-save:hover {
+        background-color: var(--btn-save-hover) !important;
+    }
+
+    .btn.btn-edit:hover {
+        background-color: var(--btn-edit-hover) !important;
+    }
+
+    .btn.btn-delete:hover {
+        background-color: var(--btn-delete-hover) !important;
+    }
+
+    .btn.btn-cancel:hover {
+        background-color: var(--btn-cancel-hover) !important;
+    }
+
+    .btn.btn-primary:hover {
+        filter: brightness(90%);
+    }
+
+    /* ===== LIVEWIRE STATE PROTECTION ===== */
+
+    /* Prevent wire:loading from changing button colors - only opacity */
+    [wire\:loading].btn-save,
+    [wire\:loading].btn-create,
+    [wire\:loading].btn-edit,
+    [wire\:loading].btn-delete,
+    [wire\:loading].btn-primary,
+    .btn-save[wire\:loading],
+    .btn-create[wire\:loading],
+    .btn-edit[wire\:loading],
+    .btn-delete[wire\:loading],
+    .btn-primary[wire\:loading],
+    .btn.btn-save[wire\:loading],
+    .btn.btn-create[wire\:loading],
+    .btn.btn-edit[wire\:loading],
+    .btn.btn-delete[wire\:loading],
+    .btn.btn-primary[wire\:loading] {
+        background-color: var(--btn-save-bg) !important;
+        color: var(--btn-save-text) !important;
+        opacity: 0.8 !important;
+    }
+
+    /* Explicit overrides for save button during all states */
+    [wire\:loading].btn.btn-save,
+    .btn.btn-save[wire\:loading] {
+        background-color: var(--btn-save-bg) !important;
+    }
+
+    /* wire:dirty protection - form dirty state should NOT change colors */
+    [wire\:dirty].btn-save,
+    [wire\:dirty].btn-create,
+    [wire\:dirty].btn-primary,
+    .btn-save[wire\:dirty],
+    .btn-create[wire\:dirty],
+    .btn-primary[wire\:dirty],
+    .btn.btn-save[wire\:dirty],
+    .btn.btn-create[wire\:dirty],
+    .btn.btn-primary[wire\:dirty] {
+        background-color: var(--btn-save-bg) !important;
+        color: var(--btn-save-text) !important;
+        border-color: var(--btn-save-border) !important;
+    }
+
+    /* Disabled state - maintain color but reduce opacity */
+    .btn.btn-save:disabled,
+    .btn.btn-create:disabled,
+    .btn.btn-edit:disabled,
+    .btn.btn-delete:disabled,
+    .btn.btn-primary:disabled {
+        background-color: var(--btn-save-bg) !important;
+        color: var(--btn-save-text) !important;
+        opacity: 0.5 !important;
+        cursor: not-allowed !important;
+    }
+
+    /* MaryUI Spinner container - ensure button keeps color during loading spinner */
+    .btn.btn-save .loading,
+    .btn.btn-create .loading,
+    .btn.btn-primary .loading {
+        color: currentColor !important;
     }
 }
 
 /* Theme toggle */
 
 /**
-
-* Paginator - Traditional style
-* Because Laravel defaults does not match well the design of daisyUI.
-*/
+ * Paginator - Traditional style
+ * Because Laravel defaults does not match well the design of daisyUI.
+ */
 
 .mary-table-pagination span[aria-current="page"]>span {
     @apply bg-primary text-base-100
@@ -249,3 +587,108 @@ select:focus[data-flux-control] {
 .mary-table-pagination button {
     @apply cursor-pointer
 }
+
+/* ===== ISOLATED DESIGN SYSTEM ===== */
+/* These classes ONLY affect elements explicitly marked with them */
+/* NO global button/submit overrides to prevent UI pollution */
+
+/* Theme Button: Save/Primary Actions (Kaydet, Gönder, Onayla) */
+.theme-btn-save {
+    background-color: var(--btn-save-bg) !important;
+    color: var(--btn-save-text) !important;
+    border: 1px solid var(--btn-save-border, var(--btn-save-bg)) !important;
+    border-radius: var(--input-radius, 0.375rem) !important;
+    padding: 0.625rem 1.25rem;
+    font-weight: 500;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.theme-btn-save:hover {
+    background-color: var(--btn-save-hover) !important;
+    opacity: 0.95;
+}
+
+.theme-btn-save:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Theme Button: Action (Yeni Müşteri, Ekle, vb) */
+.theme-btn-action {
+    background-color: var(--btn-create-bg) !important;
+    color: var(--btn-create-text) !important;
+    border: 1px solid var(--btn-create-border, var(--btn-create-bg)) !important;
+    border-radius: var(--input-radius, 0.375rem) !important;
+    padding: 0.625rem 1.25rem;
+    font-weight: 500;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.theme-btn-action:hover {
+    background-color: var(--btn-create-hover) !important;
+    opacity: 0.95;
+}
+
+/* Theme Button: Cancel/Secondary */
+.theme-btn-cancel {
+    background-color: var(--btn-cancel-bg) !important;
+    color: var(--btn-cancel-text) !important;
+    border: 1px solid var(--btn-cancel-border, var(--btn-cancel-bg)) !important;
+    border-radius: var(--input-radius, 0.375rem) !important;
+    padding: 0.625rem 1.25rem;
+    font-weight: 500;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.theme-btn-cancel:hover {
+    background-color: var(--btn-cancel-hover) !important;
+}
+
+/* Theme Button: Delete/Danger */
+.theme-btn-delete {
+    background-color: var(--btn-delete-bg) !important;
+    color: var(--btn-delete-text) !important;
+    border: 1px solid var(--btn-delete-border, var(--btn-delete-bg)) !important;
+    border-radius: var(--input-radius, 0.375rem) !important;
+    padding: 0.625rem 1.25rem;
+    font-weight: 500;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.theme-btn-delete:hover {
+    background-color: var(--btn-delete-hover) !important;
+}
+
+/* Theme Button: Edit/Warning */
+.theme-btn-edit {
+    background-color: var(--btn-edit-bg) !important;
+    color: var(--btn-edit-text) !important;
+    border: 1px solid var(--btn-edit-border, var(--btn-edit-bg)) !important;
+    border-radius: var(--input-radius, 0.375rem) !important;
+    padding: 0.625rem 1.25rem;
+    font-weight: 500;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.theme-btn-edit:hover {
+    background-color: var(--btn-edit-hover) !important;
+}
+
+/* Filter elements (Alphabet, Numbers) - DEFAULT/NEUTRAL - DO NOT THEME */
+/* These stay as DaisyUI/Tailwind defaults */

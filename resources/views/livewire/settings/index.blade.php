@@ -88,6 +88,14 @@ new
                 'color' => 'bg-pink-50 text-pink-500',
                 'link' => '#'
             ],
+            [
+                'title' => 'Tasarım Rehberi',
+                'subtitle' => 'Buton, input ve tipografi elemanlarını canlı önizleyin',
+                'icon' => 'o-swatch',
+                'color' => 'bg-gradient-to-br from-indigo-50 to-purple-50 text-indigo-600',
+                'link' => '/dashboard/style-guide',
+                'special' => true
+            ],
         ];
 
         if (empty($this->search)) {

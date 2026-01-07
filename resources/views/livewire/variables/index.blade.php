@@ -276,7 +276,7 @@ new
         </div>
 
         {{-- Main Card --}}
-        <div class="bg-[#eff4ff] border border-[#bfdbfe] rounded-xl shadow-sm p-6">
+        <div class="card border p-6 shadow-sm">
             <div class="flex flex-col lg:flex-row gap-6 h-[calc(100vh-300px)] min-h-[600px]">
                 {{-- Left Sidebar: Categories --}}
                 <div class="w-full lg:w-1/2 bg-white border border-slate-200 rounded-lg flex flex-col h-full shadow-sm">
@@ -314,7 +314,8 @@ new
 
                                     <div class="flex items-center gap-1">
                                         <button wire:click.stop="editCategory('{{ $category->id }}')"
-                                            class="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors">
+                                            class="p-1.5 text-slate-400 hover:bg-slate-50 rounded transition-colors"
+                                            style="color: var(--action-link-color);">
                                             <x-mary-icon name="o-pencil-square" class="w-4 h-4" />
                                         </button>
                                         <button wire:click.stop="deleteCategory('{{ $category->id }}')"
@@ -340,7 +341,7 @@ new
                 <div
                     class="w-full lg:w-1/2 bg-white border border-slate-200 rounded-lg shadow-sm flex flex-col h-full overflow-hidden">
                     @if($selectedCategory)
-                        <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-green-50/50">
+                        <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/70">
                             <div>
                                 <h2 class="text-lg font-bold text-slate-800">{{ $selectedCategory->name }}</h2>
                             </div>
@@ -349,11 +350,11 @@ new
                                 wire:click="openCreateModal" />
                         </div>
 
-                        <div class="p-4 flex-1 overflow-y-auto bg-green-50/30">
+                        <div class="p-4 flex-1 overflow-y-auto bg-slate-50/30">
                             <div class="space-y-2">
                                 @forelse($selectedCategory->items as $item)
                                     <div
-                                        class="flex items-center justify-between p-3 bg-white rounded-lg border border-green-100 shadow-sm hover:shadow-md transition-shadow group relative">
+                                        class="flex items-center justify-between p-3 bg-white rounded-lg border border-slate-100 shadow-sm hover:shadow-md transition-shadow group relative">
                                         <div class="flex-1 min-w-0">
                                             <div class="flex items-center gap-2 flex-wrap">
                                                 @if(isset($item->metadata['color']))
@@ -363,6 +364,10 @@ new
                                                     </span>
                                                 @else
                                                     <span class="font-medium text-slate-700">{{ $item->display_label }}</span>
+                                                @endif
+                                                @if($item->is_default)
+                                                    <span class="px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100"
+                                                        style="color: var(--btn-primary-bg);">Varsayılan</span>
                                                 @endif
                                                 <div class="text-xs text-slate-400 font-mono uppercase">{{ $item->key }}</div>
                                             </div>
@@ -382,7 +387,8 @@ new
                                             --}}
 
                                             <button wire:click="editItem('{{ $item->id }}')"
-                                                class="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors">
+                                                class="p-1.5 text-slate-400 hover:bg-slate-50 rounded transition-colors"
+                                                style="color: var(--action-link-color);">
                                                 <x-mary-icon name="o-pencil-square" class="w-4 h-4" />
                                             </button>
                                             <button wire:click="deleteItem('{{ $item->id }}')"
@@ -404,7 +410,7 @@ new
                             </div>
                         </div>
                     @else
-                        <div class="h-full flex flex-col items-center justify-center bg-green-50/10">
+                        <div class="h-full flex flex-col items-center justify-center bg-slate-50/30">
                             <div class="p-8 text-center">
                                 <h3 class="text-lg font-medium text-slate-700 mb-2">Kategori Seçimi</h3>
                                 <p class="text-slate-500 text-sm">İşlem yapmak için soldan bir kategori seçin.</p>
@@ -428,9 +434,8 @@ new
         </div>
         <x-slot:actions>
             <x-mary-button label="İptal" class="btn-ghost" wire:click="$set('showCategoryModal', false)" />
-            <x-mary-button label="{{ $categoryId ? 'Güncelle' : 'Oluştur' }}"
-                class="btn-primary bg-emerald-500 hover:bg-emerald-600 border-none text-white" wire:click="saveCategory"
-                spinner="saveCategory" />
+            <x-mary-button label="{{ $categoryId ? 'Güncelle' : 'Oluştur' }}" class="btn-primary"
+                wire:click="saveCategory" spinner="saveCategory" />
         </x-slot:actions>
     </x-mary-modal>
 
@@ -476,8 +481,7 @@ new
 
         <x-slot:actions>
             <x-mary-button label="İptal" class="btn-ghost" wire:click="$set('showItemModal', false)" />
-            <x-mary-button label="{{ $itemId ? 'Güncelle' : 'Oluştur' }}"
-                class="btn-primary bg-emerald-500 hover:bg-emerald-600 border-none text-white" wire:click="saveItem"
+            <x-mary-button label="{{ $itemId ? 'Güncelle' : 'Oluştur' }}" class="btn-primary" wire:click="saveItem"
                 spinner="saveItem" />
         </x-slot:actions>
     </x-mary-modal>

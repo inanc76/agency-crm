@@ -26,8 +26,8 @@
             </div>
 
             <!-- Hizmetler Card -->
-            <div
-                class="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl shadow-lg p-6 text-white transform hover:scale-105 transition-transform duration-300">
+            <div class="rounded-2xl shadow-lg p-6 text-white transform hover:scale-105 transition-transform duration-300"
+                style="background: linear-gradient(to bottom right, var(--btn-save-bg), color-mix(in srgb, var(--btn-save-bg) 80%, #000));">
                 <div class="flex items-center justify-between mb-4">
                     <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -39,7 +39,7 @@
                 </div>
                 <h2 class="text-2xl font-bold mb-1">Hizmetler</h2>
                 <p class="text-4xl font-extrabold mb-2">9</p>
-                <p class="text-emerald-100 text-sm">Aktif hizmet sayısı</p>
+                <p class="text-white/80 text-sm">Aktif hizmet sayısı</p>
             </div>
 
             <!-- Varlıklar Card -->

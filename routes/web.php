@@ -20,6 +20,14 @@ Route::get('dashboard/customers', function () {
     return view('customers.index');
 })->middleware(['auth', 'verified'])->name('customers.index');
 
+Volt::route('dashboard/customers/create', 'customers.create')
+    ->middleware(['auth', 'verified'])
+    ->name('customers.create');
+
+Volt::route('dashboard/customers/{customer}', 'customers.create')
+    ->middleware(['auth', 'verified'])
+    ->name('customers.edit');
+
 // Ayarlar
 // Ayarlar
 Volt::route('dashboard/settings', 'settings.index')
@@ -45,6 +53,10 @@ Volt::route('dashboard/settings/variables', 'variables.index')
 Volt::route('dashboard/settings/mail', 'settings.mail')
     ->middleware(['auth', 'verified'])
     ->name('settings.mail');
+
+Volt::route('dashboard/style-guide', 'settings.style-guide')
+    ->middleware(['auth', 'verified'])
+    ->name('settings.style-guide');
 
 
 

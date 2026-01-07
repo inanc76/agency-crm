@@ -26,6 +26,51 @@ new
     public ?string $current_favicon_path = null;
     public ?string $current_logo_path = null;
 
+    // Design Settings
+    public string $font_family = 'Inter';
+    public string $base_text_color = '#475569';
+    public string $heading_color = '#0f172a';
+
+    public string $input_focus_ring_color = '#6366f1';
+    public string $input_border_color = '#cbd5e1';
+    public string $input_error_ring_color = '#ef4444';
+    public string $input_error_border_color = '#ef4444';
+    public string $input_error_text_color = '#ef4444';
+    public string $input_vertical_padding = '0.5rem';
+    public string $input_border_radius = '0.375rem';
+
+    // Buttons - Granular
+    public string $btn_create_bg_color = '#4f46e5';
+    public string $btn_create_text_color = '#ffffff';
+    public string $btn_create_hover_color = '#4338ca';
+    public string $btn_create_border_color = '#4f46e5';
+
+    public string $btn_edit_bg_color = '#f59e0b';
+    public string $btn_edit_text_color = '#ffffff';
+    public string $btn_edit_hover_color = '#d97706';
+    public string $btn_edit_border_color = '#f59e0b';
+
+    public string $btn_delete_bg_color = '#ef4444';
+    public string $btn_delete_text_color = '#ffffff';
+    public string $btn_delete_hover_color = '#dc2626';
+    public string $btn_delete_border_color = '#ef4444';
+
+    public string $btn_cancel_bg_color = '#94a3b8';
+    public string $btn_cancel_text_color = '#ffffff';
+    public string $btn_cancel_hover_color = '#64748b';
+    public string $btn_cancel_border_color = '#94a3b8';
+
+    public string $btn_save_bg_color = '#10b981';
+    public string $btn_save_text_color = '#ffffff';
+    public string $btn_save_hover_color = '#059669';
+    public string $btn_save_border_color = '#10b981';
+
+    public string $action_link_color = '#4f46e5';
+
+    public string $card_bg_color = '#eff4ff';
+    public string $card_border_color = '#bfdbfe';
+    public string $card_border_radius = '0.75rem';
+
     public function mount(PanelSettingRepository $repository): void
     {
         $setting = $repository->getActiveSetting();
@@ -34,15 +79,58 @@ new
             $this->site_name = $setting->site_name;
             $this->logo_scale = $setting->logo_scale ?? 1.0;
             $this->header_bg_color = $setting->header_bg_color;
-            // Normalize RGBA to Hex to prevent validation errors
             $this->menu_bg_color = str_starts_with($setting->menu_bg_color, '#') ? $setting->menu_bg_color : '#3D3373';
             $this->menu_text_color = $setting->menu_text_color;
             $this->header_icon_color = $setting->header_icon_color ?? '#ffffff';
-            // Normalize "transparent" to Hex for consistency with picker
             $this->header_border_color = ($setting->header_border_color === 'transparent' || !str_starts_with($setting->header_border_color, '#')) ? '#000000' : $setting->header_border_color;
             $this->header_border_width = $setting->header_border_width ?? 0;
             $this->current_favicon_path = $setting->favicon_path;
             $this->current_logo_path = $setting->logo_path;
+
+            // Load Design Settings with defaults
+            $this->font_family = $setting->font_family ?? 'Inter';
+            $this->base_text_color = $setting->base_text_color ?? '#475569';
+            $this->heading_color = $setting->heading_color ?? '#0f172a';
+
+            $this->input_focus_ring_color = $setting->input_focus_ring_color ?? '#6366f1';
+            $this->input_border_color = $setting->input_border_color ?? '#cbd5e1';
+            $this->input_error_ring_color = $setting->input_error_ring_color ?? '#ef4444';
+            $this->input_error_border_color = $setting->input_error_border_color ?? '#ef4444';
+            $this->input_error_text_color = $setting->input_error_text_color ?? '#ef4444';
+            $this->input_vertical_padding = $setting->input_vertical_padding ?? '0.5rem';
+            $this->input_border_radius = $setting->input_border_radius ?? '0.375rem';
+
+            // Load Granular Button Settings
+            $this->btn_create_bg_color = $setting->btn_create_bg_color ?? '#4f46e5';
+            $this->btn_create_text_color = $setting->btn_create_text_color ?? '#ffffff';
+            $this->btn_create_hover_color = $setting->btn_create_hover_color ?? '#4338ca';
+            $this->btn_create_border_color = $setting->btn_create_border_color ?? '#4f46e5';
+
+            $this->btn_edit_bg_color = $setting->btn_edit_bg_color ?? '#f59e0b';
+            $this->btn_edit_text_color = $setting->btn_edit_text_color ?? '#ffffff';
+            $this->btn_edit_hover_color = $setting->btn_edit_hover_color ?? '#d97706';
+            $this->btn_edit_border_color = $setting->btn_edit_border_color ?? '#f59e0b';
+
+            $this->btn_delete_bg_color = $setting->btn_delete_bg_color ?? '#ef4444';
+            $this->btn_delete_text_color = $setting->btn_delete_text_color ?? '#ffffff';
+            $this->btn_delete_hover_color = $setting->btn_delete_hover_color ?? '#dc2626';
+            $this->btn_delete_border_color = $setting->btn_delete_border_color ?? '#ef4444';
+
+            $this->btn_cancel_bg_color = $setting->btn_cancel_bg_color ?? '#94a3b8';
+            $this->btn_cancel_text_color = $setting->btn_cancel_text_color ?? '#ffffff';
+            $this->btn_cancel_hover_color = $setting->btn_cancel_hover_color ?? '#64748b';
+            $this->btn_cancel_border_color = $setting->btn_cancel_border_color ?? '#94a3b8';
+
+            $this->btn_save_bg_color = $setting->btn_save_bg_color ?? '#10b981';
+            $this->btn_save_text_color = $setting->btn_save_text_color ?? '#ffffff';
+            $this->btn_save_hover_color = $setting->btn_save_hover_color ?? '#059669';
+            $this->btn_save_border_color = $setting->btn_save_border_color ?? '#10b981';
+
+            $this->action_link_color = $setting->action_link_color ?? '#4f46e5';
+
+            $this->card_bg_color = $setting->card_bg_color ?? '#eff4ff';
+            $this->card_border_color = $setting->card_border_color ?? '#bfdbfe';
+            $this->card_border_radius = $setting->card_border_radius ?? '0.75rem';
         }
     }
 
@@ -61,11 +149,52 @@ new
             'header_icon_color' => ['required', 'string', 'regex:/^#[0-9A-Fa-f]{6}$/'],
             'header_border_color' => ['required', 'string', 'regex:/^#[0-9A-Fa-f]{6}$/'],
             'header_border_width' => 'required|integer|min:0|max:20',
+
+            'font_family' => 'nullable|string|max:255',
+            'base_text_color' => 'nullable|string',
+            'heading_color' => 'nullable|string',
+
+            'input_focus_ring_color' => 'nullable|string',
+            'input_border_color' => 'nullable|string',
+            'input_error_ring_color' => 'nullable|string',
+            'input_error_border_color' => 'nullable|string',
+            'input_error_text_color' => 'nullable|string',
+            'input_vertical_padding' => 'nullable|string',
+            'input_border_radius' => 'nullable|string',
+
+            'btn_create_bg_color' => 'nullable|string',
+            'btn_create_text_color' => 'nullable|string',
+            'btn_create_hover_color' => 'nullable|string',
+            'btn_create_border_color' => 'nullable|string',
+            'btn_edit_bg_color' => 'nullable|string',
+            'btn_edit_text_color' => 'nullable|string',
+            'btn_edit_hover_color' => 'nullable|string',
+            'btn_edit_border_color' => 'nullable|string',
+            'btn_delete_bg_color' => 'nullable|string',
+            'btn_delete_text_color' => 'nullable|string',
+            'btn_delete_hover_color' => 'nullable|string',
+            'btn_delete_border_color' => 'nullable|string',
+            'btn_cancel_bg_color' => 'nullable|string',
+            'btn_cancel_text_color' => 'nullable|string',
+            'btn_cancel_hover_color' => 'nullable|string',
+            'btn_cancel_border_color' => 'nullable|string',
+            'btn_save_bg_color' => 'nullable|string',
+            'btn_save_text_color' => 'nullable|string',
+            'btn_save_hover_color' => 'nullable|string',
+            'btn_save_border_color' => 'nullable|string',
+
+            'action_link_color' => 'nullable|string',
+
+            'card_bg_color' => 'nullable|string',
+            'card_border_color' => 'nullable|string',
+            'card_border_radius' => 'nullable|string',
         ]);
 
         $repository->saveSettings($data);
 
-        $this->success('Ayarlar Kaydedildi', 'Tema ayarları başarıyla güncellendi. Değişiklikleri görmek için sayfayı yenileyin.');
+        Cache::forget('theme_settings');
+
+        $this->success('Ayarlar Kaydedildi', 'Tema ayarları başarıyla güncellendi. Tasarım tüm sisteme uygulandı.');
     }
 
     public function resetToDefaults(): void
@@ -79,7 +208,7 @@ new
 }; ?>
 
 <div class="p-6 bg-slate-50 min-h-screen">
-    <div class="w-full lg:w-3/4 mx-auto">
+    <div class="w-full lg:w-3/4 mx-auto pb-20">
         {{-- Back Button --}}
         <a href="/dashboard/settings"
             class="inline-flex items-center gap-2 text-slate-600 hover:text-slate-900 mb-6 transition-colors">
@@ -95,179 +224,11 @@ new
             <p class="text-sm text-slate-500 mt-1">Uygulamanın görünümünü ve tema renklerini özelleştirin.</p>
         </div>
 
-        {{-- Main Card --}}
-        <div class="bg-[#eff4ff] border border-[#bfdbfe] rounded-xl shadow-sm p-6">
-            {{-- Card Header --}}
-            <div class="flex items-center justify-between pb-4 mb-6 border-b border-slate-200">
-                <h2 class="text-sm font-medium text-slate-700">Header Görünüm Ayarları</h2>
-            </div>
+        {{-- Header Appearance Card --}}
+        @include('livewire.settings.parts.header-appearance')
 
-            {{-- Accordion Sections --}}
-            <div class="flex flex-col gap-2">
-                {{-- Accordion 1: Logo --}}
-                <x-mary-collapse name="group1" group="settings" separator
-                    class="bg-white border border-slate-200 shadow-sm rounded-lg">
-                    <x-slot:heading>
-                        <div class="flex items-center gap-3">
-                            <x-mary-icon name="o-photo" class="w-5 h-5 text-blue-500" />
-                            <span class="font-semibold text-slate-700">Logo Ayarları</span>
-                        </div>
-                    </x-slot:heading>
-                    <x-slot:content>
-                        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start py-2">
-                            {{-- Site Name --}}
-                            <div class="lg:col-span-3">
-                                <x-mary-input label="Site Adı" wire:model="site_name"
-                                    hint="Logo yüklenmediğinde gözükür" />
-                            </div>
+        {{-- Basic Design Card --}}
+        @include('livewire.settings.parts.basic-design')
 
-                            {{-- Logo --}}
-                            <div class="lg:col-span-6">
-                                <label class="block text-sm font-medium text-slate-700 mb-2">Logo</label>
-                                <div class="flex items-center gap-2">
-                                    @if($current_logo_path)
-                                        <img src="{{ asset('storage/' . $current_logo_path) }}" alt="Current Logo"
-                                            class="h-10 object-contain border border-slate-200 rounded p-1 bg-white">
-                                    @endif
-                                    <div class="flex-1">
-                                        <x-mary-file wire:model="logo" accept=".png,.jpg,.jpeg,.svg"
-                                            hint="PNG, JPG veya SVG, max 2MB" />
-                                    </div>
-                                    <div class="flex gap-1">
-                                        <button type="button" wire:click="$set('logo_scale', 1)"
-                                            class="px-2 py-1 text-xs font-medium rounded {{ $logo_scale == 1 ? 'bg-blue-500 text-white' : 'bg-slate-200 text-slate-700' }}">
-                                            1x
-                                        </button>
-                                        <button type="button" wire:click="$set('logo_scale', 1.5)"
-                                            class="px-2 py-1 text-xs font-medium rounded {{ $logo_scale == 1.5 ? 'bg-blue-500 text-white' : 'bg-slate-200 text-slate-700' }}">
-                                            1.5x
-                                        </button>
-                                        <button type="button" wire:click="$set('logo_scale', 2)"
-                                            class="px-2 py-1 text-xs font-medium rounded {{ $logo_scale == 2 ? 'bg-blue-500 text-white' : 'bg-slate-200 text-slate-700' }}">
-                                            2x
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {{-- Favicon --}}
-                            <div class="lg:col-span-3">
-                                <label class="block text-sm font-medium text-slate-700 mb-2">Favicon</label>
-                                <div class="flex items-center gap-2">
-                                    @if($current_favicon_path)
-                                        <img src="{{ asset('storage/' . $current_favicon_path) }}" alt="Current Favicon"
-                                            class="w-8 h-8 object-contain border border-slate-200 rounded p-1">
-                                    @endif
-                                    <div class="flex-1">
-                                        <x-mary-file wire:model="favicon" accept=".ico,.png"
-                                            hint="ICO veya PNG, max 512KB" />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </x-slot:content>
-                </x-mary-collapse>
-
-                {{-- Accordion 2: Menü --}}
-                <x-mary-collapse name="group2" group="settings" separator
-                    class="bg-white border border-slate-200 shadow-sm rounded-lg">
-                    <x-slot:heading>
-                        <div class="flex items-center gap-3">
-                            <x-mary-icon name="o-bars-3" class="w-5 h-5 text-emerald-500" />
-                            <span class="font-semibold text-slate-700">Menü Renk Ayarları</span>
-                        </div>
-                    </x-slot:heading>
-                    <x-slot:content>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 py-2">
-                            {{-- Header Background Color --}}
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">Header Arka Plan
-                                    Rengi</label>
-                                <div class="flex items-center gap-2">
-                                    <input type="color" wire:model.live="header_bg_color"
-                                        class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
-                                    <x-mary-input wire:model.live="header_bg_color" placeholder="#3D3373" class="flex-1" />
-                                </div>
-                            </div>
-
-                            {{-- Menu Background Color --}}
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">Menü Arka Plan
-                                    Rengi</label>
-                                <div class="flex items-center gap-2">
-                                    <input type="color" wire:model.live="menu_bg_color"
-                                        class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
-                                    <x-mary-input wire:model.live="menu_bg_color" placeholder="#3D3373" class="flex-1" />
-                                </div>
-                            </div>
-
-                            {{-- Menu Text Color --}}
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">Menü Yazı Rengi</label>
-                                <div class="flex items-center gap-2">
-                                    <input type="color" wire:model.live="menu_text_color"
-                                        class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
-                                    <x-mary-input wire:model.live="menu_text_color" placeholder="#ffffff" class="flex-1" />
-                                </div>
-                            </div>
-                        </div>
-                    </x-slot:content>
-                </x-mary-collapse>
-
-                {{-- Accordion 3: Kenarlık ve Yazı Rengi --}}
-                <x-mary-collapse name="group3" group="settings" separator
-                    class="bg-white border border-slate-200 shadow-sm rounded-lg">
-                    <x-slot:heading>
-                        <div class="flex items-center gap-3">
-                            <x-mary-icon name="o-swatch" class="w-5 h-5 text-purple-500" />
-                            <span class="font-semibold text-slate-700">Kenarlık ve Yazı Rengi</span>
-                        </div>
-                    </x-slot:heading>
-                    <x-slot:content>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 py-2">
-                            {{-- Header Icon Color --}}
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">Header İkon ve Yazı
-                                    Rengi</label>
-                                <div class="flex items-center gap-2">
-                                    <input type="color" wire:model.live="header_icon_color"
-                                        class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
-                                    <x-mary-input wire:model.live="header_icon_color" placeholder="#ffffff" class="flex-1"
-                                        hint="Sağ taraftaki bildirim zili ve kullanıcı adı rengi" />
-                                </div>
-                            </div>
-
-                            {{-- Header Border --}}
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">Header Alt Kenarlık</label>
-                                <div class="grid grid-cols-2 gap-2">
-                                    <div>
-                                        <label class="block text-xs text-slate-500 mb-1">Renk</label>
-                                        <div class="flex items-center gap-2">
-                                            <input type="color" wire:model.live="header_border_color"
-                                                class="w-10 h-10 rounded border border-slate-200 cursor-pointer">
-                                            <x-mary-input wire:model.live="header_border_color" placeholder="#000000"
-                                                class="flex-1" />
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs text-slate-500 mb-1">Kalınlık (px)</label>
-                                        <x-mary-input type="number" wire:model.live="header_border_width"
-                                            placeholder="0" min="0" max="20" />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </x-slot:content>
-                </x-mary-collapse>
-            </div>
-
-            {{-- Footer Actions --}}
-            <div class="pt-6 mt-6 border-t border-slate-200 flex justify-end gap-3">
-                <x-mary-button label="Ayarları Kaydet"
-                    class="btn-primary bg-emerald-500 hover:bg-emerald-600 border-none text-white" wire:click="save"
-                    spinner="save" />
-            </div>
-        </div>
     </div>
 </div>

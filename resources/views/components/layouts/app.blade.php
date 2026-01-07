@@ -2,17 +2,19 @@
 <html lang="tr" data-theme="light">
 
 @php
-    $panelSettings = app(\App\Repositories\PanelSettingRepository::class)->getActiveSetting();
+    // Use Shared Theme Settings (Cached in Provider)
+    // Fallback to empty object/null handled by optional chaining
+    $theme = $themeSettings ?? null;
 @endphp
 
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $title ?? ($panelSettings?->site_name ?? 'MEDIACLICK') }}</title>
+    <title>{{ $title ?? ($theme?->site_name ?? 'MEDIACLICK') }}</title>
 
     {{-- Dynamic Favicon --}}
-    @if($panelSettings?->favicon_path)
-        <link rel="icon" href="{{ asset('storage/' . $panelSettings->favicon_path) }}">
+    @if($theme?->favicon_path)
+        <link rel="icon" href="{{ asset('storage/' . $theme->favicon_path) }}">
     @else
         <link rel="icon" href="/favicon.ico">
     @endif
@@ -23,46 +25,205 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
+
+    <style>
+        :root {
+            /* Global & Typography */
+            --font-main:
+                {{ $theme?->font_family ?? 'Inter' }}
+                , sans-serif;
+            --color-text-base:
+                {{ $theme?->base_text_color ?? '#475569' }}
+            ;
+            --color-text-heading:
+                {{ $theme?->heading_color ?? '#0f172a' }}
+            ;
+
+            /* Bridge Mappings requested by user */
+            --primary-color:
+                {{ $theme?->btn_create_bg_color ?? '#4f46e5' }}
+            ;
+            --error-color:
+                {{ $theme?->input_error_text_color ?? '#ef4444' }}
+            ;
+            --table-hover: #f8fafc;
+            /* Static fallback for now, or add to settings later */
+
+            /* Inputs */
+            --input-focus-ring:
+                {{ $theme?->input_focus_ring_color ?? '#6366f1' }}
+            ;
+            --input-border:
+                {{ $theme?->input_border_color ?? '#cbd5e1' }}
+            ;
+            --input-radius:
+                {{ $theme?->input_border_radius ?? '0.375rem' }}
+            ;
+            --input-padding-y:
+                {{ $theme?->input_vertical_padding ?? '0.5rem' }}
+            ;
+
+            /* Error States */
+            --input-error-ring:
+                {{ $theme?->input_error_ring_color ?? '#ef4444' }}
+            ;
+            --input-error-border:
+                {{ $theme?->input_error_border_color ?? '#ef4444' }}
+            ;
+            --input-error-text:
+                {{ $theme?->input_error_text_color ?? '#ef4444' }}
+            ;
+
+            /* Granular Buttons */
+            /* Create / Primary */
+            --btn-create-bg:
+                {{ $theme?->btn_create_bg_color ?? '#4f46e5' }}
+            ;
+            --btn-create-text:
+                {{ $theme?->btn_create_text_color ?? '#ffffff' }}
+            ;
+            --btn-create-hover:
+                {{ $theme?->btn_create_hover_color ?? '#4338ca' }}
+            ;
+            --btn-create-border:
+                {{ $theme?->btn_create_border_color ?? '#4f46e5' }}
+            ;
+
+            /* Edit */
+            --btn-edit-bg:
+                {{ $theme?->btn_edit_bg_color ?? '#f59e0b' }}
+            ;
+            --btn-edit-text:
+                {{ $theme?->btn_edit_text_color ?? '#ffffff' }}
+            ;
+            --btn-edit-hover:
+                {{ $theme?->btn_edit_hover_color ?? '#d97706' }}
+            ;
+            --btn-edit-border:
+                {{ $theme?->btn_edit_border_color ?? '#f59e0b' }}
+            ;
+
+            /* Delete */
+            --btn-delete-bg:
+                {{ $theme?->btn_delete_bg_color ?? '#ef4444' }}
+            ;
+            --btn-delete-text:
+                {{ $theme?->btn_delete_text_color ?? '#ffffff' }}
+            ;
+            --btn-delete-hover:
+                {{ $theme?->btn_delete_hover_color ?? '#dc2626' }}
+            ;
+            --btn-delete-border:
+                {{ $theme?->btn_delete_border_color ?? '#ef4444' }}
+            ;
+
+            /* Cancel */
+            --btn-cancel-bg:
+                {{ $theme?->btn_cancel_bg_color ?? '#94a3b8' }}
+            ;
+            --btn-cancel-text:
+                {{ $theme?->btn_cancel_text_color ?? '#ffffff' }}
+            ;
+            --btn-cancel-hover:
+                {{ $theme?->btn_cancel_hover_color ?? '#64748b' }}
+            ;
+            --btn-cancel-border:
+                {{ $theme?->btn_cancel_border_color ?? '#94a3b8' }}
+            ;
+
+            /* Save */
+            --btn-save-bg:
+                {{ $theme?->btn_save_bg_color ?? '#10b981' }}
+            ;
+            --btn-save-text:
+                {{ $theme?->btn_save_text_color ?? '#ffffff' }}
+            ;
+            --btn-save-hover:
+                {{ $theme?->btn_save_hover_color ?? '#059669' }}
+            ;
+            --btn-save-border:
+                {{ $theme?->btn_save_border_color ?? '#10b981' }}
+            ;
+
+            /* Actions */
+            --action-link-color:
+                {{ $theme?->action_link_color ?? '#4f46e5' }}
+            ;
+
+            /* Cards */
+            --card-bg:
+                {{ $theme?->card_bg_color ?? '#eff4ff' }}
+            ;
+            --card-border:
+                {{ $theme?->card_border_color ?? '#bfdbfe' }}
+            ;
+            --card-radius:
+                {{ $theme?->card_border_radius ?? '0.75rem' }}
+            ;
+
+            /* Theme variables are defined above - NO DaisyUI hijacking to prevent UI pollution */
+        }
+
+        /* Input Invalid State Shake & Color */
+        .input:invalid,
+        .input.is-invalid {
+            --input-focus-ring: var(--error-color) !important;
+            border-color: var(--error-color) !important;
+        }
+
+        body {
+            font-family: var(--font-main);
+            color: var(--color-text-base);
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            color: var(--color-text-heading);
+        }
+    </style>
 </head>
 
 <body class="font-sans bg-slate-50 text-gray-900 antialiased">
-    {{-- Header - Dynamic colors from panel settings --}}
+    {{-- Header - Dynamic colors from theme settings --}}
     <header
-        style="background-color: {{ $panelSettings?->header_bg_color ?? '#3D3373' }}; border-bottom: {{ ($panelSettings?->header_border_width ?? 0) }}px solid {{ $panelSettings?->header_border_color ?? 'transparent' }}">
+        style="background-color: {{ $theme?->header_bg_color ?? '#3D3373' }}; border-bottom: {{ ($theme?->header_border_width ?? 0) }}px solid {{ $theme?->header_border_color ?? 'transparent' }}">
         <div class="flex items-center h-16 px-6">
             {{-- Logo --}}
             <div class="flex items-center w-64">
-                @if($panelSettings?->logo_path)
+                @if($theme?->logo_path)
                     @php
                         $baseHeight = 32; // h-8 = 32px
-                        $logoScale = $panelSettings->logo_scale ?? 1.0;
+                        $logoScale = $theme->logo_scale ?? 1.0;
                         $scaledHeight = $baseHeight * $logoScale;
                     @endphp
-                    <img src="{{ asset('storage/' . $panelSettings->logo_path) }}"
-                        alt="{{ $panelSettings->site_name ?? 'MEDIACLICK' }}" style="height: {{ $scaledHeight }}px"
-                        class="object-contain">
+                    <img src="{{ asset('storage/' . $theme->logo_path) }}" alt="{{ $theme->site_name ?? 'MEDIACLICK' }}"
+                        style="height: {{ $scaledHeight }}px" class="object-contain">
                 @else
-                    <h1 class="text-xl font-bold text-white">{{ $panelSettings?->site_name ?? 'MEDIACLICK' }}</h1>
+                    <h1 class="text-xl font-bold text-white">{{ $theme?->site_name ?? 'MEDIACLICK' }}</h1>
                 @endif
             </div>
 
             {{-- Navigation Tabs - Dynamic colors --}}
             <div class="flex items-center px-4">
                 <div class="flex backdrop-blur-sm rounded-full p-1.5 border border-white/20"
-                    style="background-color: {{ $panelSettings?->menu_bg_color ?? 'rgba(255, 255, 255, 0.1)' }}">
+                    style="background-color: {{ $theme?->menu_bg_color ?? 'rgba(255, 255, 255, 0.1)' }}">
                     <a href="/dashboard"
                         class="px-5 py-2 rounded-full text-sm font-medium transition-all duration-200 {{ request()->is('dashboard') ? 'bg-white text-[#3D3373]' : 'hover:bg-white/10' }}"
-                        style="{{ !request()->is('dashboard') ? 'color: ' . ($panelSettings?->menu_text_color ?? '#ffffff') : '' }}">
+                        style="{{ !request()->is('dashboard') ? 'color: ' . ($theme?->menu_text_color ?? '#ffffff') : '' }}">
                         Dashboard
                     </a>
                     <a href="/dashboard/customers"
                         class="px-5 py-2 rounded-full text-sm font-medium transition-all duration-200 {{ request()->is('dashboard/customers*') ? 'bg-white text-[#3D3373]' : 'hover:bg-white/10' }}"
-                        style="{{ !request()->is('dashboard/customers*') ? 'color: ' . ($panelSettings?->menu_text_color ?? '#ffffff') : '' }}">
+                        style="{{ !request()->is('dashboard/customers*') ? 'color: ' . ($theme?->menu_text_color ?? '#ffffff') : '' }}">
                         Müşteriler
                     </a>
                     <a href="/dashboard/settings"
                         class="px-5 py-2 rounded-full text-sm font-medium transition-all duration-200 {{ request()->is('dashboard/settings*') ? 'bg-white text-[#3D3373]' : 'hover:bg-white/10' }}"
-                        style="{{ !request()->is('dashboard/settings*') ? 'color: ' . ($panelSettings?->menu_text_color ?? '#ffffff') : '' }}">
+                        style="{{ !request()->is('dashboard/settings*') ? 'color: ' . ($theme?->menu_text_color ?? '#ffffff') : '' }}">
                         Ayarlar
                     </a>
                 </div>
@@ -72,7 +233,7 @@
             <div class="flex items-center space-x-4 ml-auto">
                 {{-- Notification Bell --}}
                 <button class="relative p-2 hover:bg-white/10 rounded-lg transition-colors"
-                    style="color: {{ $panelSettings?->header_icon_color ?? '#ffffff' }}">
+                    style="color: {{ $theme?->header_icon_color ?? '#ffffff' }}">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
@@ -91,17 +252,17 @@
                         </div>
                         <div class="text-left hidden md:block">
                             <div class="text-sm font-medium leading-tight"
-                                style="color: {{ $panelSettings?->header_icon_color ?? '#ffffff' }}">
+                                style="color: {{ $theme?->header_icon_color ?? '#ffffff' }}">
                                 {{ auth()->user()->name ?? 'Kullanıcı' }}
                             </div>
                             <div class="text-xs leading-tight"
-                                style="color: {{ $panelSettings?->header_icon_color ?? '#ffffff' }}; opacity: 0.8">
+                                style="color: {{ $theme?->header_icon_color ?? '#ffffff' }}; opacity: 0.8">
                                 {{ auth()->user()->email ?? '' }}
                             </div>
                         </div>
                         <svg class="w-4 h-4 transition-transform duration-200" :class="{'rotate-180': open}" fill="none"
                             stroke="currentColor" viewBox="0 0 24 24"
-                            style="color: {{ $panelSettings?->header_icon_color ?? '#ffffff' }}; opacity: 0.7">
+                            style="color: {{ $theme?->header_icon_color ?? '#ffffff' }}; opacity: 0.7">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                         </svg>
                     </button>
@@ -116,7 +277,8 @@
 
                         <div class="px-4 py-3 border-b border-gray-50 bg-gray-50/50">
                             <p class="text-sm text-gray-900 font-medium truncate">
-                                {{ auth()->user()->name ?? 'Kullanıcı' }}</p>
+                                {{ auth()->user()->name ?? 'Kullanıcı' }}
+                            </p>
                             <p class="text-xs text-gray-500 truncate">{{ auth()->user()->email ?? '' }}</p>
                         </div>
 

@@ -49,7 +49,8 @@ new class extends Component {
             <p class="text-sm text-gray-500">Müşteriye ait hizmetleri görüntüleyin ve yönetin</p>
         </div>
         <div class="flex items-center gap-4">
-            <span class="text-sm text-gray-500"><span class="text-emerald-500 font-medium">Aktif</span>
+            <span class="text-sm text-gray-500"><span class="font-medium"
+                    style="color: var(--btn-save-bg);">Aktif</span>
                 {{ $services->count() }} hizmet</span>
             <x-customer-management.action-button label="Yeni Hizmet" href="#" />
         </div>

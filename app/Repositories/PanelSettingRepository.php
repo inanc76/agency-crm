@@ -67,6 +67,32 @@ class PanelSettingRepository
             'header_icon_color' => '#ffffff',
             'header_border_color' => '#000000',
             'header_border_width' => 0,
+
+            // Design Defaults
+            'font_family' => 'Inter',
+            'base_text_color' => '#475569',
+            'heading_color' => '#0f172a',
+
+            'input_focus_ring_color' => '#6366f1',
+            'input_border_color' => '#cbd5e1',
+            'input_error_ring_color' => '#ef4444',
+            'input_error_border_color' => '#ef4444',
+            'input_error_text_color' => '#ef4444',
+            'input_vertical_padding' => '0.5rem',
+            'input_border_radius' => '0.375rem',
+
+            'primary_button_bg_color' => '#4f46e5',
+            'primary_button_text_color' => '#ffffff',
+            'primary_button_hover_color' => '#4338ca',
+
+            'secondary_button_border_color' => '#e2e8f0',
+            'secondary_button_text_color' => '#475569',
+
+            'action_link_color' => '#4f46e5',
+
+            'card_bg_color' => '#eff4ff',
+            'card_border_color' => '#bfdbfe',
+            'card_border_radius' => '0.75rem',
         ]);
     }
 }

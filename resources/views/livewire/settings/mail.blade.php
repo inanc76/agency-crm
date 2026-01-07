@@ -198,7 +198,8 @@ new
                         <input type="checkbox" wire:model.live="is_active" class="toggle toggle-success toggle-lg" />
                         <div>
                             <div class="text-xs font-medium text-slate-700">Gönderim Durumu</div>
-                            <div class="text-sm font-semibold {{ $is_active ? 'text-green-600' : 'text-red-600' }}">
+                            <div class="text-sm font-semibold"
+                                style="color: {{ $is_active ? 'var(--btn-save-bg)' : 'var(--btn-delete-bg)' }};">
                                 {{ $is_active ? 'Aktif' : 'Kapalı' }}
                             </div>
                         </div>
@@ -233,8 +234,8 @@ new
                                     </div>
                                 </div>
                                 @if($provider === 'smtp')
-                                    <span
-                                        class="text-xs font-semibold text-green-600 bg-green-50 px-2 py-1 rounded">Aktif</span>
+                                    <span class="text-xs font-semibold px-2 py-1 rounded"
+                                        style="color: var(--btn-save-bg); background-color: color-mix(in srgb, var(--btn-save-bg) 15%, white);">Aktif</span>
                                 @endif
                             </div>
                         </div>
@@ -259,8 +260,8 @@ new
                                     </div>
                                 </div>
                                 @if($provider === 'mailgun')
-                                    <span
-                                        class="text-xs font-semibold text-green-600 bg-green-50 px-2 py-1 rounded">Aktif</span>
+                                    <span class="text-xs font-semibold px-2 py-1 rounded"
+                                        style="color: var(--btn-save-bg); background-color: color-mix(in srgb, var(--btn-save-bg) 15%, white);">Aktif</span>
                                 @endif
                             </div>
                         </div>
@@ -357,9 +358,20 @@ new
 
             {{-- Footer --}}
             <div class="pt-6 border-t border-slate-200 flex justify-end">
-                <x-mary-button label="Ayarları Kaydet"
-                    class="btn-primary bg-emerald-500 hover:bg-emerald-600 border-none text-white px-8"
-                    wire:click="save" spinner="save" />
+                <button type="button" wire:click="save" wire:loading.attr="disabled" class="theme-btn-save">
+                    <svg wire:loading wire:target="save" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                        </circle>
+                        <path class="opacity-75" fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                        </path>
+                    </svg>
+                    <svg wire:loading.remove wire:target="save" class="w-4 h-4" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span>Ayarları Kaydet</span>
+                </button>
             </div>
         </div>
 
@@ -371,8 +383,20 @@ new
                 <x-mary-textarea label="Mesaj İçeriği" wire:model="test_body" rows="3" />
             </div>
             <x-slot:actions>
-                <x-mary-button label="İptal" wire:click="showTestModal = false" />
-                <x-mary-button label="Gönder" class="btn-success text-white" wire:click="sendTest" spinner="sendTest" />
+                <button type="button" wire:click="$set('showTestModal', false)" class="theme-btn-cancel">
+                    İptal
+                </button>
+                <button type="button" wire:click="sendTest" wire:loading.attr="disabled" class="theme-btn-save">
+                    <svg wire:loading wire:target="sendTest" class="w-4 h-4 animate-spin" fill="none"
+                        viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                        </circle>
+                        <path class="opacity-75" fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                        </path>
+                    </svg>
+                    <span wire:loading.remove wire:target="sendTest">Gönder</span>
+                </button>
             </x-slot:actions>
         </x-mary-modal>
     </div>

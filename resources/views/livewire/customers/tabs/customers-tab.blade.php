@@ -39,9 +39,10 @@ new class extends Component {
             <p class="text-sm text-gray-500">Tüm müşterilerinizi görüntüleyin ve yönetin</p>
         </div>
         <div class="flex items-center gap-4">
-            <span class="text-sm text-gray-500"><span class="text-emerald-500 font-medium">Aktif</span>
+            <span class="text-sm text-gray-500"><span class="font-medium"
+                    style="color: var(--btn-save-bg);">Aktif</span>
                 {{ $customers->count() }} müşteri</span>
-            <x-customer-management.action-button label="Yeni Müşteri" href="#" />
+            <x-customer-management.action-button label="Yeni Müşteri" href="/dashboard/customers/create" />
         </div>
     </div>
 
@@ -76,7 +77,8 @@ new class extends Component {
                                 class="!w-9 !h-9 bg-white text-black font-semibold text-xs border border-gray-100 shadow-sm" />
                         </div>
                         <div>
-                            <div class="font-bold text-slate-700 text-[13px] group-hover:text-blue-600 transition-colors">
+                            <div
+                                class="font-bold text-slate-700 text-[13px] group-hover:text-[var(--btn-primary-bg)] transition-colors">
                                 {{ $customer->name }}
                             </div>
                             <div class="text-[11px] text-slate-400 font-medium">{{ $customer->customer_type }}</div>
@@ -108,12 +110,12 @@ new class extends Component {
                     </span>
                 </td>
                 <td class="px-6 py-4 text-center">
-                    <span
-                        class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-indigo-50 text-indigo-700 text-[11px] font-bold border border-indigo-100">
+                    <span class="inline-flex items-center justify-center w-6 h-6 rounded-full text-[11px] font-bold border"
+                        style="background-color: color-mix(in srgb, var(--btn-primary-bg), white 90%); color: var(--btn-primary-bg); border-color: color-mix(in srgb, var(--btn-primary-bg), white 80%);">
                         0
                     </span>
                 </td>
-                <td class="px-6 py-4 text-center font-bold text-emerald-600 text-[13px]">
+                <td class="px-6 py-4 text-center font-bold text-[13px]" style="color: var(--btn-save-bg);">
                     0
                 </td>
             </tr>
