@@ -42,6 +42,10 @@ Volt::route('dashboard/settings/variables', 'variables.index')
     ->middleware(['auth', 'verified'])
     ->name('settings.variables');
 
+Volt::route('dashboard/settings/mail', 'settings.mail')
+    ->middleware(['auth', 'verified'])
+    ->name('settings.mail');
+
 
 
 

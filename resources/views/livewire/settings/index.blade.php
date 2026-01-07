@@ -51,7 +51,7 @@ new
                 'subtitle' => 'SMTP ve Mailgun ayarlarını yapılandırın',
                 'icon' => 'o-cog-6-tooth',
                 'color' => 'bg-purple-50 text-purple-500',
-                'link' => '#'
+                'link' => route('settings.mail')
             ],
             [
                 'title' => 'Mail Şablonları',
