@@ -124,6 +124,10 @@ class PanelSettingRepository
             'list_card_border_color' => '#e2e8f0',
             'list_card_link_color' => '#4f46e5',
             'list_card_hover_color' => '#f8fafc',
+
+            'table_avatar_bg_color' => '#f1f5f9',
+            'table_avatar_border_color' => '#e2e8f0',
+            'table_avatar_text_color' => '#475569',
         ]);
     }
 }

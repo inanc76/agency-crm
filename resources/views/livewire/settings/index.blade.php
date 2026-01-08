@@ -37,7 +37,7 @@ new
                 'subtitle' => 'Hizmet fiyat tanımlarını oluşturun ve düzenleyin',
                 'icon' => 'o-banknotes',
                 'color' => 'bg-yellow-50 text-yellow-600',
-                'link' => '#'
+                'link' => route('settings.prices')
             ],
             [
                 'title' => 'Kullanıcılar',

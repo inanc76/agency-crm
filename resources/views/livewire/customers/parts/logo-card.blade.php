@@ -8,8 +8,16 @@
             class="w-32 h-32 border-2 border-dashed border-slate-300 rounded-lg flex items-center justify-center mb-4 bg-white/50 overflow-hidden">
             @if($logo)
                 <img src="{{ $logo->temporaryUrl() }}" alt="Logo Preview" class="w-full h-full object-contain">
+            @elseif($logo_url)
+                <img src="{{ asset('storage' . $logo_url) }}" alt="Logo" class="w-full h-full object-contain">
             @else
-                <x-mary-icon name="o-photo" class="w-12 h-12 opacity-20" style="color: var(--color-text-base);" />
+                @php
+                    $initials = mb_substr($name ?? 'C', 0, 1) ?: 'C';
+                @endphp
+                <div
+                    class="w-full h-full flex items-center justify-center bg-slate-100 text-slate-400 font-bold text-5xl uppercase">
+                    {{ $initials }}
+                </div>
             @endif
         </div>
 

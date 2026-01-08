@@ -38,11 +38,13 @@ new
 
     // Logo
     public $logo;
+    public string $logo_url = '';
 
     // State Management
     public bool $isViewMode = false;
     public ?string $customerId = null;
     public string $registration_date = '';
+    public string $activeTab = 'info';
     public array $counts = [
         'contacts' => 0,
         'assets' => 0,
@@ -52,6 +54,19 @@ new
         'messages' => 0,
         'notes' => 0,
     ];
+
+    // Related Data for Tabs
+    public $relatedContacts = [];
+    public $relatedAssets = [];
+    public $relatedServices = [];
+    public $relatedOffers = [];
+    public $relatedSales = [];
+    public $relatedMessages = [];
+    public $relatedNotes = [];
+
+    // Tab Filters
+    public string $servicesStatusFilter = '';
+    public string $offersStatusFilter = '';
 
     // Reference Data
     public $customerTypes = [];
@@ -128,6 +143,7 @@ new
             $this->tax_office = $customer->tax_office ?? '';
             $this->tax_number = $customer->tax_number ?? '';
             $this->current_code = $customer->current_code ?? '';
+            $this->logo_url = $customer->logo_url ?? '';
 
             if ($customer->relatedCustomers) {
                 $this->related_customers = $customer->relatedCustomers->pluck('id')->toArray();
@@ -146,6 +162,15 @@ new
                 'messages' => $customer->messages()->count(),
                 'notes' => $customer->notes()->count(),
             ];
+
+            // Load related data for tabs
+            $this->relatedContacts = $customer->contacts()->orderBy('name')->get()->toArray();
+            $this->relatedAssets = $customer->assets()->orderBy('name')->get()->toArray();
+            $this->relatedServices = $customer->services()->orderBy('created_at', 'desc')->get()->toArray();
+            $this->relatedOffers = $customer->offers()->orderBy('created_at', 'desc')->get()->toArray();
+            $this->relatedSales = $customer->sales()->orderBy('created_at', 'desc')->get()->toArray();
+            $this->relatedMessages = $customer->messages()->orderBy('created_at', 'desc')->get()->toArray();
+            $this->relatedNotes = $customer->notes()->orderBy('created_at', 'desc')->get()->toArray();
 
             $this->registration_date = $customer->created_at?->format('d.m.Y H:i') ?? '-';
 
@@ -477,29 +502,44 @@ new
         {{-- Tab Navigation --}}
         @if($isViewMode)
             <div class="flex items-center border-b border-slate-200 mb-8 overflow-x-auto scrollbar-hide">
-                <button class="px-5 py-3 text-sm font-medium border-b-2 whitespace-nowrap"
-                    style="border-color: var(--active-tab-color); color: var(--color-text-heading);">
+                <button wire:click="$set('activeTab', 'info')"
+                    class="px-5 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors"
+                    style="{{ $activeTab === 'info' ? 'border-color: var(--active-tab-color); color: var(--color-text-heading);' : 'border-color: transparent; color: var(--color-text-base); opacity: 0.6;' }}">
                     Müşteri Bilgileri
                 </button>
-                <button class="px-5 py-3 text-sm font-medium text-slate-500 hover:text-slate-700 whitespace-nowrap">
+                <button wire:click="$set('activeTab', 'contacts')"
+                    class="px-5 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors"
+                    style="{{ $activeTab === 'contacts' ? 'border-color: var(--active-tab-color); color: var(--color-text-heading);' : 'border-color: transparent; color: var(--color-text-base); opacity: 0.6;' }}">
                     Kişiler ({{ $counts['contacts'] }})
                 </button>
-                <button class="px-5 py-3 text-sm font-medium text-slate-500 hover:text-slate-700 whitespace-nowrap">
+                <button wire:click="$set('activeTab', 'assets')"
+                    class="px-5 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors"
+                    style="{{ $activeTab === 'assets' ? 'border-color: var(--active-tab-color); color: var(--color-text-heading);' : 'border-color: transparent; color: var(--color-text-base); opacity: 0.6;' }}">
                     Varlıklar ({{ $counts['assets'] }})
                 </button>
-                <button class="px-5 py-3 text-sm font-medium text-slate-500 hover:text-slate-700 whitespace-nowrap">
+                <button wire:click="$set('activeTab', 'services')"
+                    class="px-5 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors"
+                    style="{{ $activeTab === 'services' ? 'border-color: var(--active-tab-color); color: var(--color-text-heading);' : 'border-color: transparent; color: var(--color-text-base); opacity: 0.6;' }}">
                     Hizmetler ({{ $counts['services'] }})
                 </button>
-                <button class="px-5 py-3 text-sm font-medium text-slate-500 hover:text-slate-700 whitespace-nowrap">
+                <button wire:click="$set('activeTab', 'offers')"
+                    class="px-5 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors"
+                    style="{{ $activeTab === 'offers' ? 'border-color: var(--active-tab-color); color: var(--color-text-heading);' : 'border-color: transparent; color: var(--color-text-base); opacity: 0.6;' }}">
                     Teklifler ({{ $counts['offers'] }})
                 </button>
-                <button class="px-5 py-3 text-sm font-medium text-slate-500 hover:text-slate-700 whitespace-nowrap">
+                <button wire:click="$set('activeTab', 'sales')"
+                    class="px-5 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors"
+                    style="{{ $activeTab === 'sales' ? 'border-color: var(--active-tab-color); color: var(--color-text-heading);' : 'border-color: transparent; color: var(--color-text-base); opacity: 0.6;' }}">
                     Satışlar ({{ $counts['sales'] }})
                 </button>
-                <button class="px-5 py-3 text-sm font-medium text-slate-500 hover:text-slate-700 whitespace-nowrap">
+                <button wire:click="$set('activeTab', 'messages')"
+                    class="px-5 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors"
+                    style="{{ $activeTab === 'messages' ? 'border-color: var(--active-tab-color); color: var(--color-text-heading);' : 'border-color: transparent; color: var(--color-text-base); opacity: 0.6;' }}">
                     Mesajlar ({{ $counts['messages'] }})
                 </button>
-                <button class="px-5 py-3 text-sm font-medium text-slate-500 hover:text-slate-700 whitespace-nowrap">
+                <button wire:click="$set('activeTab', 'notes')"
+                    class="px-5 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors"
+                    style="{{ $activeTab === 'notes' ? 'border-color: var(--active-tab-color); color: var(--color-text-heading);' : 'border-color: transparent; color: var(--color-text-base); opacity: 0.6;' }}">
                     Notlar ({{ $counts['notes'] }})
                 </button>
             </div>
@@ -510,14 +550,384 @@ new
         {{-- Main Layout: 80% Left, 20% Right --}}
         <div class="flex gap-6">
             {{-- Left Column (80%) --}}
-            <div class="w-4/5 space-y-6">
-                @include('livewire.customers.parts.basic-info-card')
-                @include('livewire.customers.parts.address-card')
-                @include('livewire.customers.parts.financial-card')
-                @include('livewire.customers.parts.related-companies-card')
+            <div class="w-4/5">
+                {{-- Info Tab --}}
+                @if($activeTab === 'info' || !$isViewMode)
+                    <div class="space-y-6">
+                        @include('livewire.customers.parts.basic-info-card')
+                        @include('livewire.customers.parts.address-card')
+                        @include('livewire.customers.parts.financial-card')
+                        @include('livewire.customers.parts.related-companies-card')
 
-                @if($isViewMode)
-                    @include('livewire.customers.parts.registration-info-card')
+                        @if($isViewMode)
+                            @include('livewire.customers.parts.registration-info-card')
+                        @endif
+                    </div>
+                @endif
+
+                {{-- Contacts Tab --}}
+                @if($activeTab === 'contacts' && $isViewMode)
+                    <div class="theme-card p-6 shadow-sm">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-base font-bold" style="color: var(--color-text-heading);">Kişiler</h2>
+                            <a href="/dashboard/customers/contacts/create?customer={{ $customerId }}"
+                                class="text-xs font-bold px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 transition-colors"
+                                style="color: var(--action-link-color);">
+                                + Yeni Kişi
+                            </a>
+                        </div>
+                        @if(count($relatedContacts) > 0)
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-sm">
+                                    <thead>
+                                        <tr class="border-b border-slate-200">
+                                            <th class="text-left py-2 px-2 font-medium opacity-60">Ad Soyad</th>
+                                            <th class="text-left py-2 px-2 font-medium opacity-60">Pozisyon</th>
+                                            <th class="text-left py-2 px-2 font-medium opacity-60">Email</th>
+                                            <th class="text-left py-2 px-2 font-medium opacity-60">Telefon</th>
+                                            <th class="text-center py-2 px-2 font-medium opacity-60">Durum</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($relatedContacts as $contact)
+                                            <tr class="border-b border-slate-100 hover:bg-slate-50 cursor-pointer transition-colors"
+                                                onclick="window.location.href='/dashboard/customers/contacts/{{ $contact['id'] }}'">
+                                                <td class="py-3 px-2 font-medium">{{ $contact['name'] }}</td>
+                                                <td class="py-3 px-2 opacity-70">{{ $contact['position'] ?? '-' }}</td>
+                                                <td class="py-3 px-2 opacity-70">{{ $contact['emails'][0] ?? '-' }}</td>
+                                                <td class="py-3 px-2 opacity-70">{{ $contact['phones'][0] ?? '-' }}</td>
+                                                <td class="py-3 px-2 text-center">
+                                                    <span
+                                                        class="px-2 py-0.5 rounded text-xs font-medium {{ $contact['status'] === 'WORKING' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500' }}">
+                                                        {{ $contact['status'] === 'WORKING' ? 'Çalışıyor' : 'Ayrıldı' }}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @else
+                            <div class="text-center py-8 text-slate-400">
+                                <x-mary-icon name="o-users" class="w-12 h-12 mx-auto mb-2 opacity-30" />
+                                <p class="text-sm">Henüz kişi kaydı bulunmuyor</p>
+                            </div>
+                        @endif
+                    </div>
+                @endif
+
+                {{-- Assets Tab --}}
+                @if($activeTab === 'assets' && $isViewMode)
+                    <div class="theme-card p-6 shadow-sm">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-base font-bold" style="color: var(--color-text-heading);">Varlıklar</h2>
+                            <a href="/dashboard/customers/assets/create?customer={{ $customerId }}"
+                                class="text-xs font-bold px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 transition-colors"
+                                style="color: var(--action-link-color);">
+                                + Yeni Varlık
+                            </a>
+                        </div>
+                        @if(count($relatedAssets) > 0)
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-sm">
+                                    <thead>
+                                        <tr class="border-b border-slate-200">
+                                            <th class="text-left py-2 px-2 font-medium opacity-60">Varlık Adı</th>
+                                            <th class="text-left py-2 px-2 font-medium opacity-60">Tür</th>
+                                            <th class="text-left py-2 px-2 font-medium opacity-60">URL</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($relatedAssets as $asset)
+                                            <tr class="border-b border-slate-100 hover:bg-slate-50 cursor-pointer transition-colors"
+                                                onclick="window.location.href='/dashboard/customers/assets/{{ $asset['id'] }}'">
+                                                <td class="py-3 px-2 font-medium">{{ $asset['name'] }}</td>
+                                                <td class="py-3 px-2 opacity-70">{{ $asset['type'] }}</td>
+                                                <td class="py-3 px-2 opacity-70">
+                                                    @if($asset['url'])
+                                                        <a href="{{ $asset['url'] }}" target="_blank"
+                                                            class="text-blue-500 hover:underline"
+                                                            onclick="event.stopPropagation();">{{ Str::limit($asset['url'], 40) }}</a>
+                                                    @else
+                                                        -
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @else
+                            <div class="text-center py-8 text-slate-400">
+                                <x-mary-icon name="o-globe-alt" class="w-12 h-12 mx-auto mb-2 opacity-30" />
+                                <p class="text-sm">Henüz varlık kaydı bulunmuyor</p>
+                            </div>
+                        @endif
+                    </div>
+                @endif
+
+                {{-- Services Tab --}}
+                @if($activeTab === 'services' && $isViewMode)
+                    <div class="theme-card p-6 shadow-sm">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center gap-4">
+                                <h2 class="text-base font-bold" style="color: var(--color-text-heading);">Hizmetler</h2>
+                                <select wire:model.live="servicesStatusFilter" class="select select-xs bg-white border-slate-200">
+                                    <option value="">Tüm Durumlar</option>
+                                    <option value="ACTIVE">Aktif</option>
+                                    <option value="PASSIVE">Pasif</option>
+                                </select>
+                            </div>
+                            <a href="/dashboard/customers/services/create?customer={{ $customerId }}"
+                                class="text-xs font-bold px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 transition-colors"
+                                style="color: var(--action-link-color);">
+                                + Yeni Hizmet
+                            </a>
+                        </div>
+                        @php
+                            $filteredServices = collect($relatedServices)->when($servicesStatusFilter, function ($collection) {
+                                return $collection->where('status', $this->servicesStatusFilter);
+                            });
+                        @endphp
+                        @if($filteredServices->count() > 0)
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-sm">
+                                    <thead>
+                                        <tr class="border-b border-slate-200">
+                                            <th class="text-left py-2 px-2 font-medium opacity-60">Hizmet Adı</th>
+                                            <th class="text-left py-2 px-2 font-medium opacity-60">Kategori</th>
+                                            <th class="text-center py-2 px-2 font-medium opacity-60">Kalan Gün</th>
+                                            <th class="text-center py-2 px-2 font-medium opacity-60">Bitiş</th>
+                                            <th class="text-right py-2 px-2 font-medium opacity-60">Fiyat</th>
+                                            <th class="text-center py-2 px-2 font-medium opacity-60">Durum</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($filteredServices as $service)
+                                            @php
+                                                $endDate = \Carbon\Carbon::parse($service['end_date']);
+                                                $daysLeft = now()->diffInDays($endDate, false);
+                                            @endphp
+                                            <tr class="border-b border-slate-100 hover:bg-slate-50 cursor-pointer transition-colors"
+                                                onclick="window.location.href='/dashboard/customers/services/{{ $service['id'] }}'">
+                                                <td class="py-3 px-2 font-medium">{{ $service['service_name'] }}</td>
+                                                <td class="py-3 px-2 opacity-70">{{ $service['service_category'] ?? '-' }}</td>
+                                                <td class="py-3 px-2 text-center">
+                                                    @if($daysLeft < 0)
+                                                        <span class="px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700">
+                                                            {{ abs((int)$daysLeft) }} gün geçti
+                                                        </span>
+                                                    @elseif($daysLeft <= 30)
+                                                        <span class="px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-700">
+                                                            {{ (int)$daysLeft }} gün
+                                                        </span>
+                                                    @else
+                                                        <span class="px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700">
+                                                            {{ (int)$daysLeft }} gün
+                                                        </span>
+                                                    @endif
+                                                </td>
+                                                <td class="py-3 px-2 text-center opacity-70 text-xs font-mono">
+                                                    {{ $endDate->format('d.m.Y') }}</td>
+                                                <td class="py-3 px-2 text-right font-medium">
+                                                    {{ number_format($service['service_price'], 2) }}
+                                                    {{ $service['service_currency'] }}</td>
+                                                <td class="py-3 px-2 text-center">
+                                                    <span
+                                                        class="px-2 py-0.5 rounded text-xs font-medium {{ $service['status'] === 'ACTIVE' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500' }}">
+                                                        {{ $service['status'] === 'ACTIVE' ? 'Aktif' : 'Pasif' }}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @else
+                            <div class="text-center py-8 text-slate-400">
+                                <x-mary-icon name="o-cog-6-tooth" class="w-12 h-12 mx-auto mb-2 opacity-30" />
+                                <p class="text-sm">{{ $servicesStatusFilter ? 'Filtreye uygun hizmet bulunamadı' : 'Henüz hizmet kaydı bulunmuyor' }}</p>
+                            </div>
+                        @endif
+                    </div>
+                @endif
+
+                {{-- Offers Tab --}}
+                @if($activeTab === 'offers' && $isViewMode)
+                    <div class="theme-card p-6 shadow-sm">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center gap-4">
+                                <h2 class="text-base font-bold" style="color: var(--color-text-heading);">Teklifler</h2>
+                                <select wire:model.live="offersStatusFilter" class="select select-xs bg-white border-slate-200">
+                                    <option value="">Tüm Durumlar</option>
+                                    <option value="DRAFT">Taslak</option>
+                                    <option value="SENT">Gönderildi</option>
+                                    <option value="ACCEPTED">Kabul Edildi</option>
+                                    <option value="REJECTED">Reddedildi</option>
+                                </select>
+                            </div>
+                            <a href="/dashboard/customers/offers/create?customer={{ $customerId }}"
+                                class="text-xs font-bold px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 transition-colors"
+                                style="color: var(--action-link-color);">
+                                + Yeni Teklif
+                            </a>
+                        </div>
+                        @php
+                            $filteredOffers = collect($relatedOffers)->when($offersStatusFilter, function ($collection) {
+                                return $collection->where('status', $this->offersStatusFilter);
+                            });
+                        @endphp
+                        @if($filteredOffers->count() > 0)
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-sm">
+                                    <thead>
+                                        <tr class="border-b border-slate-200">
+                                            <th class="text-left py-2 px-2 font-medium opacity-60">Teklif Başlığı</th>
+                                            <th class="text-center py-2 px-2 font-medium opacity-60">Tarih</th>
+                                            <th class="text-center py-2 px-2 font-medium opacity-60">Kalan Gün</th>
+                                            <th class="text-right py-2 px-2 font-medium opacity-60">Tutar</th>
+                                            <th class="text-center py-2 px-2 font-medium opacity-60">Durum</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($filteredOffers as $offer)
+                                            @php
+                                                $validUntil = \Carbon\Carbon::parse($offer['valid_until']);
+                                                $daysLeft = now()->diffInDays($validUntil, false);
+                                                $statusColors = [
+                                                    'DRAFT' => 'bg-slate-100 text-slate-500',
+                                                    'SENT' => 'bg-blue-100 text-blue-700',
+                                                    'ACCEPTED' => 'bg-green-100 text-green-700',
+                                                    'REJECTED' => 'bg-red-100 text-red-700',
+                                                ];
+                                                $statusLabels = ['DRAFT' => 'Taslak', 'SENT' => 'Gönderildi', 'ACCEPTED' => 'Kabul', 'REJECTED' => 'Ret'];
+                                            @endphp
+                                            <tr class="border-b border-slate-100 hover:bg-slate-50 cursor-pointer transition-colors"
+                                                onclick="window.location.href='/dashboard/customers/offers/{{ $offer['id'] }}'">
+                                                <td class="py-3 px-2 font-medium">{{ $offer['title'] }}</td>
+                                                <td class="py-3 px-2 text-center opacity-70 text-xs font-mono">
+                                                    {{ \Carbon\Carbon::parse($offer['created_at'])->format('d.m.Y') }}</td>
+                                                <td class="py-3 px-2 text-center">
+                                                    @if($daysLeft < 0)
+                                                        <span class="px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700">
+                                                            {{ abs((int)$daysLeft) }} gün geçti
+                                                        </span>
+                                                    @elseif($daysLeft <= 7)
+                                                        <span class="px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-700">
+                                                            {{ (int)$daysLeft }} gün
+                                                        </span>
+                                                    @else
+                                                        <span class="px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700">
+                                                            {{ (int)$daysLeft }} gün
+                                                        </span>
+                                                    @endif
+                                                </td>
+                                                <td class="py-3 px-2 text-right font-medium">
+                                                    {{ number_format($offer['total_amount'], 2) }} {{ $offer['currency'] }}</td>
+                                                <td class="py-3 px-2 text-center">
+                                                    <span class="px-2 py-0.5 rounded text-xs font-medium {{ $statusColors[$offer['status']] ?? 'bg-slate-100 text-slate-500' }}">
+                                                        {{ $statusLabels[$offer['status']] ?? $offer['status'] }}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @else
+                            <div class="text-center py-8 text-slate-400">
+                                <x-mary-icon name="o-document-text" class="w-12 h-12 mx-auto mb-2 opacity-30" />
+                                <p class="text-sm">{{ $offersStatusFilter ? 'Filtreye uygun teklif bulunamadı' : 'Henüz teklif kaydı bulunmuyor' }}</p>
+                            </div>
+                        @endif
+                    </div>
+                @endif
+
+                {{-- Sales Tab --}}
+                @if($activeTab === 'sales' && $isViewMode)
+                    <div class="theme-card p-6 shadow-sm">
+                        <h2 class="text-base font-bold mb-4" style="color: var(--color-text-heading);">Satışlar</h2>
+                        @if(count($relatedSales) > 0)
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-sm">
+                                    <thead>
+                                        <tr class="border-b border-slate-200">
+                                            <th class="text-left py-2 px-2 font-medium opacity-60">Satış No</th>
+                                            <th class="text-center py-2 px-2 font-medium opacity-60">Tarih</th>
+                                            <th class="text-right py-2 px-2 font-medium opacity-60">Tutar</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($relatedSales as $sale)
+                                            <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                                                <td class="py-3 px-2 font-medium">{{ $sale['number'] ?? $sale['id'] }}</td>
+                                                <td class="py-3 px-2 text-center opacity-70 text-xs font-mono">
+                                                    {{ \Carbon\Carbon::parse($sale['created_at'])->format('d.m.Y') }}</td>
+                                                <td class="py-3 px-2 text-right font-medium">
+                                                    {{ number_format($sale['total_amount'] ?? 0, 2) }}
+                                                    {{ $sale['currency'] ?? 'TRY' }}</td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @else
+                            <div class="text-center py-8 text-slate-400">
+                                <x-mary-icon name="o-banknotes" class="w-12 h-12 mx-auto mb-2 opacity-30" />
+                                <p class="text-sm">Henüz satış kaydı bulunmuyor</p>
+                            </div>
+                        @endif
+                    </div>
+                @endif
+
+                {{-- Messages Tab --}}
+                @if($activeTab === 'messages' && $isViewMode)
+                    <div class="theme-card p-6 shadow-sm">
+                        <h2 class="text-base font-bold mb-4" style="color: var(--color-text-heading);">Mesajlar</h2>
+                        @if(count($relatedMessages) > 0)
+                            <div class="space-y-3">
+                                @foreach($relatedMessages as $message)
+                                    <div class="p-3 border border-slate-200 rounded-lg bg-slate-50">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <span
+                                                class="text-xs font-mono opacity-50">{{ \Carbon\Carbon::parse($message['created_at'])->format('d.m.Y H:i') }}</span>
+                                        </div>
+                                        <p class="text-sm">{{ $message['content'] ?? $message['message'] ?? '-' }}</p>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <div class="text-center py-8 text-slate-400">
+                                <x-mary-icon name="o-chat-bubble-left-right" class="w-12 h-12 mx-auto mb-2 opacity-30" />
+                                <p class="text-sm">Henüz mesaj bulunmuyor</p>
+                            </div>
+                        @endif
+                    </div>
+                @endif
+
+                {{-- Notes Tab --}}
+                @if($activeTab === 'notes' && $isViewMode)
+                    <div class="theme-card p-6 shadow-sm">
+                        <h2 class="text-base font-bold mb-4" style="color: var(--color-text-heading);">Notlar</h2>
+                        @if(count($relatedNotes) > 0)
+                            <div class="space-y-3">
+                                @foreach($relatedNotes as $note)
+                                    <div class="p-3 border border-slate-200 rounded-lg bg-slate-50">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <span
+                                                class="text-xs font-mono opacity-50">{{ \Carbon\Carbon::parse($note['created_at'])->format('d.m.Y H:i') }}</span>
+                                        </div>
+                                        <p class="text-sm">{{ $note['content'] ?? $note['note'] ?? '-' }}</p>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <div class="text-center py-8 text-slate-400">
+                                <x-mary-icon name="o-document-text" class="w-12 h-12 mx-auto mb-2 opacity-30" />
+                                <p class="text-sm">Henüz not bulunmuyor</p>
+                            </div>
+                        @endif
+                    </div>
                 @endif
             </div>
 

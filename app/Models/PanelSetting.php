@@ -74,6 +74,10 @@ class PanelSetting extends Model
         'list_card_border_color',
         'list_card_link_color',
         'list_card_hover_color',
+        // Table Avatar
+        'table_avatar_bg_color',
+        'table_avatar_border_color',
+        'table_avatar_text_color',
     ];
 
     protected function casts(): array

@@ -43,6 +43,8 @@ class Customer extends Model
         ];
     }
 
+
+
     public function relatedCustomers(): BelongsToMany
     {
         return $this->belongsToMany(

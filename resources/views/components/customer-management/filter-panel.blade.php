@@ -1,6 +1,7 @@
 @props([
     'showCategories' => true,
     'showAlphabet' => true,
+    'showStatus' => true,
     'categoryLabel' => 'Tüm Kategoriler',
     'statusLabel' => 'Duruma Göre Filtrele',
     'letter' => ''
@@ -20,6 +21,7 @@
             </div>
         @endif
 
+        @if($showStatus)
         <div class="w-48">
             <x-mary-select 
                 :options="[
@@ -32,6 +34,7 @@
                 class="select-sm !bg-white !border-gray-200"
             />
         </div>
+        @endif
 
         <div class="flex-grow max-w-xs">
             <x-mary-input 
@@ -41,6 +44,12 @@
                 wire:model.live.debounce.300ms="search"
             />
         </div>
+
+        @if(isset($extra))
+            <div class="flex items-center">
+                {{ $extra }}
+            </div>
+        @endif
 
         @if($showAlphabet)
             <div class="flex items-center gap-1 ml-auto flex-wrap justify-end">

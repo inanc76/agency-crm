@@ -55,6 +55,15 @@ Volt::route('dashboard/customers/services/{service}', 'customers.services.create
     ->middleware(['auth', 'verified'])
     ->name('customers.services.edit');
 
+// Teklif Yönetimi
+Volt::route('dashboard/customers/offers/create', 'customers.offers.create')
+    ->middleware(['auth', 'verified'])
+    ->name('customers.offers.create');
+
+Volt::route('dashboard/customers/offers/{offer}', 'customers.offers.create')
+    ->middleware(['auth', 'verified'])
+    ->name('customers.offers.edit');
+
 // Ayarlar
 // Ayarlar
 Volt::route('dashboard/settings', 'settings.index')
@@ -80,6 +89,10 @@ Volt::route('dashboard/settings/variables', 'variables.index')
 Volt::route('dashboard/settings/mail', 'settings.mail')
     ->middleware(['auth', 'verified'])
     ->name('settings.mail');
+
+Volt::route('dashboard/settings/prices', 'settings.prices')
+    ->middleware(['auth', 'verified'])
+    ->name('settings.prices');
 
 
 

@@ -57,6 +57,20 @@ new
 
     public function with(): array
     {
+        $selectedCategory = null;
+        if ($this->selectedCategoryKey) {
+            $category = $this->repository->getCategoryByKey($this->selectedCategoryKey);
+            if ($category) {
+                // Load items with sort_order
+                $category->load([
+                    'items' => function ($query) {
+                        $query->orderBy('sort_order', 'asc')->orderBy('created_at', 'asc');
+                    }
+                ]);
+                $selectedCategory = $category;
+            }
+        }
+
         return [
             'categories' => ReferenceCategory::query()
                 ->when($this->search, fn($q) => $q->where('name', 'ilike', "%{$this->search}%")
@@ -64,9 +78,7 @@ new
                 ->withCount('items')
                 ->orderBy('name')
                 ->get(),
-            'selectedCategory' => $this->selectedCategoryKey
-                ? $this->repository->getCategoryByKey($this->selectedCategoryKey)
-                : null,
+            'selectedCategory' => $selectedCategory,
             'availableColors' => $this->service->getColorSchemes(),
         ];
     }
@@ -245,6 +257,56 @@ new
         }
     }
 
+    public function moveItemUp(string $id): void
+    {
+        try {
+            $item = ReferenceItem::findOrFail($id);
+            $previousItem = ReferenceItem::where('category_key', $item->category_key)
+                ->where('sort_order', '<', $item->sort_order)
+                ->orderBy('sort_order', 'desc')
+                ->first();
+
+            if ($previousItem) {
+                // Swap sort orders
+                $tempOrder = $item->sort_order;
+                $item->sort_order = $previousItem->sort_order;
+                $previousItem->sort_order = $tempOrder;
+
+                $item->save();
+                $previousItem->save();
+
+                $this->success('Sıralama güncellendi.');
+            }
+        } catch (\Exception $e) {
+            $this->error('Sıralama güncellenemedi.');
+        }
+    }
+
+    public function moveItemDown(string $id): void
+    {
+        try {
+            $item = ReferenceItem::findOrFail($id);
+            $nextItem = ReferenceItem::where('category_key', $item->category_key)
+                ->where('sort_order', '>', $item->sort_order)
+                ->orderBy('sort_order', 'asc')
+                ->first();
+
+            if ($nextItem) {
+                // Swap sort orders
+                $tempOrder = $item->sort_order;
+                $item->sort_order = $nextItem->sort_order;
+                $nextItem->sort_order = $tempOrder;
+
+                $item->save();
+                $nextItem->save();
+
+                $this->success('Sıralama güncellendi.');
+            }
+        } catch (\Exception $e) {
+            $this->error('Sıralama güncellenemedi.');
+        }
+    }
+
     // Helper: Reset form
     private function resetItemForm(): void
     {
@@ -276,7 +338,7 @@ new
         </div>
 
         {{-- Main Card --}}
-        <div class="card border p-6 shadow-sm">
+        <div class="card theme-card border p-6 shadow-sm">
             <div class="flex flex-col lg:flex-row gap-6 h-[calc(100vh-300px)] min-h-[600px]">
                 {{-- Left Sidebar: Categories --}}
                 <div class="w-full lg:w-1/2 bg-white border border-slate-200 rounded-lg flex flex-col h-full shadow-sm">
@@ -377,14 +439,19 @@ new
                                         </div>
 
                                         <div class="flex items-center gap-2 pl-2">
-                                            {{-- Move buttons placeholder
-                                            <div class="hidden group-hover:flex flex-col gap-0.5 mr-1">
-                                                <button class="text-slate-300 hover:text-slate-600"><x-mary-icon
-                                                        name="o-arrow-up" class="w-3 h-3" /></button>
-                                                <button class="text-slate-300 hover:text-slate-600"><x-mary-icon
-                                                        name="o-arrow-down" class="w-3 h-3" /></button>
+                                            {{-- Move buttons --}}
+                                            <div class="flex flex-col gap-0.5 mr-1">
+                                                <button wire:click="moveItemUp('{{ $item->id }}')"
+                                                    class="p-1 text-slate-300 hover:text-slate-600 hover:bg-slate-100 rounded transition-colors"
+                                                    title="Yukarı taşı">
+                                                    <x-mary-icon name="o-arrow-up" class="w-3 h-3" />
+                                                </button>
+                                                <button wire:click="moveItemDown('{{ $item->id }}')"
+                                                    class="p-1 text-slate-300 hover:text-slate-600 hover:bg-slate-100 rounded transition-colors"
+                                                    title="Aşağı taşı">
+                                                    <x-mary-icon name="o-arrow-down" class="w-3 h-3" />
+                                                </button>
                                             </div>
-                                            --}}
 
                                             <button wire:click="editItem('{{ $item->id }}')"
                                                 class="p-1.5 text-slate-400 hover:bg-slate-50 rounded transition-colors"
@@ -433,9 +500,14 @@ new
                 rows="3" />
         </div>
         <x-slot:actions>
-            <x-mary-button label="İptal" class="btn-ghost" wire:click="$set('showCategoryModal', false)" />
-            <x-mary-button label="{{ $categoryId ? 'Güncelle' : 'Oluştur' }}" class="btn-primary"
-                wire:click="saveCategory" spinner="saveCategory" />
+            <button type="button" class="theme-btn-cancel" wire:click="$set('showCategoryModal', false)">
+                İptal
+            </button>
+            <button type="button" class="theme-btn-save" wire:click="saveCategory" wire:loading.attr="disabled">
+                <span wire:loading wire:target="saveCategory" class="loading loading-spinner loading-xs mr-1"></span>
+                <x-mary-icon name="o-check" class="w-4 h-4" />
+                {{ $categoryId ? 'Güncelle' : 'Oluştur' }}
+            </button>
         </x-slot:actions>
     </x-mary-modal>
 
@@ -448,6 +520,11 @@ new
 
             <x-mary-input label="Görünen İsim" wire:model="display_label"
                 hint="Arayüzde kullanıcıların göreceği isim (örn: Erkek)" />
+
+            <x-mary-textarea label="Açıklama" wire:model="description" 
+                placeholder="Öğe hakkında açıklama yazın..." 
+                rows="3"
+                hint="Opsiyonel - Bu öğe hakkında ek bilgi" />
 
             {{-- Color Picker --}}
             <div>
@@ -480,9 +557,14 @@ new
         </div>
 
         <x-slot:actions>
-            <x-mary-button label="İptal" class="btn-ghost" wire:click="$set('showItemModal', false)" />
-            <x-mary-button label="{{ $itemId ? 'Güncelle' : 'Oluştur' }}" class="btn-primary" wire:click="saveItem"
-                spinner="saveItem" />
+            <button type="button" class="theme-btn-cancel" wire:click="$set('showItemModal', false)">
+                İptal
+            </button>
+            <button type="button" class="theme-btn-save" wire:click="saveItem" wire:loading.attr="disabled">
+                <span wire:loading wire:target="saveItem" class="loading loading-spinner loading-xs mr-1"></span>
+                <x-mary-icon name="o-check" class="w-4 h-4" />
+                {{ $itemId ? 'Güncelle' : 'Oluştur' }}
+            </button>
         </x-slot:actions>
     </x-mary-modal>
 </div>

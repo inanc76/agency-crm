@@ -88,6 +88,10 @@ new
     public string $list_card_link_color = '#4f46e5';
     public string $list_card_hover_color = '#f8fafc';
 
+    public string $table_avatar_bg_color = '#f1f5f9';
+    public string $table_avatar_border_color = '#e2e8f0';
+    public string $table_avatar_text_color = '#475569';
+
     public function mount(PanelSettingRepository $repository): void
     {
         $setting = $repository->getActiveSetting();
@@ -163,6 +167,10 @@ new
             $this->list_card_border_color = $setting->list_card_border_color ?? '#e2e8f0';
             $this->list_card_link_color = $setting->list_card_link_color ?? '#4f46e5';
             $this->list_card_hover_color = $setting->list_card_hover_color ?? '#f8fafc';
+
+            $this->table_avatar_bg_color = $setting->table_avatar_bg_color ?? '#f1f5f9';
+            $this->table_avatar_border_color = $setting->table_avatar_border_color ?? '#e2e8f0';
+            $this->table_avatar_text_color = $setting->table_avatar_text_color ?? '#475569';
         }
     }
 
@@ -235,6 +243,10 @@ new
             'list_card_border_color' => 'nullable|string',
             'list_card_link_color' => 'nullable|string',
             'list_card_hover_color' => 'nullable|string',
+
+            'table_avatar_bg_color' => 'nullable|string',
+            'table_avatar_border_color' => 'nullable|string',
+            'table_avatar_text_color' => 'nullable|string',
         ]);
 
         $repository->saveSettings($data);
@@ -717,6 +729,247 @@ new
                                             <div class="w-3 h-3 rounded border border-slate-200"
                                                 style="background-color: {{ $table_hover_text_color }}"></div>
                                             <span class="text-[10px] font-mono text-slate-400">TEXT</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </x-slot:content>
+                    </x-mary-collapse>
+
+                    {{-- 9. Combo Box Önizleme --}}
+                    <x-mary-collapse name="preview9" group="previews" separator
+                        class="bg-white border border-slate-200 shadow-sm rounded-lg">
+                        <x-slot:heading>
+                            <div class="flex items-center justify-between w-full pr-4">
+                                <div class="flex items-center gap-3">
+                                    <x-mary-icon name="o-chevron-up-down" class="w-5 h-5 text-indigo-500" />
+                                    <span class="font-semibold text-slate-700">Combo Box Önizleme</span>
+                                </div>
+                                <div class="flex gap-2">
+                                    <span
+                                        class="text-[10px] font-mono bg-slate-100 text-slate-500 px-2 py-1 rounded">.select</span>
+                                    <span
+                                        class="text-[10px] font-mono bg-slate-100 text-slate-500 px-2 py-1 rounded">.select-sm</span>
+                                </div>
+                            </div>
+                        </x-slot:heading>
+                        <x-slot:content>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 p-4">
+                                {{-- Filtre Combo Box --}}
+                                <div>
+                                    <div class="flex items-center gap-2 mb-3">
+                                        <x-mary-icon name="o-funnel" class="w-4 h-4 text-blue-500" />
+                                        <h4 class="text-sm font-bold text-slate-800">Filtre Combo Box</h4>
+                                        <span class="text-[10px] font-mono text-slate-400">(Liste Sayfaları)</span>
+                                    </div>
+                                    <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                                        <div class="flex items-center gap-3 flex-wrap">
+                                            <select class="select select-sm bg-white border-slate-200 text-xs">
+                                                <option>Tüm Kategoriler</option>
+                                                <option>Web Hosting</option>
+                                                <option>Domain</option>
+                                                <option>E-posta</option>
+                                            </select>
+                                            <select class="select select-sm bg-white border-slate-200 text-xs">
+                                                <option>Tüm Durumlar</option>
+                                                <option>Aktif</option>
+                                                <option>Pasif</option>
+                                            </select>
+                                        </div>
+                                        <p class="mt-3 text-[10px] text-slate-400">
+                                            Kullanım: <code
+                                                class="bg-white px-1 rounded border border-slate-200">select select-sm bg-white border-slate-200 text-xs</code>
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {{-- Tab Inline Filtre --}}
+                                <div>
+                                    <div class="flex items-center gap-2 mb-3">
+                                        <x-mary-icon name="o-adjustments-horizontal" class="w-4 h-4 text-emerald-500" />
+                                        <h4 class="text-sm font-bold text-slate-800">Tab Inline Filtre</h4>
+                                        <span
+                                            class="px-1.5 py-0.5 bg-emerald-100 text-emerald-700 text-[10px] font-bold rounded">XS</span>
+                                    </div>
+                                    <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                                        <div class="flex items-center gap-3">
+                                            <span class="text-sm font-bold text-slate-700">Hizmetler</span>
+                                            <select class="select select-xs bg-white border-slate-200">
+                                                <option>Tüm Durumlar</option>
+                                                <option>Aktif</option>
+                                                <option>Pasif</option>
+                                            </select>
+                                        </div>
+                                        <p class="mt-3 text-[10px] text-slate-400">
+                                            Kullanım: <code
+                                                class="bg-white px-1 rounded border border-slate-200">select select-xs bg-white border-slate-200</code>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 p-4 pt-0">
+
+                                {{-- Form Combo Box --}}
+                                <div>
+                                    <div class="flex items-center gap-2 mb-3">
+                                        <x-mary-icon name="o-document-plus" class="w-4 h-4 text-purple-500" />
+                                        <h4 class="text-sm font-bold text-slate-800">Form Combo Box</h4>
+                                        <span class="text-[10px] font-mono text-slate-400">(Yeni Ekle / Düzenle)</span>
+                                    </div>
+                                    <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-3">
+                                        <div>
+                                            <label class="block text-xs font-medium mb-1 opacity-60">Müşteri Seçimi
+                                                *</label>
+                                            <select class="select w-full bg-white">
+                                                <option value="">Müşteri Seçin</option>
+                                                <option>Örnek Müşteri A.Ş.</option>
+                                                <option>Demo Ltd. Şti.</option>
+                                                <option>Test Ticaret ve San. A.Ş.</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-medium mb-1 opacity-60">Kategori</label>
+                                            <select class="select w-full bg-white">
+                                                <option value="">Kategori Seçin</option>
+                                                <option>Web Hosting</option>
+                                                <option>Domain</option>
+                                            </select>
+                                        </div>
+                                        <p class="text-[10px] text-slate-400">
+                                            Kullanım: <code
+                                                class="bg-white px-1 rounded border border-slate-200">select w-full bg-white</code>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- CSS Sınıfları Tablosu --}}
+                            <div class="mt-4 p-4 bg-slate-50 rounded-lg border border-dashed border-slate-200">
+                                <h5 class="text-xs font-bold text-slate-700 mb-3 flex items-center gap-2">
+                                    <x-mary-icon name="o-code-bracket" class="w-4 h-4" />
+                                    Combo Box CSS Sınıfları
+                                </h5>
+                                <div class="grid grid-cols-2 md:grid-cols-3 gap-3 text-xs">
+                                    <div class="flex items-center gap-2">
+                                        <code class="bg-white px-2 py-1 rounded border border-slate-200">select</code>
+                                        <span class="text-slate-500">Temel stil</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <code
+                                            class="bg-white px-2 py-1 rounded border border-slate-200">select-sm</code>
+                                        <span class="text-slate-500">Küçük boyut</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <code
+                                            class="bg-emerald-50 text-emerald-700 px-2 py-1 rounded border border-emerald-200">select-xs</code>
+                                        <span class="text-slate-500 font-bold">Ekstra Küçük</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <code class="bg-white px-2 py-1 rounded border border-slate-200">w-full</code>
+                                        <span class="text-slate-500">Tam genişlik</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <code class="bg-white px-2 py-1 rounded border border-slate-200">bg-white</code>
+                                        <span class="text-slate-500">Beyaz arka plan</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <code
+                                            class="bg-white px-2 py-1 rounded border border-slate-200">border-slate-200</code>
+                                        <span class="text-slate-500">Kenarlık</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <code class="bg-white px-2 py-1 rounded border border-slate-200">text-xs</code>
+                                        <span class="text-slate-500">Küçük font</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </x-slot:content>
+                    </x-mary-collapse>
+
+                    {{-- 10. Table Avatar Styling --}}
+                    <x-mary-collapse name="preview10" group="previews" separator
+                        class="bg-white border border-slate-200 shadow-sm rounded-lg">
+                        <x-slot:heading>
+                            <div class="flex items-center justify-between w-full pr-4">
+                                <div class="flex items-center gap-3">
+                                    <x-mary-icon name="o-user-circle" class="w-5 h-5 text-indigo-500" />
+                                    <span class="font-semibold text-slate-700">Tablo Avatar Stili</span>
+                                </div>
+                                <div class="flex gap-2">
+                                    <span
+                                        class="text-[10px] font-mono bg-slate-100 text-slate-500 px-2 py-1 rounded">--table-avatar-bg</span>
+                                </div>
+                            </div>
+                        </x-slot:heading>
+                        <x-slot:content>
+                            <div class="p-6 bg-white rounded-xl border border-slate-100">
+                                <div class="flex items-center gap-6 mb-6">
+                                    {{-- Preview --}}
+                                    <div class="flex flex-col items-center gap-2">
+                                        <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shadow-sm"
+                                            style="background-color: {{ $table_avatar_bg_color }}; color: {{ $table_avatar_text_color }}; border: 1px solid {{ $table_avatar_border_color }};">
+                                            VB
+                                        </div>
+                                        <span class="text-xs text-slate-500">Standart</span>
+                                    </div>
+
+                                    {{-- Usage in Table --}}
+                                    <div class="flex-1">
+                                        <div class="bg-slate-50 p-3 rounded border border-slate-200">
+                                            <div class="flex items-center gap-3">
+                                                <div class="w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs shadow-sm"
+                                                    style="background-color: {{ $table_avatar_bg_color }}; color: {{ $table_avatar_text_color }}; border: 1px solid {{ $table_avatar_border_color }};">
+                                                    JD
+                                                </div>
+                                                <div class="flex flex-col">
+                                                    <span class="text-sm font-semibold text-slate-700">John Doe</span>
+                                                    <span class="text-xs text-slate-500">john@example.com</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {{-- Code Snippet --}}
+                                <div class="bg-slate-900 rounded-lg p-4 overflow-x-auto">
+                                    <code class="text-xs font-mono text-emerald-400">
+                                        &lt;div class=&quot;w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs shadow-sm&quot;<br>
+                                        &nbsp;&nbsp;style=&quot;background-color: var(--table-avatar-bg); color: var(--table-avatar-text); border: 1px solid var(--table-avatar-border);&quot;&gt;<br>
+                                        &nbsp;&nbsp;JD<br>
+                                        &lt;/div&gt;
+                                    </code>
+                                </div>
+
+                                <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div class="p-3 bg-white rounded-lg border border-slate-100 shadow-sm">
+                                        <span
+                                            class="text-[10px] text-slate-400 block mb-1 font-mono">--table-avatar-bg</span>
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-4 h-4 rounded border border-slate-200"
+                                                style="background-color: {{ $table_avatar_bg_color }}"></div>
+                                            <code
+                                                class="text-xs font-mono text-slate-600">{{ $table_avatar_bg_color }}</code>
+                                        </div>
+                                    </div>
+                                    <div class="p-3 bg-white rounded-lg border border-slate-100 shadow-sm">
+                                        <span
+                                            class="text-[10px] text-slate-400 block mb-1 font-mono">--table-avatar-text</span>
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-4 h-4 rounded border border-slate-200"
+                                                style="background-color: {{ $table_avatar_text_color }}"></div>
+                                            <code
+                                                class="text-xs font-mono text-slate-600">{{ $table_avatar_text_color }}</code>
+                                        </div>
+                                    </div>
+                                    <div class="p-3 bg-white rounded-lg border border-slate-100 shadow-sm">
+                                        <span
+                                            class="text-[10px] text-slate-400 block mb-1 font-mono">--table-avatar-border</span>
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-4 h-4 rounded border border-slate-200"
+                                                style="background-color: {{ $table_avatar_border_color }}"></div>
+                                            <code
+                                                class="text-xs font-mono text-slate-600">{{ $table_avatar_border_color }}</code>
                                         </div>
                                     </div>
                                 </div>

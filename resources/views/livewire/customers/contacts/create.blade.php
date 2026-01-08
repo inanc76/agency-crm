@@ -57,6 +57,15 @@ new
         if ($contact) {
             $this->contactId = $contact;
             $this->loadContactData();
+
+            // Set active tab from URL if present
+            $this->activeTab = request()->query('tab', 'info');
+        } else {
+            // Check for customer query parameter
+            $customerId = request()->query('customer');
+            if ($customerId && collect($this->customers)->firstWhere('id', $customerId)) {
+                $this->customer_id = $customerId;
+            }
         }
     }
 
@@ -527,9 +536,12 @@ new
              <div class="theme-card p-6 shadow-sm text-center">
                 <h3 class="text-sm font-bold text-slate-900 mb-4">Kişi Fotoğrafı</h3>
                 
-                <div class="border-2 border-dashed border-slate-200 rounded-lg p-4 mb-2 hover:border-slate-300 transition-colors cursor-pointer bg-slate-50 group">
-                    <div class="w-20 h-20 bg-slate-100 rounded-full mx-auto flex items-center justify-center mb-2 group-hover:bg-white transition-colors">
-                        <x-mary-icon name="o-photo" class="w-8 h-8 text-slate-300 group-hover:text-slate-400" />
+                <div class="w-32 h-32 mx-auto border-2 border-dashed border-slate-200 rounded-lg flex items-center justify-center mb-4 bg-white/50 overflow-hidden">
+                    @php
+                        $initials = mb_substr($name ?? 'K', 0, 1) ?: 'K';
+                    @endphp
+                    <div class="w-full h-full flex items-center justify-center bg-slate-100 text-slate-400 font-bold text-5xl uppercase">
+                        {{ $initials }}
                     </div>
                 </div>
                 <div class="text-[10px] text-slate-400">PNG, JPG, GIF (Max 5MB)</div>

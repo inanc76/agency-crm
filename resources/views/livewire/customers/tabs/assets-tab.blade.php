@@ -1,16 +1,69 @@
 <?php
 
+use App\Services\ReferenceDataService;
 use Livewire\Volt\Component;
+use Livewire\WithPagination;
 use App\Models\Asset;
+use App\Models\ReferenceItem;
 use Illuminate\Database\Eloquent\Builder;
+use Mary\Traits\Toast;
 
 new class extends Component {
+    use WithPagination;
+    use Toast;
+
     public string $search = '';
     public string $letter = '';
+    public string $typeFilter = 'all';
 
-    public function with(): array
+    // Pagination & Selection
+    public int $perPage = 25;
+    public array $selected = [];
+    public bool $selectAll = false;
+
+    // Reset pagination when filtering
+    public function updatedSearch()
     {
-        $assets = Asset::query()
+        $this->resetPage();
+    }
+    public function updatedLetter()
+    {
+        $this->resetPage();
+    }
+    public function updatedTypeFilter()
+    {
+        $this->resetPage();
+    }
+    public function updatedPerPage()
+    {
+        $this->resetPage();
+    }
+
+    public function updatedSelectAll($value)
+    {
+        if ($value) {
+            $this->selected = $this->getQuery()->pluck('id')->map(fn($id) => (string) $id)->toArray();
+        } else {
+            $this->selected = [];
+        }
+    }
+
+    public function deleteSelected()
+    {
+        if (empty($this->selected)) {
+            return;
+        }
+
+        Asset::whereIn('id', $this->selected)->delete();
+
+        $this->success('İşlem Başarılı', count($this->selected) . ' varlık silindi.');
+        $this->selected = [];
+        $this->selectAll = false;
+    }
+
+    private function getQuery(): Builder
+    {
+        return Asset::query()
             ->with('customer')
             ->when($this->search, function (Builder $query) {
                 $query->where('name', 'ilike', '%' . $this->search . '%')
@@ -31,11 +84,29 @@ new class extends Component {
                         });
                 }
             })
-            ->orderBy('name')
-            ->get();
+            ->when($this->typeFilter && $this->typeFilter !== 'all', function (Builder $query) {
+                $query->where('type', $this->typeFilter);
+            })
+            ->orderBy('name');
+    }
+
+    public function with(ReferenceDataService $service): array
+    {
+        $typeOptions = ReferenceItem::where('category_key', 'ASSET_TYPE')->where('is_active', true)->orderBy('sort_order')->get();
+        // Prepare map with both label and color
+        $typeMap = [];
+        foreach ($typeOptions as $opt) {
+            $colorId = $opt->metadata['color'] ?? 'gray';
+            $typeMap[$opt->key] = [
+                'label' => $opt->display_label,
+                'class' => $service->getColorClasses($colorId)
+            ];
+        }
 
         return [
-            'assets' => $assets,
+            'assets' => $this->getQuery()->paginate($this->perPage),
+            'typeOptions' => $typeOptions,
+            'typeMap' => $typeMap,
         ];
     }
 }; ?>
@@ -50,63 +121,164 @@ new class extends Component {
                 ve yönetin</p>
         </div>
         <div class="flex items-center gap-4">
-            <span class="text-sm opacity-60" style="color: var(--color-text-base);">{{ $assets->count() }} varlık</span>
+            @if(count($selected) > 0)
+                <button wire:click="deleteSelected"
+                    wire:confirm="Seçili {{ count($selected) }} varlığı silmek istediğinize emin misiniz?"
+                    class="flex items-center gap-2 px-3 py-1.5 text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 rounded-lg transition-colors">
+                    <x-mary-icon name="o-trash" class="w-4 h-4" />
+                    Seçilileri Sil ({{ count($selected) }})
+                </button>
+            @endif
+
+            <span class="text-sm opacity-60" style="color: var(--color-text-base);">{{ $assets->total() }} varlık</span>
             <x-customer-management.action-button label="Yeni Varlık" href="{{ route('customers.assets.create') }}" />
         </div>
     </div>
 
     {{-- Filter Panel --}}
-    <x-customer-management.filter-panel :showCategories="true" :showAlphabet="true" categoryLabel="Tüm Kategoriler"
-        statusLabel="Duruma Göre Filtrele" :letter="$letter" />
+    <x-mary-card class="theme-card shadow-sm mb-6" shadow separator>
+        <div class="flex flex-wrap items-center gap-4">
+            <div class="w-48">
+                {{-- Assuming 'type' filter property is not explicitly defined in the component yet, using search for
+                now or would need to add it --}}
+                {{-- Since only search and letter and perPage are defined, I'll add type filter support if possible or
+                just stick to existing ones if 'type' is not passed.
+                Wait, I need to add $typeFilter to the component. Let's do that in a separate chunk or assume it
+                exists/I add it.
+                I will add $typeFilter to the component property list in another chunk. --}}
+                <x-mary-select :options="[['id' => 'all', 'display_label' => 'Tüm Varlık Türleri']] + $typeOptions->map(fn($i) => ['id' => $i->key, 'display_label' => $i->display_label])->toArray()"
+                    option-label="display_label" option-value="id" wire:model.live="typeFilter"
+                    class="select-sm !bg-white !border-gray-200" />
+            </div>
+
+            <div class="flex-grow max-w-xs">
+                <x-mary-input placeholder="Ara..." icon="o-magnifying-glass" class="input-sm !bg-white !border-gray-200"
+                    wire:model.live.debounce.300ms="search" />
+            </div>
+
+            <div class="flex items-center gap-1 ml-auto flex-wrap justify-end">
+                <x-mary-button label="0-9" wire:click="$set('letter', '0-9')"
+                    class="btn-ghost btn-xs font-medium {{ $letter === '0-9' ? 'bg-slate-200 text-slate-700' : 'text-slate-500' }} hover:bg-slate-100 px-2" />
+                <x-mary-button label="Tümü" wire:click="$set('letter', '')"
+                    class="btn-ghost btn-xs font-medium {{ $letter === '' ? 'bg-slate-200 text-slate-700' : 'text-slate-500' }} hover:bg-slate-100 px-2" />
+                <div class="divider divider-horizontal mx-0 h-4"></div>
+                @foreach(range('A', 'Z') as $char)
+                    <x-mary-button :label="$char" wire:click="$set('letter', '{{ $char }}')"
+                        class="btn-ghost btn-xs font-medium {{ $letter === $char ? 'bg-slate-200 text-slate-700' : 'text-slate-500' }} hover:bg-slate-100 min-w-[24px] !px-1" />
+                @endforeach
+            </div>
+        </div>
+    </x-mary-card>
 
     {{-- Data Table --}}
     @php
         $headers = [
+            ['label' => '', 'sortable' => false, 'width' => '40px'],
             ['label' => 'Varlık', 'sortable' => true],
-            ['label' => 'Müşteri', 'sortable' => true],
             ['label' => 'Tür', 'sortable' => true],
+            ['label' => 'Müşteri', 'sortable' => true],
             ['label' => 'URL', 'sortable' => false],
-            ['label' => 'Durum', 'sortable' => true],
         ];
     @endphp
 
-    <x-customer-management.data-table :headers="$headers" emptyMessage="Henüz varlık kaydı bulunmuyor">
-        @foreach($assets as $asset)
-            @php
-                $char = mb_substr($asset->name, 0, 1);
-            @endphp
-            <tr class="group hover:bg-[var(--list-card-hover-bg)] transition-all duration-200 cursor-pointer"
-                onclick="window.location.href='/dashboard/customers/assets/{{ $asset->id }}'">
-                <td class="px-6 py-4">
-                    <div class="flex items-center gap-3">
-                        <div class="flex-shrink-0">
-                            <x-mary-avatar placeholder="{{ $char }}"
-                                class="!w-9 !h-9 bg-white text-black font-semibold text-xs border border-gray-100 shadow-sm" />
-                        </div>
-                        <div class="font-bold text-[13px] group-hover:opacity-80 transition-opacity"
-                            style="color: var(--list-card-link-color);">
-                            {{ $asset->name }}
-                        </div>
-                    </div>
-                </td>
-                <td class="px-6 py-4 text-[13px] font-medium" style="color: var(--color-text-base);">
-                    {{ $asset->customer->name ?? '-' }}
-                </td>
-                <td class="px-6 py-4 text-[13px] opacity-70" style="color: var(--color-text-base);">
-                    {{ $asset->type }}
-                </td>
-                <td class="px-6 py-4 text-[12px] font-medium hover:underline">
-                    @if($asset->url)
-                        <a href="{{ $asset->url }}" target="_blank"
-                            style="color: var(--action-link-color);">{{ parse_url($asset->url, PHP_URL_HOST) ?: $asset->url }}</a>
-                    @else
-                        -
-                    @endif
-                </td>
-                <td class="px-6 py-4">
-                    <x-customer-management.status-badge status="active" label="Yayında" />
-                </td>
-            </tr>
-        @endforeach
-    </x-customer-management.data-table>
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <thead class="bg-slate-50 border-b border-slate-200">
+                    <tr>
+                        <th class="px-6 py-3 w-10">
+                            <input type="checkbox" wire:model.live="selectAll"
+                                class="checkbox checkbox-xs rounded border-slate-300">
+                        </th>
+                        @foreach(array_slice($headers, 1) as $header)
+                            <th class="px-6 py-3 font-semibold text-slate-700">
+                                {{ $header['label'] }}
+                            </th>
+                        @endforeach
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    @forelse($assets as $asset)
+                        @php
+                            $char = mb_substr($asset->name, 0, 1);
+                        @endphp
+                        <tr class="group hover:bg-[var(--list-card-hover-bg)] transition-all duration-200 cursor-pointer"
+                            onclick="window.location.href='/dashboard/customers/assets/{{ $asset->id }}'">
+                            <td class="px-6 py-4" onclick="event.stopPropagation()">
+                                <input type="checkbox" wire:model.live="selected" value="{{ $asset->id }}"
+                                    class="checkbox checkbox-xs rounded border-slate-300">
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="flex-shrink-0">
+                                        <div class="w-9 h-9 rounded-full flex items-center justify-center text-xs shadow-sm"
+                                            style="background-color: var(--table-avatar-bg); color: var(--table-avatar-text); border: 1px solid var(--table-avatar-border);">
+                                            {{ $char }}
+                                        </div>
+                                    </div>
+                                    <div class="text-[13px] group-hover:opacity-80 transition-opacity"
+                                        style="color: var(--list-card-link-color);">
+                                        {{ $asset->name }}
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                @php
+                                    $typeData = $typeMap[$asset->type] ?? null;
+                                    $typeLabel = $typeData['label'] ?? $asset->type;
+                                    $typeClass = $typeData['class'] ?? 'bg-slate-100 text-slate-500 border border-slate-200';
+                                @endphp
+                                <span
+                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border {{ $typeClass }}">
+                                    {{ $typeLabel }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-[13px] font-medium" style="color: var(--color-text-base);">
+                                {{ $asset->customer->name ?? '-' }}
+                            </td>
+                            <td class="px-6 py-4 text-[12px] font-medium hover:underline">
+                                @if($asset->url)
+                                    <a href="{{ $asset->url }}" target="_blank"
+                                        style="color: var(--action-link-color);">{{ parse_url($asset->url, PHP_URL_HOST) ?: $asset->url }}</a>
+                                @else
+                                    -
+                                @endif
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="5" class="px-6 py-12 text-center text-slate-500">
+                                <div class="flex flex-col items-center justify-center">
+                                    <x-mary-icon name="o-computer-desktop" class="w-12 h-12 opacity-20 mb-4" />
+                                    <div class="font-medium">Henüz varlık kaydı bulunmuyor</div>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        {{-- Pagination --}}
+        <div class="px-6 py-4 border-t border-slate-200 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <span class="text-xs text-slate-500">Göster:</span>
+                <select wire:model.live="perPage"
+                    class="select select-xs bg-white border-slate-200 text-xs w-18 h-8 min-h-0 focus:outline-none focus:border-slate-400">
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                    <option value="500">500</option>
+                </select>
+            </div>
+
+            <div>
+                {{ $assets->links() }}
+            </div>
+
+            <div class="text-[10px] text-slate-400 font-mono">
+                {{ number_format(microtime(true) - (defined('LARAVEL_START') ? LARAVEL_START : request()->server('REQUEST_TIME_FLOAT')), 3) }}s
+            </div>
+        </div>
+    </div>
 </div>

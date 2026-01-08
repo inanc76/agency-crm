@@ -21,6 +21,7 @@ new
     // State Management
     public bool $isViewMode = false;
     public ?string $assetId = null;
+    public string $activeTab = 'info';
 
     // Reference Data
     public $customers = [];
@@ -45,6 +46,15 @@ new
         if ($asset) {
             $this->assetId = $asset;
             $this->loadAssetData();
+
+            // Set active tab from URL if present
+            $this->activeTab = request()->query('tab', 'info');
+        } else {
+            // Check for customer query parameter
+            $customerId = request()->query('customer');
+            if ($customerId && collect($this->customers)->firstWhere('id', $customerId)) {
+                $this->customer_id = $customerId;
+            }
         }
     }
 
@@ -182,80 +192,124 @@ new
             </div>
         </div>
 
+        {{-- Tab Navigation --}}
+        @if($isViewMode)
+            <div class="flex items-center border-b border-slate-200 mb-8 overflow-x-auto scrollbar-hide">
+                <button wire:click="$set('activeTab', 'info')"
+                    class="px-5 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors"
+                    style="{{ $activeTab === 'info' ? 'border-color: var(--active-tab-color); color: var(--color-text-heading);' : 'border-color: transparent; color: var(--color-text-base); opacity: 0.6;' }}">
+                    Varlık Bilgileri
+                </button>
+                <button wire:click="$set('activeTab', 'messages')"
+                    class="px-5 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors"
+                    style="{{ $activeTab === 'messages' ? 'border-color: var(--active-tab-color); color: var(--color-text-heading);' : 'border-color: transparent; color: var(--color-text-base); opacity: 0.6;' }}">
+                    Mesajlar (0)
+                </button>
+                <button wire:click="$set('activeTab', 'notes')"
+                    class="px-5 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors"
+                    style="{{ $activeTab === 'notes' ? 'border-color: var(--active-tab-color); color: var(--color-text-heading);' : 'border-color: transparent; color: var(--color-text-base); opacity: 0.6;' }}">
+                    Notlar (0)
+                </button>
+            </div>
+        @else
+            <div class="mb-8"></div>
+        @endif
+
         <div class="flex gap-6">
             {{-- Left Column (80%) --}}
-            <div class="w-4/5 space-y-6">
-                {{-- Varlık Bilgileri Card --}}
-                <div class="theme-card p-6 shadow-sm">
-                    <h2 class="text-base font-bold mb-4" style="color: var(--color-text-heading);">Varlık Bilgileri</h2>
-                    <div class="grid grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-xs font-medium mb-1 opacity-60"
-                                style="color: var(--color-text-base);">Müşteri *</label>
-                            @if($isViewMode)
-                                @php $customerName = collect($customers)->firstWhere('id', $customer_id)['name'] ?? '-'; @endphp
-                                <div class="text-sm font-medium" style="color: var(--color-text-base);">{{ $customerName }}
-                                </div>
-                            @else
-                                <select wire:model="customer_id" class="select w-full">
-                                    <option value="">Müşteri Seçin</option>
-                                    @foreach($customers as $c)
-                                        <option value="{{ $c['id'] }}">{{ $c['name'] }}</option>
-                                    @endforeach
-                                </select>
-                                @error('customer_id') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
-                            @endif
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-medium mb-1 opacity-60"
-                                style="color: var(--color-text-base);">Varlık Adı *</label>
-                            @if($isViewMode)
-                                <div class="text-sm font-medium" style="color: var(--color-text-base);">{{ $name }}</div>
-                            @else
-                                <input type="text" wire:model="name" placeholder="Varlık adını girin (Örn: Web Sitesi)"
-                                    class="input w-full">
-                                @error('name') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
-                            @endif
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-medium mb-1 opacity-60"
-                                style="color: var(--color-text-base);">Varlık Türü *</label>
-                            @if($isViewMode)
-                                @php $typeName = collect($assetTypes)->firstWhere('id', $type)['name'] ?? '-'; @endphp
-                                <div class="text-sm font-medium" style="color: var(--color-text-base);">{{ $typeName }}
-                                </div>
-                            @else
-                                <select wire:model="type" class="select w-full">
-                                    <option value="">Varlık türü seçin</option>
-                                    @foreach($assetTypes as $t)
-                                        <option value="{{ $t['id'] }}">{{ $t['name'] }}</option>
-                                    @endforeach
-                                </select>
-                                @error('type') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
-                            @endif
-                        </div>
-
-                        <div class="col-span-2">
-                            <label class="block text-xs font-medium mb-1 opacity-60"
-                                style="color: var(--color-text-base);">URL</label>
-                            @if($isViewMode)
-                                <div class="text-sm font-medium" style="color: var(--color-text-base);">
-                                    @if($url)
-                                        <a href="{{ $url }}" target="_blank"
-                                            class="text-blue-500 hover:underline">{{ $url }}</a>
+            <div class="w-4/5">
+                @if($activeTab === 'info')
+                    <div class="space-y-6">
+                        {{-- Varlık Bilgileri Card --}}
+                        <div class="theme-card p-6 shadow-sm">
+                            <h2 class="text-base font-bold mb-4" style="color: var(--color-text-heading);">Varlık Bilgileri
+                            </h2>
+                            <div class="grid grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-xs font-medium mb-1 opacity-60"
+                                        style="color: var(--color-text-base);">Müşteri *</label>
+                                    @if($isViewMode)
+                                        @php $customerName = collect($customers)->firstWhere('id', $customer_id)['name'] ?? '-'; @endphp
+                                        <div class="text-sm font-medium" style="color: var(--color-text-base);">
+                                            {{ $customerName }}
+                                        </div>
                                     @else
-                                        -
+                                        <select wire:model="customer_id" class="select w-full">
+                                            <option value="">Müşteri Seçin</option>
+                                            @foreach($customers as $c)
+                                                <option value="{{ $c['id'] }}">{{ $c['name'] }}</option>
+                                            @endforeach
+                                        </select>
+                                        @error('customer_id') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                                     @endif
                                 </div>
-                            @else
-                                <input type="text" wire:model.blur="url" placeholder="https://www.example.com"
-                                    class="input w-full">
-                            @endif
+
+                                <div>
+                                    <label class="block text-xs font-medium mb-1 opacity-60"
+                                        style="color: var(--color-text-base);">Varlık Adı *</label>
+                                    @if($isViewMode)
+                                        <div class="text-sm font-medium" style="color: var(--color-text-base);">{{ $name }}
+                                        </div>
+                                    @else
+                                        <input type="text" wire:model="name" placeholder="Varlık adını girin (Örn: Web Sitesi)"
+                                            class="input w-full">
+                                        @error('name') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                                    @endif
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-medium mb-1 opacity-60"
+                                        style="color: var(--color-text-base);">Varlık Türü *</label>
+                                    @if($isViewMode)
+                                        @php $typeName = collect($assetTypes)->firstWhere('id', $type)['name'] ?? '-'; @endphp
+                                        <div class="text-sm font-medium" style="color: var(--color-text-base);">{{ $typeName }}
+                                        </div>
+                                    @else
+                                        <select wire:model="type" class="select w-full">
+                                            <option value="">Varlık türü seçin</option>
+                                            @foreach($assetTypes as $t)
+                                                <option value="{{ $t['id'] }}">{{ $t['name'] }}</option>
+                                            @endforeach
+                                        </select>
+                                        @error('type') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                                    @endif
+                                </div>
+
+                                <div class="col-span-2">
+                                    <label class="block text-xs font-medium mb-1 opacity-60"
+                                        style="color: var(--color-text-base);">URL</label>
+                                    @if($isViewMode)
+                                        <div class="text-sm font-medium" style="color: var(--color-text-base);">
+                                            @if($url)
+                                                <a href="{{ $url }}" target="_blank"
+                                                    class="text-blue-500 hover:underline">{{ $url }}</a>
+                                            @else
+                                                -
+                                            @endif
+                                        </div>
+                                    @else
+                                        <input type="text" wire:model.blur="url" placeholder="https://www.example.com"
+                                            class="input w-full">
+                                    @endif
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
+                @endif
+
+                @if($activeTab === 'messages')
+                    <div class="theme-card p-6 shadow-sm text-center text-slate-500 py-12">
+                        <x-mary-icon name="o-chat-bubble-left-right" class="w-12 h-12 mx-auto mb-3 opacity-20" />
+                        <div class="font-medium">Henüz mesaj bulunmuyor</div>
+                    </div>
+                @endif
+
+                @if($activeTab === 'notes')
+                    <div class="theme-card p-6 shadow-sm text-center text-slate-500 py-12">
+                        <x-mary-icon name="o-document-text" class="w-12 h-12 mx-auto mb-3 opacity-20" />
+                        <div class="font-medium">Henüz not bulunmuyor</div>
+                    </div>
+                @endif
             </div>
 
             {{-- Right Column (20%) --}}
@@ -264,10 +318,13 @@ new
                     <h3 class="text-sm font-bold text-slate-900 mb-4">Varlık Görseli</h3>
 
                     <div
-                        class="border-2 border-dashed border-slate-200 rounded-lg p-4 mb-2 hover:border-slate-300 transition-colors cursor-pointer bg-slate-50 group">
+                        class="w-32 h-32 mx-auto border-2 border-dashed border-slate-200 rounded-lg flex items-center justify-center mb-4 bg-white/50 overflow-hidden">
+                        @php
+                            $initials = mb_substr($name ?? 'V', 0, 1) ?: 'V';
+                        @endphp
                         <div
-                            class="w-20 h-20 bg-slate-100 rounded-full mx-auto flex items-center justify-center mb-2 group-hover:bg-white transition-colors">
-                            <x-mary-icon name="o-photo" class="w-8 h-8 text-slate-300 group-hover:text-slate-400" />
+                            class="w-full h-full flex items-center justify-center bg-slate-100 text-slate-400 font-bold text-5xl uppercase">
+                            {{ $initials }}
                         </div>
                     </div>
                     <div class="text-[10px] text-slate-400">PNG, JPG, GIF (Max 5MB)</div>

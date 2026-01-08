@@ -188,6 +188,17 @@
                 {{ $theme?->table_hover_text_color ?? '#0f172a' }}
             ;
 
+            /* Table Avatar */
+            --table-avatar-bg:
+                {{ $theme?->table_avatar_bg_color ?? '#f1f5f9' }}
+            ;
+            --table-avatar-border:
+                {{ $theme?->table_avatar_border_color ?? '#e2e8f0' }}
+            ;
+            --table-avatar-text:
+                {{ $theme?->table_avatar_text_color ?? '#475569' }}
+            ;
+
             /* List Card */
             --list-card-bg:
                 {{ $theme?->list_card_bg_color ?? '#ffffff' }}
