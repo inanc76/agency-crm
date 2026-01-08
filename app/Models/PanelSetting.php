@@ -25,6 +25,11 @@ class PanelSetting extends Model
         'font_family',
         'base_text_color',
         'heading_color',
+        'label_font_size',
+        'input_font_size',
+        'heading_font_size',
+        'error_font_size',
+        'helper_font_size',
         // Input & Validation
         'input_focus_ring_color',
         'input_border_color',
@@ -57,10 +62,18 @@ class PanelSetting extends Model
         'btn_save_border_color',
 
         'action_link_color',
+        'active_tab_color',
         // Cards
         'card_bg_color',
         'card_border_color',
         'card_border_radius',
+        'table_hover_bg_color',
+        'table_hover_text_color',
+        // List Card
+        'list_card_bg_color',
+        'list_card_border_color',
+        'list_card_link_color',
+        'list_card_hover_color',
     ];
 
     protected function casts(): array

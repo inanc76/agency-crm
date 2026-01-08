@@ -57,10 +57,27 @@
                 {{ $theme?->input_border_color ?? '#cbd5e1' }}
             ;
             --input-radius:
-                {{ $theme?->input_border_radius ?? '0.375rem' }}
+                {{ $theme?->input_border_radius ?? '6px' }}
             ;
             --input-padding-y:
-                {{ $theme?->input_vertical_padding ?? '0.5rem' }}
+                {{ $theme?->input_vertical_padding ?? '8px' }}
+            ;
+
+            /* Typography Font Sizes */
+            --font-size-label:
+                {{ ($theme?->label_font_size ?? 14) . 'px' }}
+            ;
+            --font-size-input:
+                {{ ($theme?->input_font_size ?? 16) . 'px' }}
+            ;
+            --font-size-heading:
+                {{ ($theme?->heading_font_size ?? 18) . 'px' }}
+            ;
+            --font-size-error:
+                {{ ($theme?->error_font_size ?? 12) . 'px' }}
+            ;
+            --font-size-helper:
+                {{ ($theme?->helper_font_size ?? 12) . 'px' }}
             ;
 
             /* Error States */
@@ -149,6 +166,9 @@
             --action-link-color:
                 {{ $theme?->action_link_color ?? '#4f46e5' }}
             ;
+            --active-tab-color:
+                {{ $theme?->active_tab_color ?? '#4f46e5' }}
+            ;
 
             /* Cards */
             --card-bg:
@@ -158,7 +178,28 @@
                 {{ $theme?->card_border_color ?? '#bfdbfe' }}
             ;
             --card-radius:
-                {{ $theme?->card_border_radius ?? '0.75rem' }}
+                {{ $theme?->card_border_radius ?? '12px' }}
+            ;
+
+            --table-hover-bg:
+                {{ $theme?->table_hover_bg_color ?? '#f8fafc' }}
+            ;
+            --table-hover-text:
+                {{ $theme?->table_hover_text_color ?? '#0f172a' }}
+            ;
+
+            /* List Card */
+            --list-card-bg:
+                {{ $theme?->list_card_bg_color ?? '#ffffff' }}
+            ;
+            --list-card-border:
+                {{ $theme?->list_card_border_color ?? '#e2e8f0' }}
+            ;
+            --list-card-link-color:
+                {{ $theme?->list_card_link_color ?? '#4f46e5' }}
+            ;
+            --list-card-hover-bg:
+                {{ $theme?->list_card_hover_color ?? '#f8fafc' }}
             ;
 
             /* Theme variables are defined above - NO DaisyUI hijacking to prevent UI pollution */

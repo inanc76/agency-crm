@@ -52,7 +52,7 @@ new class extends Component {
             <span class="text-sm text-gray-500"><span class="font-medium"
                     style="color: var(--btn-save-bg);">Aktif</span>
                 {{ $services->count() }} hizmet</span>
-            <x-customer-management.action-button label="Yeni Hizmet" href="#" />
+            <x-customer-management.action-button label="Yeni Hizmet" href="{{ route('customers.services.create') }}" />
         </div>
     </div>
 
@@ -78,8 +78,8 @@ new class extends Component {
             @php
                 $char = mb_substr($service->service_name, 0, 1);
             @endphp
-            <tr class="group hover:bg-slate-50/80 transition-all duration-200 cursor-pointer"
-                onclick="window.location.href='/dashboard/customers/{{ $service->customer_id }}?tab=services'">
+            <tr class="group hover:bg-[var(--list-card-hover-bg)] transition-all duration-200 cursor-pointer"
+                onclick="window.location.href='/dashboard/customers/services/{{ $service->id }}'">
                 <td class="px-6 py-4">
                     <div class="flex items-center gap-3">
                         <div class="flex-shrink-0">
@@ -87,7 +87,8 @@ new class extends Component {
                                 class="!w-9 !h-9 bg-white text-black font-semibold text-xs border border-gray-100 shadow-sm" />
                         </div>
                         <div>
-                            <div class="font-bold text-slate-700 text-[13px] group-hover:text-blue-600 transition-colors">
+                            <div class="font-bold text-[13px] group-hover:opacity-80 transition-opacity"
+                                style="color: var(--list-card-link-color);">
                                 {{ $service->asset->name ?? 'Varlık Yok' }}
                             </div>
                             <div class="text-[11px] text-slate-400 font-medium">{{ $service->service_name }}</div>

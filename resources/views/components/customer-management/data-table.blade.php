@@ -3,7 +3,8 @@
     'emptyMessage' => 'Veri bulunamadı'
 ])
 
-<x-mary-card shadow class="bg-white border-0 shadow-sm rounded-xl overflow-hidden" separator>
+<x-mary-card shadow class="shadow-sm overflow-hidden" separator 
+    style="background-color: var(--list-card-bg); border: 1px solid var(--list-card-border);">
     <div class="overflow-x-auto">
         <table class="table w-full border-separate border-spacing-0">
             <thead>

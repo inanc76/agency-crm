@@ -68,7 +68,7 @@ new class extends Component {
             @php
                 $char = mb_substr($sale->customer->name ?? '?', 0, 1);
             @endphp
-            <tr class="group hover:bg-slate-50/80 transition-all duration-200 cursor-pointer"
+            <tr class="group hover:bg-[var(--list-card-hover-bg)] transition-all duration-200 cursor-pointer"
                 onclick="window.location.href='/dashboard/customers/{{ $sale->customer_id }}?tab=sales'">
                 <td class="px-6 py-4">
                     <div class="flex items-center gap-3">

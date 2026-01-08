@@ -1,0 +1,278 @@
+<?php
+
+use Livewire\Volt\Component;
+use Livewire\Attributes\Layout;
+use App\Models\Customer;
+use App\Models\Asset;
+use Mary\Traits\Toast;
+use Illuminate\Support\Str;
+
+new
+    #[Layout('components.layouts.app', ['title' => 'Yeni Varlık Ekle'])]
+    class extends Component {
+    use Toast;
+
+    // Varlık Bilgileri
+    public string $customer_id = '';
+    public string $name = '';
+    public string $type = '';
+    public string $url = '';
+
+    // State Management
+    public bool $isViewMode = false;
+    public ?string $assetId = null;
+
+    // Reference Data
+    public $customers = [];
+    public $assetTypes = [
+        ['id' => 'WEBSITE', 'name' => 'Web Sitesi'],
+        ['id' => 'SOCIAL_MEDIA', 'name' => 'Sosyal Medya'],
+        ['id' => 'HOSTING', 'name' => 'Hosting'],
+        ['id' => 'DOMAIN', 'name' => 'Domain'],
+        ['id' => 'SERVER', 'name' => 'Sunucu'],
+        ['id' => 'OTHER', 'name' => 'Diğer'],
+    ];
+
+    public function mount(?string $asset = null): void
+    {
+        // Load Customers
+        $this->customers = Customer::orderBy('name')
+            ->get(['id', 'name'])
+            ->map(fn($c) => ['id' => $c->id, 'name' => $c->name])
+            ->toArray();
+
+        // If asset ID is provided, load data
+        if ($asset) {
+            $this->assetId = $asset;
+            $this->loadAssetData();
+        }
+    }
+
+    private function loadAssetData(): void
+    {
+        $asset = Asset::findOrFail($this->assetId);
+
+        $this->customer_id = $asset->customer_id;
+        $this->name = $asset->name;
+        $this->type = $asset->type;
+        $this->url = $asset->url ?? '';
+
+        $this->isViewMode = true;
+    }
+
+    public function save(): void
+    {
+        $this->validate([
+            'customer_id' => 'required',
+            'name' => 'required|min:2',
+            'type' => 'required',
+        ]);
+
+        $data = [
+            'customer_id' => $this->customer_id,
+            'name' => $this->name,
+            'type' => $this->type,
+            'url' => $this->url,
+        ];
+
+        if ($this->assetId) {
+            $asset = Asset::findOrFail($this->assetId);
+            $asset->update($data);
+            $message = 'Varlık bilgileri güncellendi.';
+        } else {
+            $this->assetId = Str::uuid()->toString();
+            $data['id'] = $this->assetId;
+            Asset::create($data);
+            $message = 'Yeni varlık başarıyla oluşturuldu.';
+        }
+
+        $this->success('İşlem Başarılı', $message);
+        $this->isViewMode = true;
+    }
+
+    public function cancel(): void
+    {
+        if ($this->assetId) {
+            $this->loadAssetData();
+        } else {
+            $this->redirect('/dashboard/customers/' . $this->customer_id . '?tab=assets', navigate: true);
+        }
+    }
+
+    public function toggleEditMode(): void
+    {
+        $this->isViewMode = false;
+    }
+
+    public function delete(): void
+    {
+        if ($this->assetId) {
+            $asset = Asset::findOrFail($this->assetId);
+            $customer_id = $asset->customer_id;
+            $asset->delete();
+            $this->success('Varlık Silindi', 'Varlık kaydı başarıyla silindi.');
+            $this->redirect('/dashboard/customers/' . $customer_id . '?tab=assets');
+        }
+    }
+
+    // Auto-prefix URL with https://
+    public function updatedUrl()
+    {
+        $val = trim($this->url);
+        if ($val && !preg_match('/^https?:\/\//', $val)) {
+            $this->url = 'https://' . $val;
+        }
+    }
+
+}; ?>
+
+<div class="p-6 bg-slate-50 min-h-screen">
+    <div class="max-w-7xl mx-auto">
+        {{-- Back Button --}}
+        <a href="/dashboard/customers?tab=assets"
+            class="inline-flex items-center gap-2 text-slate-600 hover:text-slate-900 mb-4 transition-colors">
+            <x-mary-icon name="o-arrow-left" class="w-4 h-4" />
+            <span class="text-sm font-medium">Varlık Listesi</span>
+        </a>
+
+        {{-- Header --}}
+        <div class="flex items-start justify-between mb-6">
+            <div>
+                <h1 class="text-2xl font-bold tracking-tight" style="color: var(--color-text-heading);">
+                    @if($isViewMode) {{ $name }} @else Yeni Varlık Ekle @endif
+                </h1>
+                <div class="flex items-center gap-2 mt-1">
+                    @if($isViewMode)
+                        <span
+                            class="text-xs font-medium px-2 py-0.5 rounded bg-slate-100 text-slate-500 border border-slate-200">Varlık</span>
+                        <span class="text-[11px] font-mono text-slate-400">ID: {{ $assetId }}</span>
+                    @else
+                        <p class="text-sm opacity-60" style="color: var(--color-text-base);">
+                            Yeni varlık bilgilerini girin
+                        </p>
+                    @endif
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                @if($isViewMode)
+                    <button type="button" wire:click="delete" wire:confirm="Bu varlığı silmek istediğinize emin misiniz?"
+                        wire:key="btn-delete-{{ $assetId }}"
+                        class="theme-btn-delete flex items-center gap-2 px-4 py-2 text-sm">
+                        <x-mary-icon name="o-trash" class="w-4 h-4" />
+                        Sil
+                    </button>
+                    <button type="button" wire:click="toggleEditMode" wire:key="btn-edit-{{ $assetId }}"
+                        class="theme-btn-edit flex items-center gap-2 px-4 py-2 text-sm">
+                        <x-mary-icon name="o-pencil-square" class="w-4 h-4" />
+                        Düzenle
+                    </button>
+                @else
+                    <button type="button" wire:click="cancel" wire:key="btn-cancel-{{ $assetId ?: 'new' }}"
+                        class="theme-btn-cancel">
+                        İptal
+                    </button>
+                    <button type="button" wire:click="save" wire:loading.attr="disabled"
+                        wire:key="btn-save-{{ $assetId ?: 'new' }}" class="theme-btn-save">
+                        <span wire:loading class="loading loading-spinner loading-xs mr-1"></span>
+                        <x-mary-icon name="o-check" class="w-4 h-4" />
+                        @if($assetId) Güncelle @else Kaydet @endif
+                    </button>
+                @endif
+            </div>
+        </div>
+
+        <div class="flex gap-6">
+            {{-- Left Column (80%) --}}
+            <div class="w-4/5 space-y-6">
+                {{-- Varlık Bilgileri Card --}}
+                <div class="theme-card p-6 shadow-sm">
+                    <h2 class="text-base font-bold mb-4" style="color: var(--color-text-heading);">Varlık Bilgileri</h2>
+                    <div class="grid grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-xs font-medium mb-1 opacity-60"
+                                style="color: var(--color-text-base);">Müşteri *</label>
+                            @if($isViewMode)
+                                @php $customerName = collect($customers)->firstWhere('id', $customer_id)['name'] ?? '-'; @endphp
+                                <div class="text-sm font-medium" style="color: var(--color-text-base);">{{ $customerName }}
+                                </div>
+                            @else
+                                <select wire:model="customer_id" class="select w-full">
+                                    <option value="">Müşteri Seçin</option>
+                                    @foreach($customers as $c)
+                                        <option value="{{ $c['id'] }}">{{ $c['name'] }}</option>
+                                    @endforeach
+                                </select>
+                                @error('customer_id') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                            @endif
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium mb-1 opacity-60"
+                                style="color: var(--color-text-base);">Varlık Adı *</label>
+                            @if($isViewMode)
+                                <div class="text-sm font-medium" style="color: var(--color-text-base);">{{ $name }}</div>
+                            @else
+                                <input type="text" wire:model="name" placeholder="Varlık adını girin (Örn: Web Sitesi)"
+                                    class="input w-full">
+                                @error('name') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                            @endif
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium mb-1 opacity-60"
+                                style="color: var(--color-text-base);">Varlık Türü *</label>
+                            @if($isViewMode)
+                                @php $typeName = collect($assetTypes)->firstWhere('id', $type)['name'] ?? '-'; @endphp
+                                <div class="text-sm font-medium" style="color: var(--color-text-base);">{{ $typeName }}
+                                </div>
+                            @else
+                                <select wire:model="type" class="select w-full">
+                                    <option value="">Varlık türü seçin</option>
+                                    @foreach($assetTypes as $t)
+                                        <option value="{{ $t['id'] }}">{{ $t['name'] }}</option>
+                                    @endforeach
+                                </select>
+                                @error('type') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                            @endif
+                        </div>
+
+                        <div class="col-span-2">
+                            <label class="block text-xs font-medium mb-1 opacity-60"
+                                style="color: var(--color-text-base);">URL</label>
+                            @if($isViewMode)
+                                <div class="text-sm font-medium" style="color: var(--color-text-base);">
+                                    @if($url)
+                                        <a href="{{ $url }}" target="_blank"
+                                            class="text-blue-500 hover:underline">{{ $url }}</a>
+                                    @else
+                                        -
+                                    @endif
+                                </div>
+                            @else
+                                <input type="text" wire:model.blur="url" placeholder="https://www.example.com"
+                                    class="input w-full">
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Right Column (20%) --}}
+            <div class="w-1/5">
+                <div class="theme-card p-6 shadow-sm text-center">
+                    <h3 class="text-sm font-bold text-slate-900 mb-4">Varlık Görseli</h3>
+
+                    <div
+                        class="border-2 border-dashed border-slate-200 rounded-lg p-4 mb-2 hover:border-slate-300 transition-colors cursor-pointer bg-slate-50 group">
+                        <div
+                            class="w-20 h-20 bg-slate-100 rounded-full mx-auto flex items-center justify-center mb-2 group-hover:bg-white transition-colors">
+                            <x-mary-icon name="o-photo" class="w-8 h-8 text-slate-300 group-hover:text-slate-400" />
+                        </div>
+                    </div>
+                    <div class="text-[10px] text-slate-400">PNG, JPG, GIF (Max 5MB)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

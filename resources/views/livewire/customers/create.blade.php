@@ -42,6 +42,16 @@ new
     // State Management
     public bool $isViewMode = false;
     public ?string $customerId = null;
+    public string $registration_date = '';
+    public array $counts = [
+        'contacts' => 0,
+        'assets' => 0,
+        'services' => 0,
+        'offers' => 0,
+        'sales' => 0,
+        'messages' => 0,
+        'notes' => 0,
+    ];
 
     // Reference Data
     public $customerTypes = [];
@@ -108,9 +118,9 @@ new
 
             $this->name = $customer->name;
             $this->customer_type = $customer->customer_type;
-            $this->emails = !empty($customer->emails) ? (array)$customer->emails : [''];
-            $this->phones = !empty($customer->phones) ? (array)$customer->phones : [''];
-            $this->websites = !empty($customer->websites) ? (array)$customer->websites : [''];
+            $this->emails = !empty($customer->emails) ? (array) $customer->emails : [''];
+            $this->phones = !empty($customer->phones) ? (array) $customer->phones : [''];
+            $this->websites = !empty($customer->websites) ? (array) $customer->websites : [''];
             $this->country_id = $customer->country_id ?? '';
             $this->city_id = $customer->city_id ?? '';
             $this->address = $customer->address ?? '';
@@ -125,6 +135,19 @@ new
 
             // Trigger auxiliary data loads
             $this->loadCities();
+
+            // Load counts
+            $this->counts = [
+                'contacts' => $customer->contacts()->count(),
+                'assets' => $customer->assets()->count(),
+                'services' => $customer->services()->count(),
+                'offers' => $customer->offers()->count(),
+                'sales' => $customer->sales()->count(),
+                'messages' => $customer->messages()->count(),
+                'notes' => $customer->notes()->count(),
+            ];
+
+            $this->registration_date = $customer->created_at?->format('d.m.Y H:i') ?? '-';
 
             // Set View Mode
             $this->isViewMode = true;
@@ -208,7 +231,6 @@ new
 
     public function updatedWebsites($value, $key): void
     {
-        // Extract index from key (e.g. "websites.0" -> 0)
         $parts = explode('.', $key);
         if (count($parts) === 2 && is_numeric($parts[1])) {
             $index = (int) $parts[1];
@@ -216,19 +238,74 @@ new
         }
     }
 
+    public function updatedPhones($value, $key): void
+    {
+        $parts = explode('.', $key);
+        if (count($parts) === 2 && is_numeric($parts[1])) {
+            $index = (int) $parts[1];
+            $this->phones[$index] = $this->normalizePhone($value);
+        }
+    }
+
+    public function updatedName($value): void
+    {
+        $this->name = $this->formatTitleCase($value);
+    }
+
+    public function updatedTitle($value): void
+    {
+        $this->title = $this->formatTitleCase($value);
+    }
+
+    public function updatedTaxOffice($value): void
+    {
+        $this->tax_office = $this->formatTitleCase($value);
+    }
+
+    public function updatedAddress($value): void
+    {
+        $this->address = $this->formatTitleCase($value);
+    }
+
+    public function updatedCurrentCode($value): void
+    {
+        $this->current_code = $this->formatTitleCase($value);
+    }
+
     // Normalize URL to https:// format
-    private function normalizeUrl(string $url): string
+    private function normalizeUrl(?string $url): string
     {
         if (empty($url)) {
-            return $url;
+            return '';
         }
 
+        $url = trim($url);
         // Check if protocol exists
         if (!preg_match('#^https?://#i', $url)) {
             return 'https://' . $url;
         }
 
         return $url;
+    }
+
+    // Convert to Title Case (e.g. deneme -> Deneme, DENEME -> Deneme)
+    private function formatTitleCase(?string $text): string
+    {
+        if (empty($text)) {
+            return '';
+        }
+
+        return Str::title(trim($text));
+    }
+
+    // Allow only numbers, + and spaces in phone
+    private function normalizePhone(?string $phone): string
+    {
+        if (empty($phone)) {
+            return '';
+        }
+
+        return preg_replace('/[^0-9+ ]/', '', $phone);
     }
 
     public function save(): void
@@ -249,16 +326,13 @@ new
             'logo' => 'nullable|image|max:5120',
         ]);
 
-        // Filter empty values
+        // Filter and Normalize
         $emails = array_filter($this->emails, fn($e) => !empty($e));
-        $phones = array_filter($this->phones, fn($p) => !empty($p));
-        $websites = array_filter($this->websites, fn($w) => !empty($w));
-
-        // Normalize website URLs
-        $websites = array_map(fn($url) => $this->normalizeUrl($url), $websites);
+        $phones = array_map(fn($p) => $this->normalizePhone($p), array_filter($this->phones, fn($p) => !empty($p)));
+        $websites = array_map(fn($url) => $this->normalizeUrl($url), array_filter($this->websites, fn($w) => !empty($w)));
 
         $data = [
-            'name' => $this->name,
+            'name' => $this->formatTitleCase($this->name),
             'customer_type' => $this->customer_type,
             'email' => $emails[0] ?? null,
             'emails' => array_values($emails),
@@ -269,8 +343,8 @@ new
             'country_id' => $this->country_id ?: null,
             'city_id' => $this->city_id ?: null,
             'address' => $this->address ?: null,
-            'title' => $this->title ?: null,
-            'tax_office' => $this->tax_office ?: null,
+            'title' => $this->formatTitleCase($this->title),
+            'tax_office' => $this->formatTitleCase($this->tax_office),
             'tax_number' => $this->tax_number ?: null,
             'current_code' => $this->current_code ?: null,
         ];
@@ -314,6 +388,15 @@ new
         $this->isViewMode = false;
     }
 
+    public function cancel(): void
+    {
+        if ($this->customerId) {
+            $this->loadCustomerData();
+        } else {
+            $this->redirect('/dashboard/customers?tab=customers', navigate: true);
+        }
+    }
+
     public function delete(): void
     {
         if ($this->customerId) {
@@ -342,48 +425,87 @@ new
         {{-- Header with Action Buttons --}}
         <div class="flex items-start justify-between mb-6">
             <div>
-                <h1 class="text-2xl font-bold text-gray-900">
+                <h1 class="text-2xl font-bold tracking-tight" style="color: var(--color-text-heading);">
                     @if($isViewMode)
-                        Müşteri Bilgileri
+                        {{ $name ?: 'Müşteri Bilgileri' }}
                     @else
                         Yeni Müşteri Ekle
                     @endif
                 </h1>
-                <p class="text-sm text-slate-500 mt-1">
+                <div class="flex items-center gap-2 mt-1">
                     @if($isViewMode)
-                        Kaydedilen müşteri bilgileri
+                        <span
+                            class="text-xs font-medium px-2 py-0.5 rounded bg-slate-100 text-slate-500 border border-slate-200">Müşteri</span>
+                        <span class="text-[11px] font-mono text-slate-400">ID: {{ $customerId }}</span>
                     @else
-                        Yeni müşteri bilgilerini girin
+                        <p class="text-sm opacity-60" style="color: var(--color-text-base);">
+                            Yeni müşteri bilgilerini girin
+                        </p>
                     @endif
-                </p>
+                </div>
             </div>
             <div class="flex items-center gap-3">
                 @if($isViewMode)
                     {{-- View Mode Actions --}}
                     <button type="button" wire:click="delete" wire:confirm="Bu müşteriyi silmek istediğinize emin misiniz?"
-                        class="btn btn-error text-white">
-                        <x-mary-icon name="o-trash" class="w-4 h-4 mr-1" />
+                        wire:key="btn-delete-{{ $customerId }}"
+                        class="theme-btn-delete flex items-center gap-2 px-4 py-2 text-sm">
+                        <x-mary-icon name="o-trash" class="w-4 h-4" />
                         Sil
                     </button>
-                    <button type="button" wire:click="toggleEditMode" class="btn btn-warning">
-                        <x-mary-icon name="o-pencil-square" class="w-4 h-4 mr-1" />
+                    <button type="button" wire:click="toggleEditMode" wire:key="btn-edit-{{ $customerId }}"
+                        class="theme-btn-edit flex items-center gap-2 px-4 py-2 text-sm">
+                        <x-mary-icon name="o-pencil-square" class="w-4 h-4" />
                         Düzenle
                     </button>
-                    <a href="/dashboard/customers/create" class="btn btn-outline" wire:navigate>
-                        Yeni Ekle
-                    </a>
                 @else
                     {{-- Edit Mode Actions --}}
-                    <a href="/dashboard/customers?tab=customers" class="btn-secondary">
+                    <button type="button" wire:click="cancel" wire:key="btn-cancel-{{ $customerId ?: 'new' }}"
+                        class="theme-btn-cancel">
                         İptal
-                    </a>
-                    <button type="button" wire:click="save" wire:loading.attr="disabled" class="btn-primary">
+                    </button>
+                    <button type="button" wire:click="save" wire:loading.attr="disabled"
+                        wire:key="btn-save-{{ $customerId ?: 'new' }}" class="theme-btn-save">
                         <span wire:loading class="loading loading-spinner loading-xs mr-1"></span>
+                        <x-mary-icon name="o-check" class="w-4 h-4" />
                         @if($customerId) Güncelle @else Kaydet @endif
                     </button>
                 @endif
             </div>
         </div>
+
+        {{-- Tab Navigation --}}
+        @if($isViewMode)
+            <div class="flex items-center border-b border-slate-200 mb-8 overflow-x-auto scrollbar-hide">
+                <button class="px-5 py-3 text-sm font-medium border-b-2 whitespace-nowrap"
+                    style="border-color: var(--active-tab-color); color: var(--color-text-heading);">
+                    Müşteri Bilgileri
+                </button>
+                <button class="px-5 py-3 text-sm font-medium text-slate-500 hover:text-slate-700 whitespace-nowrap">
+                    Kişiler ({{ $counts['contacts'] }})
+                </button>
+                <button class="px-5 py-3 text-sm font-medium text-slate-500 hover:text-slate-700 whitespace-nowrap">
+                    Varlıklar ({{ $counts['assets'] }})
+                </button>
+                <button class="px-5 py-3 text-sm font-medium text-slate-500 hover:text-slate-700 whitespace-nowrap">
+                    Hizmetler ({{ $counts['services'] }})
+                </button>
+                <button class="px-5 py-3 text-sm font-medium text-slate-500 hover:text-slate-700 whitespace-nowrap">
+                    Teklifler ({{ $counts['offers'] }})
+                </button>
+                <button class="px-5 py-3 text-sm font-medium text-slate-500 hover:text-slate-700 whitespace-nowrap">
+                    Satışlar ({{ $counts['sales'] }})
+                </button>
+                <button class="px-5 py-3 text-sm font-medium text-slate-500 hover:text-slate-700 whitespace-nowrap">
+                    Mesajlar ({{ $counts['messages'] }})
+                </button>
+                <button class="px-5 py-3 text-sm font-medium text-slate-500 hover:text-slate-700 whitespace-nowrap">
+                    Notlar ({{ $counts['notes'] }})
+                </button>
+            </div>
+        @else
+            <div class="mb-8"></div>
+        @endif
 
         {{-- Main Layout: 80% Left, 20% Right --}}
         <div class="flex gap-6">
@@ -393,6 +515,10 @@ new
                 @include('livewire.customers.parts.address-card')
                 @include('livewire.customers.parts.financial-card')
                 @include('livewire.customers.parts.related-companies-card')
+
+                @if($isViewMode)
+                    @include('livewire.customers.parts.registration-info-card')
+                @endif
             </div>
 
             {{-- Right Column (20%) --}}

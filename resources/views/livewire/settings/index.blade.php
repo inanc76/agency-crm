@@ -88,14 +88,6 @@ new
                 'color' => 'bg-pink-50 text-pink-500',
                 'link' => '#'
             ],
-            [
-                'title' => 'Tasarım Rehberi',
-                'subtitle' => 'Buton, input ve tipografi elemanlarını canlı önizleyin',
-                'icon' => 'o-swatch',
-                'color' => 'bg-gradient-to-br from-indigo-50 to-purple-50 text-indigo-600',
-                'link' => '/dashboard/style-guide',
-                'special' => true
-            ],
         ];
 
         if (empty($this->search)) {
@@ -109,17 +101,17 @@ new
     }
 }; ?>
 
-<div class="p-6 bg-gray-50 min-h-screen">
+<div class="p-6 bg-slate-50 min-h-screen">
     {{-- Page Header --}}
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900">Ayarlar</h1>
-            <p class="text-gray-600 text-sm mt-1">Sistem ayarlarını ve konfigürasyonları yönetin</p>
+            <h1 class="text-2xl font-bold" style="color: var(--color-text-heading);">Ayarlar</h1>
+            <p class="text-sm opacity-60 mt-1" style="color: var(--color-text-base);">Sistem ayarlarını ve
+                konfigürasyonları yönetin</p>
         </div>
         <div class="w-full md:w-72">
             <x-mary-input placeholder="Ayarlarda ara..." icon="o-magnifying-glass"
-                class="!bg-white border-gray-200 focus:ring-primary/20 transition-all rounded-xl shadow-sm h-11"
-                wire:model.live.debounce.300ms="search" />
+                class="!bg-white border-gray-200 h-11" wire:model.live.debounce.300ms="search" />
         </div>
     </div>
 
@@ -128,7 +120,7 @@ new
         @forelse($this->cards() as $card)
             <a href="{{ $card['link'] }}" class="group block h-full">
                 <x-mary-card shadow
-                    class="bg-white border border-gray-100 hover:border-primary/20 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 rounded-2xl h-full overflow-hidden">
+                    class="theme-card shadow-sm hover:shadow-md transition-all duration-300 h-full overflow-hidden">
                     <div class="flex items-start gap-4 h-full relative p-1">
                         {{-- Icon Box --}}
                         <div
@@ -138,11 +130,12 @@ new
 
                         {{-- Text Content --}}
                         <div class="flex-grow pt-0.5">
-                            <h3
-                                class="font-bold text-gray-900 text-[15px] group-hover:text-primary transition-colors duration-300 mb-1">
+                            <h3 class="font-bold text-[15px] group-hover:opacity-80 transition-opacity mb-1"
+                                style="color: var(--color-text-heading);">
                                 {{ $card['title'] }}
                             </h3>
-                            <p class="text-gray-500 text-[13px] leading-relaxed line-clamp-2 pr-4">
+                            <p class="text-[13px] leading-relaxed line-clamp-2 pr-4 opacity-70"
+                                style="color: var(--color-text-base);">
                                 {{ $card['subtitle'] }}
                             </p>
                         </div>
@@ -150,7 +143,8 @@ new
                         {{-- Corner Arrow --}}
                         <div class="absolute bottom-0 right-0 p-1">
                             <x-mary-icon name="o-arrow-right"
-                                class="w-4 h-4 text-gray-300 group-hover:text-primary group-hover:translate-x-1 transition-all duration-300" />
+                                class="w-4 h-4 opacity-20 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
+                                style="color: var(--primary-color);" />
                         </div>
                     </div>
                 </x-mary-card>

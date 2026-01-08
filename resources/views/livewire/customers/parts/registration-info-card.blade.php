@@ -1,0 +1,46 @@
+{{-- Kayıt Bilgileri Card --}}
+<div class="theme-card p-6 shadow-sm">
+    <div class="flex items-center gap-3 mb-4">
+        <x-mary-icon name="o-information-circle" class="w-5 h-5 text-slate-400" />
+        <h2 class="text-base font-bold" style="color: var(--color-text-heading);">Kayıt Bilgileri</h2>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {{-- Müşteri ID --}}
+        <div>
+            <label class="block text-xs font-medium mb-1 opacity-60" style="color: var(--color-text-base);">Müşteri
+                ID</label>
+            <div class="flex items-center gap-2">
+                <code
+                    class="text-[11px] font-mono bg-slate-100 px-2 py-1 rounded text-slate-600">{{ $customerId }}</code>
+                <button type="button" onclick="navigator.clipboard.writeText('{{ $customerId }}')"
+                    class="text-slate-400 hover:text-slate-600 transition-colors" title="Kopyala">
+                    <x-mary-icon name="o-clipboard" class="w-3 h-3" />
+                </button>
+            </div>
+        </div>
+
+        {{-- Kayıt Tarihi --}}
+        <div>
+            <label class="block text-xs font-medium mb-1 opacity-60" style="color: var(--color-text-base);">Kayıt
+                Tarihi</label>
+            <div class="text-sm font-medium flex items-center gap-2" style="color: var(--color-text-base);">
+                <x-mary-icon name="o-calendar" class="w-4 h-4 opacity-40" />
+                {{ $registration_date }}
+            </div>
+        </div>
+
+        {{-- Kayıt Eden --}}
+        <div>
+            <label class="block text-xs font-medium mb-1 opacity-60" style="color: var(--color-text-base);">Kayıt
+                Eden</label>
+            <div class="text-sm font-medium flex items-center gap-2" style="color: var(--color-text-base);">
+                <div
+                    class="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center text-[10px] text-indigo-700 font-bold border border-indigo-200">
+                    AD
+                </div>
+                Admin
+            </div>
+        </div>
+    </div>
+</div>

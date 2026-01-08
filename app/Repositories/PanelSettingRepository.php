@@ -72,27 +72,58 @@ class PanelSettingRepository
             'font_family' => 'Inter',
             'base_text_color' => '#475569',
             'heading_color' => '#0f172a',
+            'label_font_size' => 14,
+            'input_font_size' => 16,
+            'heading_font_size' => 18,
+            'error_font_size' => 12,
+            'helper_font_size' => 12,
 
             'input_focus_ring_color' => '#6366f1',
             'input_border_color' => '#cbd5e1',
             'input_error_ring_color' => '#ef4444',
             'input_error_border_color' => '#ef4444',
             'input_error_text_color' => '#ef4444',
-            'input_vertical_padding' => '0.5rem',
-            'input_border_radius' => '0.375rem',
+            'input_vertical_padding' => '8px',
+            'input_border_radius' => '6px',
 
-            'primary_button_bg_color' => '#4f46e5',
-            'primary_button_text_color' => '#ffffff',
-            'primary_button_hover_color' => '#4338ca',
+            'btn_create_bg_color' => '#4f46e5',
+            'btn_create_text_color' => '#ffffff',
+            'btn_create_hover_color' => '#4338ca',
+            'btn_create_border_color' => '#4f46e5',
 
-            'secondary_button_border_color' => '#e2e8f0',
-            'secondary_button_text_color' => '#475569',
+            'btn_edit_bg_color' => '#f59e0b',
+            'btn_edit_text_color' => '#ffffff',
+            'btn_edit_hover_color' => '#d97706',
+            'btn_edit_border_color' => '#f59e0b',
+
+            'btn_delete_bg_color' => '#ef4444',
+            'btn_delete_text_color' => '#ffffff',
+            'btn_delete_hover_color' => '#dc2626',
+            'btn_delete_border_color' => '#ef4444',
+
+            'btn_cancel_bg_color' => '#94a3b8',
+            'btn_cancel_text_color' => '#ffffff',
+            'btn_cancel_hover_color' => '#64748b',
+            'btn_cancel_border_color' => '#94a3b8',
+
+            'btn_save_bg_color' => '#10b981',
+            'btn_save_text_color' => '#ffffff',
+            'btn_save_hover_color' => '#059669',
+            'btn_save_border_color' => '#10b981',
 
             'action_link_color' => '#4f46e5',
+            'active_tab_color' => '#4f46e5',
 
             'card_bg_color' => '#eff4ff',
             'card_border_color' => '#bfdbfe',
-            'card_border_radius' => '0.75rem',
+            'card_border_radius' => '12px',
+            'table_hover_bg_color' => '#f8fafc',
+            'table_hover_text_color' => '#0f172a',
+
+            'list_card_bg_color' => '#ffffff',
+            'list_card_border_color' => '#e2e8f0',
+            'list_card_link_color' => '#4f46e5',
+            'list_card_hover_color' => '#f8fafc',
         ]);
     }
 }

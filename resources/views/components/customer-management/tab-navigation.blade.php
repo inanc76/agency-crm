@@ -15,10 +15,9 @@
 <div class="border-b border-gray-200">
     <nav class="flex space-x-8" aria-label="Tabs">
         @foreach($tabs as $key => $label)
-            <a href="{{ url('/dashboard/customers?tab=' . $key) }}" class="whitespace-nowrap py-3 px-1 border-b-2 text-sm font-medium transition-colors
-                          {{ $activeTab === $key
-            ? 'border-orange-500 text-gray-900'
-            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
+            <a href="{{ url('/dashboard/customers?tab=' . $key) }}"
+                class="whitespace-nowrap py-3 px-1 border-b-2 text-sm font-medium transition-colors"
+                style="{{ $activeTab === $key ? 'border-color: var(--active-tab-color); color: var(--color-text-heading);' : 'border-color: transparent; color: var(--color-text-base); opacity: 0.6;' }}">
                 {{ $label }}
             </a>
         @endforeach

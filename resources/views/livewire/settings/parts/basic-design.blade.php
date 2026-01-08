@@ -1,4 +1,5 @@
-<div class="card border p-6 shadow-sm mt-6">
+<div class="theme-card p-6 shadow-sm mt-6"
+    style="background-color: {{ $card_bg_color }}; border-color: {{ $card_border_color }}; border-radius: {{ $card_border_radius }};">
     {{-- Card Header --}}
     <div class="flex items-center justify-between pb-4 mb-6 border-b border-slate-200">
         <h2 class="text-sm font-medium text-slate-700">Temel Tasarım Elemanları</h2>
@@ -37,6 +38,10 @@
                                 class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
                             <x-mary-input wire:model.live="heading_color" placeholder="#0f172a" class="flex-1" />
                         </div>
+                    </div>
+                    <div>
+                        <x-mary-input label="Form Başlığı (H2) Font Boyutu" wire:model="heading_font_size" suffix="px"
+                            hint="Default: 18px" />
                     </div>
                 </div>
             </x-slot:content>
@@ -112,14 +117,29 @@
                         </div>
                     </div>
 
-                    {{-- Geometry --}}
+                    {{-- Geometry & Fonts --}}
                     <div>
-                        <h3 class="text-sm font-semibold text-slate-900 mb-3 block">Input Geometry</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <h3 class="text-sm font-semibold text-slate-900 mb-3 block">Input Geometry & Typography</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                             <x-mary-input label="Vertical Padding" wire:model="input_vertical_padding"
-                                hint="Örn: 0.5rem" />
+                                hint="Örn: 8px" />
                             <x-mary-input label="Border Radius" wire:model="input_border_radius"
-                                hint="Örn: 0.375rem veya rounded-md" />
+                                hint="Örn: 6px veya rounded-md" />
+                            <x-mary-input label="Label Font Size" wire:model="label_font_size" suffix="px"
+                                hint="Default: 14px" />
+                            <x-mary-input label="Input Font Size" wire:model="input_font_size" suffix="px"
+                                hint="Default: 16px" />
+                        </div>
+                    </div>
+
+                    {{-- Helper & Error Typography --}}
+                    <div>
+                        <h3 class="text-sm font-semibold text-slate-900 mb-3 block">Validation Typography</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <x-mary-input label="Error Message Font Size" wire:model="error_font_size" suffix="px"
+                                hint="Default: 12px" />
+                            <x-mary-input label="Helper Text Font Size" wire:model="helper_font_size" suffix="px"
+                                hint="Default: 12px" />
                         </div>
                     </div>
                 </div>
@@ -383,6 +403,15 @@
                                         class="flex-1" />
                                 </div>
                             </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-2">Active Tab Color</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" wire:model.live="active_tab_color"
+                                        class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
+                                    <x-mary-input wire:model.live="active_tab_color" placeholder="#4f46e5"
+                                        class="flex-1" />
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -418,12 +447,86 @@
                         </div>
                     </div>
                     <div>
-                        <x-mary-input label="Border Radius" wire:model="card_border_radius" hint="Örn: 0.75rem" />
+                        <x-mary-input label="Border Radius" wire:model.live="card_border_radius" hint="Örn: 12px" />
                     </div>
                 </div>
             </x-slot:content>
         </x-mary-collapse>
 
+        {{-- Accordion 5: Tablo Ayarları --}}
+        <x-mary-collapse name="group_design_5" group="settings_design" separator
+            class="bg-white border border-slate-200 shadow-sm rounded-lg">
+            <x-slot:heading>
+                <div class="flex items-center gap-3">
+                    <x-mary-icon name="o-table-cells" class="w-5 h-5 text-indigo-500" />
+                    <span class="font-semibold text-slate-700">Tablo Ayarları</span>
+                </div>
+            </x-slot:heading>
+            <x-slot:content>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 py-2">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-2">Row Hover Background Color</label>
+                        <div class="flex items-center gap-2">
+                            <input type="color" wire:model.live="table_hover_bg_color"
+                                class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
+                            <x-mary-input wire:model.live="table_hover_bg_color" placeholder="#f8fafc" class="flex-1" />
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-2">Row Hover Text Color</label>
+                        <div class="flex items-center gap-2">
+                            <input type="color" wire:model.live="table_hover_text_color"
+                                class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
+                            <x-mary-input wire:model.live="table_hover_text_color" placeholder="#0f172a"
+                                class="flex-1" />
+                        </div>
+                    </div>
+                </div>
+
+                {{-- List Card Settings --}}
+                <div class="border-t border-slate-100 pt-6 mt-6">
+                    <h3 class="text-sm font-semibold text-slate-900 mb-3 block">List Card Styling</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">List Card Background</label>
+                            <div class="flex items-center gap-2">
+                                <input type="color" wire:model.live="list_card_bg_color"
+                                    class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
+                                <x-mary-input wire:model.live="list_card_bg_color" placeholder="#ffffff"
+                                    class="flex-1" />
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">List Card Border Color</label>
+                            <div class="flex items-center gap-2">
+                                <input type="color" wire:model.live="list_card_border_color"
+                                    class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
+                                <x-mary-input wire:model.live="list_card_border_color" placeholder="#e2e8f0"
+                                    class="flex-1" />
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">List Card Link Color</label>
+                            <div class="flex items-center gap-2">
+                                <input type="color" wire:model.live="list_card_link_color"
+                                    class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
+                                <x-mary-input wire:model.live="list_card_link_color" placeholder="#4f46e5"
+                                    class="flex-1" />
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">List Card Hover Color</label>
+                            <div class="flex items-center gap-2">
+                                <input type="color" wire:model.live="list_card_hover_color"
+                                    class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
+                                <x-mary-input wire:model.live="list_card_hover_color" placeholder="#f8fafc"
+                                    class="flex-1" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </x-slot:content>
+        </x-mary-collapse>
     </div>
 
     {{-- Card Footer --}}

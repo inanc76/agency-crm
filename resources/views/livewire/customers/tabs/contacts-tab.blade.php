@@ -45,12 +45,13 @@ new class extends Component {
     {{-- Header with Action Button --}}
     <div class="flex items-center justify-between mb-4">
         <div>
-            <h2 class="text-lg font-semibold text-gray-900">Kişiler</h2>
-            <p class="text-sm text-gray-500">Tüm iletişim kişilerini görüntüleyin ve yönetin</p>
+            <h2 class="text-lg font-bold" style="color: var(--color-text-heading);">Kişiler</h2>
+            <p class="text-sm opacity-60" style="color: var(--color-text-base);">Tüm iletişim kişilerini görüntüleyin ve
+                yönetin</p>
         </div>
         <div class="flex items-center gap-4">
-            <span class="text-sm text-gray-500">{{ $contacts->count() }} kişi</span>
-            <x-customer-management.action-button label="Yeni Kişi" href="#" />
+            <span class="text-sm opacity-60" style="color: var(--color-text-base);">{{ $contacts->count() }} kişi</span>
+            <x-customer-management.action-button label="Yeni Kişi" href="{{ route('customers.contacts.create') }}" />
         </div>
     </div>
 
@@ -75,29 +76,30 @@ new class extends Component {
             @php
                 $char = mb_substr($contact->name, 0, 1);
             @endphp
-            <tr class="group hover:bg-slate-50/80 transition-all duration-200 cursor-pointer"
-                onclick="window.location.href='/dashboard/customers/{{ $contact->customer_id }}?tab=contacts'">
+            <tr class="group hover:bg-[var(--list-card-hover-bg)] transition-all duration-200 cursor-pointer"
+                onclick="window.location.href='/dashboard/customers/contacts/{{ $contact->id }}'">
                 <td class="px-6 py-4">
                     <div class="flex items-center gap-3">
                         <div class="flex-shrink-0">
                             <x-mary-avatar placeholder="{{ $char }}"
                                 class="!w-9 !h-9 bg-white text-black font-semibold text-xs border border-gray-100 shadow-sm" />
                         </div>
-                        <div class="font-bold text-slate-700 text-[13px] group-hover:text-blue-600 transition-colors">
+                        <div class="font-bold text-[13px] group-hover:opacity-80 transition-opacity"
+                            style="color: var(--list-card-link-color);">
                             {{ $contact->name }}
                         </div>
                     </div>
                 </td>
-                <td class="px-6 py-4 text-[13px] text-slate-600 font-medium">
+                <td class="px-6 py-4 text-[13px] font-medium" style="color: var(--color-text-base);">
                     {{ $contact->customer->name ?? '-' }}
                 </td>
-                <td class="px-6 py-4 text-[13px] text-slate-500">
+                <td class="px-6 py-4 text-[13px] opacity-70" style="color: var(--color-text-base);">
                     {{ $contact->email ?? '-' }}
                 </td>
-                <td class="px-6 py-4 text-[12px] text-slate-500 font-mono">
+                <td class="px-6 py-4 text-[12px] font-mono opacity-70" style="color: var(--color-text-base);">
                     {{ $contact->phone ?? '-' }}
                 </td>
-                <td class="px-6 py-4 text-[12px] text-slate-500">
+                <td class="px-6 py-4 text-[12px] opacity-70" style="color: var(--color-text-base);">
                     {{ $contact->position ?? '-' }}
                 </td>
                 <td class="px-6 py-4">

@@ -204,6 +204,32 @@ select:focus[data-flux-control] {
     body {
         @apply bg-slate-50 text-slate-800;
     }
+
+    label,
+    .label-text {
+        font-size: var(--font-size-label) !important;
+        font-weight: 500 !important;
+    }
+
+    h2,
+    .text-h2 {
+        font-size: var(--font-size-heading) !important;
+        font-weight: 600 !important;
+    }
+
+    .label-text-alt,
+    .hint,
+    .text-caption,
+    .help-text {
+        font-size: var(--font-size-helper) !important;
+    }
+
+    .text-error,
+    .input-error+span,
+    .error,
+    .invalid-feedback {
+        font-size: var(--font-size-error) !important;
+    }
 }
 
 @layer components {
@@ -211,7 +237,9 @@ select:focus[data-flux-control] {
     .input,
     .textarea,
     .select {
-        @apply !bg-white !shadow-sm !text-sm;
+        @apply !bg-white !shadow-sm;
+        font-size: var(--font-size-input) !important;
+        font-weight: 400 !important;
         border-color: var(--input-border) !important;
         border-radius: var(--input-radius) !important;
         padding-top: var(--input-padding-y) !important;
@@ -592,6 +620,29 @@ select:focus[data-flux-control] {
 /* These classes ONLY affect elements explicitly marked with them */
 /* NO global button/submit overrides to prevent UI pollution */
 
+/* Theme Card: All Containers (Card, Modal, Box) */
+.theme-card {
+    background-color: var(--card-bg) !important;
+    border: 1px solid var(--card-border) !important;
+    border-radius: var(--card-radius) !important;
+}
+
+/* Global Input Override - Applied to ALL daisyUI inputs */
+.input,
+.select,
+.textarea {
+    border-color: var(--input-border) !important;
+    border-radius: var(--input-radius) !important;
+}
+
+.input:focus,
+.select:focus,
+.textarea:focus {
+    border-color: var(--input-focus-ring) !important;
+    outline: none !important;
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--input-focus-ring), transparent 80%) !important;
+}
+
 /* Theme Button: Save/Primary Actions (Kaydet, Gönder, Onayla) */
 .theme-btn-save {
     background-color: var(--btn-save-bg) !important;
@@ -692,3 +743,13 @@ select:focus[data-flux-control] {
 
 /* Filter elements (Alphabet, Numbers) - DEFAULT/NEUTRAL - DO NOT THEME */
 /* These stay as DaisyUI/Tailwind defaults */
+
+/* Table Hover System */
+.table tr:hover td,
+.table tr:hover th,
+table tr:hover td,
+table tr:hover th {
+    background-color: var(--table-hover-bg) !important;
+    color: var(--table-hover-text) !important;
+    transition: all 0.2s ease;
+}

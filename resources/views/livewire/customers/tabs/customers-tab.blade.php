@@ -35,12 +35,13 @@ new class extends Component {
     {{-- Header with Action Button --}}
     <div class="flex items-center justify-between mb-4">
         <div>
-            <h2 class="text-lg font-semibold text-gray-900">Müşteriler</h2>
-            <p class="text-sm text-gray-500">Tüm müşterilerinizi görüntüleyin ve yönetin</p>
+            <h2 class="text-lg font-bold" style="color: var(--color-text-heading);">Müşteriler</h2>
+            <p class="text-sm opacity-60" style="color: var(--color-text-base);">Tüm müşterilerinizi görüntüleyin ve
+                yönetin</p>
         </div>
         <div class="flex items-center gap-4">
-            <span class="text-sm text-gray-500"><span class="font-medium"
-                    style="color: var(--btn-save-bg);">Aktif</span>
+            <span class="text-sm opacity-60" style="color: var(--color-text-base);">
+                <span class="font-medium" style="color: var(--btn-save-bg);">Aktif</span>
                 {{ $customers->count() }} müşteri</span>
             <x-customer-management.action-button label="Yeni Müşteri" href="/dashboard/customers/create" />
         </div>
@@ -68,7 +69,7 @@ new class extends Component {
             @php
                 $char = mb_substr($customer->name, 0, 1);
             @endphp
-            <tr class="group hover:bg-slate-50/80 transition-all duration-200 cursor-pointer"
+            <tr class="group hover:bg-[var(--list-card-hover-bg)] transition-all duration-200 cursor-pointer"
                 onclick="window.location.href='/dashboard/customers/{{ $customer->id }}'">
                 <td class="px-6 py-4">
                     <div class="flex items-center gap-3">
@@ -77,41 +78,43 @@ new class extends Component {
                                 class="!w-9 !h-9 bg-white text-black font-semibold text-xs border border-gray-100 shadow-sm" />
                         </div>
                         <div>
-                            <div
-                                class="font-bold text-slate-700 text-[13px] group-hover:text-[var(--btn-primary-bg)] transition-colors">
+                            <div class="font-bold text-[13px] group-hover:opacity-80 transition-opacity"
+                                style="color: var(--list-card-link-color);">
                                 {{ $customer->name }}
                             </div>
-                            <div class="text-[11px] text-slate-400 font-medium">{{ $customer->customer_type }}</div>
+                            <div class="text-[11px] font-medium opacity-60" style="color: var(--color-text-base);">
+                                {{ $customer->customer_type }}
+                            </div>
                         </div>
                     </div>
                 </td>
-                <td class="px-6 py-4 text-[13px] text-slate-600 font-medium">
-                    <div class="flex items-center gap-1.5 text-slate-500 italic">
+                <td class="px-6 py-4 text-[13px] font-medium">
+                    <div class="flex items-center gap-1.5 opacity-70 italic" style="color: var(--color-text-base);">
                         <x-mary-icon name="o-map-pin" class="w-3.5 h-3.5 opacity-50" />
                         {{ $customer->city_id ?? 'Belirtilmedi' }}
                     </div>
                 </td>
                 <td class="px-6 py-4">
-                    <div
-                        class="text-[12px] text-slate-500 font-mono tracking-tight bg-slate-50 px-2 py-0.5 rounded-md border border-slate-100 inline-block">
+                    <div class="text-[12px] font-mono tracking-tight px-2 py-0.5 rounded-md border inline-block"
+                        style="background-color: var(--card-bg); border-color: var(--card-border); color: var(--color-text-base);">
                         {{ $customer->phone ?? '-' }}
                     </div>
                 </td>
                 <td class="px-6 py-4 text-center">
-                    <span
-                        class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-100 text-slate-700 text-[11px] font-bold">
+                    <span class="inline-flex items-center justify-center w-6 h-6 rounded-full text-[11px] font-bold"
+                        style="background-color: var(--card-bg); color: var(--color-text-heading); border: 1px solid var(--card-border);">
                         0
                     </span>
                 </td>
                 <td class="px-6 py-4 text-center">
-                    <span
-                        class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-100 text-slate-700 text-[11px] font-bold">
+                    <span class="inline-flex items-center justify-center w-6 h-6 rounded-full text-[11px] font-bold"
+                        style="background-color: var(--card-bg); color: var(--color-text-heading); border: 1px solid var(--card-border);">
                         0
                     </span>
                 </td>
                 <td class="px-6 py-4 text-center">
                     <span class="inline-flex items-center justify-center w-6 h-6 rounded-full text-[11px] font-bold border"
-                        style="background-color: color-mix(in srgb, var(--btn-primary-bg), white 90%); color: var(--btn-primary-bg); border-color: color-mix(in srgb, var(--btn-primary-bg), white 80%);">
+                        style="background-color: color-mix(in srgb, var(--btn-save-bg), white 90%); color: var(--btn-save-bg); border-color: color-mix(in srgb, var(--btn-save-bg), white 80%);">
                         0
                     </span>
                 </td>

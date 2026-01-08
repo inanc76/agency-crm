@@ -1,16 +1,16 @@
 {{-- Adres Bilgileri Card --}}
-<div class="card border p-6 shadow-sm @if($isViewMode) bg-slate-50/50 @endif">
-    <h2 class="text-base font-semibold text-slate-800 mb-4">Adres Bilgileri</h2>
+<div class="theme-card p-6 shadow-sm">
+    <h2 class="text-base font-bold mb-4" style="color: var(--color-text-heading);">Adres Bilgileri</h2>
 
     <div class="grid grid-cols-2 gap-8">
         {{-- Ülke --}}
         <div>
-            <label class="block text-xs font-medium text-slate-500 mb-1">Ülke</label>
+            <label class="block text-xs font-medium mb-1 opacity-60" style="color: var(--color-text-base);">Ülke</label>
             @if($isViewMode)
                 @php
                     $countryName = collect($countries)->firstWhere('id', $country_id)['name'] ?? '-';
                 @endphp
-                <div class="text-sm font-semibold text-slate-900">{{ $countryName }}</div>
+                <div class="text-sm font-medium" style="color: var(--color-text-base);">{{ $countryName }}</div>
             @else
                 <select wire:model="country_id" wire:change="loadCities" class="select w-full">
                     <option value="">Ülke seçin...</option>
@@ -24,12 +24,13 @@
 
         {{-- Şehir --}}
         <div>
-            <label class="block text-xs font-medium text-slate-500 mb-1">Şehir</label>
+            <label class="block text-xs font-medium mb-1 opacity-60"
+                style="color: var(--color-text-base);">Şehir</label>
             @if($isViewMode)
                 @php
                     $cityName = collect($cities)->firstWhere('id', $city_id)['name'] ?? '-';
                 @endphp
-                <div class="text-sm font-semibold text-slate-900">{{ $cityName }}</div>
+                <div class="text-sm font-medium" style="color: var(--color-text-base);">{{ $cityName }}</div>
             @else
                 <select wire:model="city_id" class="select w-full">
                     <option value="">Şehir seçin...</option>
@@ -43,11 +44,12 @@
 
         {{-- Adres --}}
         <div class="col-span-2">
-            <label class="block text-xs font-medium text-slate-500 mb-1">Adres</label>
+            <label class="block text-xs font-medium mb-1 opacity-60"
+                style="color: var(--color-text-base);">Adres</label>
             @if($isViewMode)
-                <div class="text-sm font-semibold text-slate-900">{{ $address ?: '-' }}</div>
+                <div class="text-sm font-medium" style="color: var(--color-text-base);">{{ $address ?: '-' }}</div>
             @else
-                <textarea wire:model="address" rows="3" placeholder="Detaylı adres bilgisi"
+                <textarea wire:model.blur="address" rows="3" placeholder="Detaylı adres bilgisi"
                     class="textarea w-full resize-none"></textarea>
                 @error('address') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
             @endif

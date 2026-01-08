@@ -28,6 +28,33 @@ Volt::route('dashboard/customers/{customer}', 'customers.create')
     ->middleware(['auth', 'verified'])
     ->name('customers.edit');
 
+// Kişi Yönetimi
+Volt::route('dashboard/customers/contacts/create', 'customers.contacts.create')
+    ->middleware(['auth', 'verified'])
+    ->name('customers.contacts.create');
+
+Volt::route('dashboard/customers/contacts/{contact}', 'customers.contacts.create')
+    ->middleware(['auth', 'verified'])
+    ->name('customers.contacts.edit');
+
+// Varlık Yönetimi
+Volt::route('dashboard/customers/assets/create', 'customers.assets.create')
+    ->middleware(['auth', 'verified'])
+    ->name('customers.assets.create');
+
+Volt::route('dashboard/customers/assets/{asset}', 'customers.assets.create')
+    ->middleware(['auth', 'verified'])
+    ->name('customers.assets.edit');
+
+// Hizmet Yönetimi
+Volt::route('dashboard/customers/services/create', 'customers.services.create')
+    ->middleware(['auth', 'verified'])
+    ->name('customers.services.create');
+
+Volt::route('dashboard/customers/services/{service}', 'customers.services.create')
+    ->middleware(['auth', 'verified'])
+    ->name('customers.services.edit');
+
 // Ayarlar
 // Ayarlar
 Volt::route('dashboard/settings', 'settings.index')
@@ -53,10 +80,6 @@ Volt::route('dashboard/settings/variables', 'variables.index')
 Volt::route('dashboard/settings/mail', 'settings.mail')
     ->middleware(['auth', 'verified'])
     ->name('settings.mail');
-
-Volt::route('dashboard/style-guide', 'settings.style-guide')
-    ->middleware(['auth', 'verified'])
-    ->name('settings.style-guide');
 
 
 

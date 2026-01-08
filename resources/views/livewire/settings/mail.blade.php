@@ -182,23 +182,26 @@ new
 
         {{-- Header --}}
         <div class="mb-8">
-            <h1 class="text-2xl font-bold text-gray-900">Mail Ayarları</h1>
-            <p class="text-sm text-slate-500 mt-1">SMTP ve Mailgun e-posta servis ayarlarını yapılandırın</p>
+            <h1 class="text-2xl font-bold" style="color: var(--color-text-heading);">Mail Ayarları</h1>
+            <p class="text-sm opacity-60 mt-1" style="color: var(--color-text-base);">SMTP ve Mailgun e-posta servis
+                ayarlarını yapılandırın</p>
         </div>
 
         {{-- Main Card --}}
-        <div class="bg-[#eff4ff] border border-[#bfdbfe] rounded-xl shadow-sm p-6">
+        <div class="theme-card shadow-sm p-6">
 
             {{-- Card Header --}}
-            <div class="flex items-center justify-between pb-4 mb-6 border-b border-slate-200">
-                <h2 class="text-sm font-medium text-slate-700">E-posta Servis Yapılandırması</h2>
+            <div class="flex items-center justify-between pb-4 mb-6 border-b border-black/5">
+                <h2 class="text-sm font-bold" style="color: var(--color-text-heading);">E-posta Servis Yapılandırması
+                </h2>
                 <div class="flex items-center gap-4">
                     {{-- Gönderim Durumu Toggle --}}
                     <div class="flex items-center gap-3">
                         <input type="checkbox" wire:model.live="is_active" class="toggle toggle-success toggle-lg" />
                         <div>
-                            <div class="text-xs font-medium text-slate-700">Gönderim Durumu</div>
-                            <div class="text-sm font-semibold"
+                            <div class="text-xs font-medium opacity-60" style="color: var(--color-text-base);">Gönderim
+                                Durumu</div>
+                            <div class="text-sm font-bold"
                                 style="color: {{ $is_active ? 'var(--btn-save-bg)' : 'var(--btn-delete-bg)' }};">
                                 {{ $is_active ? 'Aktif' : 'Kapalı' }}
                             </div>
@@ -206,36 +209,36 @@ new
                     </div>
 
                     {{-- Test Gönder Button --}}
-                    <x-mary-button label="Test Gönder" icon="o-paper-airplane" class="btn-sm btn-outline"
+                    <x-mary-button label="Test Gönder" icon="o-paper-airplane" class="btn-sm theme-btn-edit"
                         wire:click="test" />
                 </div>
             </div>
 
             {{-- SECTION 1: Service Selection --}}
             <div class="mb-6">
-                <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4">Servis Seçimi</h3>
+                <h3 class="text-xs font-bold uppercase tracking-wider mb-4 opacity-60" style="color: var(--color-text-base);">Servis Seçimi</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {{-- SMTP Option --}}
                     <label class="block cursor-pointer">
                         <input type="radio" wire:model.live="provider" value="smtp" class="peer sr-only">
                         <div
-                            class="p-4 bg-white border-2 border-gray-200 rounded-xl peer-checked:border-orange-500 peer-checked:bg-orange-50/30 transition-all relative">
+                            class="p-4 bg-white border-2 border-transparent shadow-sm rounded-xl peer-checked:ring-2 peer-checked:ring-[var(--primary-color)] transition-all relative" style="background-color: var(--card-bg); border-color: var(--card-border);">
                             <div class="flex items-start justify-between">
                                 <div class="flex items-center gap-3">
                                     <div
-                                        class="w-5 h-5 rounded-full border-2 flex items-center justify-center {{ $provider === 'smtp' ? 'border-orange-500' : 'border-gray-300' }}">
+                                        class="w-5 h-5 rounded-full border-2 flex items-center justify-center {{ $provider === 'smtp' ? 'border-[var(--primary-color)]' : 'border-gray-300' }}">
                                         @if($provider === 'smtp')
-                                            <div class="w-2.5 h-2.5 rounded-full bg-orange-500"></div>
+                                            <div class="w-2.5 h-2.5 rounded-full" style="background-color: var(--primary-color);"></div>
                                         @endif
                                     </div>
                                     <div>
-                                        <div class="font-bold text-gray-900 text-sm">SMTP</div>
-                                        <div class="text-xs text-gray-500">Kendi sunucunuz</div>
+                                        <div class="font-bold text-sm" style="color: var(--color-text-heading);">SMTP</div>
+                                        <div class="text-xs opacity-60" style="color: var(--color-text-base);">Kendi sunucunuz</div>
                                     </div>
                                 </div>
                                 @if($provider === 'smtp')
-                                    <span class="text-xs font-semibold px-2 py-1 rounded"
-                                        style="color: var(--btn-save-bg); background-color: color-mix(in srgb, var(--btn-save-bg) 15%, white);">Aktif</span>
+                                    <span class="text-xs font-bold px-2 py-1 rounded"
+                                         style="color: var(--btn-save-bg); background-color: color-mix(in srgb, var(--btn-save-bg) 15%, white);">Aktif</span>
                                 @endif
                             </div>
                         </div>

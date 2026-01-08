@@ -1,15 +1,15 @@
 {{-- İlişkili Firmalar Card --}}
-<div class="card border p-6 shadow-sm @if($isViewMode) bg-slate-50/40 @endif">
-    <h2 class="text-base font-semibold text-slate-800 mb-4">İlişkili Firmalar</h2>
-
-
+<div class="theme-card p-6 shadow-sm">
+    <h2 class="text-base font-bold mb-4" style="color: var(--color-text-heading);">İlişkili Firmalar</h2>
 
     {{-- Firma Seç Combobox (Hide in View Mode) --}}
     @if(!$isViewMode)
         <div class="mb-4">
             <div class="flex items-center justify-between mb-1">
-                <label class="block text-sm font-medium text-slate-700">Firma Seç</label>
-                <span class="text-xs text-slate-500">{{ count($related_customers) }}/10</span>
+                <label class="block text-xs font-medium opacity-60" style="color: var(--color-text-base);">Firma
+                    Seç</label>
+                <span class="text-xs opacity-40"
+                    style="color: var(--color-text-base);">{{ count($related_customers) }}/10</span>
             </div>
 
             @php
@@ -31,8 +31,9 @@
 
     {{-- Seçilen Firmalar (2) --}}
     @if(count($related_customers) > 0)
-        <div class="border-t border-slate-200 pt-4">
-            <p class="text-sm font-medium text-slate-700 mb-3">Seçilen Firmalar ({{ count($related_customers) }})</p>
+        <div class="border-t border-slate-200/50 pt-4 mt-2">
+            <p class="text-xs font-medium opacity-60 mb-3" style="color: var(--color-text-base);">Seçilen Firmalar
+                ({{ count($related_customers) }})</p>
             <div class="space-y-2">
                 @foreach($related_customers as $customerId)
                     @php
@@ -40,13 +41,14 @@
                     @endphp
                     @if($customer)
                         <div
-                            class="flex items-center justify-between bg-white border border-slate-200 rounded-lg p-3 hover:border-slate-300 transition-colors">
+                            class="flex items-center justify-between bg-white/50 border border-slate-200/60 rounded-lg p-3 hover:border-slate-300 transition-colors">
                             <div class="flex items-center gap-3">
                                 <div class="flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold"
                                     style="background-color: color-mix(in srgb, var(--btn-primary-bg), white 90%); color: var(--btn-primary-bg);">
                                     {{ $loop->iteration }}
                                 </div>
-                                <span class="text-sm font-medium text-slate-800">{{ $customer['name'] }}</span>
+                                <span class="text-sm font-medium"
+                                    style="color: var(--color-text-base);">{{ $customer['name'] }}</span>
                             </div>
                             @if(!$isViewMode)
                                 <button type="button" wire:click="removeRelatedCustomer('{{ $customerId }}')"

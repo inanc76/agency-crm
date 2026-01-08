@@ -1,4 +1,5 @@
-<div class="card border p-6 shadow-sm">
+<div class="theme-card p-6 shadow-sm"
+    style="background-color: {{ $card_bg_color }}; border-color: {{ $card_border_color }}; border-radius: {{ $card_border_radius }};">
     {{-- Card Header --}}
     <div class="flex items-center justify-between pb-4 mb-6 border-b border-slate-200">
         <h2 class="text-sm font-medium text-slate-700">Header Görünüm Ayarları</h2>
