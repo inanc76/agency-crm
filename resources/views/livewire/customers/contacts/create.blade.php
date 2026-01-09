@@ -208,7 +208,7 @@ new
 
 }; ?>
 
-<div class="p-6 bg-slate-50 min-h-screen">
+<div class="p-6 min-h-screen" style="background-color: var(--page-bg);">
     <div class="max-w-7xl mx-auto">
         {{-- Back Button --}}
         <a href="/dashboard/customers?tab=contacts"

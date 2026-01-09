@@ -125,10 +125,10 @@ $menuItems = fn() => [
 
 ?>
 
-<div
-    class="bg-[var(--color-sidebar)] border-r border-gray-200 transition-all duration-300 flex flex-col {{ $collapsed ? 'w-[var(--sidebar-collapsed-width)]' : 'w-64' }}">
+<div class="bg-[var(--sidebar-bg)] border-r border-[var(--card-border)] transition-all duration-300 flex flex-col {{ $collapsed ? 'w-[var(--sidebar-collapsed-width)]' : 'w-64' }}"
+    style="color: var(--sidebar-text);">
     <!-- Logo/Brand -->
-    <div class="p-4 border-b border-gray-200">
+    <div class="p-4 border-b border-[var(--card-border)]">
         @if (!$collapsed)
             <h1 class="text-h2 text-[var(--color-text-primary)] font-bold">Ajans Panel</h1>
         @else
@@ -148,11 +148,19 @@ $menuItems = fn() => [
                 ['id' => 'sales', 'label' => 'Satışlar', 'icon' => '💰', 'href' => '/dashboard/customers?tab=sales', 'permission' => 'SALES'],
                 ['id' => 'mails', 'label' => 'Mailler', 'icon' => '✉️', 'href' => '/dashboard/mails', 'permission' => 'MAILS'],
                 [
-                    'id' => 'settings', 'label' => 'Ayarlar', 'icon' => '⚙️', 'href' => '/dashboard/settings', 'permission' => 'SETTINGS',
+                    'id' => 'settings',
+                    'label' => 'Ayarlar',
+                    'icon' => '⚙️',
+                    'href' => '/dashboard/settings',
+                    'permission' => 'SETTINGS',
                     'children' => [
                         ['id' => 'account', 'label' => 'Hesabım', 'icon' => '👤', 'href' => '/dashboard/settings/account', 'permission' => 'SETTINGS'],
                         [
-                            'id' => 'definitions', 'label' => 'Tanımlar', 'icon' => '📋', 'href' => '/dashboard/settings/definitions', 'permission' => 'DEFINITIONS',
+                            'id' => 'definitions',
+                            'label' => 'Tanımlar',
+                            'icon' => '📋',
+                            'href' => '/dashboard/settings/definitions',
+                            'permission' => 'DEFINITIONS',
                             'children' => [
                                 ['id' => 'users', 'label' => 'Kullanıcılar', 'icon' => '👥', 'href' => '/dashboard/settings/users', 'permission' => 'USERS'],
                                 ['id' => 'price-definitions', 'label' => 'Fiyat Tanımları', 'icon' => '💲', 'href' => '/dashboard/settings/price-definitions', 'permission' => 'SERVICES'],
@@ -175,7 +183,7 @@ $menuItems = fn() => [
             <div class="mb-1">
                 @if ($hasChildren)
                     <div wire:click="toggleExpanded('{{ $item['id'] }}')"
-                        class="flex items-center px-3 py-2 rounded-lg cursor-pointer transition-colors text-[var(--color-text-primary)] hover:bg-gray-100">
+                        class="flex items-center px-3 py-2 rounded-lg cursor-pointer transition-colors text-[var(--sidebar-text)] hover:bg-[var(--sidebar-hover-bg)] hover:text-[var(--sidebar-hover-text)]">
                         @if (!$collapsed)
                             <span class="text-lg mr-3">{{ $item['icon'] }}</span>
                             <span class="text-body font-medium flex-1">{{ $item['label'] }}</span>
@@ -198,7 +206,7 @@ $menuItems = fn() => [
                                 <div class="mb-1">
                                     @if ($childHasChildren)
                                         <div wire:click="toggleExpanded('{{ $child['id'] }}')"
-                                            class="flex items-center px-3 py-2 rounded-lg cursor-pointer transition-colors text-[var(--color-text-primary)] hover:bg-gray-100">
+                                            class="flex items-center px-3 py-2 rounded-lg cursor-pointer transition-colors text-[var(--sidebar-text)] hover:bg-[var(--sidebar-hover-bg)] hover:text-[var(--sidebar-hover-text)]">
                                             <span class="text-lg mr-3">{{ $child['icon'] }}</span>
                                             <span class="text-body font-medium flex-1">{{ $child['label'] }}</span>
                                             <span class="transform transition-transform {{ $childIsExpanded ? 'rotate-90' : '' }}">▶</span>
@@ -214,7 +222,7 @@ $menuItems = fn() => [
 
                                                     <a href="{{ $grandchild['href'] }}" class="block">
                                                         <div
-                                                            class="flex items-center px-3 py-2 rounded-lg cursor-pointer transition-colors {{ $grandchildIsActive ? 'bg-[var(--color-primary)] text-white' : 'text-[var(--color-text-primary)] hover:bg-gray-100' }}">
+                                                            class="flex items-center px-3 py-2 rounded-lg cursor-pointer transition-colors {{ $grandchildIsActive ? 'bg-[var(--sidebar-active-bg)] text-[var(--sidebar-active-text)]' : 'text-[var(--sidebar-text)] hover:bg-[var(--sidebar-hover-bg)] hover:text-[var(--sidebar-hover-text)]' }}">
                                                             <span class="text-lg mr-3">{{ $grandchild['icon'] }}</span>
                                                             <span class="text-body font-medium">{{ $grandchild['label'] }}</span>
                                                         </div>
@@ -225,7 +233,7 @@ $menuItems = fn() => [
                                     @else
                                         <a href="{{ $child['href'] }}" class="block">
                                             <div
-                                                class="flex items-center px-3 py-2 rounded-lg cursor-pointer transition-colors {{ $childIsActive ? 'bg-[var(--color-primary)] text-white' : 'text-[var(--color-text-primary)] hover:bg-gray-100' }}">
+                                                class="flex items-center px-3 py-2 rounded-lg cursor-pointer transition-colors {{ $childIsActive ? 'bg-[var(--sidebar-active-bg)] text-[var(--sidebar-active-text)]' : 'text-[var(--sidebar-text)] hover:bg-[var(--sidebar-hover-bg)] hover:text-[var(--sidebar-hover-text)]' }}">
                                                 <span class="text-lg mr-3">{{ $child['icon'] }}</span>
                                                 <span class="text-body font-medium">{{ $child['label'] }}</span>
                                             </div>
@@ -238,7 +246,7 @@ $menuItems = fn() => [
                 @else
                     <a href="{{ $item['href'] }}" class="block">
                         <div
-                            class="flex items-center px-3 py-2 rounded-lg cursor-pointer transition-colors {{ $isActive ? 'bg-[var(--color-primary)] text-white' : 'text-[var(--color-text-primary)] hover:bg-gray-100' }}">
+                            class="flex items-center px-3 py-2 rounded-lg cursor-pointer transition-colors {{ $isActive ? 'bg-[var(--sidebar-active-bg)] text-[var(--sidebar-active-text)]' : 'text-[var(--sidebar-text)] hover:bg-[var(--sidebar-hover-bg)] hover:text-[var(--sidebar-hover-text)]' }}">
                             @if (!$collapsed)
                                 <span class="text-lg mr-3">{{ $item['icon'] }}</span>
                                 <span class="text-body font-medium">{{ $item['label'] }}</span>
@@ -253,9 +261,9 @@ $menuItems = fn() => [
     </nav>
 
     <!-- Toggle Button -->
-    <div class="p-4 border-t border-gray-200">
+    <div class="p-4 border-t border-[var(--card-border)]">
         <button wire:click="toggleCollapsed"
-            class="w-full flex items-center justify-center p-2 rounded-lg hover:bg-gray-100 transition-colors">
+            class="w-full flex items-center justify-center p-2 rounded-lg hover:bg-[var(--dropdown-hover-bg)] transition-colors">
             <span class="text-lg">
                 {{ $collapsed ? '▶' : '◀' }}
             </span>

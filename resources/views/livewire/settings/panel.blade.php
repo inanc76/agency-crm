@@ -30,6 +30,7 @@ new
 
     // Design Settings
     public string $font_family = 'Inter';
+    public string $page_bg_color = '#f8fafc';
     public string $base_text_color = '#475569';
     public string $heading_color = '#0f172a';
 
@@ -92,6 +93,32 @@ new
     public string $table_avatar_border_color = '#e2e8f0';
     public string $table_avatar_text_color = '#475569';
 
+    // Sidebar Settings
+    public string $sidebar_bg_color = '#3D3373';
+    public string $sidebar_text_color = '#ffffff';
+    public string $sidebar_hover_bg_color = '#4338ca';
+    public string $sidebar_hover_text_color = '#ffffff';
+    public string $sidebar_active_item_bg_color = '#4f46e5';
+    public string $sidebar_active_item_text_color = '#ffffff';
+
+    // Header Settings
+    public string $header_active_item_bg_color = '#ffffff';
+    public string $header_active_item_text_color = '#4f46e5';
+
+    // Dashboard Settings
+    public string $dashboard_card_bg_color = '#eff4ff';
+    public string $dashboard_card_text_color = '#475569';
+    public string $dashboard_stats_1_color = '#3b82f6';
+    public string $dashboard_stats_2_color = '#14b8a6';
+    public string $dashboard_stats_3_color = '#f59e0b';
+
+    // User Menu Settings
+    public string $avatar_gradient_start_color = '#c084fc';
+    public string $avatar_gradient_end_color = '#9333ea';
+    public string $dropdown_header_bg_start_color = '#f5f3ff';
+    public string $dropdown_header_bg_end_color = '#eef2ff';
+    public string $notification_badge_color = '#ef4444';
+
     public function mount(PanelSettingRepository $repository): void
     {
         $setting = $repository->getActiveSetting();
@@ -110,6 +137,7 @@ new
 
             // Load Design Settings with defaults
             $this->font_family = $setting->font_family ?? 'Inter';
+            $this->page_bg_color = $setting->page_bg_color ?? '#f8fafc';
             $this->base_text_color = $setting->base_text_color ?? '#475569';
             $this->heading_color = $setting->heading_color ?? '#0f172a';
 
@@ -171,6 +199,29 @@ new
             $this->table_avatar_bg_color = $setting->table_avatar_bg_color ?? '#f1f5f9';
             $this->table_avatar_border_color = $setting->table_avatar_border_color ?? '#e2e8f0';
             $this->table_avatar_text_color = $setting->table_avatar_text_color ?? '#475569';
+
+            // Load New Settings
+            $this->sidebar_bg_color = $setting->sidebar_bg_color ?? '#3D3373';
+            $this->sidebar_text_color = $setting->sidebar_text_color ?? '#ffffff';
+            $this->sidebar_hover_bg_color = $setting->sidebar_hover_bg_color ?? '#4338ca';
+            $this->sidebar_hover_text_color = $setting->sidebar_hover_text_color ?? '#ffffff';
+            $this->sidebar_active_item_bg_color = $setting->sidebar_active_item_bg_color ?? '#4f46e5';
+            $this->sidebar_active_item_text_color = $setting->sidebar_active_item_text_color ?? '#ffffff';
+
+            $this->header_active_item_bg_color = $setting->header_active_item_bg_color ?? '#ffffff';
+            $this->header_active_item_text_color = $setting->header_active_item_text_color ?? '#4f46e5';
+
+            $this->dashboard_card_bg_color = $setting->dashboard_card_bg_color ?? '#eff4ff';
+            $this->dashboard_card_text_color = $setting->dashboard_card_text_color ?? '#475569';
+            $this->dashboard_stats_1_color = $setting->dashboard_stats_1_color ?? '#3b82f6';
+            $this->dashboard_stats_2_color = $setting->dashboard_stats_2_color ?? '#14b8a6';
+            $this->dashboard_stats_3_color = $setting->dashboard_stats_3_color ?? '#f59e0b';
+
+            $this->avatar_gradient_start_color = $setting->avatar_gradient_start_color ?? '#c084fc';
+            $this->avatar_gradient_end_color = $setting->avatar_gradient_end_color ?? '#9333ea';
+            $this->dropdown_header_bg_start_color = $setting->dropdown_header_bg_start_color ?? '#f5f3ff';
+            $this->dropdown_header_bg_end_color = $setting->dropdown_header_bg_end_color ?? '#eef2ff';
+            $this->notification_badge_color = $setting->notification_badge_color ?? '#ef4444';
         }
     }
 
@@ -190,8 +241,9 @@ new
             'header_border_color' => ['required', 'string', 'regex:/^#[0-9A-Fa-f]{6}$/'],
             'header_border_width' => 'required|integer|min:0|max:20',
 
-            'font_family' => 'nullable|string|max:255',
-            'base_text_color' => 'nullable|string',
+            'font_family' => 'required|string',
+            'page_bg_color' => 'nullable|string',
+            'base_text_color' => 'required|string',
             'heading_color' => 'nullable|string',
 
             'input_focus_ring_color' => 'nullable|string',
@@ -247,6 +299,28 @@ new
             'table_avatar_bg_color' => 'nullable|string',
             'table_avatar_border_color' => 'nullable|string',
             'table_avatar_text_color' => 'nullable|string',
+
+            'sidebar_bg_color' => 'nullable|string',
+            'sidebar_text_color' => 'nullable|string',
+            'sidebar_hover_bg_color' => 'nullable|string',
+            'sidebar_hover_text_color' => 'nullable|string',
+            'sidebar_active_item_bg_color' => 'nullable|string',
+            'sidebar_active_item_text_color' => 'nullable|string',
+
+            'header_active_item_bg_color' => 'nullable|string',
+            'header_active_item_text_color' => 'nullable|string',
+
+            'dashboard_card_bg_color' => 'nullable|string',
+            'dashboard_card_text_color' => 'nullable|string',
+            'dashboard_stats_1_color' => 'nullable|string',
+            'dashboard_stats_2_color' => 'nullable|string',
+            'dashboard_stats_3_color' => 'nullable|string',
+
+            'avatar_gradient_start_color' => 'nullable|string',
+            'avatar_gradient_end_color' => 'nullable|string',
+            'dropdown_header_bg_start_color' => 'nullable|string',
+            'dropdown_header_bg_end_color' => 'nullable|string',
+            'notification_badge_color' => 'nullable|string',
         ]);
 
         $repository->saveSettings($data);
@@ -266,7 +340,7 @@ new
     }
 }; ?>
 
-<div class="p-6 bg-slate-50 min-h-screen">
+<div class="p-6 min-h-screen" style="background-color: var(--page-bg);">
     <div class="w-full lg:w-4/5 mx-auto pb-20">
         {{-- Back Button --}}
         <a href="/dashboard/settings"
@@ -336,50 +410,50 @@ new
                         </x-slot:content>
                     </x-mary-collapse>
 
-                    {{-- 2. Menü Renk Ayarları Önizleme --}}
+                    {{-- 2. Layout Önizleme (Sidebar & Header) --}}
                     <x-mary-collapse name="preview2" group="previews" separator
                         class="bg-white border border-slate-200 shadow-sm rounded-lg">
                         <x-slot:heading>
                             <div class="flex items-center justify-between w-full pr-4">
                                 <div class="flex items-center gap-3">
                                     <x-mary-icon name="o-bars-3" class="w-5 h-5 text-indigo-500" />
-                                    <span class="font-semibold text-slate-700">Menü Renk Ayarları Önizleme</span>
+                                    <span class="font-semibold text-slate-700">Layout Önizleme (Sidebar & Header)</span>
                                 </div>
                                 <div class="flex gap-2">
                                     <span
-                                        class="text-[10px] font-mono bg-slate-100 text-slate-500 px-2 py-1 rounded">--header-bg</span>
+                                        class="text-[10px] font-mono bg-slate-100 text-slate-500 px-2 py-1 rounded">--sidebar-bg</span>
                                     <span
-                                        class="text-[10px] font-mono bg-slate-100 text-slate-500 px-2 py-1 rounded">--menu-bg</span>
+                                        class="text-[10px] font-mono bg-slate-100 text-slate-500 px-2 py-1 rounded">--header-bg</span>
                                 </div>
                             </div>
                         </x-slot:heading>
                         <x-slot:content>
-                            <div class="space-y-4">
-                                <div class="p-4 rounded-xl border border-slate-200 relative"
-                                    style="background-color: {{ $header_bg_color }}">
-                                    <span class="absolute top-2 right-2 text-[8px] font-mono opacity-50"
-                                        style="color: {{ $menu_text_color }}">--header-bg</span>
-                                    <div class="flex items-center justify-between">
-                                        <span style="color: {{ $menu_text_color }}">Header Alanı</span>
-                                        <div class="flex gap-2">
-                                            <div class="w-8 h-8 rounded-full"
-                                                style="background-color: {{ $menu_text_color }}; opacity: 0.2;"></div>
-                                            <div class="w-8 h-8 rounded-full"
-                                                style="background-color: {{ $menu_text_color }}; opacity: 0.2;"></div>
+                            <div class="flex h-32 border border-slate-200 rounded-xl overflow-hidden">
+                                {{-- Sidebar Preview --}}
+                                <div class="w-1/4 h-full flex flex-col p-3 gap-2"
+                                    style="background-color: {{ $sidebar_bg_color }}; color: {{ $sidebar_text_color }}">
+                                    <span class="text-[8px] opacity-70 mb-2">SIDEBAR</span>
+                                    {{-- Active Item --}}
+                                    <div class="h-6 rounded w-3/4"
+                                        style="background-color: {{ $sidebar_active_item_bg_color }}"></div>
+                                    {{-- Normal Item --}}
+                                    <div class="h-6 rounded w-full opacity-50 bg-white/10"></div>
+                                </div>
+
+                                {{-- Header Preview --}}
+                                <div class="flex-1 flex flex-col">
+                                    <div class="h-12 w-full flex items-center justify-between px-4"
+                                        style="background-color: {{ $header_bg_color }}; border-bottom: {{ $header_border_width }}px solid {{ $header_border_color }}">
+                                        <span class="text-[8px] px-2 py-1 rounded"
+                                            style="background-color: white; color: black; opacity: 0.5;">HEADER</span>
+                                        {{-- Header Active Item --}}
+                                        <div class="h-6 w-16 rounded-full flex items-center justify-center text-[8px]"
+                                            style="background-color: {{ $header_active_item_bg_color }}; color: {{ $header_active_item_text_color }}">
+                                            Active
                                         </div>
                                     </div>
-                                </div>
-                                <div class="p-4 rounded-xl border border-slate-200 flex relative"
-                                    style="background-color: {{ $menu_bg_color }}">
-                                    <span class="absolute top-2 right-2 text-[8px] font-mono opacity-50"
-                                        style="color: {{ $menu_text_color }}">--menu-bg</span>
-                                    <div class="space-y-2 w-full">
-                                        <div class="h-2 w-3/4 rounded"
-                                            style="background-color: {{ $menu_text_color }}; opacity: 0.6;"></div>
-                                        <div class="h-2 w-1/2 rounded"
-                                            style="background-color: {{ $menu_text_color }}; opacity: 0.4;"></div>
-                                        <div class="h-2 w-2/3 rounded"
-                                            style="background-color: {{ $menu_text_color }}; opacity: 0.4;"></div>
+                                    <div class="flex-1 bg-slate-50 p-4">
+                                        <span class="text-[10px] text-slate-400">Content Area</span>
                                     </div>
                                 </div>
                             </div>
@@ -971,6 +1045,105 @@ new
                                             <code
                                                 class="text-xs font-mono text-slate-600">{{ $table_avatar_border_color }}</code>
                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </x-slot:content>
+                    </x-mary-collapse>
+                    {{-- 11. Dashboard Elemanları Önizleme --}}
+                    <x-mary-collapse name="preview11" group="previews" separator
+                        class="bg-white border border-slate-200 shadow-sm rounded-lg">
+                        <x-slot:heading>
+                            <div class="flex items-center justify-between w-full pr-4">
+                                <div class="flex items-center gap-3">
+                                    <x-mary-icon name="o-presentation-chart-line" class="w-5 h-5 text-indigo-500" />
+                                    <span class="font-semibold text-slate-700">Dashboard Elemanları Önizleme</span>
+                                </div>
+                                <div class="flex gap-2">
+                                    <span
+                                        class="text-[10px] font-mono bg-slate-100 text-slate-500 px-2 py-1 rounded">--dashboard-stats-*</span>
+                                </div>
+                            </div>
+                        </x-slot:heading>
+                        <x-slot:content>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                {{-- Stats 1 --}}
+                                <div class="p-4 rounded-xl shadow-sm"
+                                    style="background-color: {{ $dashboard_card_bg_color }}">
+                                    <div class="flex items-center gap-3 mb-2">
+                                        <div class="w-8 h-8 rounded-lg flex items-center justify-center"
+                                            style="background-color: color-mix(in srgb, {{ $dashboard_stats_1_color }}, white 90%); color: {{ $dashboard_stats_1_color }};">
+                                            <x-mary-icon name="o-users" class="w-4 h-4" />
+                                        </div>
+                                        <span class="text-xs px-2 py-0.5 rounded-full"
+                                            style="background-color: color-mix(in srgb, {{ $dashboard_stats_1_color }}, white 90%); color: {{ $dashboard_stats_1_color }};">Aktif</span>
+                                    </div>
+                                    <h4 class="text-lg font-bold" style="color: {{ $dashboard_card_text_color }}">7</h4>
+                                </div>
+                                {{-- Stats 2 --}}
+                                <div class="p-4 rounded-xl shadow-sm"
+                                    style="background-color: {{ $dashboard_card_bg_color }}">
+                                    <div class="flex items-center gap-3 mb-2">
+                                        <div class="w-8 h-8 rounded-lg flex items-center justify-center"
+                                            style="background-color: color-mix(in srgb, {{ $dashboard_stats_2_color }}, white 90%); color: {{ $dashboard_stats_2_color }};">
+                                            <x-mary-icon name="o-cube" class="w-4 h-4" />
+                                        </div>
+                                    </div>
+                                    <h4 class="text-lg font-bold" style="color: {{ $dashboard_card_text_color }}">9</h4>
+                                </div>
+                                {{-- Stats 3 --}}
+                                <div class="p-4 rounded-xl shadow-sm"
+                                    style="background-color: {{ $dashboard_card_bg_color }}">
+                                    <div class="flex items-center gap-3 mb-2">
+                                        <div class="w-8 h-8 rounded-lg flex items-center justify-center"
+                                            style="background-color: color-mix(in srgb, {{ $dashboard_stats_3_color }}, white 90%); color: {{ $dashboard_stats_3_color }};">
+                                            <x-mary-icon name="o-archive-box" class="w-4 h-4" />
+                                        </div>
+                                    </div>
+                                    <h4 class="text-lg font-bold" style="color: {{ $dashboard_card_text_color }}">5</h4>
+                                </div>
+                            </div>
+                        </x-slot:content>
+                    </x-mary-collapse>
+
+                    {{-- 12. User Menu & Dropdown Önizleme --}}
+                    <x-mary-collapse name="preview12" group="previews" separator
+                        class="bg-white border border-slate-200 shadow-sm rounded-lg">
+                        <x-slot:heading>
+                            <div class="flex items-center justify-between w-full pr-4">
+                                <div class="flex items-center gap-3">
+                                    <x-mary-icon name="o-user" class="w-5 h-5 text-indigo-500" />
+                                    <span class="font-semibold text-slate-700">User Menu & Dropdown Önizleme</span>
+                                </div>
+                            </div>
+                        </x-slot:heading>
+                        <x-slot:content>
+                            <div
+                                class="flex flex-col md:flex-row gap-8 items-center justify-center p-6 bg-slate-50 border border-slate-200 rounded-xl">
+                                {{-- User Icon & Badge --}}
+                                <div class="flex items-center gap-4">
+                                    <div class="relative">
+                                        <x-mary-icon name="o-bell" class="w-6 h-6 text-slate-400" />
+                                        <span class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full"
+                                            style="background-color: {{ $notification_badge_color }}"></span>
+                                    </div>
+                                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold"
+                                        style="background: linear-gradient(to right, {{ $avatar_gradient_start_color }}, {{ $avatar_gradient_end_color }})">
+                                        U
+                                    </div>
+                                </div>
+
+                                {{-- Dropdown Preview --}}
+                                <div class="w-64 bg-white rounded-xl shadow-lg border border-slate-100 overflow-hidden">
+                                    <div class="px-4 py-3 border-b border-slate-50"
+                                        style="background: linear-gradient(to right, {{ $dropdown_header_bg_start_color }}, {{ $dropdown_header_bg_end_color }})">
+                                        <p class="text-sm font-medium text-slate-800">Kullanıcı Adı</p>
+                                        <p class="text-xs text-slate-500">user@example.com</p>
+                                    </div>
+                                    <div class="p-2">
+                                        <div class="px-3 py-2 text-sm text-slate-600 hover:bg-slate-50 rounded">Profil
+                                        </div>
+                                        <div class="px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded">Çıkış</div>
                                     </div>
                                 </div>
                             </div>

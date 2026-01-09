@@ -54,6 +54,15 @@
     --color-accent: var(--color-neutral-800);
     --color-accent-content: var(--color-neutral-800);
     --color-accent-foreground: var(--color-white);
+
+    /* === NEW THEME MAPPINGS (User Request) === */
+    /* Access via text-skin-heading, bg-skin-base, etc. */
+    --color-skin-heading: var(--color-text-heading);
+    --color-skin-base: var(--color-text-base);
+    --color-skin-success: var(--brand-success);
+
+    /* Spacing aliases */
+    --spacing-sidebar: var(--sidebar-width);
 }
 
 @layer theme {
@@ -65,6 +74,33 @@
 }
 
 @layer base {
+    :root {
+        /* Brand Colors */
+        --brand-primary: #4f46e5;
+        --brand-success: #4ade80;
+
+        /* Text Colors */
+        --color-text-heading: #0f172a;
+        /* text-gray-900 */
+        --color-text-base: #374151;
+        /* text-gray-700 */
+        --color-text-muted: #9ca3af;
+        /* text-gray-400 */
+
+        /* Backgrounds & Borders */
+        --card-bg: #ffffff;
+        --card-border: #e5e7eb;
+        /* border-gray-200 */
+        --dropdown-hover-bg: #f9fafb;
+        /* hover:bg-gray-50 */
+
+        /* Spacing & Sizing */
+        --sidebar-width: 16rem;
+        /* w-64 */
+        --header-height: 4rem;
+        --border-radius-xl: 0.75rem;
+        /* rounded-xl */
+    }
 
     *,
     ::after,

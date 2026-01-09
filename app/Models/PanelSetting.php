@@ -23,6 +23,7 @@ class PanelSetting extends Model
         'is_active',
         // Typography
         'font_family',
+        'page_bg_color',
         'base_text_color',
         'heading_color',
         'label_font_size',
@@ -78,6 +79,28 @@ class PanelSetting extends Model
         'table_avatar_bg_color',
         'table_avatar_border_color',
         'table_avatar_text_color',
+        // New Sidebar Settings
+        'sidebar_bg_color',
+        'sidebar_text_color',
+        'sidebar_hover_bg_color',
+        'sidebar_hover_text_color',
+        'sidebar_active_item_bg_color',
+        'sidebar_active_item_text_color',
+        // New Header Active Items
+        'header_active_item_bg_color',
+        'header_active_item_text_color',
+        // New Dashboard Colors
+        'dashboard_card_bg_color',
+        'dashboard_card_text_color',
+        'dashboard_stats_1_color',
+        'dashboard_stats_2_color',
+        'dashboard_stats_3_color',
+        // New User Menu / Header Dropdown
+        'avatar_gradient_start_color',
+        'avatar_gradient_end_color',
+        'dropdown_header_bg_start_color',
+        'dropdown_header_bg_end_color',
+        'notification_badge_color',
     ];
 
     protected function casts(): array

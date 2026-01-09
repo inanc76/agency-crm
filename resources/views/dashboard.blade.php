@@ -2,8 +2,8 @@
     <div class="space-y-6 w-full max-w-[80%] mx-auto mt-[30px]">
         <!-- Page Header -->
         <div class="theme-card p-6">
-            <h1 class="text-3xl font-bold text-gray-900 mb-2">Gösterge Paneli</h1>
-            <p class="text-gray-600">Hoş geldiniz! İşte sisteminizdeki genel bakış.</p>
+            <h1 class="text-3xl font-bold mb-2" style="color: var(--color-text-heading);">Gösterge Paneli</h1>
+            <p style="color: var(--color-text-base);">Hoş geldiniz! İşte sisteminizdeki genel bakış.</p>
         </div>
 
         <!-- Stats Grid -->
@@ -11,56 +11,63 @@
             <!-- Müşteriler Card -->
             <div class="theme-card p-6 transform hover:scale-105 transition-transform duration-300">
                 <div class="flex items-center justify-between mb-4">
-                    <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center">
+                    <div class="w-12 h-12 rounded-xl flex items-center justify-center"
+                        style="background-color: color-mix(in srgb, var(--dashboard-stats-1), white 90%); color: var(--dashboard-stats-1);">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                         </svg>
                     </div>
-                    <span class="text-sm font-medium bg-blue-50 text-blue-600 px-3 py-1 rounded-full">Aktif</span>
+                    <span class="text-sm font-medium px-3 py-1 rounded-full"
+                        style="background-color: color-mix(in srgb, var(--dashboard-stats-1), white 90%); color: var(--dashboard-stats-1);">Aktif</span>
                 </div>
-                <h2 class="text-2xl font-bold mb-1 text-gray-900">Müşteriler</h2>
-                <p class="text-4xl font-extrabold mb-2 text-gray-900">7</p>
-                <p class="text-gray-500 text-sm">Toplam müşteri sayısı</p>
+                <h2 class="text-2xl font-bold mb-1" style="color: var(--color-text-heading);">Müşteriler</h2>
+                <p class="text-4xl font-extrabold mb-2" style="color: var(--color-text-heading);">7</p>
+                <p class="text-sm" style="color: var(--color-text-base);">Toplam müşteri sayısı</p>
             </div>
 
             <!-- Hizmetler Card -->
             <div class="theme-card p-6 transform hover:scale-105 transition-transform duration-300">
                 <div class="flex items-center justify-between mb-4">
-                    <div class="w-12 h-12 bg-teal-50 text-teal-600 rounded-xl flex items-center justify-center">
+                    <div class="w-12 h-12 rounded-xl flex items-center justify-center"
+                        style="background-color: color-mix(in srgb, var(--dashboard-stats-2), white 90%); color: var(--dashboard-stats-2);">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                     </div>
-                    <span class="text-sm font-medium bg-teal-50 text-teal-600 px-3 py-1 rounded-full">Aktif</span>
+                    <span class="text-sm font-medium px-3 py-1 rounded-full"
+                        style="background-color: color-mix(in srgb, var(--dashboard-stats-2), white 90%); color: var(--dashboard-stats-2);">Aktif</span>
                 </div>
-                <h2 class="text-2xl font-bold mb-1 text-gray-900">Hizmetler</h2>
-                <p class="text-4xl font-extrabold mb-2 text-gray-900">9</p>
-                <p class="text-gray-500 text-sm">Aktif hizmet sayısı</p>
+                <h2 class="text-2xl font-bold mb-1" style="color: var(--color-text-heading);">Hizmetler</h2>
+                <p class="text-4xl font-extrabold mb-2" style="color: var(--color-text-heading);">9</p>
+                <p class="text-sm" style="color: var(--color-text-base);">Aktif hizmet sayısı</p>
             </div>
 
             <!-- Varlıklar Card -->
             <div class="theme-card p-6 transform hover:scale-105 transition-transform duration-300">
                 <div class="flex items-center justify-between mb-4">
-                    <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center">
+                    <div class="w-12 h-12 rounded-xl flex items-center justify-center"
+                        style="background-color: color-mix(in srgb, var(--dashboard-stats-3), white 90%); color: var(--dashboard-stats-3);">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
                         </svg>
                     </div>
-                    <span class="text-sm font-medium bg-amber-50 text-amber-600 px-3 py-1 rounded-full">Toplam</span>
+                    <span class="text-sm font-medium px-3 py-1 rounded-full"
+                        style="background-color: color-mix(in srgb, var(--dashboard-stats-3), white 90%); color: var(--dashboard-stats-3);">Toplam</span>
                 </div>
-                <h2 class="text-2xl font-bold mb-1 text-gray-900">Varlıklar</h2>
-                <p class="text-4xl font-extrabold mb-2 text-gray-900">5</p>
-                <p class="text-gray-500 text-sm">Toplam varlık sayısı</p>
+                <h2 class="text-2xl font-bold mb-1" style="color: var(--color-text-heading);">Varlıklar</h2>
+                <p class="text-4xl font-extrabold mb-2" style="color: var(--color-text-heading);">5</p>
+                <p class="text-sm" style="color: var(--color-text-base);">Toplam varlık sayısı</p>
             </div>
         </div>
 
         <!-- Welcome Card -->
         <div class="theme-card p-8">
             <div class="flex items-start space-x-4">
-                <div class="w-12 h-12 bg-purple-500 rounded-xl flex items-center justify-center flex-shrink-0">
+                <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+                    style="background-color: var(--avatar-gradient-start);">
                     <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -72,7 +79,8 @@
                         Laravel layout migrasyonu başarıyla tamamlandı. Yeni tasarımınız hazır!
                     </p>
                     <button
-                        class="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-6 py-3 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105">
+                        class="text-white font-semibold px-6 py-3 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105"
+                        style="background-color: var(--btn-create-bg);">
                         Başlayın
                     </button>
                 </div>

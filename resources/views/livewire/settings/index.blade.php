@@ -101,7 +101,7 @@ new
     }
 }; ?>
 
-<div class="p-6 bg-slate-50 min-h-screen">
+<div class="p-6 min-h-screen" style="background-color: var(--page-bg);">
     {{-- Page Header --}}
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>

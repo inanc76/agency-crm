@@ -24,6 +24,14 @@
                             hint="Sistemin tamamında kullanılacak ana font (Örn: Inter, Geist, Plus Jakarta Sans)" />
                     </div>
                     <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-2">Sayfa Arka Plan Rengi</label>
+                        <div class="flex items-center gap-2">
+                            <input type="color" wire:model.live="page_bg_color"
+                                class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
+                            <x-mary-input wire:model.live="page_bg_color" placeholder="#f8fafc" class="flex-1" />
+                        </div>
+                    </div>
+                    <div>
                         <label class="block text-sm font-medium text-slate-700 mb-2">Base Text Color</label>
                         <div class="flex items-center gap-2">
                             <input type="color" wire:model.live="base_text_color"
@@ -781,6 +789,80 @@
                         </div>
                     </div>
 
+                </div>
+            </x-slot:content>
+        </x-mary-collapse>
+
+        {{-- Accordion 7: Dashboard Özelleştirme --}}
+        <x-mary-collapse name="group_design_7" group="settings_design" separator
+            class="bg-white border border-slate-200 shadow-sm rounded-lg">
+            <x-slot:heading>
+                <div class="flex items-center gap-3">
+                    <x-mary-icon name="o-presentation-chart-line" class="w-5 h-5 text-indigo-500" />
+                    <span class="font-semibold text-slate-700">Dashboard Özelleştirme</span>
+                </div>
+            </x-slot:heading>
+            <x-slot:content>
+                <div class="space-y-6 py-4">
+                    {{-- Dashboard Card Colors --}}
+                    <div>
+                        <h3 class="text-xs font-semibold uppercase text-slate-500 mb-3 block">Dashboard Kartları</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-2">Card Background</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" wire:model.live="dashboard_card_bg_color"
+                                        class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
+                                    <x-mary-input wire:model.live="dashboard_card_bg_color" placeholder="#eff4ff"
+                                        class="flex-1" />
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-2">Card Text Color</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" wire:model.live="dashboard_card_text_color"
+                                        class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
+                                    <x-mary-input wire:model.live="dashboard_card_text_color" placeholder="#475569"
+                                        class="flex-1" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Stats Colors --}}
+                    <div class="border-t border-slate-100 pt-4">
+                        <h3 class="text-xs font-semibold uppercase text-slate-500 mb-3 block">İstatistik Kart Renkleri
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-2">Stats 1 (Blue)</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" wire:model.live="dashboard_stats_1_color"
+                                        class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
+                                    <x-mary-input wire:model.live="dashboard_stats_1_color" placeholder="#3b82f6"
+                                        class="flex-1" />
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-2">Stats 2 (Teal)</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" wire:model.live="dashboard_stats_2_color"
+                                        class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
+                                    <x-mary-input wire:model.live="dashboard_stats_2_color" placeholder="#14b8a6"
+                                        class="flex-1" />
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-2">Stats 3 (Amber)</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" wire:model.live="dashboard_stats_3_color"
+                                        class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
+                                    <x-mary-input wire:model.live="dashboard_stats_3_color" placeholder="#f59e0b"
+                                        class="flex-1" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </x-slot:content>
         </x-mary-collapse>

@@ -3,7 +3,7 @@
         $activeTab = request()->query('tab', 'customers');
     @endphp
     
-    <div class="p-6 bg-gray-50 min-h-screen">
+    <div class="p-6 min-h-screen" style="background-color: var(--page-bg);">
         {{-- Page Header --}}
         <div class="mb-6">
             <h1 class="text-2xl font-bold text-gray-900">Müşteri Yönetimi</h1>

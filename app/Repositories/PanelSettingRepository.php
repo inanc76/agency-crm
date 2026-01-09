@@ -16,11 +16,14 @@ class PanelSettingRepository
     public function saveSettings(array $data): PanelSetting
     {
         return DB::transaction(function () use ($data) {
-            // Deactivate all existing settings
-            PanelSetting::query()->update(['is_active' => false]);
+            // 1. Find the currently active setting to update it directly
+            // We use lockForUpdate to prevent race conditions
+            $setting = PanelSetting::where('is_active', true)->first();
 
-            // Get or create the active setting
-            $setting = PanelSetting::where('is_active', false)->first() ?? new PanelSetting();
+            // 2. If no active setting found, try to find ANY setting or create new
+            if (!$setting) {
+                $setting = PanelSetting::latest()->first() ?? new PanelSetting();
+            }
 
             // Handle favicon upload
             if (isset($data['favicon']) && $data['favicon']) {
@@ -52,6 +55,9 @@ class PanelSettingRepository
             $setting->fill($data);
             $setting->save();
 
+            // 3. Ensure Singleton: Deactivate all OTHER settings
+            PanelSetting::where('id', '!=', $setting->id)->update(['is_active' => false]);
+
             return $setting;
         });
     }
@@ -70,6 +76,7 @@ class PanelSettingRepository
 
             // Design Defaults
             'font_family' => 'Inter',
+            'page_bg_color' => '#f8fafc',
             'base_text_color' => '#475569',
             'heading_color' => '#0f172a',
             'label_font_size' => 14,
@@ -128,6 +135,32 @@ class PanelSettingRepository
             'table_avatar_bg_color' => '#f1f5f9',
             'table_avatar_border_color' => '#e2e8f0',
             'table_avatar_text_color' => '#475569',
+
+            // Sidebar Defaults
+            'sidebar_bg_color' => '#3D3373',
+            'sidebar_text_color' => '#ffffff',
+            'sidebar_hover_bg_color' => '#4338ca',
+            'sidebar_hover_text_color' => '#ffffff',
+            'sidebar_active_item_bg_color' => '#4f46e5',
+            'sidebar_active_item_text_color' => '#ffffff',
+
+            // Header defaults
+            'header_active_item_bg_color' => '#ffffff',
+            'header_active_item_text_color' => '#4f46e5',
+
+            // Dashboard Defaults
+            'dashboard_card_bg_color' => '#eff4ff',
+            'dashboard_card_text_color' => '#475569',
+            'dashboard_stats_1_color' => '#3b82f6',
+            'dashboard_stats_2_color' => '#14b8a6',
+            'dashboard_stats_3_color' => '#f59e0b',
+
+            // User Menu Defaults
+            'avatar_gradient_start_color' => '#c084fc',
+            'avatar_gradient_end_color' => '#9333ea',
+            'dropdown_header_bg_start_color' => '#f5f3ff',
+            'dropdown_header_bg_end_color' => '#eef2ff',
+            'notification_badge_color' => '#ef4444',
         ]);
     }
 }

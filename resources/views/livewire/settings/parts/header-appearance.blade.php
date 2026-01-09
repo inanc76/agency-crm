@@ -72,94 +72,198 @@
             </x-slot:content>
         </x-mary-collapse>
 
-        {{-- Accordion 2: Menü --}}
+        {{-- Accordion 2: Sidebar (Sol Menü) --}}
         <x-mary-collapse name="group2" group="settings" separator
             class="bg-white border border-slate-200 shadow-sm rounded-lg">
             <x-slot:heading>
                 <div class="flex items-center gap-3">
                     <x-mary-icon name="o-bars-3" class="w-5 h-5 text-indigo-500" />
-                    <span class="font-semibold text-slate-700">Menü Renk Ayarları</span>
+                    <span class="font-semibold text-slate-700">Sidebar (Sol Menü) Ayarları</span>
                 </div>
             </x-slot:heading>
             <x-slot:content>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 py-2">
-                    {{-- Header Background Color --}}
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 py-2">
+                    {{-- Sidebar Background Color --}}
                     <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-2">Header Arka Plan
-                            Rengi</label>
+                        <label class="block text-sm font-medium text-slate-700 mb-2">Sidebar Arka Plan</label>
                         <div class="flex items-center gap-2">
-                            <input type="color" wire:model.live="header_bg_color"
+                            <input type="color" wire:model.live="sidebar_bg_color"
                                 class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
-                            <x-mary-input wire:model.live="header_bg_color" placeholder="#3D3373" class="flex-1" />
+                            <x-mary-input wire:model.live="sidebar_bg_color" placeholder="#3D3373" class="flex-1" />
                         </div>
                     </div>
 
-                    {{-- Menu Background Color --}}
+                    {{-- Sidebar Text Color --}}
                     <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-2">Menü Arka Plan
-                            Rengi</label>
+                        <label class="block text-sm font-medium text-slate-700 mb-2">Sidebar Yazı Rengi</label>
                         <div class="flex items-center gap-2">
-                            <input type="color" wire:model.live="menu_bg_color"
+                            <input type="color" wire:model.live="sidebar_text_color"
                                 class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
-                            <x-mary-input wire:model.live="menu_bg_color" placeholder="#3D3373" class="flex-1" />
+                            <x-mary-input wire:model.live="sidebar_text_color" placeholder="#ffffff" class="flex-1" />
                         </div>
                     </div>
+                </div>
 
-                    {{-- Menu Text Color --}}
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-2">Menü Yazı Rengi</label>
-                        <div class="flex items-center gap-2">
-                            <input type="color" wire:model.live="menu_text_color"
-                                class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
-                            <x-mary-input wire:model.live="menu_text_color" placeholder="#ffffff" class="flex-1" />
+                {{-- Validations & Active States --}}
+                <div class="border-t border-slate-100 pt-4 mt-4">
+                    <h3 class="text-xs font-semibold uppercase text-slate-500 mb-3">Durum Renkleri (Hover & Active)</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">Hover Background</label>
+                            <div class="flex items-center gap-2">
+                                <input type="color" wire:model.live="sidebar_hover_bg_color"
+                                    class="w-10 h-10 rounded border border-slate-200 cursor-pointer">
+                                <x-mary-input wire:model.live="sidebar_hover_bg_color" placeholder="#4338ca"
+                                    class="flex-1" />
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">Hover Text</label>
+                            <div class="flex items-center gap-2">
+                                <input type="color" wire:model.live="sidebar_hover_text_color"
+                                    class="w-10 h-10 rounded border border-slate-200 cursor-pointer">
+                                <x-mary-input wire:model.live="sidebar_hover_text_color" placeholder="#ffffff"
+                                    class="flex-1" />
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">Active Background</label>
+                            <div class="flex items-center gap-2">
+                                <input type="color" wire:model.live="sidebar_active_item_bg_color"
+                                    class="w-10 h-10 rounded border border-slate-200 cursor-pointer">
+                                <x-mary-input wire:model.live="sidebar_active_item_bg_color" placeholder="#4f46e5"
+                                    class="flex-1" />
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">Active Text</label>
+                            <div class="flex items-center gap-2">
+                                <input type="color" wire:model.live="sidebar_active_item_text_color"
+                                    class="w-10 h-10 rounded border border-slate-200 cursor-pointer">
+                                <x-mary-input wire:model.live="sidebar_active_item_text_color" placeholder="#ffffff"
+                                    class="flex-1" />
+                            </div>
                         </div>
                     </div>
                 </div>
             </x-slot:content>
         </x-mary-collapse>
 
-        {{-- Accordion 3: Kenarlık ve Yazı Rengi --}}
+        {{-- Accordion 3: Header & Top Bar Ayarları --}}
         <x-mary-collapse name="group3" group="settings" separator
             class="bg-white border border-slate-200 shadow-sm rounded-lg">
             <x-slot:heading>
                 <div class="flex items-center gap-3">
                     <x-mary-icon name="o-swatch" class="w-5 h-5 text-indigo-500" />
-                    <span class="font-semibold text-slate-700">Kenarlık ve Yazı Rengi</span>
+                    <span class="font-semibold text-slate-700">Header & Top Bar Ayarları</span>
                 </div>
             </x-slot:heading>
             <x-slot:content>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 py-2">
-                    {{-- Header Icon Color --}}
+                <div class="space-y-6 py-4">
+                    {{-- 1. General Header Colors --}}
                     <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-2">Header İkon ve Yazı
-                            Rengi</label>
-                        <div class="flex items-center gap-2">
-                            <input type="color" wire:model.live="header_icon_color"
-                                class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
-                            <x-mary-input wire:model.live="header_icon_color" placeholder="#ffffff" class="flex-1"
-                                hint="Sağ taraftaki bildirim zili ve kullanıcı adı rengi" />
-                        </div>
-                    </div>
-
-                    {{-- Header Border --}}
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-2">Header Alt Kenarlık</label>
-                        <div class="grid grid-cols-2 gap-2">
+                         <h3 class="text-xs font-semibold uppercase text-slate-500 mb-3 block">Genel Görünüm</h3>
+                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div>
-                                <label class="block text-xs text-slate-500 mb-1">Renk</label>
+                                <label class="block text-sm font-medium text-slate-700 mb-2">Header Arka Plan</label>
                                 <div class="flex items-center gap-2">
-                                    <input type="color" wire:model.live="header_border_color"
-                                        class="w-10 h-10 rounded border border-slate-200 cursor-pointer">
-                                    <x-mary-input wire:model.live="header_border_color" placeholder="#000000"
-                                        class="flex-1" />
+                                    <input type="color" wire:model.live="header_bg_color"
+                                        class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
+                                    <x-mary-input wire:model.live="header_bg_color" placeholder="#3D3373" class="flex-1" />
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-xs text-slate-500 mb-1">Kalınlık (px)</label>
-                                <x-mary-input type="number" wire:model.live="header_border_width" placeholder="0"
-                                    min="0" max="20" />
+                                <label class="block text-sm font-medium text-slate-700 mb-2">Border Color</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" wire:model.live="header_border_color"
+                                        class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
+                                    <x-mary-input wire:model.live="header_border_color" placeholder="#000000" class="flex-1" />
+                                </div>
                             </div>
-                        </div>
+                             <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-2">Border Width (px)</label>
+                                <x-mary-input type="number" wire:model.live="header_border_width" placeholder="0" min="0" max="20" />
+                            </div>
+                         </div>
+                    </div>
+
+                    {{-- 2. Header Active Item --}}
+                    <div class="border-t border-slate-100 pt-4">
+                         <h3 class="text-xs font-semibold uppercase text-slate-500 mb-3 block">Aktif Menü Elemanı (Oval Butonlar)</h3>
+                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                             <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-2">Active Background</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" wire:model.live="header_active_item_bg_color"
+                                        class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
+                                    <x-mary-input wire:model.live="header_active_item_bg_color" placeholder="#ffffff" class="flex-1" />
+                                </div>
+                             </div>
+                             <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-2">Active Text Color</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" wire:model.live="header_active_item_text_color"
+                                        class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
+                                    <x-mary-input wire:model.live="header_active_item_text_color" placeholder="#4f46e5" class="flex-1" />
+                                </div>
+                             </div>
+                         </div>
+                    </div>
+
+                    {{-- 3. Top Bar User & Notification --}}
+                    <div class="border-t border-slate-100 pt-4">
+                         <h3 class="text-xs font-semibold uppercase text-slate-500 mb-3 block">Kullanıcı Menüsü & Bildirimler</h3>
+                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                             <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-2">Header Icon Color</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" wire:model.live="header_icon_color"
+                                        class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
+                                    <x-mary-input wire:model.live="header_icon_color" placeholder="#ffffff" class="flex-1" />
+                                </div>
+                             </div>
+                             <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-2">Notification Badge</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" wire:model.live="notification_badge_color"
+                                        class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
+                                    <x-mary-input wire:model.live="notification_badge_color" placeholder="#ef4444" class="flex-1" />
+                                </div>
+                             </div>
+                             <div class="col-span-1 md:col-span-2 lg:col-span-1">
+                                <label class="block text-sm font-medium text-slate-700 mb-2">Avatar Gradient (Start-End)</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" wire:model.live="avatar_gradient_start_color"
+                                        class="w-8 h-8 rounded border border-slate-200 cursor-pointer" title="Start Color">
+                                    <input type="color" wire:model.live="avatar_gradient_end_color"
+                                        class="w-8 h-8 rounded border border-slate-200 cursor-pointer" title="End Color">
+                                    <span class="text-xs text-slate-400">Gradient</span>
+                                </div>
+                             </div>
+                         </div>
+                    </div>
+
+                     {{-- 4. Dropdown Header --}}
+                    <div class="border-t border-slate-100 pt-4">
+                         <h3 class="text-xs font-semibold uppercase text-slate-500 mb-3 block">Dropdown Menü Başlığı</h3>
+                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-2">Start Color</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" wire:model.live="dropdown_header_bg_start_color"
+                                        class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
+                                    <x-mary-input wire:model.live="dropdown_header_bg_start_color" placeholder="#f5f3ff" class="flex-1" />
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-2">End Color</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" wire:model.live="dropdown_header_bg_end_color"
+                                        class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
+                                    <x-mary-input wire:model.live="dropdown_header_bg_end_color" placeholder="#eef2ff" class="flex-1" />
+                                </div>
+                            </div>
+                         </div>
                     </div>
                 </div>
             </x-slot:content>

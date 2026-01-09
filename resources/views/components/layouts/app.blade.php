@@ -213,6 +213,70 @@
                 {{ $theme?->list_card_hover_color ?? '#f8fafc' }}
             ;
 
+            /* Sidebar Settings */
+            --sidebar-bg:
+                {{ $theme?->sidebar_bg_color ?? '#3D3373' }}
+            ;
+            --sidebar-text:
+                {{ $theme?->sidebar_text_color ?? '#ffffff' }}
+            ;
+            --sidebar-hover-bg:
+                {{ $theme?->sidebar_hover_bg_color ?? '#4338ca' }}
+            ;
+            --sidebar-hover-text:
+                {{ $theme?->sidebar_hover_text_color ?? '#ffffff' }}
+            ;
+            --sidebar-active-bg:
+                {{ $theme?->sidebar_active_item_bg_color ?? '#4f46e5' }}
+            ;
+            --sidebar-active-text:
+                {{ $theme?->sidebar_active_item_text_color ?? '#ffffff' }}
+            ;
+
+            /* Header Active Items */
+            --header-active-bg:
+                {{ $theme?->header_active_item_bg_color ?? '#ffffff' }}
+            ;
+            --header-active-text:
+                {{ $theme?->header_active_item_text_color ?? '#4f46e5' }}
+            ;
+
+            /* Dashboard Colors */
+            --dashboard-card-bg:
+                {{ $theme?->dashboard_card_bg_color ?? '#eff4ff' }}
+            ;
+            --dashboard-card-text:
+                {{ $theme?->dashboard_card_text_color ?? '#475569' }}
+            ;
+            --dashboard-stats-1:
+                {{ $theme?->dashboard_stats_1_color ?? '#3b82f6' }}
+            ;
+            --dashboard-stats-2:
+                {{ $theme?->dashboard_stats_2_color ?? '#14b8a6' }}
+            ;
+            --dashboard-stats-3:
+                {{ $theme?->dashboard_stats_3_color ?? '#f59e0b' }}
+            ;
+
+            /* User Menu & Dropdown */
+            --avatar-gradient-start:
+                {{ $theme?->avatar_gradient_start_color ?? '#c084fc' }}
+            ;
+            --avatar-gradient-end:
+                {{ $theme?->avatar_gradient_end_color ?? '#9333ea' }}
+            ;
+            --dropdown-header-start:
+                {{ $theme?->dropdown_header_bg_start_color ?? '#f5f3ff' }}
+            ;
+            --dropdown-header-end:
+                {{ $theme?->dropdown_header_bg_end_color ?? '#eef2ff' }}
+            ;
+            --notification-badge: {{ $theme?->notification_badge_color ?? '#ef4444' }};
+
+            /* Page Background */
+            --page-bg: {{ $theme?->page_bg_color ?? '#f8fafc' }};
+
+
             /* Theme variables are defined above - NO DaisyUI hijacking to prevent UI pollution */
         }
 
@@ -239,7 +303,7 @@
     </style>
 </head>
 
-<body class="font-sans bg-slate-50 text-gray-900 antialiased">
+<body class="font-sans antialiased text-gray-900" style="background-color: var(--page-bg);">
     {{-- Header - Dynamic colors from theme settings --}}
     <header
         style="background-color: {{ $theme?->header_bg_color ?? '#3D3373' }}; border-bottom: {{ ($theme?->header_border_width ?? 0) }}px solid {{ $theme?->header_border_color ?? 'transparent' }}">
@@ -264,17 +328,17 @@
                 <div class="flex backdrop-blur-sm rounded-full p-1.5 border border-white/20"
                     style="background-color: {{ $theme?->menu_bg_color ?? 'rgba(255, 255, 255, 0.1)' }}">
                     <a href="/dashboard"
-                        class="px-5 py-2 rounded-full text-sm font-medium transition-all duration-200 {{ request()->is('dashboard') ? 'bg-white text-[#3D3373]' : 'hover:bg-white/10' }}"
+                        class="px-5 py-2 rounded-full text-sm font-medium transition-all duration-200 {{ request()->is('dashboard') ? 'bg-[var(--header-active-bg)] text-[var(--header-active-text)]' : 'hover:bg-white/10' }}"
                         style="{{ !request()->is('dashboard') ? 'color: ' . ($theme?->menu_text_color ?? '#ffffff') : '' }}">
                         Dashboard
                     </a>
                     <a href="/dashboard/customers"
-                        class="px-5 py-2 rounded-full text-sm font-medium transition-all duration-200 {{ request()->is('dashboard/customers*') ? 'bg-white text-[#3D3373]' : 'hover:bg-white/10' }}"
+                        class="px-5 py-2 rounded-full text-sm font-medium transition-all duration-200 {{ request()->is('dashboard/customers*') ? 'bg-[var(--header-active-bg)] text-[var(--header-active-text)]' : 'hover:bg-white/10' }}"
                         style="{{ !request()->is('dashboard/customers*') ? 'color: ' . ($theme?->menu_text_color ?? '#ffffff') : '' }}">
                         Müşteriler
                     </a>
                     <a href="/dashboard/settings"
-                        class="px-5 py-2 rounded-full text-sm font-medium transition-all duration-200 {{ request()->is('dashboard/settings*') ? 'bg-white text-[#3D3373]' : 'hover:bg-white/10' }}"
+                        class="px-5 py-2 rounded-full text-sm font-medium transition-all duration-200 {{ request()->is('dashboard/settings*') ? 'bg-[var(--header-active-bg)] text-[var(--header-active-text)]' : 'hover:bg-white/10' }}"
                         style="{{ !request()->is('dashboard/settings*') ? 'color: ' . ($theme?->menu_text_color ?? '#ffffff') : '' }}">
                         Ayarlar
                     </a>

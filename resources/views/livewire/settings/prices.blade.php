@@ -154,7 +154,7 @@ new #[Layout('components.layouts.app', ['title' => 'Fiyat Tanımları'])]
     }
 }; ?>
 
-<div class="p-6 bg-slate-50 min-h-screen">
+<div class="p-6 min-h-screen" style="background-color: var(--page-bg);">
     <div class="w-full lg:w-3/4 mx-auto">
         {{-- Breadcrumbs & Back Button --}}
         <div class="mb-6">
@@ -304,7 +304,7 @@ new #[Layout('components.layouts.app', ['title' => 'Fiyat Tanımları'])]
         <x-slot:actions>
             <x-mary-button label="İptal" class="btn-ghost" wire:click="$set('showModal', false)" />
             <x-mary-button label="Kaydet" class="btn-success"
-                style="background-color: #4ade80; color: white; border: none;" wire:click="save" />
+                style="background-color: var(--brand-success); color: white; border: none;" wire:click="save" />
         </x-slot:actions>
     </x-mary-modal>
 </div>
