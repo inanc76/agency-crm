@@ -105,8 +105,8 @@ new
     {{-- Page Header --}}
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
-            <h1 class="text-2xl font-bold" style="color: var(--color-text-heading);">Ayarlar</h1>
-            <p class="text-sm opacity-60 mt-1" style="color: var(--color-text-base);">Sistem ayarlarını ve
+            <h1 class="text-2xl font-bold" class="text-skin-heading">Ayarlar</h1>
+            <p class="text-sm opacity-60 mt-1">Sistem ayarlarını ve
                 konfigürasyonları yönetin</p>
         </div>
         <div class="w-full md:w-72">
@@ -131,11 +131,11 @@ new
                         {{-- Text Content --}}
                         <div class="flex-grow pt-0.5">
                             <h3 class="font-bold text-[15px] group-hover:opacity-80 transition-opacity mb-1"
-                                style="color: var(--color-text-heading);">
+                                class="text-skin-heading">
                                 {{ $card['title'] }}
                             </h3>
                             <p class="text-[13px] leading-relaxed line-clamp-2 pr-4 opacity-70"
-                                style="color: var(--color-text-base);">
+                               >
                                 {{ $card['subtitle'] }}
                             </p>
                         </div>

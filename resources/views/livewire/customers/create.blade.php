@@ -442,7 +442,7 @@ new
     <div class="max-w-7xl mx-auto">
         {{-- Back Button --}}
         <a href="/dashboard/customers?tab=customers"
-            class="inline-flex items-center gap-2 text-slate-600 hover:text-slate-900 mb-4 transition-colors">
+            class="inline-flex items-center gap-2 text-skin-base hover:text-skin-heading mb-4 transition-colors">
             <x-mary-icon name="o-arrow-left" class="w-4 h-4" />
             <span class="text-sm font-medium">Müşteri Listesi</span>
         </a>
@@ -450,7 +450,7 @@ new
         {{-- Header with Action Buttons --}}
         <div class="flex items-start justify-between mb-6">
             <div>
-                <h1 class="text-2xl font-bold tracking-tight" style="color: var(--color-text-heading);">
+                <h1 class="text-2xl font-bold tracking-tight text-skin-heading">
                     @if($isViewMode)
                         {{ $name ?: 'Müşteri Bilgileri' }}
                     @else
@@ -460,10 +460,10 @@ new
                 <div class="flex items-center gap-2 mt-1">
                     @if($isViewMode)
                         <span
-                            class="text-xs font-medium px-2 py-0.5 rounded bg-slate-100 text-slate-500 border border-slate-200">Müşteri</span>
-                        <span class="text-[11px] font-mono text-slate-400">ID: {{ $customerId }}</span>
+                            class="text-xs font-medium px-2 py-0.5 rounded bg-[var(--dropdown-hover-bg)] text-[var(--color-text-base)] border border-[var(--card-border)]">Müşteri</span>
+                        <span class="text-[11px] font-mono text-[var(--color-text-muted)]">ID: {{ $customerId }}</span>
                     @else
-                        <p class="text-sm opacity-60" style="color: var(--color-text-base);">
+                        <p class="text-sm opacity-60 text-skin-base">
                             Yeni müşteri bilgilerini girin
                         </p>
                     @endif
@@ -501,45 +501,37 @@ new
 
         {{-- Tab Navigation --}}
         @if($isViewMode)
-            <div class="flex items-center border-b border-slate-200 mb-8 overflow-x-auto scrollbar-hide">
+            <div class="flex items-center border-b border-[var(--card-border)] mb-8 overflow-x-auto scrollbar-hide">
                 <button wire:click="$set('activeTab', 'info')"
-                    class="px-5 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors"
-                    style="{{ $activeTab === 'info' ? 'border-color: var(--active-tab-color); color: var(--color-text-heading);' : 'border-color: transparent; color: var(--color-text-base); opacity: 0.6;' }}">
+                    class="px-5 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors {{ $activeTab === 'info' ? 'border-[var(--active-tab-color)] text-skin-heading' : 'border-transparent text-skin-base opacity-60' }}">
                     Müşteri Bilgileri
                 </button>
                 <button wire:click="$set('activeTab', 'contacts')"
-                    class="px-5 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors"
-                    style="{{ $activeTab === 'contacts' ? 'border-color: var(--active-tab-color); color: var(--color-text-heading);' : 'border-color: transparent; color: var(--color-text-base); opacity: 0.6;' }}">
+                    class="px-5 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors {{ $activeTab === 'contacts' ? 'border-[var(--active-tab-color)] text-skin-heading' : 'border-transparent text-skin-base opacity-60' }}">
                     Kişiler ({{ $counts['contacts'] }})
                 </button>
                 <button wire:click="$set('activeTab', 'assets')"
-                    class="px-5 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors"
-                    style="{{ $activeTab === 'assets' ? 'border-color: var(--active-tab-color); color: var(--color-text-heading);' : 'border-color: transparent; color: var(--color-text-base); opacity: 0.6;' }}">
+                    class="px-5 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors {{ $activeTab === 'assets' ? 'border-[var(--active-tab-color)] text-skin-heading' : 'border-transparent text-skin-base opacity-60' }}">
                     Varlıklar ({{ $counts['assets'] }})
                 </button>
                 <button wire:click="$set('activeTab', 'services')"
-                    class="px-5 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors"
-                    style="{{ $activeTab === 'services' ? 'border-color: var(--active-tab-color); color: var(--color-text-heading);' : 'border-color: transparent; color: var(--color-text-base); opacity: 0.6;' }}">
+                    class="px-5 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors {{ $activeTab === 'services' ? 'border-[var(--active-tab-color)] text-skin-heading' : 'border-transparent text-skin-base opacity-60' }}">
                     Hizmetler ({{ $counts['services'] }})
                 </button>
                 <button wire:click="$set('activeTab', 'offers')"
-                    class="px-5 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors"
-                    style="{{ $activeTab === 'offers' ? 'border-color: var(--active-tab-color); color: var(--color-text-heading);' : 'border-color: transparent; color: var(--color-text-base); opacity: 0.6;' }}">
+                    class="px-5 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors {{ $activeTab === 'offers' ? 'border-[var(--active-tab-color)] text-skin-heading' : 'border-transparent text-skin-base opacity-60' }}">
                     Teklifler ({{ $counts['offers'] }})
                 </button>
                 <button wire:click="$set('activeTab', 'sales')"
-                    class="px-5 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors"
-                    style="{{ $activeTab === 'sales' ? 'border-color: var(--active-tab-color); color: var(--color-text-heading);' : 'border-color: transparent; color: var(--color-text-base); opacity: 0.6;' }}">
+                    class="px-5 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors {{ $activeTab === 'sales' ? 'border-[var(--active-tab-color)] text-skin-heading' : 'border-transparent text-skin-base opacity-60' }}">
                     Satışlar ({{ $counts['sales'] }})
                 </button>
                 <button wire:click="$set('activeTab', 'messages')"
-                    class="px-5 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors"
-                    style="{{ $activeTab === 'messages' ? 'border-color: var(--active-tab-color); color: var(--color-text-heading);' : 'border-color: transparent; color: var(--color-text-base); opacity: 0.6;' }}">
+                    class="px-5 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors {{ $activeTab === 'messages' ? 'border-[var(--active-tab-color)] text-skin-heading' : 'border-transparent text-skin-base opacity-60' }}">
                     Mesajlar ({{ $counts['messages'] }})
                 </button>
                 <button wire:click="$set('activeTab', 'notes')"
-                    class="px-5 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors"
-                    style="{{ $activeTab === 'notes' ? 'border-color: var(--active-tab-color); color: var(--color-text-heading);' : 'border-color: transparent; color: var(--color-text-base); opacity: 0.6;' }}">
+                    class="px-5 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors {{ $activeTab === 'notes' ? 'border-[var(--active-tab-color)] text-skin-heading' : 'border-transparent text-skin-base opacity-60' }}">
                     Notlar ({{ $counts['notes'] }})
                 </button>
             </div>
@@ -569,10 +561,9 @@ new
                 @if($activeTab === 'contacts' && $isViewMode)
                     <div class="theme-card p-6 shadow-sm">
                         <div class="flex items-center justify-between mb-4">
-                            <h2 class="text-base font-bold" style="color: var(--color-text-heading);">Kişiler</h2>
+                            <h2 class="text-base font-bold text-skin-heading">Kişiler</h2>
                             <a href="/dashboard/customers/contacts/create?customer={{ $customerId }}"
-                                class="text-xs font-bold px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 transition-colors"
-                                style="color: var(--action-link-color);">
+                                class="text-xs font-bold px-3 py-1.5 rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] hover:bg-[var(--dropdown-hover-bg)] transition-colors text-skin-primary">
                                 + Yeni Kişi
                             </a>
                         </div>
@@ -580,7 +571,7 @@ new
                             <div class="overflow-x-auto">
                                 <table class="w-full text-sm">
                                     <thead>
-                                        <tr class="border-b border-slate-200">
+                                        <tr class="border-b border-[var(--card-border)]">
                                             <th class="text-left py-2 px-2 font-medium opacity-60">Ad Soyad</th>
                                             <th class="text-left py-2 px-2 font-medium opacity-60">Pozisyon</th>
                                             <th class="text-left py-2 px-2 font-medium opacity-60">Email</th>
@@ -590,7 +581,7 @@ new
                                     </thead>
                                     <tbody>
                                         @foreach($relatedContacts as $contact)
-                                            <tr class="border-b border-slate-100 hover:bg-slate-50 cursor-pointer transition-colors"
+                                            <tr class="border-b border-[var(--card-border)]/50 hover:bg-[var(--dropdown-hover-bg)] cursor-pointer transition-colors"
                                                 onclick="window.location.href='/dashboard/customers/contacts/{{ $contact['id'] }}'">
                                                 <td class="py-3 px-2 font-medium">{{ $contact['name'] }}</td>
                                                 <td class="py-3 px-2 opacity-70">{{ $contact['position'] ?? '-' }}</td>
@@ -598,7 +589,7 @@ new
                                                 <td class="py-3 px-2 opacity-70">{{ $contact['phones'][0] ?? '-' }}</td>
                                                 <td class="py-3 px-2 text-center">
                                                     <span
-                                                        class="px-2 py-0.5 rounded text-xs font-medium {{ $contact['status'] === 'WORKING' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500' }}">
+                                                        class="px-2 py-0.5 rounded text-xs font-medium {{ $contact['status'] === 'WORKING' ? 'bg-[var(--color-success)]/10 text-[var(--color-success)]' : 'bg-[var(--dropdown-hover-bg)] text-[var(--color-text-muted)]' }}">
                                                         {{ $contact['status'] === 'WORKING' ? 'Çalışıyor' : 'Ayrıldı' }}
                                                     </span>
                                                 </td>
@@ -608,7 +599,7 @@ new
                                 </table>
                             </div>
                         @else
-                            <div class="text-center py-8 text-slate-400">
+                            <div class="text-center py-8 text-[var(--color-text-muted)]">
                                 <x-mary-icon name="o-users" class="w-12 h-12 mx-auto mb-2 opacity-30" />
                                 <p class="text-sm">Henüz kişi kaydı bulunmuyor</p>
                             </div>
@@ -620,10 +611,9 @@ new
                 @if($activeTab === 'assets' && $isViewMode)
                     <div class="theme-card p-6 shadow-sm">
                         <div class="flex items-center justify-between mb-4">
-                            <h2 class="text-base font-bold" style="color: var(--color-text-heading);">Varlıklar</h2>
+                            <h2 class="text-base font-bold text-skin-heading">Varlıklar</h2>
                             <a href="/dashboard/customers/assets/create?customer={{ $customerId }}"
-                                class="text-xs font-bold px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 transition-colors"
-                                style="color: var(--action-link-color);">
+                                class="text-xs font-bold px-3 py-1.5 rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] hover:bg-[var(--dropdown-hover-bg)] transition-colors text-skin-primary">
                                 + Yeni Varlık
                             </a>
                         </div>
@@ -631,7 +621,7 @@ new
                             <div class="overflow-x-auto">
                                 <table class="w-full text-sm">
                                     <thead>
-                                        <tr class="border-b border-slate-200">
+                                        <tr class="border-b border-[var(--card-border)]">
                                             <th class="text-left py-2 px-2 font-medium opacity-60">Varlık Adı</th>
                                             <th class="text-left py-2 px-2 font-medium opacity-60">Tür</th>
                                             <th class="text-left py-2 px-2 font-medium opacity-60">URL</th>
@@ -639,14 +629,14 @@ new
                                     </thead>
                                     <tbody>
                                         @foreach($relatedAssets as $asset)
-                                            <tr class="border-b border-slate-100 hover:bg-slate-50 cursor-pointer transition-colors"
+                                            <tr class="border-b border-[var(--card-border)]/50 hover:bg-[var(--dropdown-hover-bg)] cursor-pointer transition-colors"
                                                 onclick="window.location.href='/dashboard/customers/assets/{{ $asset['id'] }}'">
                                                 <td class="py-3 px-2 font-medium">{{ $asset['name'] }}</td>
                                                 <td class="py-3 px-2 opacity-70">{{ $asset['type'] }}</td>
                                                 <td class="py-3 px-2 opacity-70">
                                                     @if($asset['url'])
                                                         <a href="{{ $asset['url'] }}" target="_blank"
-                                                            class="text-blue-500 hover:underline"
+                                                            class="text-skin-primary hover:underline"
                                                             onclick="event.stopPropagation();">{{ Str::limit($asset['url'], 40) }}</a>
                                                     @else
                                                         -
@@ -658,7 +648,7 @@ new
                                 </table>
                             </div>
                         @else
-                            <div class="text-center py-8 text-slate-400">
+                            <div class="text-center py-8 text-[var(--color-text-muted)]">
                                 <x-mary-icon name="o-globe-alt" class="w-12 h-12 mx-auto mb-2 opacity-30" />
                                 <p class="text-sm">Henüz varlık kaydı bulunmuyor</p>
                             </div>
@@ -671,16 +661,15 @@ new
                     <div class="theme-card p-6 shadow-sm">
                         <div class="flex items-center justify-between mb-4">
                             <div class="flex items-center gap-4">
-                                <h2 class="text-base font-bold" style="color: var(--color-text-heading);">Hizmetler</h2>
-                                <select wire:model.live="servicesStatusFilter" class="select select-xs bg-white border-slate-200">
+                                <h2 class="text-base font-bold text-skin-heading">Hizmetler</h2>
+                                <select wire:model.live="servicesStatusFilter" class="select select-xs bg-[var(--card-bg)] border-[var(--card-border)]">
                                     <option value="">Tüm Durumlar</option>
                                     <option value="ACTIVE">Aktif</option>
                                     <option value="PASSIVE">Pasif</option>
                                 </select>
                             </div>
                             <a href="/dashboard/customers/services/create?customer={{ $customerId }}"
-                                class="text-xs font-bold px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 transition-colors"
-                                style="color: var(--action-link-color);">
+                                class="text-xs font-bold px-3 py-1.5 rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] hover:bg-[var(--dropdown-hover-bg)] transition-colors text-skin-primary">
                                 + Yeni Hizmet
                             </a>
                         </div>
@@ -693,7 +682,7 @@ new
                             <div class="overflow-x-auto">
                                 <table class="w-full text-sm">
                                     <thead>
-                                        <tr class="border-b border-slate-200">
+                                        <tr class="border-b border-[var(--card-border)]">
                                             <th class="text-left py-2 px-2 font-medium opacity-60">Hizmet Adı</th>
                                             <th class="text-left py-2 px-2 font-medium opacity-60">Kategori</th>
                                             <th class="text-center py-2 px-2 font-medium opacity-60">Kalan Gün</th>
@@ -708,21 +697,21 @@ new
                                                 $endDate = \Carbon\Carbon::parse($service['end_date']);
                                                 $daysLeft = now()->diffInDays($endDate, false);
                                             @endphp
-                                            <tr class="border-b border-slate-100 hover:bg-slate-50 cursor-pointer transition-colors"
+                                            <tr class="border-b border-[var(--card-border)]/50 hover:bg-[var(--dropdown-hover-bg)] cursor-pointer transition-colors"
                                                 onclick="window.location.href='/dashboard/customers/services/{{ $service['id'] }}'">
                                                 <td class="py-3 px-2 font-medium">{{ $service['service_name'] }}</td>
                                                 <td class="py-3 px-2 opacity-70">{{ $service['service_category'] ?? '-' }}</td>
                                                 <td class="py-3 px-2 text-center">
                                                     @if($daysLeft < 0)
-                                                        <span class="px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700">
+                                                        <span class="px-2 py-0.5 rounded text-xs font-medium bg-[var(--color-danger)]/10 text-[var(--color-danger)]">
                                                             {{ abs((int)$daysLeft) }} gün geçti
                                                         </span>
                                                     @elseif($daysLeft <= 30)
-                                                        <span class="px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-700">
+                                                        <span class="px-2 py-0.5 rounded text-xs font-medium bg-[var(--color-warning)]/10 text-[var(--color-warning)]">
                                                             {{ (int)$daysLeft }} gün
                                                         </span>
                                                     @else
-                                                        <span class="px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700">
+                                                        <span class="px-2 py-0.5 rounded text-xs font-medium bg-[var(--color-success)]/10 text-[var(--color-success)]">
                                                             {{ (int)$daysLeft }} gün
                                                         </span>
                                                     @endif
@@ -734,7 +723,7 @@ new
                                                     {{ $service['service_currency'] }}</td>
                                                 <td class="py-3 px-2 text-center">
                                                     <span
-                                                        class="px-2 py-0.5 rounded text-xs font-medium {{ $service['status'] === 'ACTIVE' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500' }}">
+                                                        class="px-2 py-0.5 rounded text-xs font-medium {{ $service['status'] === 'ACTIVE' ? 'bg-[var(--color-success)]/10 text-[var(--color-success)]' : 'bg-[var(--dropdown-hover-bg)] text-[var(--color-text-muted)]' }}">
                                                         {{ $service['status'] === 'ACTIVE' ? 'Aktif' : 'Pasif' }}
                                                     </span>
                                                 </td>
@@ -744,7 +733,7 @@ new
                                 </table>
                             </div>
                         @else
-                            <div class="text-center py-8 text-slate-400">
+                            <div class="text-center py-8 text-[var(--color-text-muted)]">
                                 <x-mary-icon name="o-cog-6-tooth" class="w-12 h-12 mx-auto mb-2 opacity-30" />
                                 <p class="text-sm">{{ $servicesStatusFilter ? 'Filtreye uygun hizmet bulunamadı' : 'Henüz hizmet kaydı bulunmuyor' }}</p>
                             </div>
@@ -757,8 +746,8 @@ new
                     <div class="theme-card p-6 shadow-sm">
                         <div class="flex items-center justify-between mb-4">
                             <div class="flex items-center gap-4">
-                                <h2 class="text-base font-bold" style="color: var(--color-text-heading);">Teklifler</h2>
-                                <select wire:model.live="offersStatusFilter" class="select select-xs bg-white border-slate-200">
+                                <h2 class="text-base font-bold text-skin-heading">Teklifler</h2>
+                                <select wire:model.live="offersStatusFilter" class="select select-xs bg-[var(--card-bg)] border-[var(--card-border)]">
                                     <option value="">Tüm Durumlar</option>
                                     <option value="DRAFT">Taslak</option>
                                     <option value="SENT">Gönderildi</option>
@@ -767,8 +756,7 @@ new
                                 </select>
                             </div>
                             <a href="/dashboard/customers/offers/create?customer={{ $customerId }}"
-                                class="text-xs font-bold px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 transition-colors"
-                                style="color: var(--action-link-color);">
+                                class="text-xs font-bold px-3 py-1.5 rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] hover:bg-[var(--dropdown-hover-bg)] transition-colors text-skin-primary">
                                 + Yeni Teklif
                             </a>
                         </div>
@@ -781,7 +769,7 @@ new
                             <div class="overflow-x-auto">
                                 <table class="w-full text-sm">
                                     <thead>
-                                        <tr class="border-b border-slate-200">
+                                        <tr class="border-b border-[var(--card-border)]">
                                             <th class="text-left py-2 px-2 font-medium opacity-60">Teklif Başlığı</th>
                                             <th class="text-center py-2 px-2 font-medium opacity-60">Tarih</th>
                                             <th class="text-center py-2 px-2 font-medium opacity-60">Kalan Gün</th>
@@ -795,29 +783,29 @@ new
                                                 $validUntil = \Carbon\Carbon::parse($offer['valid_until']);
                                                 $daysLeft = now()->diffInDays($validUntil, false);
                                                 $statusColors = [
-                                                    'DRAFT' => 'bg-slate-100 text-slate-500',
-                                                    'SENT' => 'bg-blue-100 text-blue-700',
-                                                    'ACCEPTED' => 'bg-green-100 text-green-700',
-                                                    'REJECTED' => 'bg-red-100 text-red-700',
+                                                    'DRAFT' => 'bg-[var(--dropdown-hover-bg)] text-[var(--color-text-muted)]',
+                                                    'SENT' => 'bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]',
+                                                    'ACCEPTED' => 'bg-[var(--color-success)]/10 text-[var(--color-success)]',
+                                                    'REJECTED' => 'bg-[var(--color-danger)]/10 text-[var(--color-danger)]',
                                                 ];
                                                 $statusLabels = ['DRAFT' => 'Taslak', 'SENT' => 'Gönderildi', 'ACCEPTED' => 'Kabul', 'REJECTED' => 'Ret'];
                                             @endphp
-                                            <tr class="border-b border-slate-100 hover:bg-slate-50 cursor-pointer transition-colors"
+                                            <tr class="border-b border-[var(--card-border)]/50 hover:bg-[var(--dropdown-hover-bg)] cursor-pointer transition-colors"
                                                 onclick="window.location.href='/dashboard/customers/offers/{{ $offer['id'] }}'">
                                                 <td class="py-3 px-2 font-medium">{{ $offer['title'] }}</td>
                                                 <td class="py-3 px-2 text-center opacity-70 text-xs font-mono">
                                                     {{ \Carbon\Carbon::parse($offer['created_at'])->format('d.m.Y') }}</td>
                                                 <td class="py-3 px-2 text-center">
                                                     @if($daysLeft < 0)
-                                                        <span class="px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700">
+                                                        <span class="px-2 py-0.5 rounded text-xs font-medium bg-[var(--color-danger)]/10 text-[var(--color-danger)]">
                                                             {{ abs((int)$daysLeft) }} gün geçti
                                                         </span>
                                                     @elseif($daysLeft <= 7)
-                                                        <span class="px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-700">
+                                                        <span class="px-2 py-0.5 rounded text-xs font-medium bg-[var(--color-warning)]/10 text-[var(--color-warning)]">
                                                             {{ (int)$daysLeft }} gün
                                                         </span>
                                                     @else
-                                                        <span class="px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700">
+                                                        <span class="px-2 py-0.5 rounded text-xs font-medium bg-[var(--color-success)]/10 text-[var(--color-success)]">
                                                             {{ (int)$daysLeft }} gün
                                                         </span>
                                                     @endif
@@ -825,7 +813,7 @@ new
                                                 <td class="py-3 px-2 text-right font-medium">
                                                     {{ number_format($offer['total_amount'], 2) }} {{ $offer['currency'] }}</td>
                                                 <td class="py-3 px-2 text-center">
-                                                    <span class="px-2 py-0.5 rounded text-xs font-medium {{ $statusColors[$offer['status']] ?? 'bg-slate-100 text-slate-500' }}">
+                                                    <span class="px-2 py-0.5 rounded text-xs font-medium {{ $statusColors[$offer['status']] ?? 'bg-[var(--dropdown-hover-bg)] text-[var(--color-text-muted)]' }}">
                                                         {{ $statusLabels[$offer['status']] ?? $offer['status'] }}
                                                     </span>
                                                 </td>
@@ -835,7 +823,7 @@ new
                                 </table>
                             </div>
                         @else
-                            <div class="text-center py-8 text-slate-400">
+                            <div class="text-center py-8 text-[var(--color-text-muted)]">
                                 <x-mary-icon name="o-document-text" class="w-12 h-12 mx-auto mb-2 opacity-30" />
                                 <p class="text-sm">{{ $offersStatusFilter ? 'Filtreye uygun teklif bulunamadı' : 'Henüz teklif kaydı bulunmuyor' }}</p>
                             </div>
@@ -846,12 +834,12 @@ new
                 {{-- Sales Tab --}}
                 @if($activeTab === 'sales' && $isViewMode)
                     <div class="theme-card p-6 shadow-sm">
-                        <h2 class="text-base font-bold mb-4" style="color: var(--color-text-heading);">Satışlar</h2>
+                        <h2 class="text-base font-bold mb-4 text-skin-heading">Satışlar</h2>
                         @if(count($relatedSales) > 0)
                             <div class="overflow-x-auto">
                                 <table class="w-full text-sm">
                                     <thead>
-                                        <tr class="border-b border-slate-200">
+                                        <tr class="border-b border-[var(--card-border)]">
                                             <th class="text-left py-2 px-2 font-medium opacity-60">Satış No</th>
                                             <th class="text-center py-2 px-2 font-medium opacity-60">Tarih</th>
                                             <th class="text-right py-2 px-2 font-medium opacity-60">Tutar</th>
@@ -859,7 +847,7 @@ new
                                     </thead>
                                     <tbody>
                                         @foreach($relatedSales as $sale)
-                                            <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                                            <tr class="border-b border-[var(--card-border)]/50 hover:bg-[var(--dropdown-hover-bg)] transition-colors">
                                                 <td class="py-3 px-2 font-medium">{{ $sale['number'] ?? $sale['id'] }}</td>
                                                 <td class="py-3 px-2 text-center opacity-70 text-xs font-mono">
                                                     {{ \Carbon\Carbon::parse($sale['created_at'])->format('d.m.Y') }}</td>
@@ -872,7 +860,7 @@ new
                                 </table>
                             </div>
                         @else
-                            <div class="text-center py-8 text-slate-400">
+                            <div class="text-center py-8 text-[var(--color-text-muted)]">
                                 <x-mary-icon name="o-banknotes" class="w-12 h-12 mx-auto mb-2 opacity-30" />
                                 <p class="text-sm">Henüz satış kaydı bulunmuyor</p>
                             </div>
@@ -883,11 +871,11 @@ new
                 {{-- Messages Tab --}}
                 @if($activeTab === 'messages' && $isViewMode)
                     <div class="theme-card p-6 shadow-sm">
-                        <h2 class="text-base font-bold mb-4" style="color: var(--color-text-heading);">Mesajlar</h2>
+                        <h2 class="text-base font-bold mb-4 text-skin-heading">Mesajlar</h2>
                         @if(count($relatedMessages) > 0)
                             <div class="space-y-3">
                                 @foreach($relatedMessages as $message)
-                                    <div class="p-3 border border-slate-200 rounded-lg bg-slate-50">
+                                    <div class="p-3 border border-[var(--card-border)]/60 rounded-lg bg-[var(--card-bg)]/50">
                                         <div class="flex items-center justify-between mb-2">
                                             <span
                                                 class="text-xs font-mono opacity-50">{{ \Carbon\Carbon::parse($message['created_at'])->format('d.m.Y H:i') }}</span>
@@ -897,7 +885,7 @@ new
                                 @endforeach
                             </div>
                         @else
-                            <div class="text-center py-8 text-slate-400">
+                            <div class="text-center py-8 text-[var(--color-text-muted)]">
                                 <x-mary-icon name="o-chat-bubble-left-right" class="w-12 h-12 mx-auto mb-2 opacity-30" />
                                 <p class="text-sm">Henüz mesaj bulunmuyor</p>
                             </div>
@@ -908,11 +896,11 @@ new
                 {{-- Notes Tab --}}
                 @if($activeTab === 'notes' && $isViewMode)
                     <div class="theme-card p-6 shadow-sm">
-                        <h2 class="text-base font-bold mb-4" style="color: var(--color-text-heading);">Notlar</h2>
+                        <h2 class="text-base font-bold mb-4 text-skin-heading">Notlar</h2>
                         @if(count($relatedNotes) > 0)
                             <div class="space-y-3">
                                 @foreach($relatedNotes as $note)
-                                    <div class="p-3 border border-slate-200 rounded-lg bg-slate-50">
+                                    <div class="p-3 border border-[var(--card-border)]/60 rounded-lg bg-[var(--card-bg)]/50">
                                         <div class="flex items-center justify-between mb-2">
                                             <span
                                                 class="text-xs font-mono opacity-50">{{ \Carbon\Carbon::parse($note['created_at'])->format('d.m.Y H:i') }}</span>
@@ -922,7 +910,7 @@ new
                                 @endforeach
                             </div>
                         @else
-                            <div class="text-center py-8 text-slate-400">
+                            <div class="text-center py-8 text-[var(--color-text-muted)]">
                                 <x-mary-icon name="o-document-text" class="w-12 h-12 mx-auto mb-2 opacity-30" />
                                 <p class="text-sm">Henüz not bulunmuyor</p>
                             </div>

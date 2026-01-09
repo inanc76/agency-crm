@@ -117,21 +117,21 @@ new class extends Component {
     {{-- Header with Action Button --}}
     <div class="flex items-center justify-between mb-4">
         <div>
-            <h2 class="text-lg font-bold" style="color: var(--color-text-heading);">Müşteriler</h2>
-            <p class="text-sm opacity-60" style="color: var(--color-text-base);">Tüm müşterilerinizi görüntüleyin ve
+            <h2 class="text-lg font-bold" class="text-skin-heading">Müşteriler</h2>
+            <p class="text-sm opacity-60">Tüm müşterilerinizi görüntüleyin ve
                 yönetin</p>
         </div>
         <div class="flex items-center gap-4">
             @if(count($selected) > 0)
                 <button wire:click="deleteSelected"
                     wire:confirm="Seçili {{ count($selected) }} müşteriyi silmek istediğinize emin misiniz?"
-                    class="flex items-center gap-2 px-3 py-1.5 text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 rounded-lg transition-colors">
+                    class="btn-danger-outline">
                     <x-mary-icon name="o-trash" class="w-4 h-4" />
                     Seçilileri Sil ({{ count($selected) }})
                 </button>
             @endif
 
-            <span class="text-sm opacity-60" style="color: var(--color-text-base);">
+            <span class="text-sm opacity-60">
                 <span class="font-medium" style="color: var(--btn-save-bg);">Aktif</span>
                 {{ $customers->total() }} müşteri</span>
             <x-customer-management.action-button label="Yeni Müşteri" href="/dashboard/customers/create" />
@@ -170,7 +170,7 @@ new class extends Component {
                         </th>
                         @foreach(array_slice($headers, 1) as $header)
                             <th
-                                class="px-6 py-3 font-semibold text-slate-700 {{ isset($header['align']) && $header['align'] == 'center' ? 'text-center' : '' }}">
+                                class="px-6 py-3 font-semibold text-skin-base {{ isset($header['align']) && $header['align'] == 'center' ? 'text-center' : '' }}">
                                 {{ $header['label'] }}
                             </th>
                         @endforeach
@@ -205,7 +205,7 @@ new class extends Component {
                             <td class="px-6 py-4">
                                 @php
                                     $cityName = $cityMap[$customer->city_id] ?? 'Belirtilmedi';
-                                    $cityColor = $cityColorMap[$customer->city_id] ?? 'bg-slate-100 text-slate-500 border-slate-200';
+                                    $cityColor = $cityColorMap[$customer->city_id] ?? 'bg-skin-hover text-skin-muted border-skin-light';
                                 @endphp
                                 @if($cityName !== 'Belirtilmedi')
                                     <span
@@ -213,7 +213,7 @@ new class extends Component {
                                         {{ $cityName }}
                                     </span>
                                 @else
-                                    <span class="text-slate-400 italic text-xs">-</span>
+                                    <span class="text-skin-muted italic text-xs">-</span>
                                 @endif
                             </td>
 
@@ -263,7 +263,7 @@ new class extends Component {
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="9" class="px-6 py-12 text-center text-slate-500">
+                            <td colspan="9" class="px-6 py-12 text-center text-skin-muted">
                                 <div class="flex flex-col items-center justify-center">
                                     <x-mary-icon name="o-inbox" class="w-12 h-12 opacity-20 mb-4" />
                                     <div class="font-medium">Henüz müşteri kaydı bulunmuyor</div>
@@ -277,11 +277,11 @@ new class extends Component {
         </div>
 
         {{-- Pagination --}}
-        <div class="px-6 py-4 border-t border-slate-200 flex items-center justify-between">
+        <div class="px-6 py-4 border-t border-skin-light flex items-center justify-between">
             <div class="flex items-center gap-2">
-                <span class="text-xs text-slate-500">Göster:</span>
+                <span class="text-xs text-skin-muted">Göster:</span>
                 <select wire:model.live="perPage"
-                    class="select select-xs bg-white border-slate-200 text-xs w-18 h-8 min-h-0 focus:outline-none focus:border-slate-400">
+                    class="select select-xs bg-white border-skin-light text-xs w-18 h-8 min-h-0 focus:outline-none focus:border-slate-400">
                     <option value="25">25</option>
                     <option value="50">50</option>
                     <option value="100">100</option>
@@ -293,7 +293,7 @@ new class extends Component {
                 {{ $customers->links() }}
             </div>
 
-            <div class="text-[10px] text-slate-400 font-mono">
+            <div class="text-[10px] text-skin-muted font-mono">
                 {{ number_format(microtime(true) - (defined('LARAVEL_START') ? LARAVEL_START : request()->server('REQUEST_TIME_FLOAT')), 3) }}s
             </div>
         </div>

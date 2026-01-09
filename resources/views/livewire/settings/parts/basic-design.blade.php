@@ -1,8 +1,8 @@
 <div class="theme-card p-6 shadow-sm mt-6"
     style="background-color: {{ $card_bg_color }}; border-color: {{ $card_border_color }}; border-radius: {{ $card_border_radius }};">
     {{-- Card Header --}}
-    <div class="flex items-center justify-between pb-4 mb-6 border-b border-slate-200">
-        <h2 class="text-sm font-medium text-slate-700">Temel Tasarım Elemanları</h2>
+    <div class="flex items-center justify-between pb-4 mb-6 border-b border-[var(--card-border)]">
+        <h2 class="text-sm font-medium text-skin-heading">Temel Tasarım Elemanları</h2>
     </div>
 
     {{-- Accordion Sections --}}
@@ -10,11 +10,11 @@
 
         {{-- Accordion 1: Global Tipografi --}}
         <x-mary-collapse name="group_design_1" group="settings_design" separator
-            class="bg-white border border-slate-200 shadow-sm rounded-lg">
+            class="bg-[var(--card-bg)] border border-[var(--card-border)] shadow-sm rounded-lg">
             <x-slot:heading>
                 <div class="flex items-center gap-3">
-                    <x-mary-icon name="o-language" class="w-5 h-5 text-indigo-500" />
-                    <span class="font-semibold text-slate-700">Global Tipografi</span>
+                    <x-mary-icon name="o-language" class="w-5 h-5 text-[var(--brand-primary)]" />
+                    <span class="font-semibold text-skin-heading">Global Tipografi</span>
                 </div>
             </x-slot:heading>
             <x-slot:content>
@@ -24,26 +24,26 @@
                             hint="Sistemin tamamında kullanılacak ana font (Örn: Inter, Geist, Plus Jakarta Sans)" />
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-2">Sayfa Arka Plan Rengi</label>
+                        <label class="block text-sm font-medium text-skin-base mb-2">Sayfa Arka Plan Rengi</label>
                         <div class="flex items-center gap-2">
                             <input type="color" wire:model.live="page_bg_color"
-                                class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
+                                class="w-12 h-10 rounded border border-[var(--card-border)] cursor-pointer">
                             <x-mary-input wire:model.live="page_bg_color" placeholder="#f8fafc" class="flex-1" />
                         </div>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-2">Base Text Color</label>
+                        <label class="block text-sm font-medium text-skin-base mb-2">Base Text Color</label>
                         <div class="flex items-center gap-2">
                             <input type="color" wire:model.live="base_text_color"
-                                class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
+                                class="w-12 h-10 rounded border border-[var(--card-border)] cursor-pointer">
                             <x-mary-input wire:model.live="base_text_color" placeholder="#475569" class="flex-1" />
                         </div>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-2">Heading Color</label>
+                        <label class="block text-sm font-medium text-skin-base mb-2">Heading Color</label>
                         <div class="flex items-center gap-2">
                             <input type="color" wire:model.live="heading_color"
-                                class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
+                                class="w-12 h-10 rounded border border-[var(--card-border)] cursor-pointer">
                             <x-mary-input wire:model.live="heading_color" placeholder="#0f172a" class="flex-1" />
                         </div>
                     </div>
@@ -57,33 +57,33 @@
 
         {{-- Accordion 2: Input & Validation --}}
         <x-mary-collapse name="group_design_2" group="settings_design" separator
-            class="bg-white border border-slate-200 shadow-sm rounded-lg">
+            class="bg-[var(--card-bg)] border border-[var(--card-border)] shadow-sm rounded-lg">
             <x-slot:heading>
                 <div class="flex items-center gap-3">
-                    <x-mary-icon name="o-pencil-square" class="w-5 h-5 text-indigo-500" />
-                    <span class="font-semibold text-slate-700">Input & Validation</span>
+                    <x-mary-icon name="o-pencil-square" class="w-5 h-5 text-[var(--brand-primary)]" />
+                    <span class="font-semibold text-skin-heading">Input & Validation</span>
                 </div>
             </x-slot:heading>
             <x-slot:content>
                 <div class="space-y-6 py-2">
                     {{-- Normal State --}}
                     <div>
-                        <h3 class="text-sm font-semibold text-slate-900 mb-3 block">Normal State</h3>
+                        <h3 class="text-sm font-semibold text-skin-heading mb-3 block">Normal State</h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">Focus Ring Color</label>
+                                <label class="block text-sm font-medium text-skin-base mb-2">Focus Ring Color</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" wire:model.live="input_focus_ring_color"
-                                        class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
+                                        class="w-12 h-10 rounded border border-[var(--card-border)] cursor-pointer">
                                     <x-mary-input wire:model.live="input_focus_ring_color" placeholder="#6366f1"
                                         class="flex-1" />
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">Border Color</label>
+                                <label class="block text-sm font-medium text-skin-base mb-2">Border Color</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" wire:model.live="input_border_color"
-                                        class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
+                                        class="w-12 h-10 rounded border border-[var(--card-border)] cursor-pointer">
                                     <x-mary-input wire:model.live="input_border_color" placeholder="#cbd5e1"
                                         class="flex-1" />
                                 </div>
@@ -93,19 +93,19 @@
 
                     {{-- Error State --}}
                     <div>
-                        <h3 class="text-sm font-semibold text-slate-900 mb-3 block">Error State</h3>
+                        <h3 class="text-sm font-semibold text-skin-heading mb-3 block">Error State</h3>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">Error Ring Color</label>
+                                <label class="block text-sm font-medium text-skin-base mb-2">Error Ring Color</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" wire:model.live="input_error_ring_color"
-                                        class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
+                                        class="w-12 h-10 rounded border border-[var(--card-border)] cursor-pointer">
                                     <x-mary-input wire:model.live="input_error_ring_color" placeholder="#ef4444"
                                         class="flex-1" />
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">Error Border Color</label>
+                                <label class="block text-sm font-medium text-skin-base mb-2">Error Border Color</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" wire:model.live="input_error_border_color"
                                         class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
@@ -114,7 +114,7 @@
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">Error Text Color</label>
+                                <label class="block text-sm font-medium text-skin-base mb-2">Error Text Color</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" wire:model.live="input_error_text_color"
                                         class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
@@ -160,7 +160,7 @@
             <x-slot:heading>
                 <div class="flex items-center gap-3">
                     <x-mary-icon name="o-cursor-arrow-rays" class="w-5 h-5 text-indigo-500" />
-                    <span class="font-semibold text-slate-700">Buton & Aksiyon Parametreleri</span>
+                    <span class="font-semibold text-skin-base">Buton & Aksiyon Parametreleri</span>
                 </div>
             </x-slot:heading>
             <x-slot:content>
@@ -169,21 +169,21 @@
                     {{-- 1. Ekle (Create) Button --}}
                     <div>
                         <h3
-                            class="text-sm font-bold text-slate-900 mb-4 border-b border-gray-100 pb-2 flex items-center gap-2">
-                            <x-mary-icon name="o-plus-circle" class="w-4 h-4 text-indigo-600" /> Ekle Butonu
+                            class="text-sm font-bold text-skin-heading mb-4 border-b border-[var(--card-border)] pb-2 flex items-center gap-2">
+                            <x-mary-icon name="o-plus-circle" class="w-4 h-4 text-[var(--brand-primary)]" /> Ekle Butonu
                         </h3>
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">Background Color</label>
+                                <label class="block text-sm font-medium text-skin-base mb-2">Background Color</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" wire:model.live="btn_create_bg_color"
-                                        class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
+                                        class="w-12 h-10 rounded border border-[var(--card-border)] cursor-pointer">
                                     <x-mary-input wire:model.live="btn_create_bg_color" placeholder="#4f46e5"
                                         class="flex-1" />
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">Text Color</label>
+                                <label class="block text-sm font-medium text-skin-base mb-2">Text Color</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" wire:model.live="btn_create_text_color"
                                         class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
@@ -192,7 +192,7 @@
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">Hover Color</label>
+                                <label class="block text-sm font-medium text-skin-base mb-2">Hover Color</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" wire:model.live="btn_create_hover_color"
                                         class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
@@ -201,7 +201,7 @@
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">Border Color</label>
+                                <label class="block text-sm font-medium text-skin-base mb-2">Border Color</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" wire:model.live="btn_create_border_color"
                                         class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
@@ -215,22 +215,22 @@
                     {{-- 2. Kaydet (Save) Button --}}
                     <div>
                         <h3
-                            class="text-sm font-bold text-slate-900 mb-4 border-b border-gray-100 pb-2 flex items-center gap-2">
+                            class="text-sm font-bold text-skin-heading mb-4 border-b border-[var(--card-border)] pb-2 flex items-center gap-2">
                             <x-mary-icon name="o-check-circle" class="w-4 h-4" style="color: var(--btn-save-bg);" />
                             Kaydet Butonu
                         </h3>
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">Background Color</label>
+                                <label class="block text-sm font-medium text-skin-base mb-2">Background Color</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" wire:model.live="btn_save_bg_color"
-                                        class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
+                                        class="w-12 h-10 rounded border border-[var(--card-border)] cursor-pointer">
                                     <x-mary-input wire:model.live="btn_save_bg_color" placeholder="#10b981"
                                         class="flex-1" />
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">Text Color</label>
+                                <label class="block text-sm font-medium text-skin-base mb-2">Text Color</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" wire:model.live="btn_save_text_color"
                                         class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
@@ -239,7 +239,7 @@
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">Hover Color</label>
+                                <label class="block text-sm font-medium text-skin-base mb-2">Hover Color</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" wire:model.live="btn_save_hover_color"
                                         class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
@@ -248,7 +248,7 @@
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">Border Color</label>
+                                <label class="block text-sm font-medium text-skin-base mb-2">Border Color</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" wire:model.live="btn_save_border_color"
                                         class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
@@ -262,21 +262,22 @@
                     {{-- 3. Düzenle (Edit) Button --}}
                     <div>
                         <h3
-                            class="text-sm font-bold text-slate-900 mb-4 border-b border-gray-100 pb-2 flex items-center gap-2">
-                            <x-mary-icon name="o-pencil-square" class="w-4 h-4 text-amber-500" /> Düzenle Butonu
+                            class="text-sm font-bold text-skin-heading mb-4 border-b border-[var(--card-border)] pb-2 flex items-center gap-2">
+                            <x-mary-icon name="o-pencil-square" class="w-4 h-4 text-[var(--color-warning)]" /> Düzenle
+                            Butonu
                         </h3>
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">Background Color</label>
+                                <label class="block text-sm font-medium text-skin-base mb-2">Background Color</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" wire:model.live="btn_edit_bg_color"
-                                        class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
+                                        class="w-12 h-10 rounded border border-[var(--card-border)] cursor-pointer">
                                     <x-mary-input wire:model.live="btn_edit_bg_color" placeholder="#f59e0b"
                                         class="flex-1" />
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">Text Color</label>
+                                <label class="block text-sm font-medium text-skin-base mb-2">Text Color</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" wire:model.live="btn_edit_text_color"
                                         class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
@@ -285,7 +286,7 @@
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">Hover Color</label>
+                                <label class="block text-sm font-medium text-skin-base mb-2">Hover Color</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" wire:model.live="btn_edit_hover_color"
                                         class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
@@ -294,7 +295,7 @@
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">Border Color</label>
+                                <label class="block text-sm font-medium text-skin-base mb-2">Border Color</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" wire:model.live="btn_edit_border_color"
                                         class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
@@ -308,21 +309,21 @@
                     {{-- 4. Sil (Delete) Button --}}
                     <div>
                         <h3
-                            class="text-sm font-bold text-slate-900 mb-4 border-b border-gray-100 pb-2 flex items-center gap-2">
-                            <x-mary-icon name="o-trash" class="w-4 h-4 text-red-500" /> Sil Butonu
+                            class="text-sm font-bold text-skin-heading mb-4 border-b border-[var(--card-border)] pb-2 flex items-center gap-2">
+                            <x-mary-icon name="o-trash" class="w-4 h-4 text-[var(--color-danger)]" /> Sil Butonu
                         </h3>
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">Background Color</label>
+                                <label class="block text-sm font-medium text-skin-base mb-2">Background Color</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" wire:model.live="btn_delete_bg_color"
-                                        class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
+                                        class="w-12 h-10 rounded border border-[var(--card-border)] cursor-pointer">
                                     <x-mary-input wire:model.live="btn_delete_bg_color" placeholder="#ef4444"
                                         class="flex-1" />
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">Text Color</label>
+                                <label class="block text-sm font-medium text-skin-base mb-2">Text Color</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" wire:model.live="btn_delete_text_color"
                                         class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
@@ -331,7 +332,7 @@
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">Hover Color</label>
+                                <label class="block text-sm font-medium text-skin-base mb-2">Hover Color</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" wire:model.live="btn_delete_hover_color"
                                         class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
@@ -340,7 +341,7 @@
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">Border Color</label>
+                                <label class="block text-sm font-medium text-skin-base mb-2">Border Color</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" wire:model.live="btn_delete_border_color"
                                         class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
@@ -354,21 +355,22 @@
                     {{-- 5. İptal (Cancel) Button --}}
                     <div>
                         <h3
-                            class="text-sm font-bold text-slate-900 mb-4 border-b border-gray-100 pb-2 flex items-center gap-2">
-                            <x-mary-icon name="o-x-circle" class="w-4 h-4 text-slate-500" /> İptal Butonu
+                            class="text-sm font-bold text-skin-heading mb-4 border-b border-[var(--card-border)] pb-2 flex items-center gap-2">
+                            <x-mary-icon name="o-x-circle" class="w-4 h-4 text-[var(--color-text-muted)]" /> İptal
+                            Butonu
                         </h3>
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">Background Color</label>
+                                <label class="block text-sm font-medium text-skin-base mb-2">Background Color</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" wire:model.live="btn_cancel_bg_color"
-                                        class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
+                                        class="w-12 h-10 rounded border border-[var(--card-border)] cursor-pointer">
                                     <x-mary-input wire:model.live="btn_cancel_bg_color" placeholder="#94a3b8"
                                         class="flex-1" />
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">Text Color</label>
+                                <label class="block text-sm font-medium text-skin-base mb-2">Text Color</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" wire:model.live="btn_cancel_text_color"
                                         class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
@@ -377,7 +379,7 @@
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">Hover Color</label>
+                                <label class="block text-sm font-medium text-skin-base mb-2">Hover Color</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" wire:model.live="btn_cancel_hover_color"
                                         class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
@@ -386,7 +388,7 @@
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">Border Color</label>
+                                <label class="block text-sm font-medium text-skin-base mb-2">Border Color</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" wire:model.live="btn_cancel_border_color"
                                         class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
@@ -403,7 +405,7 @@
                         </h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">Link Color</label>
+                                <label class="block text-sm font-medium text-skin-base mb-2">Link Color</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" wire:model.live="action_link_color"
                                         class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
@@ -412,7 +414,7 @@
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">Active Tab Color</label>
+                                <label class="block text-sm font-medium text-skin-base mb-2">Active Tab Color</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" wire:model.live="active_tab_color"
                                         class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
@@ -429,17 +431,17 @@
 
         {{-- Accordion 4: Kart & Konteyner --}}
         <x-mary-collapse name="group_design_4" group="settings_design" separator
-            class="bg-white border border-slate-200 shadow-sm rounded-lg">
+            class="bg-[var(--card-bg)] border border-[var(--card-border)] shadow-sm rounded-lg">
             <x-slot:heading>
                 <div class="flex items-center gap-3">
-                    <x-mary-icon name="o-rectangle-group" class="w-5 h-5 text-indigo-500" />
-                    <span class="font-semibold text-slate-700">Kart & Konteyner</span>
+                    <x-mary-icon name="o-rectangle-group" class="w-5 h-5 text-[var(--brand-primary)]" />
+                    <span class="font-semibold text-skin-heading">Kart & Konteyner</span>
                 </div>
             </x-slot:heading>
             <x-slot:content>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 py-2">
                     <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-2">Card Background</label>
+                        <label class="block text-sm font-medium text-skin-base mb-2">Card Background</label>
                         <div class="flex items-center gap-2">
                             <input type="color" wire:model.live="card_bg_color"
                                 class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
@@ -447,10 +449,10 @@
                         </div>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-2">Card Border Color</label>
+                        <label class="block text-sm font-medium text-skin-base mb-2">Card Border Color</label>
                         <div class="flex items-center gap-2">
                             <input type="color" wire:model.live="card_border_color"
-                                class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
+                                class="w-12 h-10 rounded border border-[var(--card-border)] cursor-pointer">
                             <x-mary-input wire:model.live="card_border_color" placeholder="#bfdbfe" class="flex-1" />
                         </div>
                     </div>
@@ -467,13 +469,13 @@
             <x-slot:heading>
                 <div class="flex items-center gap-3">
                     <x-mary-icon name="o-table-cells" class="w-5 h-5 text-indigo-500" />
-                    <span class="font-semibold text-slate-700">Tablo Ayarları</span>
+                    <span class="font-semibold text-skin-base">Tablo Ayarları</span>
                 </div>
             </x-slot:heading>
             <x-slot:content>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 py-2">
                     <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-2">Row Hover Background Color</label>
+                        <label class="block text-sm font-medium text-skin-base mb-2">Row Hover Background Color</label>
                         <div class="flex items-center gap-2">
                             <input type="color" wire:model.live="table_hover_bg_color"
                                 class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
@@ -481,7 +483,7 @@
                         </div>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-2">Row Hover Text Color</label>
+                        <label class="block text-sm font-medium text-skin-base mb-2">Row Hover Text Color</label>
                         <div class="flex items-center gap-2">
                             <input type="color" wire:model.live="table_hover_text_color"
                                 class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
@@ -496,7 +498,7 @@
                     <h3 class="text-sm font-semibold text-slate-900 mb-3 block">Table Avatar Styling</h3>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-2">Avatar Background</label>
+                            <label class="block text-sm font-medium text-skin-base mb-2">Avatar Background</label>
                             <div class="flex items-center gap-2">
                                 <input type="color" wire:model.live="table_avatar_bg_color"
                                     class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
@@ -505,7 +507,7 @@
                             </div>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-2">Avatar Border Color</label>
+                            <label class="block text-sm font-medium text-skin-base mb-2">Avatar Border Color</label>
                             <div class="flex items-center gap-2">
                                 <input type="color" wire:model.live="table_avatar_border_color"
                                     class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
@@ -514,7 +516,7 @@
                             </div>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-2">Avatar Text Color</label>
+                            <label class="block text-sm font-medium text-skin-base mb-2">Avatar Text Color</label>
                             <div class="flex items-center gap-2">
                                 <input type="color" wire:model.live="table_avatar_text_color"
                                     class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
@@ -530,7 +532,7 @@
                     <h3 class="text-sm font-semibold text-slate-900 mb-3 block">List Card Styling</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-2">List Card Background</label>
+                            <label class="block text-sm font-medium text-skin-base mb-2">List Card Background</label>
                             <div class="flex items-center gap-2">
                                 <input type="color" wire:model.live="list_card_bg_color"
                                     class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
@@ -539,7 +541,7 @@
                             </div>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-2">List Card Border Color</label>
+                            <label class="block text-sm font-medium text-skin-base mb-2">List Card Border Color</label>
                             <div class="flex items-center gap-2">
                                 <input type="color" wire:model.live="list_card_border_color"
                                     class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
@@ -548,7 +550,7 @@
                             </div>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-2">List Card Link Color</label>
+                            <label class="block text-sm font-medium text-skin-base mb-2">List Card Link Color</label>
                             <div class="flex items-center gap-2">
                                 <input type="color" wire:model.live="list_card_link_color"
                                     class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
@@ -557,7 +559,7 @@
                             </div>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-2">List Card Hover Color</label>
+                            <label class="block text-sm font-medium text-skin-base mb-2">List Card Hover Color</label>
                             <div class="flex items-center gap-2">
                                 <input type="color" wire:model.live="list_card_hover_color"
                                     class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
@@ -572,11 +574,11 @@
 
         {{-- Accordion 6: Combo Box --}}
         <x-mary-collapse name="group_design_6" group="settings_design" separator
-            class="bg-white border border-slate-200 shadow-sm rounded-lg">
+            class="bg-[var(--card-bg)] border border-[var(--card-border)] shadow-sm rounded-lg">
             <x-slot:heading>
                 <div class="flex items-center gap-3">
-                    <x-mary-icon name="o-chevron-up-down" class="w-5 h-5 text-indigo-500" />
-                    <span class="font-semibold text-slate-700">Combo Box</span>
+                    <x-mary-icon name="o-chevron-up-down" class="w-5 h-5 text-[var(--brand-primary)]" />
+                    <span class="font-semibold text-skin-heading">Combo Box</span>
                 </div>
             </x-slot:heading>
             <x-slot:content>
@@ -593,15 +595,19 @@
                         </h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                             {{-- Preview --}}
-                            <div class="bg-slate-50 rounded-lg p-4 border border-slate-200">
-                                <label class="block text-xs font-medium text-slate-500 mb-2">Önizleme</label>
+                            <div
+                                class="bg-[var(--dropdown-hover-bg)] rounded-lg p-4 border border-[var(--card-border)]">
+                                <label
+                                    class="block text-xs font-medium text-[var(--color-text-muted)] mb-2">Önizleme</label>
                                 <div class="flex items-center gap-3">
-                                    <select class="select select-sm bg-white border-slate-200 text-xs w-40">
+                                    <select
+                                        class="select select-sm bg-[var(--card-bg)] border-[var(--card-border)] text-xs w-40">
                                         <option>Tüm Kategoriler</option>
                                         <option>Kategori 1</option>
                                         <option>Kategori 2</option>
                                     </select>
-                                    <select class="select select-sm bg-white border-slate-200 text-xs w-32">
+                                    <select
+                                        class="select select-sm bg-[var(--card-bg)] border-[var(--card-border)] text-xs w-32">
                                         <option>Tüm Durumlar</option>
                                         <option>Aktif</option>
                                         <option>Pasif</option>
@@ -609,17 +615,22 @@
                                 </div>
                             </div>
                             {{-- Code Example --}}
-                            <div class="bg-slate-900 rounded-lg p-4 text-xs font-mono text-green-400 overflow-x-auto">
-                                <pre>&lt;select class="select select-sm bg-white 
-       border-slate-200 text-xs"&gt;
+                            <div
+                                class="bg-[var(--color-surface-dark-def)] rounded-lg p-4 text-xs font-mono text-[var(--color-success)] overflow-x-auto">
+                                <pre>&lt;select class="select select-sm bg-[var(--card-bg)] 
+        border-[var(--card-border)] text-xs"&gt;
     &lt;option&gt;Seçenek&lt;/option&gt;
 &lt;/select&gt;</pre>
                             </div>
                         </div>
-                        <div class="text-xs text-slate-500 bg-blue-50 p-3 rounded-lg border border-blue-100">
-                            <strong class="text-blue-700">Kullanım:</strong> Liste sayfalarının üst kısmındaki
+                        <div
+                            class="text-xs text-[var(--color-info)] bg-[var(--color-info)]/10 p-3 rounded-lg border border-[var(--color-info)]/20">
+                            <strong class="text-[var(--color-info)]">Kullanım:</strong> Liste sayfalarının üst
+                            kısmındaki
                             filtreleme panellerinde kullanılır.
-                            <code class="bg-blue-100 px-1 rounded text-blue-800">select-sm</code> sınıfı küçük boyut
+                            <code
+                                class="bg-[var(--color-info)]/20 px-1 rounded text-[var(--color-info)]">select-sm</code>
+                            sınıfı küçük boyut
                             sağlar.
                         </div>
                     </div>
@@ -627,20 +638,21 @@
                     {{-- 1b. Tab Inline Filtre Combo Box --}}
                     <div>
                         <h3
-                            class="text-sm font-bold text-slate-900 mb-4 border-b border-gray-100 pb-2 flex items-center gap-2">
-                            <x-mary-icon name="o-adjustments-horizontal" class="w-4 h-4 text-emerald-500" />
+                            class="text-sm font-bold text-skin-heading mb-4 border-b border-[var(--card-border)] pb-2 flex items-center gap-2">
+                            <x-mary-icon name="o-adjustments-horizontal" class="w-4 h-4 text-[var(--color-success)]" />
                             Tab Inline Filtre
-                            <span class="text-xs font-normal text-slate-400 ml-2">(Tab içi kompakt filtreler)</span>
+                            <span class="text-xs font-normal text-[var(--color-text-muted)] ml-2">(Tab içi kompakt filtreler)</span>
                             <span
-                                class="px-1.5 py-0.5 bg-emerald-100 text-emerald-700 text-[10px] font-bold rounded">XS</span>
+                                class="px-1.5 py-0.5 bg-[var(--color-success)]/10 text-[var(--color-success)] text-[10px] font-bold rounded">XS</span>
                         </h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                             {{-- Preview --}}
-                            <div class="bg-slate-50 rounded-lg p-4 border border-slate-200">
-                                <label class="block text-xs font-medium text-slate-500 mb-2">Önizleme</label>
+                            {{-- Preview --}}
+                            <div class="bg-[var(--dropdown-hover-bg)] rounded-lg p-4 border border-[var(--card-border)]">
+                                <label class="block text-xs font-medium text-[var(--color-text-muted)] mb-2">Önizleme</label>
                                 <div class="flex items-center gap-3">
-                                    <span class="text-sm font-bold text-slate-700">Hizmetler</span>
-                                    <select class="select select-xs bg-white border-slate-200">
+                                    <span class="text-sm font-bold text-skin-heading">Hizmetler</span>
+                                    <select class="select select-xs bg-[var(--card-bg)] border-[var(--card-border)]">
                                         <option>Tüm Durumlar</option>
                                         <option>Aktif</option>
                                         <option>Pasif</option>
@@ -648,17 +660,22 @@
                                 </div>
                             </div>
                             {{-- Code Example --}}
-                            <div class="bg-slate-900 rounded-lg p-4 text-xs font-mono text-green-400 overflow-x-auto">
-                                <pre>&lt;select class="select select-xs bg-white 
-       border-slate-200"&gt;
+                            <div
+                                class="bg-[var(--color-surface-dark-def)] rounded-lg p-4 text-xs font-mono text-[var(--color-success)] overflow-x-auto">
+                                <pre>&lt;select class="select select-xs bg-[var(--card-bg)] 
+        border-[var(--card-border)]"&gt;
     &lt;option&gt;Tüm Durumlar&lt;/option&gt;
 &lt;/select&gt;</pre>
                             </div>
                         </div>
-                        <div class="text-xs text-slate-500 bg-emerald-50 p-3 rounded-lg border border-emerald-100">
-                            <strong class="text-emerald-700">Kullanım:</strong> Müşteri detay tabları içinde satır başı
+                        <div
+                            class="text-xs text-[var(--color-success)] bg-[var(--color-success)]/10 p-3 rounded-lg border border-[var(--color-success)]/20">
+                            <strong class="text-[var(--color-success)]">Kullanım:</strong> Müşteri detay tabları içinde
+                            satır başı
                             filtreler için kullanılır.
-                            <code class="bg-emerald-100 px-1 rounded text-emerald-800">select-xs</code> sınıfı ekstra
+                            <code
+                                class="bg-[var(--color-success)]/20 px-1 rounded text-[var(--color-success)]">select-xs</code>
+                            sınıfı ekstra
                             küçük boyut sağlar (28px yükseklik).
                         </div>
                     </div>
@@ -666,15 +683,16 @@
                     {{-- 2. Form Combo Box --}}
                     <div>
                         <h3
-                            class="text-sm font-bold text-slate-900 mb-4 border-b border-gray-100 pb-2 flex items-center gap-2">
-                            <x-mary-icon name="o-document-plus" class="w-4 h-4 text-purple-500" />
+                            class="text-sm font-bold text-skin-heading mb-4 border-b border-[var(--card-border)] pb-2 flex items-center gap-2">
+                            <x-mary-icon name="o-document-plus" class="w-4 h-4 text-[var(--brand-primary)]" />
                             Form Combo Box
-                            <span class="text-xs font-normal text-slate-400 ml-2">(Yeni ekle / düzenle formları)</span>
+                            <span class="text-xs font-normal text-[var(--color-text-muted)] ml-2">(Yeni ekle / düzenle
+                                formları)</span>
                         </h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                             {{-- Preview --}}
                             <div class="bg-slate-50 rounded-lg p-4 border border-slate-200">
-                                <label class="block text-xs font-medium text-slate-500 mb-2">Önizleme</label>
+                                <label class="block text-xs font-medium text-[var(--color-text-muted)] mb-2">Önizleme</label>
                                 <div class="space-y-3">
                                     <div>
                                         <label class="block text-xs font-medium mb-1 opacity-60">Müşteri Seçimi
@@ -714,12 +732,18 @@
 @@enderror</pre>
                             </div>
                         </div>
-                        <div class="text-xs text-slate-500 bg-purple-50 p-3 rounded-lg border border-purple-100">
-                            <strong class="text-purple-700">Kullanım:</strong> Yeni kayıt oluşturma ve düzenleme
+                        <div
+                            class="text-xs text-[var(--brand-primary)] bg-[var(--brand-primary)]/10 p-3 rounded-lg border border-[var(--brand-primary)]/20">
+                            <strong class="text-[var(--brand-primary)]">Kullanım:</strong> Yeni kayıt oluşturma ve
+                            düzenleme
                             formlarında kullanılır.
-                            <code class="bg-purple-100 px-1 rounded text-purple-800">w-full</code> sınıfı tam genişlik
+                            <code
+                                class="bg-[var(--brand-primary)]/20 px-1 rounded text-[var(--brand-primary)]">w-full</code>
+                            sınıfı tam genişlik
                             sağlar.
-                            <code class="bg-purple-100 px-1 rounded text-purple-800">wire:model</code> ile Livewire
+                            <code
+                                class="bg-[var(--brand-primary)]/20 px-1 rounded text-[var(--brand-primary)]">wire:model</code>
+                            ile Livewire
                             binding yapılır.
                         </div>
                     </div>
@@ -727,62 +751,69 @@
                     {{-- Style Classes Reference --}}
                     <div>
                         <h3
-                            class="text-sm font-bold text-slate-900 mb-4 border-b border-gray-100 pb-2 flex items-center gap-2">
-                            <x-mary-icon name="o-code-bracket" class="w-4 h-4 text-slate-500" />
+                            class="text-sm font-bold text-skin-heading mb-4 border-b border-[var(--card-border)] pb-2 flex items-center gap-2">
+                            <x-mary-icon name="o-code-bracket" class="w-4 h-4 text-[var(--color-text-muted)]" />
                             CSS Sınıfları Referansı
                         </h3>
                         <div class="overflow-x-auto">
                             <table class="w-full text-sm">
                                 <thead>
-                                    <tr class="border-b border-slate-200 bg-slate-50">
-                                        <th class="text-left py-2 px-3 font-medium text-slate-700">Sınıf</th>
-                                        <th class="text-left py-2 px-3 font-medium text-slate-700">Açıklama</th>
-                                        <th class="text-left py-2 px-3 font-medium text-slate-700">Kullanım Alanı</th>
+                                    <tr class="border-b border-[var(--card-border)] bg-[var(--dropdown-hover-bg)]">
+                                        <th class="text-left py-2 px-3 font-medium text-skin-heading">Sınıf</th>
+                                        <th class="text-left py-2 px-3 font-medium text-skin-heading">Açıklama</th>
+                                        <th class="text-left py-2 px-3 font-medium text-skin-heading">Kullanım Alanı
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody class="text-xs">
-                                    <tr class="border-b border-slate-100">
+                                    <tr class="border-b border-[var(--card-border)]">
                                         <td class="py-2 px-3"><code
-                                                class="bg-slate-100 px-1.5 py-0.5 rounded">select</code></td>
-                                        <td class="py-2 px-3 text-slate-600">Temel select stili</td>
-                                        <td class="py-2 px-3 text-slate-500">Tüm comboboxlar</td>
-                                    </tr>
-                                    <tr class="border-b border-slate-100">
-                                        <td class="py-2 px-3"><code
-                                                class="bg-slate-100 px-1.5 py-0.5 rounded">select-sm</code></td>
-                                        <td class="py-2 px-3 text-slate-600">Küçük boyut</td>
-                                        <td class="py-2 px-3 text-slate-500">Filtre panelleri</td>
-                                    </tr>
-                                    <tr class="border-b border-slate-100 bg-emerald-50/30">
-                                        <td class="py-2 px-3"><code
-                                                class="bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded">select-xs</code>
+                                                class="bg-[var(--dropdown-hover-bg)] px-1.5 py-0.5 rounded">select</code>
                                         </td>
-                                        <td class="py-2 px-3 text-slate-600 font-bold">Ekstra Küçük</td>
-                                        <td class="py-2 px-3 text-slate-500">Tab içi kompakt filtreler</td>
+                                        <td class="py-2 px-3 text-skin-base">Temel select stili</td>
+                                        <td class="py-2 px-3 text-[var(--color-text-muted)]">Tüm comboboxlar</td>
                                     </tr>
-                                    <tr class="border-b border-slate-100">
+                                    <tr class="border-b border-[var(--card-border)]">
                                         <td class="py-2 px-3"><code
-                                                class="bg-slate-100 px-1.5 py-0.5 rounded">w-full</code></td>
-                                        <td class="py-2 px-3 text-slate-600">Tam genişlik</td>
-                                        <td class="py-2 px-3 text-slate-500">Form alanları</td>
+                                                class="bg-[var(--dropdown-hover-bg)] px-1.5 py-0.5 rounded">select-sm</code>
+                                        </td>
+                                        <td class="py-2 px-3 text-skin-base">Küçük boyut</td>
+                                        <td class="py-2 px-3 text-[var(--color-text-muted)]">Filtre panelleri</td>
                                     </tr>
-                                    <tr class="border-b border-slate-100">
+                                    <tr class="border-b border-[var(--card-border)] bg-[var(--color-success)]/10">
                                         <td class="py-2 px-3"><code
-                                                class="bg-slate-100 px-1.5 py-0.5 rounded">bg-white</code></td>
-                                        <td class="py-2 px-3 text-slate-600">Beyaz arka plan</td>
-                                        <td class="py-2 px-3 text-slate-500">Tüm comboboxlar</td>
+                                                class="bg-[var(--color-success)]/20 text-[var(--color-success)] px-1.5 py-0.5 rounded">select-xs</code>
+                                        </td>
+                                        <td class="py-2 px-3 text-skin-base font-bold">Ekstra Küçük</td>
+                                        <td class="py-2 px-3 text-[var(--color-text-muted)]">Tab içi kompakt filtreler
+                                        </td>
                                     </tr>
-                                    <tr class="border-b border-slate-100">
+                                    <tr class="border-b border-[var(--card-border)]">
                                         <td class="py-2 px-3"><code
-                                                class="bg-slate-100 px-1.5 py-0.5 rounded">border-slate-200</code></td>
-                                        <td class="py-2 px-3 text-slate-600">Açık gri kenarlık</td>
-                                        <td class="py-2 px-3 text-slate-500">Normal durum</td>
+                                                class="bg-[var(--dropdown-hover-bg)] px-1.5 py-0.5 rounded">w-full</code>
+                                        </td>
+                                        <td class="py-2 px-3 text-skin-base">Tam genişlik</td>
+                                        <td class="py-2 px-3 text-[var(--color-text-muted)]">Form alanları</td>
+                                    </tr>
+                                    <tr class="border-b border-[var(--card-border)]">
+                                        <td class="py-2 px-3"><code
+                                                class="bg-[var(--dropdown-hover-bg)] px-1.5 py-0.5 rounded">bg-white</code>
+                                        </td>
+                                        <td class="py-2 px-3 text-skin-base">Beyaz arka plan</td>
+                                        <td class="py-2 px-3 text-[var(--color-text-muted)]">Tüm comboboxlar</td>
+                                    </tr>
+                                    <tr class="border-b border-[var(--card-border)]">
+                                        <td class="py-2 px-3"><code
+                                                class="bg-[var(--dropdown-hover-bg)] px-1.5 py-0.5 rounded">border-slate-200</code>
+                                        </td>
+                                        <td class="py-2 px-3 text-skin-base">Açık gri kenarlık</td>
+                                        <td class="py-2 px-3 text-[var(--color-text-muted)]">Normal durum</td>
                                     </tr>
                                     <tr class="border-b border-slate-100">
                                         <td class="py-2 px-3"><code
                                                 class="bg-slate-100 px-1.5 py-0.5 rounded">text-xs</code></td>
                                         <td class="py-2 px-3 text-slate-600">Küçük font boyutu</td>
-                                        <td class="py-2 px-3 text-slate-500">Filtre panelleri</td>
+                                        <td class="py-2 px-3 text-[var(--color-text-muted)]">Filtre panelleri</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -795,33 +826,34 @@
 
         {{-- Accordion 7: Dashboard Özelleştirme --}}
         <x-mary-collapse name="group_design_7" group="settings_design" separator
-            class="bg-white border border-slate-200 shadow-sm rounded-lg">
+            class="bg-[var(--card-bg)] border border-[var(--card-border)] shadow-sm rounded-lg">
             <x-slot:heading>
                 <div class="flex items-center gap-3">
-                    <x-mary-icon name="o-presentation-chart-line" class="w-5 h-5 text-indigo-500" />
-                    <span class="font-semibold text-slate-700">Dashboard Özelleştirme</span>
+                    <x-mary-icon name="o-presentation-chart-line" class="w-5 h-5 text-[var(--brand-primary)]" />
+                    <span class="font-semibold text-skin-heading">Dashboard Özelleştirme</span>
                 </div>
             </x-slot:heading>
             <x-slot:content>
                 <div class="space-y-6 py-4">
                     {{-- Dashboard Card Colors --}}
                     <div>
-                        <h3 class="text-xs font-semibold uppercase text-slate-500 mb-3 block">Dashboard Kartları</h3>
+                        <h3 class="text-xs font-semibold uppercase text-[var(--color-text-muted)] mb-3 block">Dashboard
+                            Kartları</h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">Card Background</label>
+                                <label class="block text-sm font-medium text-skin-base mb-2">Card Background</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" wire:model.live="dashboard_card_bg_color"
-                                        class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
+                                        class="w-12 h-10 rounded border border-[var(--card-border)] cursor-pointer">
                                     <x-mary-input wire:model.live="dashboard_card_bg_color" placeholder="#eff4ff"
                                         class="flex-1" />
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">Card Text Color</label>
+                                <label class="block text-sm font-medium text-skin-base mb-2">Card Text Color</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" wire:model.live="dashboard_card_text_color"
-                                        class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
+                                        class="w-12 h-10 rounded border border-[var(--card-border)] cursor-pointer">
                                     <x-mary-input wire:model.live="dashboard_card_text_color" placeholder="#475569"
                                         class="flex-1" />
                                 </div>
@@ -830,33 +862,34 @@
                     </div>
 
                     {{-- Stats Colors --}}
-                    <div class="border-t border-slate-100 pt-4">
-                        <h3 class="text-xs font-semibold uppercase text-slate-500 mb-3 block">İstatistik Kart Renkleri
+                    <div class="border-t border-[var(--card-border)] pt-4">
+                        <h3 class="text-xs font-semibold uppercase text-[var(--color-text-muted)] mb-3 block">İstatistik
+                            Kart Renkleri
                         </h3>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">Stats 1 (Blue)</label>
+                                <label class="block text-sm font-medium text-skin-base mb-2">Stats 1 (Blue)</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" wire:model.live="dashboard_stats_1_color"
-                                        class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
+                                        class="w-12 h-10 rounded border border-[var(--card-border)] cursor-pointer">
                                     <x-mary-input wire:model.live="dashboard_stats_1_color" placeholder="#3b82f6"
                                         class="flex-1" />
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">Stats 2 (Teal)</label>
+                                <label class="block text-sm font-medium text-skin-base mb-2">Stats 2 (Teal)</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" wire:model.live="dashboard_stats_2_color"
-                                        class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
+                                        class="w-12 h-10 rounded border border-[var(--card-border)] cursor-pointer">
                                     <x-mary-input wire:model.live="dashboard_stats_2_color" placeholder="#14b8a6"
                                         class="flex-1" />
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">Stats 3 (Amber)</label>
+                                <label class="block text-sm font-medium text-skin-base mb-2">Stats 3 (Amber)</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" wire:model.live="dashboard_stats_3_color"
-                                        class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
+                                        class="w-12 h-10 rounded border border-[var(--card-border)] cursor-pointer">
                                     <x-mary-input wire:model.live="dashboard_stats_3_color" placeholder="#f59e0b"
                                         class="flex-1" />
                                 </div>
@@ -869,7 +902,7 @@
     </div>
 
     {{-- Card Footer --}}
-    <div class="flex justify-end pt-6 mt-6 border-t border-slate-200">
+    <div class="flex justify-end pt-6 mt-6 border-t border-[var(--card-border)]">
         <button type="button" wire:click="save" wire:loading.attr="disabled" class="theme-btn-save">
             <svg wire:loading wire:target="save" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>

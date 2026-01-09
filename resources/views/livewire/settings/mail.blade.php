@@ -182,8 +182,8 @@ new
 
         {{-- Header --}}
         <div class="mb-8">
-            <h1 class="text-2xl font-bold" style="color: var(--color-text-heading);">Mail Ayarları</h1>
-            <p class="text-sm opacity-60 mt-1" style="color: var(--color-text-base);">SMTP ve Mailgun e-posta servis
+            <h1 class="text-2xl font-bold text-skin-heading">Mail Ayarları</h1>
+            <p class="text-sm opacity-60 mt-1 text-skin-base">SMTP ve Mailgun e-posta servis
                 ayarlarını yapılandırın</p>
         </div>
 
@@ -192,17 +192,17 @@ new
 
             {{-- Card Header --}}
             <div class="flex items-center justify-between pb-4 mb-6 border-b border-[var(--card-border)]">
-                <h2 class="text-sm font-bold" style="color: var(--color-text-heading);">E-posta Servis Yapılandırması
+                <h2 class="text-sm font-bold text-skin-heading">E-posta Servis Yapılandırması
                 </h2>
                 <div class="flex items-center gap-4">
                     {{-- Gönderim Durumu Toggle --}}
                     <div class="flex items-center gap-3">
                         <input type="checkbox" wire:model.live="is_active" class="toggle toggle-success toggle-lg" />
                         <div>
-                            <div class="text-xs font-medium opacity-60" style="color: var(--color-text-base);">Gönderim
+                            <div class="text-xs font-medium opacity-60 text-skin-base">Gönderim
                                 Durumu</div>
-                            <div class="text-sm font-bold"
-                                style="color: {{ $is_active ? 'var(--btn-save-bg)' : 'var(--btn-delete-bg)' }};">
+                            <div
+                                class="text-sm font-bold {{ $is_active ? 'text-[var(--color-success)]' : 'text-[var(--color-danger)]' }}">
                                 {{ $is_active ? 'Aktif' : 'Kapalı' }}
                             </div>
                         </div>
@@ -216,33 +216,31 @@ new
 
             {{-- SECTION 1: Service Selection --}}
             <div class="mb-6">
-                <h3 class="text-xs font-bold uppercase tracking-wider mb-4 opacity-60"
-                    style="color: var(--color-text-base);">Servis Seçimi</h3>
+                <h3 class="text-xs font-bold uppercase tracking-wider mb-4 opacity-60 text-skin-base">Servis Seçimi</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {{-- SMTP Option --}}
                     <label class="block cursor-pointer">
                         <input type="radio" wire:model.live="provider" value="smtp" class="peer sr-only">
-                        <div class="p-4 bg-[var(--card-bg)] border-2 border-[var(--card-border)] shadow-sm rounded-xl peer-checked:ring-2 peer-checked:ring-[var(--primary-color)] transition-all relative"
-                            style="background-color: var(--card-bg); border-color: var(--card-border);">
+                        <div
+                            class="p-4 bg-[var(--card-bg)] border-2 border-[var(--card-border)] shadow-sm rounded-xl peer-checked:ring-2 peer-checked:ring-[var(--primary-color)] transition-all relative">
                             <div class="flex items-start justify-between">
                                 <div class="flex items-center gap-3">
                                     <div
                                         class="w-5 h-5 rounded-full border-2 flex items-center justify-center {{ $provider === 'smtp' ? 'border-[var(--primary-color)]' : 'border-[var(--card-border)]' }}">
                                         @if($provider === 'smtp')
-                                            <div class="w-2.5 h-2.5 rounded-full"
-                                                style="background-color: var(--primary-color);"></div>
+                                            <div class="w-2.5 h-2.5 rounded-full bg-[var(--primary-color)]"></div>
                                         @endif
                                     </div>
                                     <div>
-                                        <div class="font-bold text-sm" style="color: var(--color-text-heading);">SMTP
+                                        <div class="font-bold text-sm text-skin-heading">SMTP
                                         </div>
-                                        <div class="text-xs opacity-60" style="color: var(--color-text-base);">Kendi
+                                        <div class="text-xs opacity-60 text-skin-base">Kendi
                                             sunucunuz</div>
                                     </div>
                                 </div>
                                 @if($provider === 'smtp')
-                                    <span class="text-xs font-bold px-2 py-1 rounded"
-                                        style="color: var(--btn-save-bg); background-color: color-mix(in srgb, var(--btn-save-bg) 15%, white);">Aktif</span>
+                                    <span
+                                        class="text-xs font-bold px-2 py-1 rounded text-[var(--color-success)] bg-[var(--color-success)]/10">Aktif</span>
                                 @endif
                             </div>
                         </div>
@@ -256,7 +254,7 @@ new
                             <div class="flex items-start justify-between">
                                 <div class="flex items-center gap-3">
                                     <div
-                                        class="w-5 h-5 rounded-full border-2 flex items-center justify-center {{ $provider === 'mailgun' ? 'border-orange-500' : 'border-gray-300' }}">
+                                        class="w-5 h-5 rounded-full border-2 flex items-center justify-center {{ $provider === 'mailgun' ? 'border-[var(--color-active-border)]' : 'border-[var(--card-border)]' }}">
                                         @if($provider === 'mailgun')
                                             <div class="w-2.5 h-2.5 rounded-full bg-[var(--color-active-border)]"></div>
                                         @endif
@@ -267,8 +265,8 @@ new
                                     </div>
                                 </div>
                                 @if($provider === 'mailgun')
-                                    <span class="text-xs font-semibold px-2 py-1 rounded"
-                                        style="color: var(--btn-save-bg); background-color: color-mix(in srgb, var(--btn-save-bg) 15%, white);">Aktif</span>
+                                    <span
+                                        class="text-xs font-semibold px-2 py-1 rounded text-[var(--color-success)] bg-[var(--color-success)]/10">Aktif</span>
                                 @endif
                             </div>
                         </div>
@@ -288,11 +286,11 @@ new
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <x-mary-input label="SMTP Sunucu Adresi" wire:model="smtp_host"
-                                    placeholder="örn: smtp.yandex.com" class="bg-white" />
+                                    placeholder="örn: smtp.yandex.com" class="bg-[var(--card-bg)]" />
                             </div>
                             <div>
                                 <x-mary-input label="Port" wire:model="smtp_port" type="number" placeholder="587"
-                                    class="bg-white" />
+                                    class="bg-[var(--card-bg)]" />
                             </div>
                         </div>
 
@@ -300,10 +298,10 @@ new
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <x-mary-input label="Kullanıcı Adı (E-posta)" wire:model="smtp_username"
-                                    placeholder="info@domain.com" class="bg-white" />
+                                    placeholder="info@domain.com" class="bg-[var(--card-bg)]" />
                             </div>
                             <div>
-                                <x-mary-password label="Şifre" wire:model="smtp_password" class="bg-white" />
+                                <x-mary-password label="Şifre" wire:model="smtp_password" class="bg-[var(--card-bg)]" />
                             </div>
                         </div>
 
@@ -311,11 +309,11 @@ new
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <x-mary-input label="Gönderen E-posta" wire:model="smtp_from_email"
-                                    placeholder="noreply@domain.com" class="bg-white" />
+                                    placeholder="noreply@domain.com" class="bg-[var(--card-bg)]" />
                             </div>
                             <div>
                                 <x-mary-input label="Gönderen Adı" wire:model="smtp_from_name" placeholder="Firma Adı"
-                                    class="bg-white" />
+                                    class="bg-[var(--card-bg)]" />
                             </div>
                         </div>
 
@@ -330,24 +328,24 @@ new
                                 {{-- Mailgun API Key --}}
                                 <div>
                                     <x-mary-password label="Mailgun API Key" wire:model="mailgun_api_key"
-                                        hint="Mailgun panelinden alacağınız gizli anahtar" class="bg-white" />
+                                        hint="Mailgun panelinden alacağınız gizli anahtar" class="bg-[var(--card-bg)]" />
                                 </div>
 
                                 {{-- Mailgun Domain --}}
                                 <div>
                                     <x-mary-input label="Mailgun Domain" wire:model="mailgun_domain" placeholder="mg.alanadi.com"
-                                        class="bg-white" />
+                                        class="bg-[var(--card-bg)]" />
                                 </div>
 
                                 {{-- Gönderen E-posta & Adı --}}
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <x-mary-input label="Gönderen E-posta" wire:model="mailgun_from_email"
-                                            placeholder="teknik@alanadi.com" class="bg-white" />
+                                            placeholder="teknik@alanadi.com" class="bg-[var(--card-bg)]" />
                                     </div>
                                     <div>
                                         <x-mary-input label="Gönderen Adı" wire:model="mailgun_from_name" placeholder="Firma Adı"
-                                            class="bg-white" />
+                                            class="bg-[var(--card-bg)]" />
                                     </div>
                                 </div>
 

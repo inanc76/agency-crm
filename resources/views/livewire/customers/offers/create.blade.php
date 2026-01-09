@@ -528,7 +528,7 @@ new
         {{-- Header --}}
         <div class="flex items-start justify-between mb-6">
             <div>
-                <h1 class="text-2xl font-bold tracking-tight" style="color: var(--color-text-heading);">
+                <h1 class="text-2xl font-bold tracking-tight" class="text-skin-heading">
                     @if($isViewMode) {{ $title }} @else Yeni Teklif Oluştur @endif
                 </h1>
                 <div class="flex items-center gap-2 mt-1">
@@ -537,7 +537,7 @@ new
                             class="text-xs font-medium px-2 py-0.5 rounded bg-slate-100 text-slate-500 border border-slate-200">Teklif</span>
                         <span class="text-[11px] font-mono text-slate-400">ID: {{ $offerId }}</span>
                     @else
-                        <p class="text-sm opacity-60" style="color: var(--color-text-base);">
+                        <p class="text-sm opacity-60">
                             Müşteri için yeni bir teklif hazırlayın
                         </p>
                     @endif
@@ -607,15 +607,15 @@ new
                     <div class="space-y-6">
                         {{-- Müşteri Bilgileri Card --}}
                         <div class="theme-card p-6 shadow-sm">
-                            <h2 class="text-base font-bold mb-4" style="color: var(--color-text-heading);">Müşteri Bilgileri
+                            <h2 class="text-base font-bold mb-4" class="text-skin-heading">Müşteri Bilgileri
                             </h2>
                             <div class="grid grid-cols-2 gap-6">
                                 <div>
                                     <label class="block text-xs font-medium mb-1 opacity-60"
-                                        style="color: var(--color-text-base);">Müşteri *</label>
+                                       >Müşteri *</label>
                                     @if($isViewMode)
                                         @php $customerName = collect($customers)->firstWhere('id', $customer_id)['name'] ?? '-'; @endphp
-                                        <div class="text-sm font-medium" style="color: var(--color-text-base);">
+                                        <div class="text-sm font-medium">
                                             {{ $customerName }}
                                         </div>
                                     @else
@@ -625,15 +625,15 @@ new
                                                 <option value="{{ $c['id'] }}">{{ $c['name'] }}</option>
                                             @endforeach
                                         </select>
-                                        @error('customer_id') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                                        @error('customer_id') <span class="text-skin-danger text-xs">{{ $message }}</span> @enderror
                                     @endif
                                 </div>
 
                                 <div>
                                     <label class="block text-xs font-medium mb-1 opacity-60"
-                                        style="color: var(--color-text-base);">Teklif Durumu</label>
+                                       >Teklif Durumu</label>
                                     @if($isViewMode)
-                                        <div class="text-sm font-medium" style="color: var(--color-text-base);">
+                                        <div class="text-sm font-medium">
                                             @if($status === 'DRAFT') Taslak
                                             @elseif($status === 'SENT') Gönderildi
                                             @elseif($status === 'ACCEPTED') Kabul Edildi
@@ -654,16 +654,16 @@ new
 
                         {{-- Teklif Ayarları Card --}}
                         <div class="theme-card p-6 shadow-sm border border-blue-100 bg-blue-50/50">
-                            <h2 class="text-base font-bold mb-4" style="color: var(--color-text-heading);">Teklif Ayarları
+                            <h2 class="text-base font-bold mb-4" class="text-skin-heading">Teklif Ayarları
                             </h2>
                             <div class="grid grid-cols-2 gap-6">
                                 {{-- Title moved to Description card --}}
 
                                 <div>
                                     <label class="block text-xs font-medium mb-1 opacity-60"
-                                        style="color: var(--color-text-base);">Geçerlilik Süresi (Gün)</label>
+                                       >Geçerlilik Süresi (Gün)</label>
                                     @if($isViewMode)
-                                        <div class="text-sm font-medium" style="color: var(--color-text-base);">
+                                        <div class="text-sm font-medium">
                                             {{ $valid_days }}
                                             gün
                                         </div>
@@ -674,9 +674,9 @@ new
 
                                 <div>
                                     <label class="block text-xs font-medium mb-1 opacity-60"
-                                        style="color: var(--color-text-base);">Para Birimi</label>
+                                       >Para Birimi</label>
                                     @if($isViewMode)
-                                        <div class="text-sm font-medium" style="color: var(--color-text-base);">{{ $currency }}
+                                        <div class="text-sm font-medium">{{ $currency }}
                                         </div>
                                     @else
                                         <select wire:model.live="currency" class="select w-full bg-white">
@@ -689,9 +689,9 @@ new
 
                                 <div>
                                     <label class="block text-xs font-medium mb-1 opacity-60"
-                                        style="color: var(--color-text-base);">İndirim</label>
+                                       >İndirim</label>
                                     @if($isViewMode)
-                                        <div class="text-sm font-medium" style="color: var(--color-text-base);">
+                                        <div class="text-sm font-medium">
                                             @if($discount_type === 'PERCENTAGE') %{{ $discount_value }} @else
                                             {{ number_format($discount_value, 0, ',', '.') }} {{ $currency }} @endif
                                         </div>
@@ -711,9 +711,9 @@ new
 
                                 <div>
                                     <label class="block text-xs font-medium mb-1 opacity-60"
-                                        style="color: var(--color-text-base);">KDV Oranı</label>
+                                       >KDV Oranı</label>
                                     @if($isViewMode)
-                                        <div class="text-sm font-medium" style="color: var(--color-text-base);">
+                                        <div class="text-sm font-medium">
                                             %{{ $vat_rate }}
                                         </div>
                                     @else
@@ -732,26 +732,26 @@ new
 
                         {{-- Teklif Başlığı ve Açıklaması Card --}}
                         <div class="theme-card p-6 shadow-sm border border-purple-100 bg-purple-50/50">
-                            <h2 class="text-base font-bold mb-4" style="color: var(--color-text-heading);">Teklif Başlığı ve
+                            <h2 class="text-base font-bold mb-4" class="text-skin-heading">Teklif Başlığı ve
                                 Açıklaması</h2>
 
                             <div class="mb-4">
                                 <label class="block text-xs font-medium mb-1 opacity-60"
-                                    style="color: var(--color-text-base);">Teklif Başlığı *</label>
+                                   >Teklif Başlığı *</label>
                                 @if($isViewMode)
-                                    <div class="text-sm font-medium" style="color: var(--color-text-base);">{{ $title }}</div>
+                                    <div class="text-sm font-medium">{{ $title }}</div>
                                 @else
                                     <input type="text" wire:model="title" placeholder="Örn: Web Sitesi Bakım Teklifi"
                                         class="input w-full bg-white">
-                                    @error('title') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                                    @error('title') <span class="text-skin-danger text-xs">{{ $message }}</span> @enderror
                                 @endif
                             </div>
 
                             <div>
                                 <label class="block text-xs font-medium mb-1 opacity-60"
-                                    style="color: var(--color-text-base);">Teklif Açıklaması</label>
+                                   >Teklif Açıklaması</label>
                                 @if($isViewMode)
-                                    <div class="text-sm font-medium whitespace-pre-wrap" style="color: var(--color-text-base);">
+                                    <div class="text-sm font-medium whitespace-pre-wrap">
                                         {{ $description ?: '-' }}
                                     </div>
                                 @else
@@ -764,7 +764,7 @@ new
                         {{-- Teklif Kalemleri Card --}}
                         <div class="theme-card p-6 shadow-sm border border-green-100 bg-green-50/50">
                             <div class="flex items-center justify-between mb-4">
-                                <h2 class="text-base font-bold" style="color: var(--color-text-heading);">Teklif Kalemleri *
+                                <h2 class="text-base font-bold" class="text-skin-heading">Teklif Kalemleri *
                                 </h2>
                                 @if(!$isViewMode)
                                     <div class="flex gap-2">
@@ -788,17 +788,17 @@ new
                                         <thead>
                                             <tr class="border-b border-slate-200">
                                                 <th class="text-left py-2 px-2 font-medium opacity-60"
-                                                    style="color: var(--color-text-base);">Hizmet Adı</th>
+                                                   >Hizmet Adı</th>
                                                 <th class="text-left py-2 px-2 font-medium opacity-60"
-                                                    style="color: var(--color-text-base);">Açıklama</th>
+                                                   >Açıklama</th>
                                                 <th class="text-center py-2 px-2 font-medium opacity-60"
-                                                    style="color: var(--color-text-base);">Süre</th>
+                                                   >Süre</th>
                                                 <th class="text-right py-2 px-2 font-medium opacity-60"
-                                                    style="color: var(--color-text-base);">Fiyat</th>
+                                                   >Fiyat</th>
                                                 <th class="text-center py-2 px-2 font-medium opacity-60"
-                                                    style="color: var(--color-text-base);">Adet</th>
+                                                   >Adet</th>
                                                 <th class="text-right py-2 px-2 font-medium opacity-60"
-                                                    style="color: var(--color-text-base);">Toplam</th>
+                                                   >Toplam</th>
                                                 @if(!$isViewMode)
                                                     <th class="w-10"></th>
                                                 @endif
@@ -808,10 +808,10 @@ new
                                             @foreach($items as $index => $item)
                                                 <tr class="border-b border-slate-100" wire:key="item-{{ $index }}">
                                                     <td class="py-3 px-2 font-normal text-xs"
-                                                        style="color: var(--color-text-base);">
+                                                       >
                                                         {{ $item['service_name'] }}
                                                     </td>
-                                                    <td class="py-3 px-2 text-xs opacity-70" style="color: var(--color-text-base);">
+                                                    <td class="py-3 px-2 text-xs opacity-70">
                                                         <div class="flex items-center gap-1 text-slate-500">
                                                             <span>{{ Str::limit($item['description'], 40) }}</span>
                                                             @if(!$isViewMode)
@@ -838,14 +838,14 @@ new
                                                         @endif
                                                     </td>
                                                     <td class="py-3 px-2 text-right text-xs font-normal"
-                                                        style="color: var(--color-text-heading);">
+                                                        class="text-skin-heading">
                                                         {{ number_format($item['price'] * $item['quantity'], 0, ',', '.') }}
                                                         {{ $item['currency'] }}
                                                     </td>
                                                     @if(!$isViewMode)
                                                         <td class="py-3 px-2">
                                                             <button type="button" wire:click="removeItem({{ $index }})"
-                                                                class="text-red-500 hover:text-red-700">
+                                                                class="text-skin-danger hover:opacity-80">
                                                                 <x-mary-icon name="o-x-mark" class="w-4 h-4" />
                                                             </button>
                                                         </td>
@@ -862,7 +862,7 @@ new
                                     <p class="text-xs mt-1">Yukarıdaki "+ Hizmet Ekle" butonuna tıklayarak başlayın</p>
                                 </div>
                             @endif
-                            @error('items') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                            @error('items') <span class="text-skin-danger text-xs">{{ $message }}</span> @enderror
                         </div>
                     </div>
                 @endif
@@ -906,7 +906,7 @@ new
                         </div>
 
                         @if($totals['discount'] > 0)
-                            <div class="flex justify-between text-red-600">
+                            <div class="flex justify-between text-skin-danger">
                                 <span>İndirim (@if($discount_type === 'PERCENTAGE') %{{ $discount_value }} @else Tutar
                                 @endif):</span>
                                 <span class="font-medium">-{{ number_format($totals['discount'], 0, ',', '.') }}
@@ -933,7 +933,7 @@ new
                         </div>
 
                         <div class="flex justify-between pt-3 border-t-2 border-slate-300 text-base font-bold"
-                            style="color: var(--color-text-heading);">
+                            class="text-skin-heading">
                             <span>Genel Toplam:</span>
                             <span>{{ number_format($totals['total'], 0, ',', '.') }} {{ $currency }}</span>
                         </div>
@@ -955,7 +955,7 @@ new
             {{-- Left Panel: Existing Services --}}
             <div class="border-r border-slate-200 pr-6">
                 <div class="flex items-center justify-between mb-4">
-                    <h4 class="font-bold text-sm" style="color: var(--color-text-heading);">Mevcut Hizmetleri Uzat</h4>
+                    <h4 class="font-bold text-sm" class="text-skin-heading">Mevcut Hizmetleri Uzat</h4>
                     <select wire:model.live="selectedYear" class="select select-sm bg-white border-slate-200">
                         @for($year = date('Y'); $year >= date('Y') - 2; $year--)
                             <option value="{{ $year }}">{{ $year }}</option>
@@ -1003,7 +1003,7 @@ new
 
             {{-- Right Panel: Price Definitions --}}
             <div class="pl-6">
-                <h4 class="font-bold text-sm mb-4" style="color: var(--color-text-heading);">Yeni Hizmet Ekle</h4>
+                <h4 class="font-bold text-sm mb-4" class="text-skin-heading">Yeni Hizmet Ekle</h4>
                 <p class="text-xs text-slate-500 mb-6 font-medium">Fiyat tanımlarından yeni hizmet ekleyebilirsiniz</p>
 
                 <div class="space-y-5">
@@ -1065,10 +1065,10 @@ new
         <div class="space-y-4">
             <div class="relative">
                 <div class="flex justify-between items-center mb-2">
-                    <label class="text-xs font-bold opacity-70" style="color: var(--color-text-base);">Kalem
+                    <label class="text-xs font-bold opacity-70">Kalem
                         Açıklaması</label>
                     <span
-                        class="text-[10px] font-black px-2 py-0.5 rounded-lg {{ strlen($itemDescriptionTemp) >= 50 ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600' }}">
+                        class="text-[10px] font-black px-2 py-0.5 rounded-lg {{ strlen($itemDescriptionTemp) >= 50 ? 'bg-skin-danger-muted text-skin-danger' : 'bg-blue-100 text-blue-600' }}">
                         {{ 50 - strlen($itemDescriptionTemp) }} Karakter Kaldı
                     </span>
                 </div>
@@ -1077,7 +1077,7 @@ new
                     placeholder="Bu kalem için özel bir not ekleyin..." rows="3" maxlength="50"
                     style="border-radius: var(--input-radius, 0.375rem);"></textarea>
             </div>
-            <p class="text-[11px] opacity-50 italic leading-relaxed" style="color: var(--color-text-base);">
+            <p class="text-[11px] opacity-50 italic leading-relaxed">
                 * Bu açıklama teklif dökümanında ilgili hizmet kalemi altında gösterilecektir.
             </p>
         </div>
@@ -1117,7 +1117,7 @@ new
                                     class="input input-sm w-full bg-white border-slate-200 focus:border-blue-400"
                                     placeholder="Hizmet Adı">
                                 @error("manualItems.{$index}.service_name")
-                                    <span class="text-red-500 text-[10px] block mt-1">{{ $message }}</span>
+                                    <span class="text-skin-danger text-[10px] block mt-1">{{ $message }}</span>
                                 @enderror
                             </td>
                             <td class="p-2 align-top">
@@ -1135,7 +1135,7 @@ new
                                     class="input input-sm w-full bg-white border-slate-200 focus:border-blue-400 text-right"
                                     min="0" step="0.01">
                                 @error("manualItems.{$index}.price")
-                                    <span class="text-red-500 text-[10px] block mt-1">{{ $message }}</span>
+                                    <span class="text-skin-danger text-[10px] block mt-1">{{ $message }}</span>
                                 @enderror
                             </td>
                             <td class="p-2 align-top">
@@ -1149,7 +1149,7 @@ new
                             <td class="p-2 align-top pt-2 text-center">
                                 @if(count($manualItems) > 1)
                                     <button type="button" wire:click="removeManualItemRow({{ $index }})"
-                                        class="text-red-500 hover:text-red-700 p-1">
+                                        class="text-skin-danger hover:opacity-80 p-1">
                                         <x-mary-icon name="o-trash" class="w-4 h-4" />
                                     </button>
                                 @endif

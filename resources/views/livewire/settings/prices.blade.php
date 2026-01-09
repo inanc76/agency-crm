@@ -159,7 +159,7 @@ new #[Layout('components.layouts.app', ['title' => 'Fiyat Tanımları'])]
         {{-- Breadcrumbs & Back Button --}}
         <div class="mb-6">
             <a href="/dashboard/settings"
-                class="inline-flex items-center gap-2 text-slate-500 hover:text-slate-700 transition-colors group">
+                class="inline-flex items-center gap-2 text-skin-base hover:text-skin-heading transition-colors group">
                 <x-mary-icon name="o-arrow-left" class="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
                 <span class="text-sm font-medium">Geri</span>
             </a>
@@ -168,8 +168,8 @@ new #[Layout('components.layouts.app', ['title' => 'Fiyat Tanımları'])]
         {{-- Page Header --}}
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
             <div>
-                <h1 class="text-2xl font-bold" style="color: var(--color-text-heading);">Fiyat Tanımları</h1>
-                <p class="text-sm opacity-60 mt-1" style="color: var(--color-text-base);">Hizmet fiyat tanımlarını
+                <h1 class="text-2xl font-bold" class="text-skin-heading">Fiyat Tanımları</h1>
+                <p class="text-sm opacity-60 mt-1">Hizmet fiyat tanımlarını
                     görüntüleyin ve yönetin</p>
             </div>
             <button class="theme-btn-save" wire:click="openCreateModal">
@@ -207,7 +207,7 @@ new #[Layout('components.layouts.app', ['title' => 'Fiyat Tanımları'])]
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
-                        <tr class="border-b border-slate-100 bg-slate-50/50">
+                        <tr class="border-b border-[var(--table-border)] bg-[var(--table-header-bg)]">
                             <th class="px-4 py-3 text-[11px] font-bold uppercase tracking-wider opacity-50">Durum</th>
                             <th class="px-4 py-3 text-[11px] font-bold uppercase tracking-wider opacity-50">Hizmet Adı
                             </th>
@@ -221,17 +221,17 @@ new #[Layout('components.layouts.app', ['title' => 'Fiyat Tanımları'])]
                             </th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-100">
+                    <tbody class="divide-y divide-[var(--table-border)]">
                         @forelse($prices as $price)
-                            <tr class="hover:bg-slate-50/50 transition-colors group">
+                            <tr class="hover:bg-[var(--table-hover-bg)] transition-colors group">
                                 <td class="px-4 py-4">
                                     <div class="flex items-center gap-2">
                                         <div
-                                            class="w-2 h-2 rounded-full {{ $price->is_active ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]' : 'bg-slate-300' }}">
+                                            class="w-2 h-2 rounded-full {{ $price->is_active ? 'bg-[var(--status-active)] shadow-[0_0_8px_rgba(34,197,94,0.4)]' : 'bg-[var(--status-inactive)]' }}">
                                         </div>
                                     </div>
                                 </td>
-                                <td class="px-4 py-4 text-sm" style="color: var(--color-text-heading);">
+                                <td class="px-4 py-4 text-sm" class="text-skin-heading">
                                     {{ $price->name }}
                                 </td>
                                 <td class="px-4 py-4 text-sm opacity-70">
@@ -240,15 +240,17 @@ new #[Layout('components.layouts.app', ['title' => 'Fiyat Tanımları'])]
                                 <td class="px-4 py-4 text-sm opacity-70">
                                     {{ $durations->firstWhere('key', $price->duration)?->display_label ?? $price->duration }}
                                 </td>
-                                <td class="px-4 py-4 text-sm" style="color: var(--color-text-heading);">
+                                <td class="px-4 py-4 text-sm" class="text-skin-heading">
                                     {{ number_format($price->price, 2) }} {{ $price->currency }}
                                 </td>
                                 <td class="px-4 py-4 text-sm opacity-60">{{ $price->created_at->format('d.m.Y') }}</td>
                                 <td class="px-4 py-4">
                                     <div class="flex items-center gap-1">
-                                        <x-mary-button icon="o-pencil" class="btn-ghost btn-xs text-slate-400"
+                                        <x-mary-button icon="o-pencil"
+                                            class="btn-ghost btn-xs text-[var(--color-text-muted)]"
                                             wire:click="edit('{{ $price->id }}')" />
-                                        <x-mary-button icon="o-trash" class="btn-ghost btn-xs text-slate-400"
+                                        <x-mary-button icon="o-trash"
+                                            class="btn-ghost btn-xs text-[var(--color-text-muted)]"
                                             wire:click="delete('{{ $price->id }}')"
                                             wire:confirm="Bu fiyat tanımını silmek istediğinize emin misiniz?" />
                                     </div>
@@ -296,9 +298,11 @@ new #[Layout('components.layouts.app', ['title' => 'Fiyat Tanımları'])]
             </div>
 
             <div class="md:col-span-2 flex items-center gap-3">
-                <span class="text-sm font-medium {{ !$is_active ? 'text-red-500' : 'text-slate-400' }}">Pasif</span>
+                <span
+                    class="text-sm font-medium {{ !$is_active ? 'text-[var(--color-danger)]' : 'text-[var(--color-text-muted)]' }}">Pasif</span>
                 <x-mary-toggle wire:model="is_active" class="toggle-success" />
-                <span class="text-sm font-medium {{ $is_active ? 'text-green-500' : 'text-slate-400' }}">Aktif</span>
+                <span
+                    class="text-sm font-medium {{ $is_active ? 'text-[var(--color-success)]' : 'text-[var(--color-text-muted)]' }}">Aktif</span>
             </div>
         </div>
 

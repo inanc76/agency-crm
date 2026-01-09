@@ -271,10 +271,14 @@
             --dropdown-header-end:
                 {{ $theme?->dropdown_header_bg_end_color ?? '#eef2ff' }}
             ;
-            --notification-badge: {{ $theme?->notification_badge_color ?? '#ef4444' }};
+            --notification-badge:
+                {{ $theme?->notification_badge_color ?? '#ef4444' }}
+            ;
 
             /* Page Background */
-            --page-bg: {{ $theme?->page_bg_color ?? '#f8fafc' }};
+            --page-bg:
+                {{ $theme?->page_bg_color ?? '#f8fafc' }}
+            ;
 
 
             /* Theme variables are defined above - NO DaisyUI hijacking to prevent UI pollution */
@@ -361,7 +365,8 @@
                 <div class="relative" x-data="{ open: false }" @click.outside="open = false">
                     <button @click="open = !open"
                         class="flex items-center space-x-3 px-3 py-1.5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer focus:outline-none">
-                        <div class="w-8 h-8 bg-purple-400 rounded-full flex items-center justify-center">
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center"
+                            style="background-color: var(--avatar-bg);">
                             <span class="text-xs font-semibold text-white">
                                 {{ strtoupper(substr(auth()->user()->name ?? 'A', 0, 1)) }}
                             </span>
@@ -388,20 +393,25 @@
                         x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
                         x-transition:leave="transition ease-in duration-75"
                         x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
-                        class="absolute right-0 top-full mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-50 overflow-hidden"
-                        style="display: none;">
+                        class="absolute right-0 top-full mt-2 w-56 rounded-xl shadow-lg py-1 z-50 overflow-hidden"
+                        style="display: none; background-color: var(--dropdown-bg); border: 1px solid var(--dropdown-border);">
 
-                        <div class="px-4 py-3 border-b border-gray-50 bg-gray-50/50">
-                            <p class="text-sm text-gray-900 font-medium truncate">
+                        <div class="px-4 py-3 border-b"
+                            style="border-color: var(--dropdown-border); background-color: var(--dropdown-header-bg);">
+                            <p class="text-sm font-medium truncate" style="color: var(--dropdown-text);">
                                 {{ auth()->user()->name ?? 'Kullanıcı' }}
                             </p>
-                            <p class="text-xs text-gray-500 truncate">{{ auth()->user()->email ?? '' }}</p>
+                            <p class="text-xs truncate" style="color: var(--dropdown-text-muted);">
+                                {{ auth()->user()->email ?? '' }}</p>
                         </div>
 
                         <div class="py-1">
                             <a href="{{ route('profile.edit') }}"
-                                class="group flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors">
-                                <svg class="mr-3 h-4 w-4 text-gray-400 group-hover:text-purple-500" fill="none"
+                                class="group flex items-center px-4 py-2 text-sm transition-colors"
+                               
+                                onmouseover="this.style.backgroundColor='var(--dropdown-item-hover)'; this.style.color='var(--dropdown-item-hover-text)';"
+                                onmouseout="this.style.backgroundColor='transparent'; this.style.color='var(--color-text-base)';">
+                                <svg class="mr-3 h-4 w-4" style="color: var(--dropdown-icon-muted);" fill="none"
                                     viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -410,12 +420,15 @@
                             </a>
                         </div>
 
-                        <div class="border-t border-gray-100 py-1">
+                        <div class="border-t py-1" style="border-color: var(--dropdown-border);">
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
                                 <button type="submit"
-                                    class="group flex w-full items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
-                                    <svg class="mr-3 h-4 w-4 text-red-500 group-hover:text-red-600" fill="none"
+                                    class="group flex w-full items-center px-4 py-2 text-sm transition-colors"
+                                    style="color: var(--dropdown-danger-text);"
+                                    onmouseover="this.style.backgroundColor='var(--dropdown-danger-hover)';"
+                                    onmouseout="this.style.backgroundColor='transparent';">
+                                    <svg class="mr-3 h-4 w-4" style="color: var(--dropdown-danger-icon);" fill="none"
                                         viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />

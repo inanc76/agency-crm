@@ -307,7 +307,7 @@ new
         {{-- Header --}}
         <div class="flex items-start justify-between mb-6">
             <div>
-                <h1 class="text-2xl font-bold tracking-tight" style="color: var(--color-text-heading);">
+                <h1 class="text-2xl font-bold tracking-tight" class="text-skin-heading">
                     @if($isViewMode) {{ $services[0]['service_name'] ?? 'Hizmet' }} @else Yeni Hizmet Ekle @endif
                 </h1>
                 <div class="flex items-center gap-2 mt-1">
@@ -316,7 +316,7 @@ new
                             class="text-xs font-medium px-2 py-0.5 rounded bg-slate-100 text-slate-500 border border-slate-200">Hizmet</span>
                         <span class="text-[11px] font-mono text-slate-400">ID: {{ $serviceId }}</span>
                     @else
-                        <p class="text-sm opacity-60" style="color: var(--color-text-base);">
+                        <p class="text-sm opacity-60">
                             {{ count($services) }} hizmet kaydı oluşturun
                         </p>
                     @endif
@@ -381,15 +381,15 @@ new
                     <div class="space-y-6">
                         {{-- Varlık Seçimi Card --}}
                         <div class="theme-card p-6 shadow-sm">
-                            <h2 class="text-base font-bold mb-4" style="color: var(--color-text-heading);">Varlık Seçimi
+                            <h2 class="text-base font-bold mb-4" class="text-skin-heading">Varlık Seçimi
                             </h2>
                             <div class="grid grid-cols-2 gap-6">
                                 <div>
                                     <label class="block text-xs font-medium mb-1 opacity-60"
-                                        style="color: var(--color-text-base);">Müşteri *</label>
+                                       >Müşteri *</label>
                                     @if($isViewMode)
                                         @php $customerName = collect($customers)->firstWhere('id', $customer_id)['name'] ?? '-'; @endphp
-                                        <div class="text-sm font-medium" style="color: var(--color-text-base);">
+                                        <div class="text-sm font-medium">
                                             {{ $customerName }}
                                         </div>
                                     @else
@@ -399,16 +399,16 @@ new
                                                 <option value="{{ $c['id'] }}">{{ $c['name'] }}</option>
                                             @endforeach
                                         </select>
-                                        @error('customer_id') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                                        @error('customer_id') <span class="text-skin-danger text-xs">{{ $message }}</span> @enderror
                                     @endif
                                 </div>
 
                                 <div>
                                     <label class="block text-xs font-medium mb-1 opacity-60"
-                                        style="color: var(--color-text-base);">Varlık *</label>
+                                       >Varlık *</label>
                                     @if($isViewMode)
                                         @php $assetName = \App\Models\Asset::find($asset_id)?->name ?? '-'; @endphp
-                                        <div class="text-sm font-medium" style="color: var(--color-text-base);">{{ $assetName }}
+                                        <div class="text-sm font-medium">{{ $assetName }}
                                         </div>
                                     @else
                                         <select wire:model="asset_id" class="select w-full" @if(!$customer_id) disabled @endif>
@@ -417,7 +417,7 @@ new
                                                 <option value="{{ $a['id'] }}">{{ $a['name'] }}</option>
                                             @endforeach
                                         </select>
-                                        @error('asset_id') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                                        @error('asset_id') <span class="text-skin-danger text-xs">{{ $message }}</span> @enderror
                                     @endif
                                 </div>
                             </div>
@@ -425,22 +425,22 @@ new
 
                         {{-- Başlangıç Tarihi Card --}}
                         <div class="theme-card p-6 shadow-sm border border-purple-100 bg-purple-50/50">
-                            <h2 class="text-base font-bold mb-4" style="color: var(--color-text-heading);">Başlangıç Tarihi
+                            <h2 class="text-base font-bold mb-4" class="text-skin-heading">Başlangıç Tarihi
                             </h2>
                             <div>
                                 <label class="block text-xs font-medium mb-1 opacity-60"
-                                    style="color: var(--color-text-base);">Başlangıç Tarihi *</label>
+                                   >Başlangıç Tarihi *</label>
                                 <div class="text-xs text-slate-400 mb-2">Bitiş tarihi seçilen süreye göre otomatik
                                     hesaplanacaktır.
                                 </div>
 
                                 @if($isViewMode)
-                                    <div class="text-sm font-medium" style="color: var(--color-text-base);">
+                                    <div class="text-sm font-medium">
                                         {{ \Carbon\Carbon::parse($start_date)->format('d.m.Y') }}
                                     </div>
                                 @else
                                     <input type="date" wire:model="start_date" class="input w-full bg-white">
-                                    @error('start_date') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                                    @error('start_date') <span class="text-skin-danger text-xs">{{ $message }}</span> @enderror
                                 @endif
                             </div>
                         </div>
@@ -450,12 +450,12 @@ new
                             <div class="theme-card p-6 shadow-sm border border-green-100 bg-green-50/50"
                                 wire:key="service-{{ $index }}">
                                 <div class="flex items-center justify-between mb-4">
-                                    <h2 class="text-base font-bold" style="color: var(--color-text-heading);">
+                                    <h2 class="text-base font-bold" class="text-skin-heading">
                                         Hizmet Bilgileri @if(count($services) > 1) #{{ $index + 1 }} @endif
                                     </h2>
                                     @if(!$isViewMode && $index > 0)
                                         <button type="button" wire:click="removeService({{ $index }})"
-                                            class="text-red-500 hover:text-red-700 text-xs font-medium flex items-center gap-1">
+                                            class="text-skin-danger hover:opacity-80 text-xs font-medium flex items-center gap-1">
                                             <x-mary-icon name="o-x-mark" class="w-4 h-4" />
                                             Kaldır
                                         </button>
@@ -465,9 +465,9 @@ new
                                 <div class="grid grid-cols-2 gap-6">
                                     <div>
                                         <label class="block text-xs font-medium mb-1 opacity-60"
-                                            style="color: var(--color-text-base);">Kategori *</label>
+                                           >Kategori *</label>
                                         @if($isViewMode)
-                                            <div class="text-sm font-medium" style="color: var(--color-text-base);">
+                                            <div class="text-sm font-medium">
                                                 {{ $service['category'] }}
                                             </div>
                                         @else
@@ -478,15 +478,15 @@ new
                                                 @endforeach
                                             </select>
                                             @error("services.{$index}.category") <span
-                                            class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                                            class="text-skin-danger text-xs">{{ $message }}</span> @enderror
                                         @endif
                                     </div>
 
                                     <div>
                                         <label class="block text-xs font-medium mb-1 opacity-60"
-                                            style="color: var(--color-text-base);">Hizmet *</label>
+                                           >Hizmet *</label>
                                         @if($isViewMode)
-                                            <div class="text-sm font-medium" style="color: var(--color-text-base);">
+                                            <div class="text-sm font-medium">
                                                 {{ $service['service_name'] }}
                                             </div>
                                         @else
@@ -500,13 +500,13 @@ new
                                                 @endforeach
                                             </select>
                                             @error("services.{$index}.service_name") <span
-                                            class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                                            class="text-skin-danger text-xs">{{ $message }}</span> @enderror
                                         @endif
                                     </div>
 
                                     <div>
                                         <label class="block text-xs font-medium mb-1 opacity-60"
-                                            style="color: var(--color-text-base);">Durum *</label>
+                                           >Durum *</label>
                                         @if($isViewMode)
                                             <div
                                                 class="badge {{ $service['status'] === 'ACTIVE' ? 'badge-success' : 'badge-ghost' }} gap-2">
@@ -522,9 +522,9 @@ new
 
                                     <div>
                                         <label class="block text-xs font-medium mb-1 opacity-60"
-                                            style="color: var(--color-text-base);">Özel Fiyat (Opsiyonel)</label>
+                                           >Özel Fiyat (Opsiyonel)</label>
                                         @if($isViewMode)
-                                            <div class="text-sm font-medium" style="color: var(--color-text-base);">
+                                            <div class="text-sm font-medium">
                                                 {{ number_format($service['service_price'], 2, ',', '.') }}
                                                 {{ $service['service_currency'] }}
                                             </div>
@@ -540,9 +540,9 @@ new
 
                                     <div class="col-span-2">
                                         <label class="block text-xs font-medium mb-1 opacity-60"
-                                            style="color: var(--color-text-base);">Açıklama</label>
+                                           >Açıklama</label>
                                         @if($isViewMode)
-                                            <div class="text-sm font-medium" style="color: var(--color-text-base);">
+                                            <div class="text-sm font-medium">
                                                 {{ $service['description'] ?: '-' }}
                                             </div>
                                         @else

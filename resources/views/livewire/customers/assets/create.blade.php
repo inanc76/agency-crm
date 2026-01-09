@@ -148,7 +148,7 @@ new
         {{-- Header --}}
         <div class="flex items-start justify-between mb-6">
             <div>
-                <h1 class="text-2xl font-bold tracking-tight" style="color: var(--color-text-heading);">
+                <h1 class="text-2xl font-bold tracking-tight" class="text-skin-heading">
                     @if($isViewMode) {{ $name }} @else Yeni Varlık Ekle @endif
                 </h1>
                 <div class="flex items-center gap-2 mt-1">
@@ -157,7 +157,7 @@ new
                             class="text-xs font-medium px-2 py-0.5 rounded bg-slate-100 text-slate-500 border border-slate-200">Varlık</span>
                         <span class="text-[11px] font-mono text-slate-400">ID: {{ $assetId }}</span>
                     @else
-                        <p class="text-sm opacity-60" style="color: var(--color-text-base);">
+                        <p class="text-sm opacity-60">
                             Yeni varlık bilgilerini girin
                         </p>
                     @endif
@@ -222,15 +222,15 @@ new
                     <div class="space-y-6">
                         {{-- Varlık Bilgileri Card --}}
                         <div class="theme-card p-6 shadow-sm">
-                            <h2 class="text-base font-bold mb-4" style="color: var(--color-text-heading);">Varlık Bilgileri
+                            <h2 class="text-base font-bold mb-4" class="text-skin-heading">Varlık Bilgileri
                             </h2>
                             <div class="grid grid-cols-2 gap-6">
                                 <div>
                                     <label class="block text-xs font-medium mb-1 opacity-60"
-                                        style="color: var(--color-text-base);">Müşteri *</label>
+                                       >Müşteri *</label>
                                     @if($isViewMode)
                                         @php $customerName = collect($customers)->firstWhere('id', $customer_id)['name'] ?? '-'; @endphp
-                                        <div class="text-sm font-medium" style="color: var(--color-text-base);">
+                                        <div class="text-sm font-medium">
                                             {{ $customerName }}
                                         </div>
                                     @else
@@ -240,29 +240,29 @@ new
                                                 <option value="{{ $c['id'] }}">{{ $c['name'] }}</option>
                                             @endforeach
                                         </select>
-                                        @error('customer_id') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                                        @error('customer_id') <span class="text-skin-danger text-xs">{{ $message }}</span> @enderror
                                     @endif
                                 </div>
 
                                 <div>
                                     <label class="block text-xs font-medium mb-1 opacity-60"
-                                        style="color: var(--color-text-base);">Varlık Adı *</label>
+                                       >Varlık Adı *</label>
                                     @if($isViewMode)
-                                        <div class="text-sm font-medium" style="color: var(--color-text-base);">{{ $name }}
+                                        <div class="text-sm font-medium">{{ $name }}
                                         </div>
                                     @else
                                         <input type="text" wire:model="name" placeholder="Varlık adını girin (Örn: Web Sitesi)"
                                             class="input w-full">
-                                        @error('name') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                                        @error('name') <span class="text-skin-danger text-xs">{{ $message }}</span> @enderror
                                     @endif
                                 </div>
 
                                 <div>
                                     <label class="block text-xs font-medium mb-1 opacity-60"
-                                        style="color: var(--color-text-base);">Varlık Türü *</label>
+                                       >Varlık Türü *</label>
                                     @if($isViewMode)
                                         @php $typeName = collect($assetTypes)->firstWhere('id', $type)['name'] ?? '-'; @endphp
-                                        <div class="text-sm font-medium" style="color: var(--color-text-base);">{{ $typeName }}
+                                        <div class="text-sm font-medium">{{ $typeName }}
                                         </div>
                                     @else
                                         <select wire:model="type" class="select w-full">
@@ -271,15 +271,15 @@ new
                                                 <option value="{{ $t['id'] }}">{{ $t['name'] }}</option>
                                             @endforeach
                                         </select>
-                                        @error('type') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                                        @error('type') <span class="text-skin-danger text-xs">{{ $message }}</span> @enderror
                                     @endif
                                 </div>
 
                                 <div class="col-span-2">
                                     <label class="block text-xs font-medium mb-1 opacity-60"
-                                        style="color: var(--color-text-base);">URL</label>
+                                       >URL</label>
                                     @if($isViewMode)
-                                        <div class="text-sm font-medium" style="color: var(--color-text-base);">
+                                        <div class="text-sm font-medium">
                                             @if($url)
                                                 <a href="{{ $url }}" target="_blank"
                                                     class="text-blue-500 hover:underline">{{ $url }}</a>

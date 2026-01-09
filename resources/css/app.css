@@ -59,8 +59,7 @@
     /* Access via text-skin-heading, bg-skin-base, etc. */
     --color-skin-heading: var(--color-text-heading);
     --color-skin-base: var(--color-text-base);
-    --color-skin-heading: var(--color-text-heading);
-    --color-skin-base: var(--color-text-base);
+    --color-skin-primary: var(--brand-primary);
     --color-skin-success: var(--brand-success);
 
     /* Highlight & Informative aliases */
@@ -140,6 +139,52 @@
         /* border-orange-400 */
         --color-active-text: #c2410c;
         /* text-orange-700 */
+
+        /* ===== LAYOUT SKIN VARIABLES ===== */
+        /* Avatar (Header User Avatar) */
+        --avatar-bg: var(--brand-primary);
+        /* bg-purple-400 -> var(--avatar-bg) */
+
+        /* Dropdown Menu */
+        --dropdown-bg: #ffffff;
+        --dropdown-border: #e5e7eb;
+        /* border-gray-100 */
+        --dropdown-header-bg: #f9fafb;
+        /* bg-gray-50/50 */
+        --dropdown-text: #111827;
+        /* text-gray-900 */
+        --dropdown-text-muted: #6b7280;
+        /* text-gray-500 */
+        --dropdown-item-hover: #eff6ff;
+        /* hover:bg-purple-50 -> brand muted */
+        --dropdown-item-hover-text: var(--brand-primary);
+        /* hover:text-purple-600 */
+        --dropdown-icon-muted: #9ca3af;
+        /* text-gray-400 */
+
+        /* Logout/Danger Item in Dropdown */
+        --dropdown-danger-text: var(--color-danger-base);
+        /* text-red-600 */
+        --dropdown-danger-hover: var(--color-danger-muted-base);
+        /* hover:bg-red-50 */
+        --dropdown-danger-icon: #ef4444;
+        /* text-red-500 */
+
+        /* ===== ERROR PANEL SKIN VARIABLES ===== */
+        --error-panel-bg: var(--color-danger-muted-base);
+        /* bg-red-50 */
+        --error-panel-border: #fecaca;
+        /* border-red-200 */
+        --error-panel-text: #991b1b;
+        /* text-red-800 */
+        --error-btn-text: var(--color-danger-base);
+        /* text-red-600 */
+        --error-btn-hover-text: #991b1b;
+        /* hover:text-red-800 */
+        --error-btn-border: #fca5a5;
+        /* border-red-300 */
+        --error-btn-hover-bg: var(--color-danger-muted-base);
+        /* hover:bg-red-50 */
     }
 
     *,
@@ -847,4 +892,217 @@ table tr:hover th {
     /* Global select/input padding ve font ayarlarını bu sınıf için devre dışı bırakıyoruz */
     --font-size-input: 0.75rem !important;
     --input-padding-y: 0px !important;
+}
+
+/* ===== DANGER ACTION BUTTONS ===== */
+/* Bulk delete, secondary delete actions */
+.btn-danger-outline {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--color-danger-base);
+    background-color: var(--color-danger-muted-base);
+    border: 1px solid var(--error-panel-border);
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.btn-danger-outline:hover {
+    background-color: #fee2e2;
+    /* red-100 equivalent */
+    color: var(--error-btn-hover-text);
+}
+
+/* Status Badge - Danger/Cancel */
+.badge-danger {
+    padding: 0.25rem 0.5rem;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--error-panel-text);
+    background-color: #fee2e2;
+    /* red-100 equivalent */
+    border-radius: 9999px;
+}
+
+/* Dropdown Danger Item */
+.dropdown-item-danger {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    color: var(--dropdown-danger-text);
+    border-radius: 0.25rem;
+    transition: background-color 0.2s ease;
+}
+
+.dropdown-item-danger:hover {
+    background-color: var(--dropdown-danger-hover);
+}
+
+/* ============================================= */
+/* ===== GLOBAL HARD-CODED COLOR OVERRIDES ===== */
+/* ============================================= */
+/* 
+ * NÜKLEER SEÇİMSEÇENEK: Bu kurallar Flux UI, DaisyUI ve 
+ * Tailwind'in hardcoded renklerini CSS değişkenlerine zorlar.
+ * !important kullanımı mimari bir zorunluluktur.
+ */
+
+/* ===== BORDER COLOR SEALING ===== */
+/* Slate/Gray/Zinc border'ları skin sistemine çek */
+[class*="border-slate-100"],
+[class*="border-slate-200"],
+[class*="border-gray-100"],
+[class*="border-gray-200"],
+[class*="border-zinc-100"],
+[class*="border-zinc-200"] {
+    border-color: var(--card-border) !important;
+}
+
+/* ===== TEXT COLOR SEALING ===== */
+/* Error/Danger text renklerini skin sistemine çek */
+[class*="text-red-500"],
+[class*="text-red-600"] {
+    color: var(--color-danger-base) !important;
+}
+
+[class*="text-red-700"],
+[class*="text-red-800"] {
+    color: var(--error-panel-text) !important;
+}
+
+/* Heading colors */
+[class*="text-slate-900"],
+[class*="text-gray-900"] {
+    color: var(--color-text-heading) !important;
+}
+
+/* Base text colors */
+[class*="text-slate-700"],
+[class*="text-gray-700"] {
+    color: var(--color-text-base) !important;
+}
+
+/* Muted text colors */
+[class*="text-slate-500"],
+[class*="text-gray-500"],
+[class*="text-slate-400"],
+[class*="text-gray-400"] {
+    color: var(--color-text-muted) !important;
+}
+
+/* ===== BACKGROUND COLOR SEALING ===== */
+/* Error/Danger backgrounds */
+[class*="bg-red-50"] {
+    background-color: var(--color-danger-muted-base) !important;
+}
+
+[class*="bg-red-100"] {
+    background-color: #fee2e2 !important;
+    /* Slightly darker muted */
+}
+
+/* Hover backgrounds for danger items */
+[class*="hover\\:bg-red-50"]:hover,
+[class*="hover\\:bg-red-100"]:hover {
+    background-color: var(--color-danger-muted-base) !important;
+}
+
+/* ===== FLUX UI FORCE OVERRIDES ===== */
+/* Header component override */
+[data-flux-header],
+.flux-header {
+    background-color: var(--header-bg, var(--color-header)) !important;
+    border-color: var(--card-border) !important;
+}
+
+/* Sidebar component override */
+[data-flux-sidebar],
+.flux-sidebar {
+    background-color: var(--sidebar-bg, var(--color-sidebar)) !important;
+    border-color: var(--card-border) !important;
+}
+
+/* Flux input fields */
+[data-flux-input],
+[data-flux-control] {
+    border-color: var(--input-border) !important;
+    border-radius: var(--input-radius) !important;
+}
+
+[data-flux-input]:focus,
+[data-flux-control]:focus {
+    border-color: var(--input-focus-ring) !important;
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--input-focus-ring), transparent 80%) !important;
+}
+
+/* Flux buttons - respect our theme */
+[data-flux-button][data-variant="primary"] {
+    background-color: var(--btn-create-bg) !important;
+    color: var(--btn-create-text) !important;
+}
+
+[data-flux-button][data-variant="danger"] {
+    background-color: var(--btn-delete-bg) !important;
+    color: var(--btn-delete-text) !important;
+}
+
+/* ===== SKIN UTILITY CLASSES ===== */
+/* Direct CSS variable mappings for blade templates */
+.text-skin-heading {
+    color: var(--color-text-heading) !important;
+}
+
+.text-skin-base {
+    color: var(--color-text-base) !important;
+}
+
+.text-skin-muted {
+    color: var(--color-text-muted) !important;
+}
+
+.text-skin-primary {
+    color: var(--brand-primary) !important;
+}
+
+.text-skin-success {
+    color: var(--brand-success) !important;
+}
+
+.text-skin-danger {
+    color: var(--color-danger-base) !important;
+}
+
+.text-skin-link {
+    color: var(--action-link-color) !important;
+}
+
+.bg-skin-page {
+    background-color: var(--page-bg) !important;
+}
+
+.bg-skin-card {
+    background-color: var(--card-bg) !important;
+}
+
+.bg-skin-hover {
+    background-color: var(--table-hover-bg) !important;
+}
+
+.bg-skin-danger-muted {
+    background-color: var(--color-danger-muted-base) !important;
+}
+
+.border-skin-light {
+    border-color: var(--card-border) !important;
+}
+
+.border-skin-input {
+    border-color: var(--input-border) !important;
+}
+
+.border-skin-danger {
+    border-color: var(--color-danger-base) !important;
 }

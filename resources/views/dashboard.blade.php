@@ -2,8 +2,8 @@
     <div class="space-y-6 w-full max-w-[80%] mx-auto mt-[30px]">
         <!-- Page Header -->
         <div class="theme-card p-6">
-            <h1 class="text-3xl font-bold mb-2" style="color: var(--color-text-heading);">Gösterge Paneli</h1>
-            <p style="color: var(--color-text-base);">Hoş geldiniz! İşte sisteminizdeki genel bakış.</p>
+            <h1 class="text-3xl font-bold mb-2 text-skin-heading">Gösterge Paneli</h1>
+            <p class="text-skin-base">Hoş geldiniz! İşte sisteminizdeki genel bakış.</p>
         </div>
 
         <!-- Stats Grid -->
@@ -21,9 +21,9 @@
                     <span class="text-sm font-medium px-3 py-1 rounded-full"
                         style="background-color: color-mix(in srgb, var(--dashboard-stats-1), white 90%); color: var(--dashboard-stats-1);">Aktif</span>
                 </div>
-                <h2 class="text-2xl font-bold mb-1" style="color: var(--color-text-heading);">Müşteriler</h2>
-                <p class="text-4xl font-extrabold mb-2" style="color: var(--color-text-heading);">7</p>
-                <p class="text-sm" style="color: var(--color-text-base);">Toplam müşteri sayısı</p>
+                <h2 class="text-2xl font-bold mb-1 text-skin-heading">Müşteriler</h2>
+                <p class="text-4xl font-extrabold mb-2 text-skin-heading">7</p>
+                <p class="text-sm text-skin-base">Toplam müşteri sayısı</p>
             </div>
 
             <!-- Hizmetler Card -->
@@ -39,9 +39,9 @@
                     <span class="text-sm font-medium px-3 py-1 rounded-full"
                         style="background-color: color-mix(in srgb, var(--dashboard-stats-2), white 90%); color: var(--dashboard-stats-2);">Aktif</span>
                 </div>
-                <h2 class="text-2xl font-bold mb-1" style="color: var(--color-text-heading);">Hizmetler</h2>
-                <p class="text-4xl font-extrabold mb-2" style="color: var(--color-text-heading);">9</p>
-                <p class="text-sm" style="color: var(--color-text-base);">Aktif hizmet sayısı</p>
+                <h2 class="text-2xl font-bold mb-1 text-skin-heading">Hizmetler</h2>
+                <p class="text-4xl font-extrabold mb-2 text-skin-heading">9</p>
+                <p class="text-sm text-skin-base">Aktif hizmet sayısı</p>
             </div>
 
             <!-- Varlıklar Card -->
@@ -57,9 +57,9 @@
                     <span class="text-sm font-medium px-3 py-1 rounded-full"
                         style="background-color: color-mix(in srgb, var(--dashboard-stats-3), white 90%); color: var(--dashboard-stats-3);">Toplam</span>
                 </div>
-                <h2 class="text-2xl font-bold mb-1" style="color: var(--color-text-heading);">Varlıklar</h2>
-                <p class="text-4xl font-extrabold mb-2" style="color: var(--color-text-heading);">5</p>
-                <p class="text-sm" style="color: var(--color-text-base);">Toplam varlık sayısı</p>
+                <h2 class="text-2xl font-bold mb-1 text-skin-heading">Varlıklar</h2>
+                <p class="text-4xl font-extrabold mb-2 text-skin-heading">5</p>
+                <p class="text-sm text-skin-base">Toplam varlık sayısı</p>
             </div>
         </div>
 
@@ -74,8 +74,8 @@
                     </svg>
                 </div>
                 <div class="flex-1">
-                    <h2 class="text-2xl font-bold mb-2" style="color: var(--color-text-heading);">Hoş Geldiniz!</h2>
-                    <p class="mb-4" style="color: var(--color-text-base);">
+                    <h2 class="text-2xl font-bold mb-2 text-skin-heading">Hoş Geldiniz!</h2>
+                    <p class="mb-4 text-skin-base">
                         Laravel layout migrasyonu başarıyla tamamlandı. Yeni tasarımınız hazır!
                     </p>
                     <button

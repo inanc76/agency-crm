@@ -93,20 +93,20 @@ new class extends Component {
     {{-- Header with Action Button --}}
     <div class="flex items-center justify-between mb-4">
         <div>
-            <h2 class="text-lg font-semibold text-gray-900">Mesajlar</h2>
-            <p class="text-sm text-gray-500">Tüm mesajları görüntüleyin ve yönetin</p>
+            <h2 class="text-lg font-semibold text-skin-heading">Mesajlar</h2>
+            <p class="text-sm text-skin-muted">Tüm mesajları görüntüleyin ve yönetin</p>
         </div>
         <div class="flex items-center gap-4">
             @if(count($selected) > 0)
                 <button wire:click="deleteSelected"
                     wire:confirm="Seçili {{ count($selected) }} mesajı silmek istediğinize emin misiniz?"
-                    class="flex items-center gap-2 px-3 py-1.5 text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 rounded-lg transition-colors">
+                    class="btn-danger-outline">
                     <x-mary-icon name="o-trash" class="w-4 h-4" />
                     Seçilileri Sil ({{ count($selected) }})
                 </button>
             @endif
 
-            <span class="text-sm text-gray-500">{{ $messages->total() }} mesaj</span>
+            <span class="text-sm text-skin-muted">{{ $messages->total() }} mesaj</span>
             <x-customer-management.action-button label="Yeni Mesaj" href="#" />
         </div>
     </div>
@@ -129,17 +129,17 @@ new class extends Component {
         ];
     @endphp
 
-    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+    <div class="bg-white rounded-xl border border-skin-light shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-left text-sm">
-                <thead class="bg-slate-50 border-b border-slate-200">
+                <thead class="bg-slate-50 border-b border-skin-light">
                     <tr>
                         <th class="px-6 py-3 w-10">
                             <input type="checkbox" wire:model.live="selectAll"
                                 class="checkbox checkbox-xs rounded border-slate-300">
                         </th>
                         @foreach(array_slice($headers, 1) as $header)
-                            <th class="px-6 py-3 font-semibold text-slate-700">
+                            <th class="px-6 py-3 font-semibold text-skin-base">
                                 {{ $header['label'] }}
                             </th>
                         @endforeach
@@ -162,27 +162,27 @@ new class extends Component {
                                         <x-mary-avatar placeholder="{{ $char }}"
                                             class="!w-9 !h-9 bg-white text-black text-xs border border-gray-100 shadow-sm" />
                                     </div>
-                                    <div class="text-slate-700 text-[13px] group-hover:text-blue-600 transition-colors">
+                                    <div class="text-skin-base text-[13px] group-hover:text-blue-600 transition-colors">
                                         {{ $message->subject }}
                                     </div>
                                 </div>
                             </td>
-                            <td class="px-6 py-4 text-[13px] text-slate-600 font-medium">
+                            <td class="px-6 py-4 text-[13px] text-skin-base font-medium">
                                 {{ $message->customer->name ?? '-' }}
                             </td>
-                            <td class="px-6 py-4 text-[13px] text-slate-500">
+                            <td class="px-6 py-4 text-[13px] text-skin-muted">
                                 {{ $message->type }}
                             </td>
                             <td class="px-6 py-4">
                                 <x-customer-management.status-badge :status="$message->status ?? 'sent'" />
                             </td>
-                            <td class="px-6 py-4 text-[12px] text-slate-500 font-mono text-center">
+                            <td class="px-6 py-4 text-[12px] text-skin-muted font-mono text-center">
                                 {{ $message->sent_at?->format('d.m.Y H:i') ?? '-' }}
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-6 py-12 text-center text-slate-500">
+                            <td colspan="6" class="px-6 py-12 text-center text-skin-muted">
                                 <div class="flex flex-col items-center justify-center">
                                     <x-mary-icon name="o-envelope" class="w-12 h-12 opacity-20 mb-4" />
                                     <div class="font-medium">Henüz mesaj kaydı bulunmuyor</div>
@@ -195,11 +195,11 @@ new class extends Component {
         </div>
 
         {{-- Pagination --}}
-        <div class="px-6 py-4 border-t border-slate-200 flex items-center justify-between">
+        <div class="px-6 py-4 border-t border-skin-light flex items-center justify-between">
             <div class="flex items-center gap-2">
-                <span class="text-xs text-slate-500">Göster:</span>
+                <span class="text-xs text-skin-muted">Göster:</span>
                 <select wire:model.live="perPage"
-                    class="select select-xs bg-white border-slate-200 text-xs w-18 h-8 min-h-0 focus:outline-none focus:border-slate-400">
+                    class="select select-xs bg-white border-skin-light text-xs w-18 h-8 min-h-0 focus:outline-none focus:border-slate-400">
                     <option value="25">25</option>
                     <option value="50">50</option>
                     <option value="100">100</option>
@@ -211,7 +211,7 @@ new class extends Component {
                 {{ $messages->links() }}
             </div>
 
-            <div class="text-[10px] text-slate-400 font-mono">
+            <div class="text-[10px] text-skin-muted font-mono">
                 {{ number_format(microtime(true) - (defined('LARAVEL_START') ? LARAVEL_START : request()->server('REQUEST_TIME_FLOAT')), 3) }}s
             </div>
         </div>
