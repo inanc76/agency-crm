@@ -74,8 +74,8 @@
                     </svg>
                 </div>
                 <div class="flex-1">
-                    <h2 class="text-2xl font-bold text-gray-900 mb-2">Hoş Geldiniz!</h2>
-                    <p class="text-gray-700 mb-4">
+                    <h2 class="text-2xl font-bold mb-2" style="color: var(--color-text-heading);">Hoş Geldiniz!</h2>
+                    <p class="mb-4" style="color: var(--color-text-base);">
                         Laravel layout migrasyonu başarıyla tamamlandı. Yeni tasarımınız hazır!
                     </p>
                     <button

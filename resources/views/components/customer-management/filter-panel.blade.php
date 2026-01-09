@@ -16,7 +16,7 @@
                     option-label="name" 
                     option-value="id"
                     placeholder="{{ $categoryLabel }}"
-                    class="select-sm !bg-white !border-gray-200"
+                    class="select-sm !bg-[var(--card-bg)] !border-[var(--card-border)]"
                 />
             </div>
         @endif
@@ -31,7 +31,7 @@
                 ]" 
                 option-label="name" 
                 option-value="id"
-                class="select-sm !bg-white !border-gray-200"
+                class="select-sm !bg-[var(--card-bg)] !border-[var(--card-border)]"
             />
         </div>
         @endif
@@ -40,7 +40,7 @@
             <x-mary-input 
                 placeholder="Ara..." 
                 icon="o-magnifying-glass" 
-                class="input-sm !bg-white !border-gray-200"
+                class="input-sm !bg-[var(--card-bg)] !border-[var(--card-border)]"
                 wire:model.live.debounce.300ms="search"
             />
         </div>
@@ -56,19 +56,19 @@
                 <x-mary-button 
                     label="0-9" 
                     wire:click="$set('letter', '0-9')"
-                    class="btn-ghost btn-xs font-medium {{ $letter === '0-9' ? 'bg-slate-200 text-slate-700' : 'text-slate-500' }} hover:bg-slate-100 px-2"
+                    class="btn-ghost btn-xs font-medium {{ $letter === '0-9' ? 'bg-[var(--dropdown-hover-bg)] text-[var(--color-text-heading)]' : 'text-[var(--color-text-muted)]' }} hover:bg-[var(--dropdown-hover-bg)] px-2"
                 />
                 <x-mary-button 
                     label="Tümü" 
                     wire:click="$set('letter', '')"
-                    class="btn-ghost btn-xs font-medium {{ $letter === '' ? 'bg-slate-200 text-slate-700' : 'text-slate-500' }} hover:bg-slate-100 px-2"
+                    class="btn-ghost btn-xs font-medium {{ $letter === '' ? 'bg-[var(--dropdown-hover-bg)] text-[var(--color-text-heading)]' : 'text-[var(--color-text-muted)]' }} hover:bg-[var(--dropdown-hover-bg)] px-2"
                 />
                 <div class="divider divider-horizontal mx-0 h-4"></div>
                 @foreach(range('A', 'Z') as $char)
                     <x-mary-button 
                         :label="$char" 
                         wire:click="$set('letter', '{{ $char }}')"
-                        class="btn-ghost btn-xs font-medium {{ $letter === $char ? 'bg-slate-200 text-slate-700' : 'text-slate-500' }} hover:bg-slate-100 min-w-[24px] !px-1"
+                        class="btn-ghost btn-xs font-medium {{ $letter === $char ? 'bg-[var(--dropdown-hover-bg)] text-[var(--color-text-heading)]' : 'text-[var(--color-text-muted)]' }} hover:bg-[var(--dropdown-hover-bg)] min-w-[24px] !px-1"
                     />
                 @endforeach
             </div>

@@ -179,7 +179,7 @@ new #[Layout('components.layouts.app', ['title' => 'Fiyat Tanımları'])]
         </div>
 
         {{-- Filters Card --}}
-        <div class="bg-[#eff4ff] border border-[#bfdbfe] rounded-xl shadow-sm p-6 mb-6">
+        <div class="bg-[var(--color-info-bg)] border border-[var(--color-info-border)] rounded-xl shadow-sm p-6 mb-6">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <x-mary-input label="Arama" placeholder="Hizmet adı veya açıklama..." icon="o-magnifying-glass"
                     wire:model.live.debounce.300ms="search" />
@@ -202,7 +202,8 @@ new #[Layout('components.layouts.app', ['title' => 'Fiyat Tanımları'])]
         </div>
 
         {{-- Table Card --}}
-        <div class="bg-[#eff4ff] border border-[#bfdbfe] rounded-xl shadow-sm overflow-hidden">
+        <div
+            class="bg-[var(--color-info-bg)] border border-[var(--color-info-border)] rounded-xl shadow-sm overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>

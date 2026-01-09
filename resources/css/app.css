@@ -59,7 +59,21 @@
     /* Access via text-skin-heading, bg-skin-base, etc. */
     --color-skin-heading: var(--color-text-heading);
     --color-skin-base: var(--color-text-base);
+    --color-skin-heading: var(--color-text-heading);
+    --color-skin-base: var(--color-text-base);
     --color-skin-success: var(--brand-success);
+
+    /* Highlight & Informative aliases */
+    --color-info-bg: var(--color-info-bg-base);
+    --color-info-border: var(--color-info-border-base);
+
+    /* Semantic Actions aliases */
+    --color-danger: var(--color-danger-base);
+    --color-danger-muted: var(--color-danger-muted-base);
+
+    /* Surface aliases */
+    --color-surface-base: var(--color-surface-base-def);
+    --color-surface-dark: var(--color-surface-dark-def);
 
     /* Spacing aliases */
     --spacing-sidebar: var(--sidebar-width);
@@ -100,6 +114,22 @@
         --header-height: 4rem;
         --border-radius-xl: 0.75rem;
         /* rounded-xl */
+
+        /* Highlight & Informative */
+        --color-info-bg-base: #eff4ff;
+        --color-info-border-base: #bfdbfe;
+
+        /* Semantic Actions */
+        --color-danger-base: #dc2626;
+        /* text-red-600 */
+        --color-danger-muted-base: #fef2f2;
+        /* bg-red-50 hover:bg-red-50 */
+
+        /* Slate/Gray mapping for Variables page */
+        --color-surface-base-def: #475569;
+        /* slate-600 */
+        --color-surface-dark-def: #0f172a;
+        /* slate-900 */
     }
 
     *,
