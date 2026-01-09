@@ -47,6 +47,73 @@ new
     public $offerId = null;
     public string $activeTab = 'info';
 
+    // Manual Entry Modal State
+    public $showManualEntryModal = false;
+    public $manualItems = [];
+
+    public function openManualEntryModal(): void
+    {
+        $this->manualItems = [
+            [
+                'service_name' => '',
+                'description' => '',
+                'duration' => null,
+                'price' => 0,
+                'quantity' => 1
+            ]
+        ];
+        $this->showManualEntryModal = true;
+    }
+
+    public function addManualItemRow(): void
+    {
+        $this->manualItems[] = [
+            'service_name' => '',
+            'description' => '',
+            'duration' => null,
+            'price' => 0,
+            'quantity' => 1
+        ];
+    }
+
+    public function removeManualItemRow(int $index): void
+    {
+        unset($this->manualItems[$index]);
+        $this->manualItems = array_values($this->manualItems);
+    }
+
+    public function saveManualItems(): void
+    {
+        $this->validate([
+            'manualItems.*.service_name' => 'required|string|max:255',
+            'manualItems.*.description' => 'nullable|string',
+            'manualItems.*.duration' => 'nullable|integer|min:1',
+            'manualItems.*.price' => 'required|numeric|min:0',
+            'manualItems.*.quantity' => 'required|integer|min:1',
+        ], [
+            'manualItems.*.service_name.required' => 'Hizmet adı zorunludur.',
+            'manualItems.*.price.required' => 'Fiyat zorunludur.',
+        ]);
+
+        $count = count($this->manualItems);
+
+        foreach ($this->manualItems as $item) {
+            $this->items[] = [
+                'service_id' => null, // Manual item
+                'service_name' => $item['service_name'],
+                'description' => $item['description'] ?? '',
+                'price' => (float) $item['price'],
+                'currency' => $this->currency,
+                'duration' => $item['duration'] ? (int) $item['duration'] : null,
+                'quantity' => (int) $item['quantity'],
+            ];
+        }
+
+        $this->showManualEntryModal = false;
+        $this->manualItems = [];
+        $this->success('Başarılı', $count . ' kalem eklendi.');
+    }
+
     // Reference Data
     public $customers = [];
     public $customerServices = [];
@@ -62,11 +129,23 @@ new
             ->map(fn($c) => ['id' => $c->id, 'name' => $c->name])
             ->toArray();
 
-        // Load Categories
-        $this->categories = PriceDefinition::where('is_active', true)
+        // Load Categories with Display Labels
+        $usedCategoryKeys = PriceDefinition::where('is_active', true)
             ->distinct()
             ->pluck('category')
             ->toArray();
+
+        $categoryDefinitions = ReferenceItem::where('category_key', 'SERVICE_CATEGORY')
+            ->whereIn('key', $usedCategoryKeys)
+            ->get()
+            ->keyBy('key');
+
+        $this->categories = collect($usedCategoryKeys)->map(function ($key) use ($categoryDefinitions) {
+            return [
+                'id' => $key,
+                'name' => $categoryDefinitions[$key]->display_label ?? $key
+            ];
+        })->sortBy('name')->values()->toArray();
 
         // Load all price definitions
         $this->priceDefinitions = PriceDefinition::where('is_active', true)
@@ -614,7 +693,7 @@ new
                                     @if($isViewMode)
                                         <div class="text-sm font-medium" style="color: var(--color-text-base);">
                                             @if($discount_type === 'PERCENTAGE') %{{ $discount_value }} @else
-                                            {{ number_format($discount_value, 2) }} {{ $currency }} @endif
+                                            {{ number_format($discount_value, 0, ',', '.') }} {{ $currency }} @endif
                                         </div>
                                     @else
                                         <div class="flex items-center gap-[5px]">
@@ -688,11 +767,18 @@ new
                                 <h2 class="text-base font-bold" style="color: var(--color-text-heading);">Teklif Kalemleri *
                                 </h2>
                                 @if(!$isViewMode)
-                                    <button type="button" wire:click="openServiceModal"
-                                        class="flex items-center gap-2 px-3 py-1.5 text-xs font-bold bg-white border border-slate-200 rounded-lg shadow-sm hover:bg-slate-50 cursor-pointer transition-all text-slate-700">
-                                        <x-mary-icon name="o-plus" class="w-4 h-4" />
-                                        Hizmet Ekle
-                                    </button>
+                                    <div class="flex gap-2">
+                                        <button type="button" wire:click="openManualEntryModal"
+                                            class="flex items-center gap-2 px-3 py-1.5 text-xs font-bold bg-white border border-slate-200 rounded-lg shadow-sm hover:bg-slate-50 cursor-pointer transition-all text-slate-700">
+                                            <x-mary-icon name="o-pencil" class="w-4 h-4" />
+                                            Manuel Ekle
+                                        </button>
+                                        <button type="button" wire:click="openServiceModal"
+                                            class="flex items-center gap-2 px-3 py-1.5 text-xs font-bold bg-white border border-slate-200 rounded-lg shadow-sm hover:bg-slate-50 cursor-pointer transition-all text-slate-700">
+                                            <x-mary-icon name="o-plus" class="w-4 h-4" />
+                                            Hizmet Ekle
+                                        </button>
+                                    </div>
                                 @endif
                             </div>
 
@@ -721,7 +807,8 @@ new
                                         <tbody>
                                             @foreach($items as $index => $item)
                                                 <tr class="border-b border-slate-100" wire:key="item-{{ $index }}">
-                                                    <td class="py-3 px-2 font-medium" style="color: var(--color-text-base);">
+                                                    <td class="py-3 px-2 font-normal text-xs"
+                                                        style="color: var(--color-text-base);">
                                                         {{ $item['service_name'] }}
                                                     </td>
                                                     <td class="py-3 px-2 text-xs opacity-70" style="color: var(--color-text-base);">
@@ -737,8 +824,9 @@ new
                                                             @endif
                                                         </div>
                                                     </td>
-                                                    <td class="py-3 px-2 text-center">{{ $item['duration'] }} Yıl</td>
-                                                    <td class="py-3 px-2 text-right">{{ number_format($item['price'], 2) }}
+                                                    <td class="py-3 px-2 text-center text-xs">{{ $item['duration'] }} Yıl</td>
+                                                    <td class="py-3 px-2 text-right text-xs">
+                                                        {{ number_format($item['price'], 0, ',', '.') }}
                                                         {{ $item['currency'] }}
                                                     </td>
                                                     <td class="py-3 px-2 text-center">
@@ -749,9 +837,9 @@ new
                                                             {{ $item['quantity'] }}
                                                         @endif
                                                     </td>
-                                                    <td class="py-3 px-2 text-right font-bold"
+                                                    <td class="py-3 px-2 text-right text-xs font-normal"
                                                         style="color: var(--color-text-heading);">
-                                                        {{ number_format($item['price'] * $item['quantity'], 2) }}
+                                                        {{ number_format($item['price'] * $item['quantity'], 0, ',', '.') }}
                                                         {{ $item['currency'] }}
                                                     </td>
                                                     @if(!$isViewMode)
@@ -813,26 +901,29 @@ new
                     <div class="space-y-3 text-sm">
                         <div class="flex justify-between">
                             <span class="opacity-60">Ara Toplam:</span>
-                            <span class="font-medium">{{ number_format($totals['original'], 2) }} {{ $currency }}</span>
+                            <span class="font-medium">{{ number_format($totals['original'], 0, ',', '.') }}
+                                {{ $currency }}</span>
                         </div>
 
                         @if($totals['discount'] > 0)
                             <div class="flex justify-between text-red-600">
                                 <span>İndirim (@if($discount_type === 'PERCENTAGE') %{{ $discount_value }} @else Tutar
                                 @endif):</span>
-                                <span class="font-medium">-{{ number_format($totals['discount'], 2) }}
+                                <span class="font-medium">-{{ number_format($totals['discount'], 0, ',', '.') }}
                                     {{ $currency }}</span>
                             </div>
                             <div class="flex justify-between pt-2 border-t border-slate-200">
                                 <span class="opacity-60">İndirimli Toplam:</span>
-                                <span class="font-medium">{{ number_format($totals['original'] - $totals['discount'], 2) }}
+                                <span
+                                    class="font-medium">{{ number_format($totals['original'] - $totals['discount'], 0, ',', '.') }}
                                     {{ $currency }}</span>
                             </div>
                         @endif
 
                         <div class="flex justify-between">
                             <span class="opacity-60">KDV (%{{ (int) $vat_rate }}):</span>
-                            <span class="font-medium">{{ number_format($totals['vat'], 2) }} {{ $currency }}</span>
+                            <span class="font-medium">{{ number_format($totals['vat'], 0, ',', '.') }}
+                                {{ $currency }}</span>
                         </div>
 
                         <div class="flex justify-between pt-2 border-t border-slate-200">
@@ -844,7 +935,7 @@ new
                         <div class="flex justify-between pt-3 border-t-2 border-slate-300 text-base font-bold"
                             style="color: var(--color-text-heading);">
                             <span>Genel Toplam:</span>
-                            <span>{{ number_format($totals['total'], 2) }} {{ $currency }}</span>
+                            <span>{{ number_format($totals['total'], 0, ',', '.') }} {{ $currency }}</span>
                         </div>
                     </div>
 
@@ -882,7 +973,7 @@ new
                                         <p class="font-bold text-sm text-slate-800 truncate">{{ $service['service_name'] }}</p>
                                         <div class="flex items-center gap-2 mt-1">
                                             <span
-                                                class="text-xs font-semibold text-blue-600">{{ number_format($service['service_price'], 2) }}
+                                                class="text-xs font-semibold text-blue-600">{{ number_format($service['service_price'], 0, ',', '.') }}
                                                 {{ $service['service_currency'] }}</span>
                                             <span
                                                 class="text-[10px] text-slate-400 uppercase tracking-wider">{{ $service['service_duration'] }}
@@ -917,8 +1008,7 @@ new
 
                 <div class="space-y-5">
                     <x-mary-select label="Kategori Seçin" icon="o-tag" wire:model.live="modalCategory"
-                        :options="array_map(fn($c) => ['id' => $c, 'name' => $c], $categories)"
-                        placeholder="Kategori Seçin" />
+                        :options="$categories" placeholder="Kategori Seçin" />
 
                     @if($modalCategory)
                         <x-mary-select label="Hizmet Adı" icon="o-briefcase" wire:model.live="modalServiceName"
@@ -946,7 +1036,8 @@ new
                                         Yıl</span>
                                 </div>
                                 <div class="mt-4 flex items-end justify-between">
-                                    <span class="text-lg font-black text-slate-900">{{ number_format($selectedPD['price'], 2) }}
+                                    <span
+                                        class="text-lg font-black text-slate-900">{{ number_format($selectedPD['price'], 0, ',', '.') }}
                                         <span class="text-sm font-medium">{{ $selectedPD['currency'] }}</span></span>
                                 </div>
                             </div>
@@ -998,6 +1089,92 @@ new
             <button wire:click="saveItemDescription" class="theme-btn-save">
                 <x-mary-icon name="o-check" class="w-4 h-4" />
                 Kaydet
+            </button>
+        </x-slot:actions>
+    </x-mary-modal>
+
+    {{-- Manual Entry Modal --}}
+    <x-mary-modal wire:model="showManualEntryModal" title="Manuel Kalem Ekle" class="backdrop-blur"
+        box-class="!max-w-6xl">
+        <div class="overflow-x-auto min-h-[300px]">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="border-b border-slate-200">
+                        <th class="text-left py-2 px-2 w-[25%]">Hizmet Adı *</th>
+                        <th class="text-left py-2 px-2 w-[25%]">Açıklama</th>
+                        <th class="text-center py-2 px-2 w-[10%]">Süre (Yıl)</th>
+                        <th class="text-right py-2 px-2 w-[15%]">Fiyat ({{ $currency }}) *</th>
+                        <th class="text-center py-2 px-2 w-[10%]">Adet *</th>
+                        <th class="text-right py-2 px-2 w-[10%]">Toplam</th>
+                        <th class="w-[5%]"></th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    @foreach($manualItems as $index => $mItem)
+                        <tr wire:key="manual-item-{{ $index }}">
+                            <td class="p-2 align-top">
+                                <input type="text" wire:model="manualItems.{{ $index }}.service_name"
+                                    class="input input-sm w-full bg-white border-slate-200 focus:border-blue-400"
+                                    placeholder="Hizmet Adı">
+                                @error("manualItems.{$index}.service_name")
+                                    <span class="text-red-500 text-[10px] block mt-1">{{ $message }}</span>
+                                @enderror
+                            </td>
+                            <td class="p-2 align-top">
+                                <textarea wire:model="manualItems.{{ $index }}.description"
+                                    class="textarea textarea-sm w-full bg-white border-slate-200 focus:border-blue-400"
+                                    rows="1" placeholder="Açıklama"></textarea>
+                            </td>
+                            <td class="p-2 align-top">
+                                <input type="number" wire:model="manualItems.{{ $index }}.duration"
+                                    class="input input-sm w-full bg-white border-slate-200 focus:border-blue-400 text-center"
+                                    placeholder="Opsiyonel" min="1">
+                            </td>
+                            <td class="p-2 align-top">
+                                <input type="number" wire:model.live="manualItems.{{ $index }}.price"
+                                    class="input input-sm w-full bg-white border-slate-200 focus:border-blue-400 text-right"
+                                    min="0" step="0.01">
+                                @error("manualItems.{$index}.price")
+                                    <span class="text-red-500 text-[10px] block mt-1">{{ $message }}</span>
+                                @enderror
+                            </td>
+                            <td class="p-2 align-top">
+                                <input type="number" wire:model.live="manualItems.{{ $index }}.quantity"
+                                    class="input input-sm w-full bg-white border-slate-200 focus:border-blue-400 text-center"
+                                    min="1">
+                            </td>
+                            <td class="p-2 align-top text-right font-medium pt-3 text-slate-700">
+                                {{ number_format(((float) ($mItem['price'] ?? 0)) * ((int) ($mItem['quantity'] ?? 1)), 0, ',', '.') }}
+                            </td>
+                            <td class="p-2 align-top pt-2 text-center">
+                                @if(count($manualItems) > 1)
+                                    <button type="button" wire:click="removeManualItemRow({{ $index }})"
+                                        class="text-red-500 hover:text-red-700 p-1">
+                                        <x-mary-icon name="o-trash" class="w-4 h-4" />
+                                    </button>
+                                @endif
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+
+            <div class="mt-4">
+                <button type="button" wire:click="addManualItemRow"
+                    class="flex items-center gap-2 text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors">
+                    <x-mary-icon name="o-plus-circle" class="w-4 h-4" />
+                    Yeni Satır Ekle
+                </button>
+            </div>
+        </div>
+
+        <x-slot:actions>
+            <button wire:click="$set('showManualEntryModal', false)" class="theme-btn-cancel">
+                Vazgeç
+            </button>
+            <button wire:click="saveManualItems" class="theme-btn-save">
+                <x-mary-icon name="o-check" class="w-4 h-4" />
+                Listeye Ekle
             </button>
         </x-slot:actions>
     </x-mary-modal>

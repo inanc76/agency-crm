@@ -6,7 +6,7 @@ Görevin: Kullanıcı `/yukle` komutunu verdiğinde, sistemi daha önce `/muhurl
 
 ## 🔍 Arama ve Listeleme Protokolü
 Kullanıcı `/yukle` dediğinde şu adımları izle:
-1. `database/snapshots` klasöründeki mevcut `.sql` dosyalarını tarih sırasına göre listele.
+1. `database/snapshots` klasöründeki mevcut `.sql` dosyalarını tarih sırasına göre listele. Geçmişe doğru 20 tane snapshotı listelemelisin. Kullanıcı bunlardan birini seçerek yükleme yapabilir.
 2. Her snapshot ile eşleşen Git commit mesajlarını (mühür notlarını) kullanıcıya bir tablo olarak sun.
 3. Kullanıcıdan bir numara veya dosya adı seçmesini bekle.
 
