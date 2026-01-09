@@ -6,8 +6,8 @@
     <div class="p-6 min-h-screen" style="background-color: var(--page-bg);">
         {{-- Page Header --}}
         <div class="mb-6">
-            <h1 class="text-2xl font-bold text-gray-900">Müşteri Yönetimi</h1>
-            <p class="text-gray-600 text-sm mt-1">Müşteriler ve ilgili tüm verileri tek yerden yönetin</p>
+            <h1 class="text-2xl font-bold text-[var(--color-text-heading)]">Müşteri Yönetimi</h1>
+            <p class="text-[var(--color-text-base)] text-sm mt-1">Müşteriler ve ilgili tüm verileri tek yerden yönetin</p>
         </div>
 
         {{-- Tab Navigation --}}

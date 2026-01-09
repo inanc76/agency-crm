@@ -173,7 +173,7 @@ new
     <div class="w-full lg:w-3/4 mx-auto">
         {{-- Back Button --}}
         <a href="{{ route('settings.index') }}"
-            class="inline-flex items-center gap-2 text-slate-600 hover:text-slate-900 mb-6 transition-colors">
+            class="inline-flex items-center gap-2 text-[var(--color-text-base)] hover:text-[var(--color-text-heading)] mb-6 transition-colors">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
             </svg>
@@ -191,7 +191,7 @@ new
         <div class="theme-card shadow-sm p-6">
 
             {{-- Card Header --}}
-            <div class="flex items-center justify-between pb-4 mb-6 border-b border-black/5">
+            <div class="flex items-center justify-between pb-4 mb-6 border-b border-[var(--card-border)]">
                 <h2 class="text-sm font-bold" style="color: var(--color-text-heading);">E-posta Servis Yapılandırması
                 </h2>
                 <div class="flex items-center gap-4">
@@ -216,29 +216,33 @@ new
 
             {{-- SECTION 1: Service Selection --}}
             <div class="mb-6">
-                <h3 class="text-xs font-bold uppercase tracking-wider mb-4 opacity-60" style="color: var(--color-text-base);">Servis Seçimi</h3>
+                <h3 class="text-xs font-bold uppercase tracking-wider mb-4 opacity-60"
+                    style="color: var(--color-text-base);">Servis Seçimi</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {{-- SMTP Option --}}
                     <label class="block cursor-pointer">
                         <input type="radio" wire:model.live="provider" value="smtp" class="peer sr-only">
-                        <div
-                            class="p-4 bg-white border-2 border-transparent shadow-sm rounded-xl peer-checked:ring-2 peer-checked:ring-[var(--primary-color)] transition-all relative" style="background-color: var(--card-bg); border-color: var(--card-border);">
+                        <div class="p-4 bg-[var(--card-bg)] border-2 border-[var(--card-border)] shadow-sm rounded-xl peer-checked:ring-2 peer-checked:ring-[var(--primary-color)] transition-all relative"
+                            style="background-color: var(--card-bg); border-color: var(--card-border);">
                             <div class="flex items-start justify-between">
                                 <div class="flex items-center gap-3">
                                     <div
-                                        class="w-5 h-5 rounded-full border-2 flex items-center justify-center {{ $provider === 'smtp' ? 'border-[var(--primary-color)]' : 'border-gray-300' }}">
+                                        class="w-5 h-5 rounded-full border-2 flex items-center justify-center {{ $provider === 'smtp' ? 'border-[var(--primary-color)]' : 'border-[var(--card-border)]' }}">
                                         @if($provider === 'smtp')
-                                            <div class="w-2.5 h-2.5 rounded-full" style="background-color: var(--primary-color);"></div>
+                                            <div class="w-2.5 h-2.5 rounded-full"
+                                                style="background-color: var(--primary-color);"></div>
                                         @endif
                                     </div>
                                     <div>
-                                        <div class="font-bold text-sm" style="color: var(--color-text-heading);">SMTP</div>
-                                        <div class="text-xs opacity-60" style="color: var(--color-text-base);">Kendi sunucunuz</div>
+                                        <div class="font-bold text-sm" style="color: var(--color-text-heading);">SMTP
+                                        </div>
+                                        <div class="text-xs opacity-60" style="color: var(--color-text-base);">Kendi
+                                            sunucunuz</div>
                                     </div>
                                 </div>
                                 @if($provider === 'smtp')
                                     <span class="text-xs font-bold px-2 py-1 rounded"
-                                         style="color: var(--btn-save-bg); background-color: color-mix(in srgb, var(--btn-save-bg) 15%, white);">Aktif</span>
+                                        style="color: var(--btn-save-bg); background-color: color-mix(in srgb, var(--btn-save-bg) 15%, white);">Aktif</span>
                                 @endif
                             </div>
                         </div>
@@ -248,18 +252,18 @@ new
                     <label class="block cursor-pointer">
                         <input type="radio" wire:model.live="provider" value="mailgun" class="peer sr-only">
                         <div
-                            class="p-4 bg-white border-2 border-gray-200 rounded-xl peer-checked:border-orange-500 peer-checked:bg-orange-50/30 transition-all relative">
+                            class="p-4 bg-[var(--card-bg)] border-2 border-[var(--card-border)] rounded-xl peer-checked:border-[var(--color-active-border)] peer-checked:bg-[var(--color-active-bg)] transition-all relative">
                             <div class="flex items-start justify-between">
                                 <div class="flex items-center gap-3">
                                     <div
                                         class="w-5 h-5 rounded-full border-2 flex items-center justify-center {{ $provider === 'mailgun' ? 'border-orange-500' : 'border-gray-300' }}">
                                         @if($provider === 'mailgun')
-                                            <div class="w-2.5 h-2.5 rounded-full bg-orange-500"></div>
+                                            <div class="w-2.5 h-2.5 rounded-full bg-[var(--color-active-border)]"></div>
                                         @endif
                                     </div>
                                     <div>
-                                        <div class="font-bold text-gray-900 text-sm">MAILGUN</div>
-                                        <div class="text-xs text-gray-500">API Hizmeti</div>
+                                        <div class="font-bold text-[var(--color-text-heading)] text-sm">MAILGUN</div>
+                                        <div class="text-xs text-[var(--color-text-muted)]">API Hizmeti</div>
                                     </div>
                                 </div>
                                 @if($provider === 'mailgun')
@@ -274,7 +278,7 @@ new
 
             {{-- SECTION 2: Form Fields --}}
             <div class="mb-6">
-                <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4">
+                <h3 class="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-4">
                     {{ $provider === 'smtp' ? 'SMTP Bağlantı Detayları' : 'Mailgun Ayarları' }}
                 </h3>
 
@@ -353,14 +357,14 @@ new
                         ['id' => 'US', 'name' => 'Amerika (US)'],
                         ['id' => 'EU', 'name' => 'Avrupa (EU)']
                     ]"
-                                        placeholder="Sunucu bölgesi seçiniz" class="bg-white" />
+                                        placeholder="Sunucu bölgesi seçiniz" class="bg-[var(--card-bg)]" />
                                 </div>
                             </div>
                 @endif
             </div>
 
             {{-- Footer --}}
-            <div class="pt-6 border-t border-slate-200 flex justify-end">
+            <div class="pt-6 border-t border-[var(--card-border)] flex justify-end">
                 <button type="button" wire:click="save" wire:loading.attr="disabled" class="theme-btn-save">
                     <svg wire:loading wire:target="save" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">

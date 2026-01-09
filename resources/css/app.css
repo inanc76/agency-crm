@@ -130,6 +130,16 @@
         /* slate-600 */
         --color-surface-dark-def: #0f172a;
         /* slate-900 */
+
+        /* Auth & Focus */
+        --color-focus: #3b82f6;
+        /* focus:border-blue-500 */
+        --color-active-bg: #fff7ed;
+        /* bg-orange-50/30 */
+        --color-active-border: #fb923c;
+        /* border-orange-400 */
+        --color-active-text: #c2410c;
+        /* text-orange-700 */
     }
 
     *,

@@ -353,14 +353,14 @@ new
                             <x-mary-icon name="o-magnifying-glass"
                                 class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]" />
                             <input wire:model.live="search" type="search" placeholder="Kategori ara..."
-                                class="w-full pl-9 pr-3 py-2 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg text-sm focus:outline-none focus:border-blue-500 transition-colors">
+                                class="w-full pl-9 pr-3 py-2 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg text-sm focus:outline-none focus:border-[var(--color-focus)] transition-colors">
                         </div>
                     </div>
 
                     <div class="flex-1 overflow-y-auto p-4 space-y-2">
                         {{-- Categories List --}}
                         @foreach($categories as $category)
-                            <div class="group relative flex items-center justify-between p-4 rounded-lg border transition-all duration-200 cursor-pointer hover:shadow-md {{ $selectedCategoryKey === $category->key ? 'border-orange-400 bg-orange-50/30' : 'border-[var(--card-border)] bg-[var(--card-bg)] hover:border-[var(--card-hover-border)]' }}"
+                            <div class="group relative flex items-center justify-between p-4 rounded-lg border transition-all duration-200 cursor-pointer hover:shadow-md {{ $selectedCategoryKey === $category->key ? 'border-[var(--color-active-border)] bg-[var(--color-active-bg)]' : 'border-[var(--card-border)] bg-[var(--card-bg)] hover:border-[var(--card-hover-border)]' }}"
                                 wire:click="selectCategory('{{ $category->key }}')">
 
                                 <div class="flex-1 min-w-0">
@@ -541,11 +541,11 @@ new
                     <div class="grid grid-cols-5 gap-y-4 gap-x-2">
                         @foreach($availableColors as $colorScheme)
                             <button type="button" wire:click="$set('selectedColor', '{{ $colorScheme['id'] }}')"
-                                class="flex flex-col items-center justify-center p-2 rounded-lg border transition-all duration-200 group {{ $selectedColor === $colorScheme['id'] ? 'border-orange-500 bg-white ring-2 ring-orange-100 shadow-sm' : 'border-transparent hover:bg-[var(--dropdown-hover-bg)]' }}">
+                                class="flex flex-col items-center justify-center p-2 rounded-lg border transition-all duration-200 group {{ $selectedColor === $colorScheme['id'] ? 'border-[var(--color-active-border)] bg-white ring-2 ring-[var(--color-active-bg)] shadow-sm' : 'border-transparent hover:bg-[var(--dropdown-hover-bg)]' }}">
                                 <span
                                     class="px-2 py-0.5 rounded textxs font-medium {{ $this->getTailwindColor($colorScheme['id']) }} mb-1 shadow-sm ring-1 ring-black/5 min-w-[32px] text-center">Abc</span>
                                 <span
-                                    class="text-[10px] {{ $selectedColor === $colorScheme['id'] ? 'text-orange-700 font-bold' : 'text-slate-500' }}">{{ $colorScheme['name'] }}</span>
+                                    class="text-[10px] {{ $selectedColor === $colorScheme['id'] ? 'text-[var(--color-active-text)] font-bold' : 'text-[var(--color-text-muted)]' }}">{{ $colorScheme['name'] }}</span>
                             </button>
                         @endforeach
                     </div>

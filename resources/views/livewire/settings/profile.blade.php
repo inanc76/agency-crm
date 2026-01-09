@@ -106,7 +106,7 @@ new class extends Component {
                         </flux:text>
 
                         @if (session('status') === 'verification-link-sent')
-                            <flux:text class="mt-2 font-medium !dark:text-green-400 !text-green-600">
+                            <flux:text class="mt-2 font-medium !text-[var(--brand-success)]">
                                 {{ __('A new verification link has been sent to your email address.') }}
                             </flux:text>
                         @endif
@@ -114,8 +114,8 @@ new class extends Component {
                 @endif
             </div>
 
-            <div class="border-t border-gray-200 pt-6">
-                <h3 class="text-sm font-medium text-gray-900 mb-4">Şifre Değiştir</h3>
+            <div class="border-t border-[var(--card-border)] pt-6">
+                <h3 class="text-sm font-medium text-[var(--color-text-heading)] mb-4">Şifre Değiştir</h3>
                 <div class="space-y-4">
                     <flux:input wire:model="new_password" label="Yeni Şifre" type="password"
                         autocomplete="new-password" />
