@@ -1,3 +1,11 @@
+{{--
+@component: _summary.blade.php
+@section: Sağ Kolon - Teklif Özeti
+@description: Ara toplam, indirim, KDV ve genel toplam hesaplamalarının gösterildiği özet kartı.
+@params: $isViewMode (bool), $currency (string), $discount_type (string), $discount_value (float), $vat_rate (float),
+$valid_until (string), $items (array)
+@events: calculateTotals()
+--}}
 <div class="theme-card p-6 shadow-sm sticky top-6">
     <h3 class="text-sm font-bold text-slate-900 mb-4">Teklif Özeti</h3>
 

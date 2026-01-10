@@ -1,3 +1,11 @@
+{{--
+@component: _customer_info.blade.php
+@section: Sol Kolon - Müşteri ve Ayarlar
+@description: Müşteri seçimi, teklif geçerlilik süresi, para birimi, KDV ve indirim ayarlarını içerir.
+@params: $isViewMode (bool), $customers (array), $customer_id (string), $status (string), $valid_days (int), $currency
+(string), $discount_type (string), $discount_value (float), $vat_rate (float), $vatRates (array)
+@events: updatedCustomerId, updatedValidDays, updatedDiscountValue, updatedDiscountType
+--}}
 {{-- Müşteri Bilgileri Card --}}
 <div class="theme-card p-6 shadow-sm">
     <h2 class="text-base font-bold mb-4 text-skin-heading">Müşteri Bilgileri

@@ -1,4 +1,11 @@
 {{-- Teklif Kalemleri Card --}}
+{{--
+@component: _items_table.blade.php
+@section: Teklif Kalemleri Tablosu
+@description: Teklifin içindeki hizmet kalemlerinin listelendiği, düzenlendiği ve silindiği ana tablodur.
+@params: $isViewMode (bool), $items (array)
+@events: openServiceModal, openManualEntryModal, removeItem, openItemDescriptionModal
+--}}
 <div class="theme-card p-6 shadow-sm">
     <div class="flex items-center justify-between mb-4">
         <h2 class="text-base font-bold text-skin-heading">Teklif Kalemleri *

@@ -1,3 +1,9 @@
+{{--
+@component: _title_description.blade.php
+@section: Teklif Başlığı ve Açıklaması
+@description: Teklifin başlık ve genel açıklama metinlerinin girildiği kart bileşeni.
+@params: $isViewMode (bool), $title (string), $description (string)
+--}}
 {{-- Teklif Başlığı ve Açıklaması Card --}}
 <div class="theme-card p-6 shadow-sm">
     <h2 class="text-base font-bold mb-4 text-skin-heading">Teklif Başlığı ve

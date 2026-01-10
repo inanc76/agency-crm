@@ -1,3 +1,10 @@
+{{--
+@component: _attachments.blade.php
+@section: Teklif Ekleri Listesi
+@description: Teklife eklenen dosyaların listelendiği, indirme ve silme işlemlerinin yapıldığı kart.
+@params: $isViewMode (bool), $attachments (array)
+@events: openAttachmentModal, downloadAttachment, editAttachment, removeAttachment
+--}}
 {{-- Teklif Ekleri Card --}}
 <div class="theme-card p-6 shadow-sm">
     <div class="flex items-center justify-between mb-4">

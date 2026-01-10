@@ -5,6 +5,13 @@
 </a>
 
 {{-- Header --}}
+{{--
+@component: _header.blade.php
+@section: Teklif Oluşturma Üst Başlık
+@description: Sayfa başlığı, geri dön butonu ve ana aksiyon butonlarını (İptal, Kaydet, Sil) içerir.
+@params: $isViewMode (bool), $title (string), $offerId (string|null)
+@events: cancel, delete, toggleEditMode, save
+--}}
 <div class="flex items-start justify-between mb-6">
     <div>
         <h1 class="text-2xl font-bold tracking-tight" class="text-skin-heading">

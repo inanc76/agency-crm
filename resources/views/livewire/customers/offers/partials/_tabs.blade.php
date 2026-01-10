@@ -1,3 +1,11 @@
+{{--
+@component: _tabs.blade.php
+@section: Tab Navigasyonu
+@description: Sayfa içi sekmeler arası geçişi sağlar.
+@params: $activeTab (string: 'info'|'messages'|'notes'|'downloads'), $isViewMode (bool)
+@events: $set('activeTab', 'info'), $set('activeTab', 'messages'), $set('activeTab', 'notes'), $set('activeTab',
+'downloads')
+--}}
 @if($isViewMode)
     <div class="flex items-center border-b border-slate-200 mb-8 overflow-x-auto scrollbar-hide">
         <button wire:click="$set('activeTab', 'info')"

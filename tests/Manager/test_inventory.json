@@ -1,0 +1,17 @@
+{
+    "modules": [
+        {
+            "id": "OffersCreate",
+            "name": "Teklif Olu\u015fturma Mod\u00fcl\u00fc - Kapsaml\u0131 Test Senaryolar\u0131 (Offers\/Create)",
+            "scenarios": 50,
+            "coded_tests": 50,
+            "test_file": "CreateOfferTest.php"
+        }
+    ],
+    "summary": {
+        "total_defined_scenarios": 50,
+        "total_coded_custom_tests": 50,
+        "system_tests": 30
+    },
+    "history": []
+}
