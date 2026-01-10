@@ -2,6 +2,7 @@
 
 use Livewire\Volt\Component;
 use Livewire\Attributes\Layout;
+use Livewire\WithFileUploads;
 use App\Models\Customer;
 use App\Models\Service;
 use App\Models\PriceDefinition;
@@ -12,11 +13,12 @@ use Illuminate\Support\Str;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use App\Models\ReferenceItem;
+use App\Models\OfferAttachment;
 
 new
     #[Layout('components.layouts.app', ['title' => 'Yeni Teklif Oluştur'])]
     class extends Component {
-    use Toast;
+    use Toast, WithFileUploads;
 
     // Offer Fields
     public $customer_id = '';
@@ -50,6 +52,15 @@ new
     // Manual Entry Modal State
     public $showManualEntryModal = false;
     public $manualItems = [];
+
+    // Attachment Modal State
+    public $showAttachmentModal = false;
+    public $attachments = [];
+    public $attachmentTitle = '';
+    public $attachmentDescription = '';
+    public $attachmentPrice = 0;
+    public $attachmentFile = null;
+    public $editingAttachmentIndex = null;
 
     public function openManualEntryModal(): void
     {
@@ -112,6 +123,152 @@ new
         $this->showManualEntryModal = false;
         $this->manualItems = [];
         $this->success('Başarılı', $count . ' kalem eklendi.');
+    }
+    // Attachment Methods
+    public function openAttachmentModal(): void
+    {
+        $this->resetAttachmentForm();
+        $this->showAttachmentModal = true;
+    }
+
+    public function closeAttachmentModal(): void
+    {
+        $this->showAttachmentModal = false;
+        $this->resetAttachmentForm();
+    }
+
+    private function resetAttachmentForm(): void
+    {
+        $this->attachmentTitle = '';
+        $this->attachmentDescription = '';
+        $this->attachmentPrice = 0;
+        $this->attachmentFile = null;
+        $this->editingAttachmentIndex = null;
+    }
+
+    public function saveAttachment(): void
+    {
+        $this->resetErrorBag();
+
+        $this->validate([
+            'attachmentTitle' => 'required|string|max:255',
+            'attachmentDescription' => 'nullable|string',
+            'attachmentPrice' => 'required|numeric|min:0',
+            'attachmentFile' => $this->editingAttachmentIndex === null ? 'required|file|mimes:pdf,doc,docx|max:25600' :
+                'nullable|file|mimes:pdf,doc,docx|max:25600',
+        ], [
+            'attachmentTitle.required' => 'Lütfen ek için bir başlık giriniz.',
+            'attachmentPrice.required' => 'Lütfen bir fiyat belirtiniz.',
+            'attachmentFile.required' => 'Lütfen bir dosya seçiniz.',
+            'attachmentFile.mimes' => 'Sadece PDF veya Microsoft Word (.doc, .docx) formatları kabul edilmektedir.',
+            'attachmentFile.max' => 'Dosya boyutu çok büyük. Maksimum 25 MB yükleyebilirsiniz.',
+        ]);
+
+        try {
+            $minioService = app(\App\Services\MinioService::class);
+
+            if ($this->editingAttachmentIndex !== null) {
+                // Update existing attachment
+                $this->attachments[$this->editingAttachmentIndex]['title'] = $this->attachmentTitle;
+                $this->attachments[$this->editingAttachmentIndex]['description'] = $this->attachmentDescription;
+                $this->attachments[$this->editingAttachmentIndex]['price'] = $this->attachmentPrice;
+
+                // If new file uploaded, replace old one
+                if ($this->attachmentFile) {
+                    $oldPath = $this->attachments[$this->editingAttachmentIndex]['file_path'] ?? null;
+                    if ($oldPath) {
+                        $minioService->deleteFile($oldPath);
+                    }
+
+                    $uploadResult = $minioService->uploadFile($this->attachmentFile, 'offers');
+
+                    $this->attachments[$this->editingAttachmentIndex]['file_name'] = $this->attachmentFile->getClientOriginalName();
+                    $this->attachments[$this->editingAttachmentIndex]['file_type'] = $this->attachmentFile->getClientOriginalExtension();
+                    $this->attachments[$this->editingAttachmentIndex]['file_size'] = $this->attachmentFile->getSize();
+                    $this->attachments[$this->editingAttachmentIndex]['file_path'] = $uploadResult['path'];
+                }
+
+                $this->success('Başarılı', 'Ek güncellendi.');
+            } else {
+                // Add new attachment - Upload to Minio
+                $uploadResult = $minioService->uploadFile($this->attachmentFile, 'offers');
+
+                $this->attachments[] = [
+                    'title' => $this->attachmentTitle,
+                    'description' => $this->attachmentDescription,
+                    'price' => $this->attachmentPrice,
+                    'currency' => $this->currency,
+                    'file_name' => $this->attachmentFile->getClientOriginalName(),
+                    'file_type' => $this->attachmentFile->getClientOriginalExtension(),
+                    'file_size' => $this->attachmentFile->getSize(),
+                    'file_path' => $uploadResult['path'],
+                ];
+
+                $this->success('Başarılı', 'Ek eklendi.');
+            }
+
+            $this->closeAttachmentModal();
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Teklif Eki Yükleme Hatası: ' . $e->getMessage());
+            $this->error('Hata', 'Dosya yüklenirken bir hata oluştu: ' . $e->getMessage());
+        }
+    }
+
+    public function editAttachment(int $index): void
+    {
+        $attachment = $this->attachments[$index];
+        $this->editingAttachmentIndex = $index;
+        $this->attachmentTitle = $attachment['title'];
+        $this->attachmentDescription = $attachment['description'] ?? '';
+        $this->attachmentPrice = $attachment['price'];
+        $this->showAttachmentModal = true;
+    }
+
+    public function removeAttachment(int $index): void
+    {
+        try {
+            // Delete file from Minio
+            $filePath = $this->attachments[$index]['file_path'] ?? null;
+            if ($filePath) {
+                $minioService = app(\App\Services\MinioService::class);
+                $result = $minioService->deleteFile($filePath);
+
+                if ($result) {
+                    \Illuminate\Support\Facades\Log::info("Teklif Eki Başarıyla Silindi: {$filePath}");
+                } else {
+                    \Illuminate\Support\Facades\Log::error("Teklif Eki Silinemedi (Minio Hatası): {$filePath}");
+                }
+            }
+
+            unset($this->attachments[$index]);
+            $this->attachments = array_values($this->attachments);
+            $this->success('Başarılı', 'Ek silindi.');
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("Minio silme HATASI - Yol: {$filePath} - Hata: " . $e->getMessage());
+            $this->error('Hata', 'Dosya silinirken bir hata oluştu: ' . $e->getMessage());
+        }
+    }
+
+    public function downloadAttachment(int $index): mixed
+    {
+        $attachment = $this->attachments[$index] ?? null;
+
+        if (!$attachment || empty($attachment['file_path'])) {
+            $this->error('Hata', 'Dosya bulunamadı.');
+            return null;
+        }
+
+        try {
+            $minioService = app(\App\Services\MinioService::class);
+            return $minioService->downloadFile(
+                $attachment['file_path'],
+                $attachment['file_name']
+            );
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("İndirme Hatası: " . $e->getMessage());
+            $this->error('Hata', 'Dosya indirilemedi: ' . $e->getMessage());
+            return null;
+        }
     }
 
     // Reference Data
@@ -225,6 +382,19 @@ new
             'currency' => $item->currency,
             'duration' => $item->duration,
             'quantity' => $item->quantity,
+        ])->toArray();
+
+        // Load attachments
+        $this->attachments = $offer->attachments->map(fn($att) => [
+            'id' => $att->id,
+            'title' => $att->title,
+            'description' => $att->description,
+            'price' => $att->price,
+            'currency' => $att->currency,
+            'file_name' => $att->file_name,
+            'file_type' => $att->file_type,
+            'file_size' => $att->file_size,
+            'file_path' => $att->file_path,
         ])->toArray();
 
         $this->isViewMode = true;
@@ -473,6 +643,26 @@ new
                     'quantity' => $item['quantity'],
                 ]);
             }
+
+            // Sync Attachments
+            // First delete old attachments (except those we keep, but easier to delete all and recreate for now or just delete all since we have full state in $this->attachments)
+            // Correction: Recreating is safer for sync as long as we don't lose the file paths.
+            $offer->attachments()->delete();
+
+            foreach ($this->attachments as $att) {
+                OfferAttachment::create([
+                    'id' => Str::uuid()->toString(),
+                    'offer_id' => $offer->id,
+                    'title' => $att['title'],
+                    'description' => $att['description'] ?? '',
+                    'price' => $att['price'],
+                    'currency' => $att['currency'],
+                    'file_path' => $att['file_path'],
+                    'file_name' => $att['file_name'],
+                    'file_type' => $att['file_type'],
+                    'file_size' => $att['file_size'],
+                ]);
+            }
         });
 
         $this->success('İşlem Başarılı', 'Teklif başarıyla kaydedildi.');
@@ -493,10 +683,30 @@ new
 
     public function cancel(): void
     {
+        // Clean up unsaved attachments from Minio
+        if (!empty($this->attachments)) {
+            $minioService = app(\App\Services\MinioService::class);
+
+            foreach ($this->attachments as $attachment) {
+                // If the attachment doesn't have an ID, it means it hasn't been saved to the DB yet
+                // and was just uploaded in this session.
+                if (!isset($attachment['id'])) {
+                    if (isset($attachment['file_path'])) {
+                        try {
+                            $minioService->deleteFile($attachment['file_path']);
+                            \Illuminate\Support\Facades\Log::info("Cancelled Offer Creation: Deleted temporary file: " . $attachment['file_path']);
+                        } catch (\Exception $e) {
+                            \Illuminate\Support\Facades\Log::error("Failed to delete file on cancel: " . $e->getMessage());
+                        }
+                    }
+                }
+            }
+        }
+
         if ($this->offerId) {
             $this->loadOfferData();
         } else {
-            $this->redirect('/dashboard/customers?tab=offers');
+            $this->redirect('/dashboard/customers?tab=offers', navigate: true);
         }
     }
 
@@ -529,7 +739,13 @@ new
         <div class="flex items-start justify-between mb-6">
             <div>
                 <h1 class="text-2xl font-bold tracking-tight" class="text-skin-heading">
-                    @if($isViewMode) {{ $title }} @else Yeni Teklif Oluştur @endif
+                    @if($isViewMode)
+                        {{ $title }}
+                    @elseif($offerId)
+                        Düzenle: {{ $title }}
+                    @else
+                        Yeni Teklif Oluştur
+                    @endif
                 </h1>
                 <div class="flex items-center gap-2 mt-1">
                     @if($isViewMode)
@@ -611,8 +827,7 @@ new
                             </h2>
                             <div class="grid grid-cols-2 gap-6">
                                 <div>
-                                    <label class="block text-xs font-medium mb-1 opacity-60"
-                                       >Müşteri *</label>
+                                    <label class="block text-xs font-medium mb-1 opacity-60">Müşteri *</label>
                                     @if($isViewMode)
                                         @php $customerName = collect($customers)->firstWhere('id', $customer_id)['name'] ?? '-'; @endphp
                                         <div class="text-sm font-medium">
@@ -625,13 +840,13 @@ new
                                                 <option value="{{ $c['id'] }}">{{ $c['name'] }}</option>
                                             @endforeach
                                         </select>
-                                        @error('customer_id') <span class="text-skin-danger text-xs">{{ $message }}</span> @enderror
+                                        @error('customer_id') <span class="text-skin-danger text-xs">{{ $message }}</span>
+                                        @enderror
                                     @endif
                                 </div>
 
                                 <div>
-                                    <label class="block text-xs font-medium mb-1 opacity-60"
-                                       >Teklif Durumu</label>
+                                    <label class="block text-xs font-medium mb-1 opacity-60">Teklif Durumu</label>
                                     @if($isViewMode)
                                         <div class="text-sm font-medium">
                                             @if($status === 'DRAFT') Taslak
@@ -653,15 +868,14 @@ new
                         </div>
 
                         {{-- Teklif Ayarları Card --}}
-                        <div class="theme-card p-6 shadow-sm border border-blue-100 bg-blue-50/50">
+                        <div class="theme-card p-6 shadow-sm">
                             <h2 class="text-base font-bold mb-4" class="text-skin-heading">Teklif Ayarları
                             </h2>
                             <div class="grid grid-cols-2 gap-6">
                                 {{-- Title moved to Description card --}}
 
                                 <div>
-                                    <label class="block text-xs font-medium mb-1 opacity-60"
-                                       >Geçerlilik Süresi (Gün)</label>
+                                    <label class="block text-xs font-medium mb-1 opacity-60">Geçerlilik Süresi (Gün)</label>
                                     @if($isViewMode)
                                         <div class="text-sm font-medium">
                                             {{ $valid_days }}
@@ -673,8 +887,7 @@ new
                                 </div>
 
                                 <div>
-                                    <label class="block text-xs font-medium mb-1 opacity-60"
-                                       >Para Birimi</label>
+                                    <label class="block text-xs font-medium mb-1 opacity-60">Para Birimi</label>
                                     @if($isViewMode)
                                         <div class="text-sm font-medium">{{ $currency }}
                                         </div>
@@ -688,8 +901,7 @@ new
                                 </div>
 
                                 <div>
-                                    <label class="block text-xs font-medium mb-1 opacity-60"
-                                       >İndirim</label>
+                                    <label class="block text-xs font-medium mb-1 opacity-60">İndirim</label>
                                     @if($isViewMode)
                                         <div class="text-sm font-medium">
                                             @if($discount_type === 'PERCENTAGE') %{{ $discount_value }} @else
@@ -710,8 +922,7 @@ new
                                 </div>
 
                                 <div>
-                                    <label class="block text-xs font-medium mb-1 opacity-60"
-                                       >KDV Oranı</label>
+                                    <label class="block text-xs font-medium mb-1 opacity-60">KDV Oranı</label>
                                     @if($isViewMode)
                                         <div class="text-sm font-medium">
                                             %{{ $vat_rate }}
@@ -731,13 +942,12 @@ new
                         </div>
 
                         {{-- Teklif Başlığı ve Açıklaması Card --}}
-                        <div class="theme-card p-6 shadow-sm border border-purple-100 bg-purple-50/50">
+                        <div class="theme-card p-6 shadow-sm">
                             <h2 class="text-base font-bold mb-4" class="text-skin-heading">Teklif Başlığı ve
                                 Açıklaması</h2>
 
                             <div class="mb-4">
-                                <label class="block text-xs font-medium mb-1 opacity-60"
-                                   >Teklif Başlığı *</label>
+                                <label class="block text-xs font-medium mb-1 opacity-60">Teklif Başlığı *</label>
                                 @if($isViewMode)
                                     <div class="text-sm font-medium">{{ $title }}</div>
                                 @else
@@ -748,8 +958,7 @@ new
                             </div>
 
                             <div>
-                                <label class="block text-xs font-medium mb-1 opacity-60"
-                                   >Teklif Açıklaması</label>
+                                <label class="block text-xs font-medium mb-1 opacity-60">Teklif Açıklaması</label>
                                 @if($isViewMode)
                                     <div class="text-sm font-medium whitespace-pre-wrap">
                                         {{ $description ?: '-' }}
@@ -762,7 +971,7 @@ new
                         </div>
 
                         {{-- Teklif Kalemleri Card --}}
-                        <div class="theme-card p-6 shadow-sm border border-green-100 bg-green-50/50">
+                        <div class="theme-card p-6 shadow-sm">
                             <div class="flex items-center justify-between mb-4">
                                 <h2 class="text-base font-bold" class="text-skin-heading">Teklif Kalemleri *
                                 </h2>
@@ -787,18 +996,12 @@ new
                                     <table class="w-full text-sm">
                                         <thead>
                                             <tr class="border-b border-slate-200">
-                                                <th class="text-left py-2 px-2 font-medium opacity-60"
-                                                   >Hizmet Adı</th>
-                                                <th class="text-left py-2 px-2 font-medium opacity-60"
-                                                   >Açıklama</th>
-                                                <th class="text-center py-2 px-2 font-medium opacity-60"
-                                                   >Süre</th>
-                                                <th class="text-right py-2 px-2 font-medium opacity-60"
-                                                   >Fiyat</th>
-                                                <th class="text-center py-2 px-2 font-medium opacity-60"
-                                                   >Adet</th>
-                                                <th class="text-right py-2 px-2 font-medium opacity-60"
-                                                   >Toplam</th>
+                                                <th class="text-left py-2 px-2 font-medium opacity-60">Hizmet Adı</th>
+                                                <th class="text-left py-2 px-2 font-medium opacity-60">Açıklama</th>
+                                                <th class="text-center py-2 px-2 font-medium opacity-60">Süre</th>
+                                                <th class="text-right py-2 px-2 font-medium opacity-60">Fiyat</th>
+                                                <th class="text-center py-2 px-2 font-medium opacity-60">Adet</th>
+                                                <th class="text-right py-2 px-2 font-medium opacity-60">Toplam</th>
                                                 @if(!$isViewMode)
                                                     <th class="w-10"></th>
                                                 @endif
@@ -807,8 +1010,7 @@ new
                                         <tbody>
                                             @foreach($items as $index => $item)
                                                 <tr class="border-b border-slate-100" wire:key="item-{{ $index }}">
-                                                    <td class="py-3 px-2 font-normal text-xs"
-                                                       >
+                                                    <td class="py-3 px-2 font-normal text-xs">
                                                         {{ $item['service_name'] }}
                                                     </td>
                                                     <td class="py-3 px-2 text-xs opacity-70">
@@ -837,15 +1039,14 @@ new
                                                             {{ $item['quantity'] }}
                                                         @endif
                                                     </td>
-                                                    <td class="py-3 px-2 text-right text-xs font-normal"
-                                                        class="text-skin-heading">
+                                                    <td class="py-3 px-2 text-right text-xs font-normal" class="text-skin-heading">
                                                         {{ number_format($item['price'] * $item['quantity'], 0, ',', '.') }}
                                                         {{ $item['currency'] }}
                                                     </td>
                                                     @if(!$isViewMode)
                                                         <td class="py-3 px-2">
                                                             <button type="button" wire:click="removeItem({{ $index }})"
-                                                                class="text-skin-danger hover:opacity-80">
+                                                                class="text-skin-danger hover:opacity-80 cursor-pointer">
                                                                 <x-mary-icon name="o-x-mark" class="w-4 h-4" />
                                                             </button>
                                                         </td>
@@ -864,9 +1065,97 @@ new
                             @endif
                             @error('items') <span class="text-skin-danger text-xs">{{ $message }}</span> @enderror
                         </div>
+
+                        {{-- Teklif Ekleri Card --}}
+                        <div class="theme-card p-6 shadow-sm">
+                            <div class="flex items-center justify-between mb-4">
+                                <h2 class="text-base font-bold text-skin-heading">Teklif Ekleri</h2>
+                                @if(!$isViewMode)
+                                    <button type="button" wire:click="openAttachmentModal"
+                                        class="flex items-center gap-2 px-3 py-1.5 text-xs font-bold bg-white border border-slate-200 rounded-lg shadow-sm hover:bg-slate-50 cursor-pointer transition-all text-slate-700">
+                                        <x-mary-icon name="o-plus" class="w-4 h-4" />
+                                        Teklif Ekle
+                                    </button>
+                                @endif
+                            </div>
+
+                            @if(count($attachments) > 0)
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-sm">
+                                        <thead>
+                                            <tr class="border-b border-slate-200">
+                                                <th class="text-left py-2 px-2 font-medium opacity-60">Başlık</th>
+                                                <th class="text-left py-2 px-2 font-medium opacity-60">Açıklama</th>
+                                                <th class="text-right py-2 px-2 font-medium opacity-60">Fiyat</th>
+                                                @if(!$isViewMode)
+                                                    <th class="text-center py-2 px-2 font-medium opacity-60 w-24">İşlemler</th>
+                                                @endif
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($attachments as $index => $attachment)
+                                                <tr class="border-b border-slate-100 hover:bg-white/50">
+                                                    <td class="py-3 px-2">
+                                                        <div class="cursor-pointer" wire:click="downloadAttachment({{ $index }})">
+                                                            <div class="flex items-center gap-2">
+                                                                @php
+                                                                    $ext = strtolower(pathinfo($attachment['file_name'], PATHINFO_EXTENSION));
+                                                                    $iconName = match (true) {
+                                                                        $ext === 'pdf' => 'o-document-text',
+                                                                        in_array($ext, ['doc', 'docx']) => 'o-clipboard-document',
+                                                                        in_array($ext, ['ppt', 'pptx']) => 'o-presentation-chart-line',
+                                                                        default => 'o-document',
+                                                                    };
+                                                                @endphp
+                                                                <x-mary-icon :name="$iconName" class="w-4 h-4 text-slate-400" />
+                                                                <span
+                                                                    class="font-medium hover:text-blue-600 transition-colors">{{ $attachment['title'] }}</span>
+                                                            </div>
+                                                            <div
+                                                                class="text-[10px] text-slate-400 mt-0.5 hover:text-blue-500 transition-colors">
+                                                                {{ $attachment['file_name'] }}
+                                                                ({{ number_format($attachment['file_size'] / 1024, 1) }} KB)
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td class="py-3 px-2 text-slate-600 text-xs">
+                                                        {{ Str::limit($attachment['description'] ?? '-', 50) }}
+                                                    </td>
+                                                    <td class="py-3 px-2 text-right font-medium">
+                                                        {{ number_format($attachment['price'], 2) }} {{ $attachment['currency'] }}
+                                                    </td>
+                                                    @if(!$isViewMode)
+                                                        <td class="py-3 px-2 text-center">
+                                                            <div class="flex items-center justify-center gap-2">
+                                                                <button type="button" wire:click="editAttachment({{ $index }})"
+                                                                    class="text-slate-400 hover:text-slate-600 transition-colors cursor-pointer">
+                                                                    <x-mary-icon name="o-pencil" class="w-4 h-4" />
+                                                                </button>
+                                                                <button type="button" wire:click="removeAttachment({{ $index }})"
+                                                                    wire:confirm="Bu eki silmek istediğinize emin misiniz?"
+                                                                    class="text-slate-400 hover:text-slate-600 transition-colors cursor-pointer">
+                                                                    <x-mary-icon name="o-trash" class="w-4 h-4" />
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                    @endif
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            @else
+                                <div class="text-center py-8 text-slate-400">
+                                    <x-mary-icon name="o-paper-clip" class="w-12 h-12 mx-auto mb-2 opacity-30" />
+                                    <p class="text-sm">Henüz ek dosya eklenmemiş</p>
+                                    @if(!$isViewMode)
+                                        <p class="text-xs mt-1">Yukarıdaki "+ Teklif Ekle" butonuna tıklayarak başlayın</p>
+                                    @endif
+                                </div>
+                            @endif
+                        </div>
                     </div>
                 @endif
-
                 @if($activeTab === 'messages')
                     <div class="theme-card p-6 shadow-sm text-center text-slate-500 py-12">
                         <x-mary-icon name="o-chat-bubble-left-right" class="w-12 h-12 mx-auto mb-3 opacity-20" />
@@ -966,8 +1255,7 @@ new
                 @if(count($customerServices) > 0)
                     <div class="space-y-3 max-h-[500px] overflow-y-auto pr-2">
                         @foreach($customerServices as $service)
-                            <div
-                                class="p-4 border border-slate-100 rounded-xl bg-slate-50/50 hover:bg-white hover:border-blue-200 hover:shadow-sm transition-all group">
+                            <div class="p-4 theme-card bg-skin-hover transition-all group">
                                 <div class="flex items-start justify-between">
                                     <div class="flex-1 min-w-0">
                                         <p class="font-bold text-sm text-slate-800 truncate">{{ $service['service_name'] }}</p>
@@ -1022,8 +1310,7 @@ new
                                 ->firstWhere('name', $modalServiceName);
                         @endphp
                         @if($selectedPD)
-                            <div
-                                class="p-5 bg-gradient-to-br from-green-50 to-emerald-50 border border-green-100 rounded-xl shadow-sm">
+                            <div class="p-5 theme-card">
                                 <div class="flex justify-between items-start">
                                     <div>
                                         <p class="font-bold text-slate-800">{{ $selectedPD['name'] }}</p>
@@ -1175,6 +1462,84 @@ new
             <button wire:click="saveManualItems" class="theme-btn-save">
                 <x-mary-icon name="o-check" class="w-4 h-4" />
                 Listeye Ekle
+            </button>
+        </x-slot:actions>
+    </x-mary-modal>
+
+    {{-- Attachment Modal --}}
+    <x-mary-modal wire:model="showAttachmentModal"
+        title="{{ $editingAttachmentIndex !== null ? 'Ek Düzenle' : 'Teklif Eki Ekle' }}" class="backdrop-blur"
+        box-class="!max-w-2xl">
+        <div class="space-y-4">
+            {{-- Title --}}
+            <div>
+                <label class="block text-xs font-medium mb-1 opacity-60">Başlık *</label>
+                <input type="text" wire:model="attachmentTitle" class="input w-full bg-white"
+                    placeholder="Örn: Teknik Şartname">
+                @error('attachmentTitle') <span class="text-skin-danger text-xs">{{ $message }}</span> @enderror
+            </div>
+
+            {{-- Description --}}
+            <div>
+                <label class="block text-xs font-medium mb-1 opacity-60">Açıklama</label>
+                <textarea wire:model="attachmentDescription" class="textarea w-full bg-white" rows="3"
+                    placeholder="Ek hakkında açıklama..."></textarea>
+                @error('attachmentDescription') <span class="text-skin-danger text-xs">{{ $message }}</span> @enderror
+            </div>
+
+            {{-- Price --}}
+            <div>
+                <label class="block text-xs font-medium mb-1 opacity-60">Fiyat *</label>
+                <div class="flex items-center gap-2">
+                    <input type="number" wire:model="attachmentPrice" class="input w-full bg-white" min="0" step="0.01"
+                        placeholder="0.00">
+                    <span class="text-sm font-medium text-slate-600 min-w-[50px]">{{ $currency }}</span>
+                </div>
+                @error('attachmentPrice') <span class="text-skin-danger text-xs">{{ $message }}</span> @enderror
+            </div>
+
+            {{-- File Upload --}}
+            <div>
+                <label class="block text-xs font-medium mb-1 opacity-60">
+                    Dosya {{ $editingAttachmentIndex === null ? '*' : '(Değiştirmek için seçin)' }}
+                </label>
+                <input type="file" wire:model="attachmentFile" accept=".pdf,.doc,.docx"
+                    class="file-input file-input-bordered w-full bg-white"
+                    onchange="if(this.files[0] && this.files[0].size > 25600 * 1024) { alert('Dosya boyutu çok büyük! Maksimum 25MB yükleyebilirsiniz.'); this.value = ''; }">
+
+                <div wire:loading wire:target="attachmentFile" class="w-full mt-2">
+                    <div class="flex items-center gap-2">
+                        <span class="loading loading-ring loading-xs text-blue-600"></span>
+                        <span class="text-[10px] text-blue-600 font-bold uppercase tracking-wider">Dosya Sunucuya
+                            Aktarılıyor...</span>
+                    </div>
+                    <progress class="progress progress-primary w-full h-1.5 mt-1"></progress>
+                </div>
+
+                <div class="text-[10px] text-slate-400 mt-1" wire:loading.remove wire:target="attachmentFile">
+                    Maksimum 25MB - Sadece PDF veya Word dosyaları
+                </div>
+                @error('attachmentFile') <span class="text-skin-danger text-xs">{{ $message }}</span> @enderror
+
+                @if($editingAttachmentIndex !== null && isset($attachments[$editingAttachmentIndex]['file_name']))
+                    <div class="text-xs text-slate-600 mt-2 flex items-center gap-2">
+                        <x-mary-icon name="o-document" class="w-4 h-4" />
+                        <span>Mevcut: {{ $attachments[$editingAttachmentIndex]['file_name'] }}</span>
+                    </div>
+                @endif
+            </div>
+        </div>
+
+        <x-slot:actions>
+            <button wire:click="closeAttachmentModal" class="theme-btn-cancel" wire:loading.attr="disabled"
+                wire:target="attachmentFile, saveAttachment">
+                Vazgeç
+            </button>
+            <button wire:click="saveAttachment" class="theme-btn-save" wire:loading.attr="disabled"
+                wire:target="attachmentFile, saveAttachment">
+                <span wire:loading wire:target="saveAttachment" class="loading loading-spinner loading-xs mr-1"></span>
+                <x-mary-icon name="o-check" class="w-4 h-4" wire:loading.remove wire:target="saveAttachment" />
+                {{ $editingAttachmentIndex !== null ? 'Güncelle' : 'Ekle' }}
             </button>
         </x-slot:actions>
     </x-mary-modal>

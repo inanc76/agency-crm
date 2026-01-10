@@ -149,7 +149,13 @@ new
         <div class="flex items-start justify-between mb-6">
             <div>
                 <h1 class="text-2xl font-bold tracking-tight" class="text-skin-heading">
-                    @if($isViewMode) {{ $name }} @else Yeni Varlık Ekle @endif
+                    @if($isViewMode)
+                        {{ $name }}
+                    @elseif($assetId)
+                        Düzenle: {{ $name }}
+                    @else
+                        Yeni Varlık Ekle
+                    @endif
                 </h1>
                 <div class="flex items-center gap-2 mt-1">
                     @if($isViewMode)
@@ -226,8 +232,7 @@ new
                             </h2>
                             <div class="grid grid-cols-2 gap-6">
                                 <div>
-                                    <label class="block text-xs font-medium mb-1 opacity-60"
-                                       >Müşteri *</label>
+                                    <label class="block text-xs font-medium mb-1 opacity-60">Müşteri *</label>
                                     @if($isViewMode)
                                         @php $customerName = collect($customers)->firstWhere('id', $customer_id)['name'] ?? '-'; @endphp
                                         <div class="text-sm font-medium">
@@ -240,13 +245,13 @@ new
                                                 <option value="{{ $c['id'] }}">{{ $c['name'] }}</option>
                                             @endforeach
                                         </select>
-                                        @error('customer_id') <span class="text-skin-danger text-xs">{{ $message }}</span> @enderror
+                                        @error('customer_id') <span class="text-skin-danger text-xs">{{ $message }}</span>
+                                        @enderror
                                     @endif
                                 </div>
 
                                 <div>
-                                    <label class="block text-xs font-medium mb-1 opacity-60"
-                                       >Varlık Adı *</label>
+                                    <label class="block text-xs font-medium mb-1 opacity-60">Varlık Adı *</label>
                                     @if($isViewMode)
                                         <div class="text-sm font-medium">{{ $name }}
                                         </div>
@@ -258,8 +263,7 @@ new
                                 </div>
 
                                 <div>
-                                    <label class="block text-xs font-medium mb-1 opacity-60"
-                                       >Varlık Türü *</label>
+                                    <label class="block text-xs font-medium mb-1 opacity-60">Varlık Türü *</label>
                                     @if($isViewMode)
                                         @php $typeName = collect($assetTypes)->firstWhere('id', $type)['name'] ?? '-'; @endphp
                                         <div class="text-sm font-medium">{{ $typeName }}
@@ -276,8 +280,7 @@ new
                                 </div>
 
                                 <div class="col-span-2">
-                                    <label class="block text-xs font-medium mb-1 opacity-60"
-                                       >URL</label>
+                                    <label class="block text-xs font-medium mb-1 opacity-60">URL</label>
                                     @if($isViewMode)
                                         <div class="text-sm font-medium">
                                             @if($url)

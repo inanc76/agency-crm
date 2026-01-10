@@ -221,7 +221,13 @@ new
         <div class="flex items-start justify-between mb-6">
             <div>
                 <h1 class="text-2xl font-bold tracking-tight" class="text-skin-heading">
-                    @if($isViewMode) {{ $name }} @else Yeni Kişi Ekle @endif
+                    @if($isViewMode)
+                        {{ $name }}
+                    @elseif($contactId)
+                        Düzenle: {{ $name }}
+                    @else
+                        Yeni Kişi Ekle
+                    @endif
                 </h1>
                 <div class="flex items-center gap-2 mt-1">
                     @if($isViewMode)

@@ -308,7 +308,13 @@ new
         <div class="flex items-start justify-between mb-6">
             <div>
                 <h1 class="text-2xl font-bold tracking-tight" class="text-skin-heading">
-                    @if($isViewMode) {{ $services[0]['service_name'] ?? 'Hizmet' }} @else Yeni Hizmet Ekle @endif
+                    @if($isViewMode)
+                        {{ $services[0]['service_name'] ?? 'Hizmet' }}
+                    @elseif($serviceId)
+                        Düzenle: {{ $services[0]['service_name'] ?? 'Hizmet' }}
+                    @else
+                        Yeni Hizmet Ekle
+                    @endif
                 </h1>
                 <div class="flex items-center gap-2 mt-1">
                     @if($isViewMode)
@@ -385,8 +391,7 @@ new
                             </h2>
                             <div class="grid grid-cols-2 gap-6">
                                 <div>
-                                    <label class="block text-xs font-medium mb-1 opacity-60"
-                                       >Müşteri *</label>
+                                    <label class="block text-xs font-medium mb-1 opacity-60">Müşteri *</label>
                                     @if($isViewMode)
                                         @php $customerName = collect($customers)->firstWhere('id', $customer_id)['name'] ?? '-'; @endphp
                                         <div class="text-sm font-medium">
@@ -399,13 +404,13 @@ new
                                                 <option value="{{ $c['id'] }}">{{ $c['name'] }}</option>
                                             @endforeach
                                         </select>
-                                        @error('customer_id') <span class="text-skin-danger text-xs">{{ $message }}</span> @enderror
+                                        @error('customer_id') <span class="text-skin-danger text-xs">{{ $message }}</span>
+                                        @enderror
                                     @endif
                                 </div>
 
                                 <div>
-                                    <label class="block text-xs font-medium mb-1 opacity-60"
-                                       >Varlık *</label>
+                                    <label class="block text-xs font-medium mb-1 opacity-60">Varlık *</label>
                                     @if($isViewMode)
                                         @php $assetName = \App\Models\Asset::find($asset_id)?->name ?? '-'; @endphp
                                         <div class="text-sm font-medium">{{ $assetName }}
@@ -417,7 +422,8 @@ new
                                                 <option value="{{ $a['id'] }}">{{ $a['name'] }}</option>
                                             @endforeach
                                         </select>
-                                        @error('asset_id') <span class="text-skin-danger text-xs">{{ $message }}</span> @enderror
+                                        @error('asset_id') <span class="text-skin-danger text-xs">{{ $message }}</span>
+                                        @enderror
                                     @endif
                                 </div>
                             </div>
@@ -428,8 +434,7 @@ new
                             <h2 class="text-base font-bold mb-4" class="text-skin-heading">Başlangıç Tarihi
                             </h2>
                             <div>
-                                <label class="block text-xs font-medium mb-1 opacity-60"
-                                   >Başlangıç Tarihi *</label>
+                                <label class="block text-xs font-medium mb-1 opacity-60">Başlangıç Tarihi *</label>
                                 <div class="text-xs text-slate-400 mb-2">Bitiş tarihi seçilen süreye göre otomatik
                                     hesaplanacaktır.
                                 </div>
@@ -464,8 +469,7 @@ new
 
                                 <div class="grid grid-cols-2 gap-6">
                                     <div>
-                                        <label class="block text-xs font-medium mb-1 opacity-60"
-                                           >Kategori *</label>
+                                        <label class="block text-xs font-medium mb-1 opacity-60">Kategori *</label>
                                         @if($isViewMode)
                                             <div class="text-sm font-medium">
                                                 {{ $service['category'] }}
@@ -483,8 +487,7 @@ new
                                     </div>
 
                                     <div>
-                                        <label class="block text-xs font-medium mb-1 opacity-60"
-                                           >Hizmet *</label>
+                                        <label class="block text-xs font-medium mb-1 opacity-60">Hizmet *</label>
                                         @if($isViewMode)
                                             <div class="text-sm font-medium">
                                                 {{ $service['service_name'] }}
@@ -505,8 +508,7 @@ new
                                     </div>
 
                                     <div>
-                                        <label class="block text-xs font-medium mb-1 opacity-60"
-                                           >Durum *</label>
+                                        <label class="block text-xs font-medium mb-1 opacity-60">Durum *</label>
                                         @if($isViewMode)
                                             <div
                                                 class="badge {{ $service['status'] === 'ACTIVE' ? 'badge-success' : 'badge-ghost' }} gap-2">
@@ -521,8 +523,7 @@ new
                                     </div>
 
                                     <div>
-                                        <label class="block text-xs font-medium mb-1 opacity-60"
-                                           >Özel Fiyat (Opsiyonel)</label>
+                                        <label class="block text-xs font-medium mb-1 opacity-60">Özel Fiyat (Opsiyonel)</label>
                                         @if($isViewMode)
                                             <div class="text-sm font-medium">
                                                 {{ number_format($service['service_price'], 2, ',', '.') }}
@@ -539,8 +540,7 @@ new
                                     </div>
 
                                     <div class="col-span-2">
-                                        <label class="block text-xs font-medium mb-1 opacity-60"
-                                           >Açıklama</label>
+                                        <label class="block text-xs font-medium mb-1 opacity-60">Açıklama</label>
                                         @if($isViewMode)
                                             <div class="text-sm font-medium">
                                                 {{ $service['description'] ?: '-' }}

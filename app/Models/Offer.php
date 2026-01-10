@@ -50,4 +50,22 @@ class Offer extends Model
     {
         return $this->hasMany(OfferItem::class);
     }
+
+    public function attachments()
+    {
+        return $this->hasMany(OfferAttachment::class);
+    }
+
+    protected static function booted(): void
+    {
+        static::deleting(function (Offer $offer) {
+            // Delete attachments to trigger their deleting event for file cleanup
+            $offer->attachments()->each(function ($attachment) {
+                $attachment->delete();
+            });
+
+            // Allow OfferItem cascade (usually handled by DB or another hook)
+            $offer->items()->delete();
+        });
+    }
 }

@@ -65,6 +65,20 @@ return [
             'root' => storage_path('app/snapshots'),
         ],
 
+        'minio' => [
+            'driver' => 's3',
+            'key' => env('MINIO_ACCESS_KEY', ''),
+            'secret' => env('MINIO_SECRET_KEY', ''),
+            'region' => env('MINIO_REGION', 'us-east-1'),
+            'bucket' => env('MINIO_BUCKET', 'default'),
+            'endpoint' => env('MINIO_ENDPOINT', 'http://localhost:9000'),
+            'use_path_style_endpoint' => true,
+            'throw' => false,
+            'http' => [
+                'verify' => false,
+            ],
+        ],
+
     ],
 
     /*

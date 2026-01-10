@@ -154,7 +154,7 @@ new
     <div class="w-full lg:w-3/4 mx-auto">
         {{-- Back Button --}}
         <a href="/dashboard/settings"
-            class="inline-flex items-center gap-2 text-[var(--color-text-base)] hover:text-[var(--color-text-heading)] mb-6 transition-colors">
+            class="inline-flex items-center gap-2 text-skin-base hover:text-skin-heading mb-6 transition-colors">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
             </svg>
@@ -163,15 +163,15 @@ new
 
         {{-- Header --}}
         <div class="mb-8">
-            <h1 class="text-2xl font-bold text-[var(--color-text-heading)]">Depolama Ayarları</h1>
-            <p class="text-sm text-[var(--color-text-muted)] mt-1">Minio (S3 Uyumlu) depolama entegrasyonu ayarları.</p>
+            <h1 class="text-2xl font-bold text-skin-heading">Depolama Ayarları</h1>
+            <p class="text-sm text-skin-muted mt-1">Minio (S3 Uyumlu) depolama entegrasyonu ayarları.</p>
         </div>
 
         {{-- Main Card --}}
-        <div class="bg-[var(--color-info-bg)] border border-[var(--color-info-border)] rounded-xl shadow-sm p-6">
+        <div class="theme-card p-6 shadow-sm">
             {{-- Card Header --}}
-            <div class="flex items-center justify-between pb-4 mb-6 border-b border-[var(--card-border)]">
-                <h2 class="text-sm font-medium text-[var(--color-text-base)]">Minio Bağlantı Ayarları</h2>
+            <div class="flex items-center justify-between pb-4 mb-6 border-b border-skin-light">
+                <h2 class="text-sm font-medium text-skin-base">Minio Bağlantı Ayarları</h2>
                 <x-mary-button label="Bağlantıyı Test Et" icon="o-wifi" class="btn-sm btn-outline"
                     wire:click="testConnection" spinner="testConnection" />
             </div>
@@ -214,7 +214,7 @@ new
             </div>
 
             {{-- Footer Actions --}}
-            <div class="pt-6 mt-6 border-t border-[var(--card-border)] flex justify-end gap-3">
+            <div class="pt-6 mt-6 border-t border-skin-light flex justify-end gap-3">
                 <button type="button" wire:click="store" wire:loading.attr="disabled" class="theme-btn-save">
                     <svg wire:loading wire:target="store" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
