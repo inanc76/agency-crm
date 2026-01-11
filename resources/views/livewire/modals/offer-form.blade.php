@@ -36,11 +36,11 @@ new class extends Component {
                         'vat_rate' => $vat_rate,
                         'vatRates' => $vatRates
                     ])
-                    @include('livewire.customers.offers.partials._title_description', [
-                        'isViewMode' => $isViewMode,
-                        'title' => $title,
-                        'description' => $description
-                    ])
+                        @include('livewire.customers.offers.partials._title_description', [
+                            'isViewMode' => $isViewMode,
+                            'title' => $title,
+                            'description' => $description
+                        ])
                     @include('livewire.customers.offers.partials._items_table', [
                         'isViewMode' => $isViewMode,
                         'items' => $items
@@ -50,7 +50,7 @@ new class extends Component {
                         'isViewMode' => $isViewMode,
                         'attachments' => $attachments
                     ])
-                </div>
+                    </div>
             @endif
             @if($activeTab === 'messages')
                 <div class="theme-card p-6 shadow-sm text-center text-slate-500 py-12">
@@ -89,16 +89,32 @@ new class extends Component {
         </div>
     </div>
 
-    @include('livewire.customers.offers.partials._modals', [
+    @include('livewire.customers.offers.partials._modal-service-item', [
+        'showServiceModal' => $showServiceModal,
+        'selectedYear' => $selectedYear,
         'customerServices' => $customerServices,
-        'categories' => $categories,
-        'priceDefinitions' => $priceDefinitions,
-        'manualItems' => $manualItems,
-        'currency' => $currency,
-        'attachments' => $attachments,
-        'editingAttachmentIndex' => $editingAttachmentIndex,
-        'itemDescriptionTemp' => $itemDescriptionTemp,
         'modalCategory' => $modalCategory,
-        'modalServiceName' => $modalServiceName
+        'categories' => $categories,
+        'modalServiceName' => $modalServiceName,
+        'priceDefinitions' => $priceDefinitions
+    ])
+    @include('livewire.customers.offers.partials._modal-manual-item', [
+        'showManualEntryModal' => $showManualEntryModal,
+        'manualItems' => $manualItems,
+        'currency' => $currency
+    ])
+    @include('livewire.customers.offers.partials._modal-attachment', [
+        'showAttachmentModal' => $showAttachmentModal,
+        'editingAttachmentIndex' => $editingAttachmentIndex,
+        'attachmentTitle' => $attachmentTitle,
+        'attachmentDescription' => $attachmentDescription,
+        'attachmentPrice' => $attachmentPrice,
+        'currency' => $currency,
+        'attachmentFile' => $attachmentFile,
+        'attachments' => $attachments
+    ])
+    @include('livewire.customers.offers.partials._modal-item-description', [
+        'showItemDescriptionModal' => $showItemDescriptionModal,
+        'itemDescriptionTemp' => $itemDescriptionTemp
     ])
 </div>

@@ -1,4 +1,13 @@
 <?php
+/**
+ * 🚀 VARIABLES MANAGEMENT ORCHESTRATOR
+ * ---------------------------------------------------------------------------------------
+ * ROL: Bu dosya Değişken Yönetimi modülünün "Orkestra Şefi"dir.
+ * MİMARİ: Volt + Trait tabanlı atomik yapı.
+ * LOGIC: Tüm iş mantığı App\Livewire\Variables\Traits\HasVariableActions trait'ine delege edilmiştir.
+ * GRID SİSTEMİ: 12 sütunlu (Lg:w-3/4 mx-auto) yapıda, Sidebar (w-1/2) ve Content (w-1/2) dengesiyle çalışır.
+ * ---------------------------------------------------------------------------------------
+ */
 
 use Livewire\Volt\Component;
 use Livewire\Attributes\Layout;
@@ -7,61 +16,22 @@ use App\Models\ReferenceItem;
 use App\Repositories\ReferenceDataRepository;
 use App\Services\ReferenceDataService;
 use Mary\Traits\Toast;
+use App\Livewire\Variables\Traits\HasVariableActions;
 
 new
     #[Layout('components.layouts.app', ['title' => 'Değişken Yönetimi'])]
     class extends Component {
-    use Toast;
+    use Toast, HasVariableActions;
 
-    // Services
-    protected ReferenceDataRepository $repository;
-    protected ReferenceDataService $service;
-
-    public function boot(ReferenceDataRepository $repository, ReferenceDataService $service)
-    {
-        $this->repository = $repository;
-        $this->service = $service;
-    }
-    use Toast;
-
-    // State
-    public string $search = '';
-    public ?string $selectedCategoryKey = null;
-
-    // Item Form State
-    public bool $showItemModal = false;
-    public string $itemId = '';
-    public string $key = '';
-    public string $display_label = '';
-    public string $description = '';
-    public bool $is_default = false;
-    public string $selectedColor = 'gray'; // Default color
-
-    // Category Form State
-    public bool $showCategoryModal = false;
-    public string $categoryId = '';
-    public string $categoryName = '';
-    public string $categoryKey = '';
-    public string $categoryDescription = '';
-
-    // Valid colors for metadata
-    public function getColorsProperty()
-    {
-        return $this->service->getColorSchemes();
-    }
-
-    public function getTailwindColor($colorId)
-    {
-        return $this->service->getColorClasses($colorId);
-    }
-
+    /**
+     * Data provider for the view
+     */
     public function with(): array
     {
         $selectedCategory = null;
         if ($this->selectedCategoryKey) {
             $category = $this->repository->getCategoryByKey($this->selectedCategoryKey);
             if ($category) {
-                // Load items with sort_order
                 $category->load([
                     'items' => function ($query) {
                         $query->orderBy('sort_order', 'asc')->orderBy('created_at', 'asc');
@@ -82,489 +52,21 @@ new
             'availableColors' => $this->service->getColorSchemes(),
         ];
     }
-
-    public function selectCategory(string $key): void
-    {
-        $this->selectedCategoryKey = $key;
-        $this->resetItemForm(); // Clear form when switching categories
-    }
-
-    // --- Category Actions ---
-
-    public function openCreateCategoryModal(): void
-    {
-        $this->resetCategoryForm();
-        $this->showCategoryModal = true;
-    }
-
-    public function editCategory(string $id): void
-    {
-        $category = ReferenceCategory::find($id);
-        if (!$category)
-            return;
-
-        $this->categoryId = $category->id;
-        $this->categoryName = $category->name;
-        $this->categoryKey = $category->key;
-        $this->categoryDescription = $category->description ?? '';
-        $this->showCategoryModal = true;
-    }
-
-    public function saveCategory(): void
-    {
-        $this->validate([
-            'categoryName' => 'required|string|max:255',
-            'categoryKey' => 'required|string|max:255', // Unique check simpler here
-            'categoryDescription' => 'nullable|string',
-        ]);
-
-        try {
-            // Uniqueness check is still good for UX, but repo will enforce it too
-            // Keeping simple UX check
-            $query = ReferenceCategory::where('key', $this->categoryKey);
-            if ($this->categoryId) {
-                $query->where('id', '!=', $this->categoryId);
-            }
-            if ($query->exists()) {
-                $this->addError('categoryKey', 'Bu anahtar zaten kullanılıyor.');
-                return;
-            }
-
-            $data = [
-                'name' => $this->categoryName,
-                'key' => $this->categoryKey,
-                'description' => $this->categoryDescription,
-            ];
-
-            if ($this->categoryId) {
-                $this->repository->updateCategory($this->categoryId, $data);
-
-                // If we edited the key of the currently selected category, update selection
-                if ($this->selectedCategoryKey && $this->categoryId === ReferenceCategory::where('key', $this->selectedCategoryKey)->first()?->id) {
-                    $this->selectedCategoryKey = $this->categoryKey;
-                }
-                $this->success('Kategori güncellendi.');
-            } else {
-                $this->repository->createCategory($data);
-                $this->success('Yeni kategori oluşturuldu.');
-            }
-
-            $this->showCategoryModal = false;
-            $this->resetCategoryForm();
-        } catch (\Exception $e) {
-            $this->error($e->getMessage());
-        }
-    }
-
-    public function deleteCategory(string $id): void
-    {
-        try {
-            $category = ReferenceCategory::find($id);
-            if (!$category)
-                return;
-            $key = $category->key;
-
-            $this->repository->deleteCategory($id);
-
-            if ($this->selectedCategoryKey === $key) {
-                $this->selectedCategoryKey = null;
-            }
-            $this->success('Kategori silindi.');
-        } catch (\Exception $e) {
-            $this->error($e->getMessage());
-        }
-    }
-
-    private function resetCategoryForm(): void
-    {
-        $this->categoryId = '';
-        $this->categoryName = '';
-        $this->categoryKey = '';
-        $this->categoryDescription = '';
-        $this->resetErrorBag();
-    }
-
-    // --- Item Actions ---
-
-    public function openCreateModal(): void
-    {
-        if (!$this->selectedCategoryKey) {
-            $this->error('Lütfen önce bir kategori seçiniz.');
-            return;
-        }
-        $this->resetItemForm();
-        $this->showItemModal = true;
-    }
-
-    public function editItem(string $id): void
-    {
-        $item = ReferenceItem::find($id);
-        if (!$item)
-            return;
-
-        $this->itemId = $item->id;
-        $this->key = $item->key;
-        $this->display_label = $item->display_label;
-        $this->description = $item->description ?? '';
-        $this->is_default = $item->is_default;
-        $this->selectedColor = $item->metadata['color'] ?? 'gray';
-        $this->showItemModal = true;
-    }
-
-    public function saveItem(): void
-    {
-        $this->validate([
-            'key' => 'required|string|max:255', // Unique validation logic below due to composite key
-            'display_label' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'is_default' => 'boolean',
-            'selectedColor' => 'required|string',
-        ]);
-
-        try {
-            $data = [
-                'category_key' => $this->selectedCategoryKey,
-                'key' => $this->key,
-                'display_label' => $this->display_label,
-                'description' => $this->description,
-                'is_default' => $this->is_default,
-                'is_active' => true, // Assuming active by default
-                'metadata' => ['color' => $this->selectedColor],
-            ];
-
-            if ($this->itemId) {
-                $this->repository->updateItem($this->itemId, $data);
-                $this->success('Öğe güncellendi.');
-            } else {
-                $this->repository->createItem($data);
-                $this->success('Yeni öğe oluşturuldu.');
-            }
-
-            $this->showItemModal = false;
-            $this->resetItemForm();
-        } catch (\Exception $e) {
-            $this->addError('key', $e->getMessage()); // Most likely uniqueness error
-        }
-    }
-
-    public function deleteItem(string $id): void
-    {
-        try {
-            $this->repository->deleteItem($id);
-            $this->success('Öğe silindi.');
-        } catch (\Exception $e) {
-            $this->error($e->getMessage());
-        }
-    }
-
-    public function moveItemUp(string $id): void
-    {
-        try {
-            $item = ReferenceItem::findOrFail($id);
-            $previousItem = ReferenceItem::where('category_key', $item->category_key)
-                ->where('sort_order', '<', $item->sort_order)
-                ->orderBy('sort_order', 'desc')
-                ->first();
-
-            if ($previousItem) {
-                // Swap sort orders
-                $tempOrder = $item->sort_order;
-                $item->sort_order = $previousItem->sort_order;
-                $previousItem->sort_order = $tempOrder;
-
-                $item->save();
-                $previousItem->save();
-
-                $this->success('Sıralama güncellendi.');
-            }
-        } catch (\Exception $e) {
-            $this->error('Sıralama güncellenemedi.');
-        }
-    }
-
-    public function moveItemDown(string $id): void
-    {
-        try {
-            $item = ReferenceItem::findOrFail($id);
-            $nextItem = ReferenceItem::where('category_key', $item->category_key)
-                ->where('sort_order', '>', $item->sort_order)
-                ->orderBy('sort_order', 'asc')
-                ->first();
-
-            if ($nextItem) {
-                // Swap sort orders
-                $tempOrder = $item->sort_order;
-                $item->sort_order = $nextItem->sort_order;
-                $nextItem->sort_order = $tempOrder;
-
-                $item->save();
-                $nextItem->save();
-
-                $this->success('Sıralama güncellendi.');
-            }
-        } catch (\Exception $e) {
-            $this->error('Sıralama güncellenemedi.');
-        }
-    }
-
-    // Helper: Reset form
-    private function resetItemForm(): void
-    {
-        $this->itemId = '';
-        $this->key = '';
-        $this->display_label = '';
-        $this->description = '';
-        $this->is_default = false;
-        $this->selectedColor = 'gray';
-        $this->resetErrorBag();
-    }
 }; ?>
 
 <div class="p-6 min-h-screen" style="background-color: var(--page-bg);">
     <div class="w-full lg:w-3/4 mx-auto">
-        {{-- Back Button --}}
-        <a href="/dashboard/settings"
-            class="inline-flex items-center gap-2 text-[var(--color-text-base)] hover:text-[var(--color-text-heading)] mb-6 transition-colors">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-            </svg>
-            <span class="text-sm font-medium">Geri</span>
-        </a>
-
-        {{-- Header --}}
-        <div class="mb-8">
-            <h1 class="text-2xl font-bold text-[var(--color-text-heading)]">Değişken Yönetimi</h1>
-            <p class="text-sm text-[var(--color-text-muted)] mt-1">Sistem değişkenlerini ve referans verilerini yönetin.</p>
-        </div>
+        @include('livewire.variables.parts._index-header')
 
         {{-- Main Card --}}
         <div class="card theme-card border p-6 shadow-sm">
             <div class="flex flex-col lg:flex-row gap-6 h-[calc(100vh-300px)] min-h-[600px]">
-                {{-- Left Sidebar: Categories --}}
-                <div class="w-full lg:w-1/2 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg flex flex-col h-full shadow-sm">
-                    <div class="p-4 border-b border-[var(--card-border)] flex justify-between items-center">
-                        <div class="font-bold text-lg text-[var(--color-text-heading)]">Kategoriler</div>
-                        <x-mary-button label="Yeni Kategori" icon="o-plus"
-                            class="btn-sm bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--color-text-base)] hover:bg-[var(--dropdown-hover-bg)] shadow-sm"
-                            wire:click="openCreateCategoryModal" />
-                    </div>
-                    <div class="px-4 py-3 border-b border-[var(--card-border)] bg-[var(--card-bg)]">
-                        <div class="relative">
-                            <x-mary-icon name="o-magnifying-glass"
-                                class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]" />
-                            <input wire:model.live="search" type="search" placeholder="Kategori ara..."
-                                class="w-full pl-9 pr-3 py-2 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg text-sm focus:outline-none focus:border-[var(--color-focus)] transition-colors">
-                        </div>
-                    </div>
-
-                    <div class="flex-1 overflow-y-auto p-4 space-y-2">
-                        {{-- Categories List --}}
-                        @foreach($categories as $category)
-                            <div class="group relative flex items-center justify-between p-4 rounded-lg border transition-all duration-200 cursor-pointer hover:shadow-md {{ $selectedCategoryKey === $category->key ? 'border-[var(--color-active-border)] bg-[var(--color-active-bg)]' : 'border-[var(--card-border)] bg-[var(--card-bg)] hover:border-[var(--card-hover-border)]' }}"
-                                wire:click="selectCategory('{{ $category->key }}')">
-
-                                <div class="flex-1 min-w-0">
-                                    <div class="font-semibold text-[var(--color-text-heading)] truncate">{{ $category->name }}</div>
-                                    <div class="text-xs text-[var(--color-text-muted)] font-mono mt-0.5 uppercase">{{ $category->key }}
-                                    </div>
-                                </div>
-
-                                <div class="flex items-center gap-3 pl-3">
-                                    <span
-                                        class="text-xs font-semibold text-[var(--color-text-muted)] bg-[var(--dropdown-hover-bg)] px-2 py-1 rounded">{{ $category->items->count() }}
-                                        öğe</span>
-
-                                    <div class="flex items-center gap-1">
-                                        <button wire:click.stop="editCategory('{{ $category->id }}')"
-                                            class="p-1.5 text-[var(--color-text-muted)] hover:bg-[var(--dropdown-hover-bg)] rounded transition-colors"
-                                            style="color: var(--action-link-color);">
-                                            <x-mary-icon name="o-pencil-square" class="w-4 h-4" />
-                                        </button>
-                                        <button wire:click.stop="deleteCategory('{{ $category->id }}')"
-                                            wire:confirm="Bu kategoriyi silmek istediğinize emin misiniz?"
-                                            class="p-1.5 text-[var(--color-text-muted)] hover:text-[var(--color-danger)] hover:bg-[var(--color-danger-muted)] rounded transition-colors">
-                                            <x-mary-icon name="o-trash" class="w-4 h-4" />
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        @endforeach
-
-                        @if($categories->isEmpty())
-                            <div class="p-8 text-center text-[var(--color-text-muted)]">
-                                <x-mary-icon name="o-folder" class="w-8 h-8 mx-auto mb-2 opacity-50" />
-                                <p class="text-sm">Kategori bulunamadı.</p>
-                            </div>
-                        @endif
-                    </div>
-                </div>
-
-                {{-- Right Content: Items --}}
-                <div
-                    class="w-full lg:w-1/2 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg shadow-sm flex flex-col h-full overflow-hidden">
-                    @if($selectedCategory)
-                        <div class="p-6 border-b border-[var(--card-border)] flex justify-between items-center bg-[var(--dropdown-hover-bg)]">
-                            <div>
-                                <h2 class="text-lg font-bold text-[var(--color-text-heading)]">{{ $selectedCategory->name }}</h2>
-                            </div>
-                            <x-mary-button label="Yeni Öğe" icon="o-plus"
-                                class="btn-sm bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--color-text-base)] hover:bg-[var(--dropdown-hover-bg)] shadow-sm"
-                                wire:click="openCreateModal" />
-                        </div>
-
-                        <div class="p-4 flex-1 overflow-y-auto bg-[var(--color-background)]">
-                            <div class="space-y-2">
-                                @forelse($selectedCategory->items as $item)
-                                    <div
-                                        class="flex items-center justify-between p-3 bg-[var(--card-bg)] rounded-lg border border-[var(--card-border)] shadow-sm hover:shadow-md transition-shadow group relative">
-                                        <div class="flex-1 min-w-0">
-                                            <div class="flex items-center gap-2 flex-wrap">
-                                                @if(isset($item->metadata['color']))
-                                                    <span
-                                                        class="px-3 py-1 rounded-full text-xs font-medium {{ $this->getTailwindColor($item->metadata['color']) }} border border-transparent">
-                                                        {{ $item->display_label }}
-                                                    </span>
-                                                @else
-                                                    <span class="font-medium text-[var(--color-text-base)]">{{ $item->display_label }}</span>
-                                                @endif
-                                                @if($item->is_default)
-                                                    <span class="px-2 py-0.5 rounded-full text-xs font-medium bg-[var(--dropdown-hover-bg)]"
-                                                        style="color: var(--btn-primary-bg);">Varsayılan</span>
-                                                @endif
-                                                <div class="text-xs text-[var(--color-text-muted)] font-mono uppercase">{{ $item->key }}</div>
-                                            </div>
-                                            @if($item->description)
-                                                <div class="text-xs text-[var(--color-text-muted)] mt-1 truncate">{{ $item->description }}</div>
-                                            @endif
-                                        </div>
-
-                                        <div class="flex items-center gap-2 pl-2">
-                                            {{-- Move buttons --}}
-                                            <div class="flex flex-col gap-0.5 mr-1">
-                                                <button wire:click="moveItemUp('{{ $item->id }}')"
-                                                    class="p-1 text-[var(--color-text-muted)] hover:text-[var(--color-text-base)] hover:bg-[var(--dropdown-hover-bg)] rounded transition-colors"
-                                                    title="Yukarı taşı">
-                                                    <x-mary-icon name="o-arrow-up" class="w-3 h-3" />
-                                                </button>
-                                                <button wire:click="moveItemDown('{{ $item->id }}')"
-                                                    class="p-1 text-[var(--color-text-muted)] hover:text-[var(--color-text-base)] hover:bg-[var(--dropdown-hover-bg)] rounded transition-colors"
-                                                    title="Aşağı taşı">
-                                                    <x-mary-icon name="o-arrow-down" class="w-3 h-3" />
-                                                </button>
-                                            </div>
-
-                                            <button wire:click="editItem('{{ $item->id }}')"
-                                                class="p-1.5 text-[var(--color-text-muted)] hover:bg-[var(--dropdown-hover-bg)] rounded transition-colors"
-                                                style="color: var(--action-link-color);">
-                                                <x-mary-icon name="o-pencil-square" class="w-4 h-4" />
-                                            </button>
-                                            <button wire:click="deleteItem('{{ $item->id }}')"
-                                                wire:confirm="Bu öğeyi silmek istediğinize emin misiniz?"
-                                                class="p-1.5 text-[var(--color-text-muted)] hover:text-[var(--color-danger)] hover:bg-[var(--color-danger-muted)] rounded transition-colors">
-                                                <x-mary-icon name="o-trash" class="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </div>
-                                @empty
-                                    <div class="flex flex-col items-center justify-center py-20 text-center">
-                                        <div
-                                            class="w-16 h-16 bg-[var(--card-bg)] rounded-full flex items-center justify-center mb-4 border border-dashed border-[var(--card-border)]">
-                                            <x-mary-icon name="o-inbox" class="w-8 h-8 text-[var(--color-text-muted)]" />
-                                        </div>
-                                        <p class="text-[var(--color-text-muted)] text-sm">Bu kategori boş.</p>
-                                    </div>
-                                @endforelse
-                            </div>
-                        </div>
-                    @else
-                        <div class="h-full flex flex-col items-center justify-center bg-[var(--color-background)]">
-                            <div class="p-8 text-center">
-                                <h3 class="text-lg font-medium text-[var(--color-text-heading)] mb-2">Kategori Seçimi</h3>
-                                <p class="text-[var(--color-text-muted)] text-sm">İşlem yapmak için soldan bir kategori seçin.</p>
-                            </div>
-                        </div>
-                    @endif
-                </div>
+                @include('livewire.variables.parts._index-sidebar')
+                @include('livewire.variables.parts._index-items')
             </div>
         </div>
     </div>
 
-    {{-- Category Create/Edit Modal --}}
-    <x-mary-modal wire:model="showCategoryModal" title="{{ $categoryId ? 'Kategoriyi Düzenle' : 'Yeni Kategori' }}"
-        class="backdrop-blur" box-class="!max-w-lg">
-        <div class="grid gap-4">
-            <x-mary-input label="Anahtar" wire:model="categoryKey" placeholder="CATEGORY_KEY"
-                hint="Sistem tarafında kullanılacak benzersiz kod" />
-            <x-mary-input label="İsim" wire:model="categoryName" placeholder="Kategori İsmi" />
-            <x-mary-textarea label="Açıklama" wire:model="categoryDescription" placeholder="Kategori açıklaması"
-                rows="3" />
-        </div>
-        <x-slot:actions>
-            <button type="button" class="theme-btn-cancel" wire:click="$set('showCategoryModal', false)">
-                İptal
-            </button>
-            <button type="button" class="theme-btn-save" wire:click="saveCategory" wire:loading.attr="disabled">
-                <span wire:loading wire:target="saveCategory" class="loading loading-spinner loading-xs mr-1"></span>
-                <x-mary-icon name="o-check" class="w-4 h-4" />
-                {{ $categoryId ? 'Güncelle' : 'Oluştur' }}
-            </button>
-        </x-slot:actions>
-    </x-mary-modal>
-
-    {{-- Create/Edit Item Modal --}}
-    <x-mary-modal wire:model="showItemModal" title="{{ $itemId ? 'Öğeyi Düzenle' : 'Yeni Öğe' }}" class="backdrop-blur"
-        box-class="!max-w-2xl">
-        <div class="grid gap-5">
-            <x-mary-input label="Anahtar (Key)" wire:model="key"
-                hint="Sistem tarafında kullanılacak benzersiz kod (örn: MALE)" />
-
-            <x-mary-input label="Görünen İsim" wire:model="display_label"
-                hint="Arayüzde kullanıcıların göreceği isim (örn: Erkek)" />
-
-            <x-mary-textarea label="Açıklama" wire:model="description" 
-                placeholder="Öğe hakkında açıklama yazın..." 
-                rows="3"
-                hint="Opsiyonel - Bu öğe hakkında ek bilgi" />
-
-            {{-- Color Picker --}}
-            <div>
-                <label class="block text-sm font-medium text-[var(--color-text-base)] mb-3">Renk Şeması</label>
-                <div class="p-4 border border-[var(--card-border)] rounded-lg bg-[var(--color-background)]">
-                    <div class="flex items-center gap-3 mb-4">
-                        <span class="text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wide">Ön İzleme:</span>
-                        <span
-                            class="px-3 py-1 rounded-md text-sm font-medium border border-transparent {{ $this->getTailwindColor($selectedColor) }} ring-1 ring-black/5 shadow-sm">
-                            {{ $display_label ?: 'Örnek Etiket' }}
-                        </span>
-                    </div>
-
-                    <div class="grid grid-cols-5 gap-y-4 gap-x-2">
-                        @foreach($availableColors as $colorScheme)
-                            <button type="button" wire:click="$set('selectedColor', '{{ $colorScheme['id'] }}')"
-                                class="flex flex-col items-center justify-center p-2 rounded-lg border transition-all duration-200 group {{ $selectedColor === $colorScheme['id'] ? 'border-[var(--color-active-border)] bg-white ring-2 ring-[var(--color-active-bg)] shadow-sm' : 'border-transparent hover:bg-[var(--dropdown-hover-bg)]' }}">
-                                <span
-                                    class="px-2 py-0.5 rounded textxs font-medium {{ $this->getTailwindColor($colorScheme['id']) }} mb-1 shadow-sm ring-1 ring-black/5 min-w-[32px] text-center">Abc</span>
-                                <span
-                                    class="text-[10px] {{ $selectedColor === $colorScheme['id'] ? 'text-[var(--color-active-text)] font-bold' : 'text-[var(--color-text-muted)]' }}">{{ $colorScheme['name'] }}</span>
-                            </button>
-                        @endforeach
-                    </div>
-                </div>
-            </div>
-
-            <x-mary-toggle label="Varsayılan Öğe" wire:model="is_default"
-                hint="Bu kategorinin varsayılan seçeneği olsun" class="toggle-info" />
-        </div>
-
-        <x-slot:actions>
-            <button type="button" class="theme-btn-cancel" wire:click="$set('showItemModal', false)">
-                İptal
-            </button>
-            <button type="button" class="theme-btn-save" wire:click="saveItem" wire:loading.attr="disabled">
-                <span wire:loading wire:target="saveItem" class="loading loading-spinner loading-xs mr-1"></span>
-                <x-mary-icon name="o-check" class="w-4 h-4" />
-                {{ $itemId ? 'Güncelle' : 'Oluştur' }}
-            </button>
-        </x-slot:actions>
-    </x-mary-modal>
+    @include('livewire.variables.parts._modal-category')
+    @include('livewire.variables.parts._modal-item')
 </div>

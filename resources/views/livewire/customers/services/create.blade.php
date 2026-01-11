@@ -10,6 +10,11 @@ new
 
     public function mount(?string $service = null): void
     {
+        if ($service) {
+            $this->authorize('services.view');
+        } else {
+            $this->authorize('services.create');
+        }
         $this->service = $service;
     }
 }; ?>

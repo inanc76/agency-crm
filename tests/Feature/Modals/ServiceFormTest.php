@@ -29,6 +29,8 @@ test('Service Form Component can create a service', function () {
     $asset = Asset::factory()->create(['customer_id' => $customer->id]);
     $priceDefinition = PriceDefinition::factory()->create(['category' => 'Web', 'name' => 'Hosting', 'price' => 100, 'duration' => '1 Year']);
 
+    $user->givePermissionTo('services.create');
+
     Volt::actingAs($user)
         ->test('modals.service-form')
         ->set('customer_id', $customer->id)

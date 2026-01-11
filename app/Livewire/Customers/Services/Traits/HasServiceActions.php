@@ -189,6 +189,12 @@ trait HasServiceActions
 
     public function save(): void
     {
+        if ($this->serviceId) {
+            $this->authorize('services.edit');
+        } else {
+            $this->authorize('services.create');
+        }
+
         $this->validate([
             'customer_id' => 'required',
             'asset_id' => 'required',
@@ -277,11 +283,14 @@ trait HasServiceActions
 
     public function toggleEditMode(): void
     {
+        $this->authorize('services.edit');
         $this->isViewMode = false;
     }
 
     public function delete(): void
     {
+        $this->authorize('services.delete');
+
         if ($this->serviceId) {
             $service = Service::findOrFail($this->serviceId);
             $customer_id = $service->customer_id;

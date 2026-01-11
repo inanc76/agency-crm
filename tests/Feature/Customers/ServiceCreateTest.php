@@ -50,7 +50,7 @@ test('T04: Yetkisiz kullanıcı hizmet düzenleyemez', function () {
     $service = Service::factory()->create();
 
     Volt::actingAs($user)
-        ->test('customers.services.create', ['service' => $service->id])
+        ->test('modals.service-form', ['service' => $service->id])
         ->call('toggleEditMode')
         ->assertForbidden();
 });
@@ -79,7 +79,7 @@ test('T15: Bulk Insert Check (5 hizmet tek sorguda eklenmeli)', function () {
     ]);
 
     $component = Volt::actingAs($user)
-        ->test('customers.services.create')
+        ->test('modals.service-form')
         ->set('customer_id', $customer->id)
         ->set('asset_id', $asset->id)
         ->set('start_date', '2024-01-01')
@@ -107,7 +107,7 @@ test('T26: Müşteri ve Varlık seçimi zorunludur', function () {
     $user->givePermissionTo('services.create');
 
     Volt::actingAs($user)
-        ->test('customers.services.create')
+        ->test('modals.service-form')
         ->set('customer_id', '')
         ->set('asset_id', '')
         ->call('save')
@@ -119,7 +119,7 @@ test('T32: Maksimum 5 hizmet eklenebilir', function () {
     $user->givePermissionTo('services.create');
 
     $component = Volt::actingAs($user)
-        ->test('customers.services.create');
+        ->test('modals.service-form');
 
     // 5 tane eklemeyi dene (zaten 1 tane var default)
     for ($i = 0; $i < 6; $i++) {
@@ -155,7 +155,7 @@ test('T36: Bitiş tarihi otomatik hesaplanır', function () {
     ];
 
     Volt::actingAs($user)
-        ->test('customers.services.create')
+        ->test('modals.service-form')
         ->set('customer_id', $customer->id)
         ->set('asset_id', $asset->id)
         ->set('start_date', '2024-01-01')

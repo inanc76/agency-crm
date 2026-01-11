@@ -80,4 +80,27 @@ class User extends Authenticatable
             ->map(fn($word) => Str::substr($word, 0, 1))
             ->implode('');
     }
+
+    /**
+     * Check if user has a specific permission
+     */
+    public function hasPermissionTo(string $permissionName): bool
+    {
+        return $this->role && $this->role->permissions()->where('name', $permissionName)->exists();
+    }
+
+    /**
+     * Grants a permission to the user's current role (for testing/setup)
+     */
+    public function givePermissionTo(string $permissionName): void
+    {
+        $permission = Permission::firstOrCreate(
+            ['name' => $permissionName],
+            ['type' => 'ACTION', 'resource' => explode('.', $permissionName)[0] ?? 'global']
+        );
+
+        if ($this->role) {
+            $this->role->permissions()->syncWithoutDetaching([$permission->id]);
+        }
+    }
 }

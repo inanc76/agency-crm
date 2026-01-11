@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 
-class Role extends Model
+class Permission extends Model
 {
     use HasFactory, HasUuids;
 
@@ -15,11 +15,13 @@ class Role extends Model
 
     protected $fillable = [
         'name',
-        'description',
+        'type',
+        'resource',
+        'action',
     ];
 
-    public function permissions()
+    public function roles()
     {
-        return $this->belongsToMany(Permission::class, 'permission_role');
+        return $this->belongsToMany(Role::class, 'permission_role');
     }
 }

@@ -104,14 +104,7 @@ trait HasCustomerActions
      */
     public function toggleEditMode(): void
     {
-        // Permission system check (Admin bypass)
-        if (method_exists(auth()->user(), 'can') && !auth()->user()->can('customers.edit')) {
-            // Check if user is admin as fallback
-            if (optional(auth()->user()->role)->name !== 'admin') {
-                $this->warning('Yetkisiz Erişim', 'Bu işlem için düzenleme yetkiniz bulunmuyor.');
-                return;
-            }
-        }
+        $this->authorize('customers.edit');
 
         $this->isViewMode = false;
     }
@@ -135,14 +128,7 @@ trait HasCustomerActions
      */
     public function delete(): void
     {
-        // Permission system check (Admin bypass)
-        if (method_exists(auth()->user(), 'can') && !auth()->user()->can('customers.delete')) {
-            // Check if user is admin as fallback
-            if (optional(auth()->user()->role)->name !== 'admin') {
-                $this->error('Yetkisiz Erişim', 'Bu işlem için silme yetkiniz bulunmuyor.');
-                return;
-            }
-        }
+        $this->authorize('customers.delete');
 
         if ($this->customerId) {
             Customer::findOrFail($this->customerId)->delete();

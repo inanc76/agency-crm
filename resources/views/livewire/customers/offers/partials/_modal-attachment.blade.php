@@ -1,12 +1,12 @@
 {{--
-@component: _modal_attachment.blade.php
-@section: Ek Dosya Ekleme/Düzenleme Modalı
-@description: Teklife dosya eki eklemek veya mevcut ekleri düzenlemek için kullanılan modal.
-@params: $showAttachmentModal (bool), $editingAttachmentIndex (int|null), $attachmentTitle (string),
-$attachmentDescription (string), $attachmentPrice (float), $currency (string), $attachmentFile (object|null)
-@events: closeAttachmentModal, saveAttachment
+🚀 MODAL: OFFER ATTACHMENT
+---------------------------------------------------------------------------------------
+SORUMLULUK: Teklife teknik şartname, sözleşme veya ek dökümanların yüklenmesi.
+VALIDATION: Dosya boyutu (Client & Server side) ve dosya tipi kontrollerini içerir.
+DÜZENLEME: editingAttachmentIndex üzerinden mevcut eklerin meta verilerini günceller.
+BAĞLANTI: HasOfferActions trait'i - saveAttachment(), removeAttachment()
+---------------------------------------------------------------------------------------
 --}}
-{{-- Attachment Modal --}}
 <x-mary-modal wire:model="showAttachmentModal"
     title="{{ $editingAttachmentIndex !== null ? 'Ek Düzenle' : 'Teklif Eki Ekle' }}" class="backdrop-blur"
     box-class="!max-w-2xl">

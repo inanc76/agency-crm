@@ -1,9 +1,10 @@
 {{--
-@component: _modal_item_description.blade.php
-@section: Kalem Açıklama Modalı
-@description: Teklif kalemleri için özel açıklama girilmesini sağlayan modal.
-@params: $showItemDescriptionModal (bool), $itemDescriptionTemp (string)
-@events: saveItemDescription
+🚀 MODAL: ITEM DESCRIPTION
+---------------------------------------------------------------------------------------
+SORUMLULUK: Belirli bir teklif kalemi için özel 'Açıklama' verisi girilmesini sağlar.
+KISITLAMA: Karakter sınırı (50) ile teklif dökümanındaki görsel düzeni korur.
+BAĞLANTI: HasOfferItems trait'i - saveItemDescription()
+---------------------------------------------------------------------------------------
 --}}
 {{-- Item Description Modal --}}
 <x-mary-modal wire:model="showItemDescriptionModal" title="Teklif Kalem Açıklaması" class="backdrop-blur"

@@ -12,6 +12,7 @@ new class extends Component {
     use WithPagination;
     use Toast;
 
+    public string $customerId = '';
     public string $search = '';
     public string $letter = '';
     public string $statusFilter = 'all';
@@ -56,6 +57,8 @@ new class extends Component {
 
         Contact::whereIn('id', $this->selected)->delete();
 
+        $this->dispatch('contacts-updated');
+
         $this->success('İşlem Başarılı', count($this->selected) . ' kişi silindi.');
         $this->selected = [];
         $this->selectAll = false;
@@ -65,10 +68,11 @@ new class extends Component {
     {
         return Contact::query()
             ->with('customer')
+            ->when($this->customerId, fn($q) => $q->where('customer_id', $this->customerId))
             ->when($this->search, function (Builder $query) {
-                $query->where('name', 'ilike', '%' . $this->search . '%')
+                $query->where('name', 'like', '%' . $this->search . '%')
                     ->orWhereHas('customer', function ($q) {
-                        $q->where('name', 'ilike', '%' . $this->search . '%');
+                        $q->where('name', 'like', '%' . $this->search . '%');
                     });
             })
             ->when($this->letter, function (Builder $query) {
@@ -78,9 +82,9 @@ new class extends Component {
                             $q->whereRaw("name ~ '^[0-9]'");
                         });
                 } else {
-                    $query->where('name', 'ilike', $this->letter . '%')
+                    $query->where('name', 'like', $this->letter . '%')
                         ->orWhereHas('customer', function ($q) {
-                            $q->where('name', 'ilike', $this->letter . '%');
+                            $q->where('name', 'like', $this->letter . '%');
                         });
                 }
             })

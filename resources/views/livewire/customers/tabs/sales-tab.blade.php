@@ -10,6 +10,7 @@ new class extends Component {
     use WithPagination;
     use Toast;
 
+    public string $customerId = '';
     public string $search = '';
     public string $letter = '';
 
@@ -58,6 +59,7 @@ new class extends Component {
     {
         return Sale::query()
             ->with(['customer', 'offer'])
+            ->when($this->customerId, fn($q) => $q->where('customer_id', $this->customerId))
             ->when($this->search, function (Builder $query) {
                 $query->whereHas('customer', function ($q) {
                     $q->where('name', 'ilike', '%' . $this->search . '%');
@@ -166,7 +168,7 @@ new class extends Component {
                                 </div>
                             </td>
                             <td class="px-6 py-4 text-[13px] text-skin-muted font-mono">
-                                {{ $sale->offer->offer_no ?? '-' }}
+                                {{ $sale->offer->number ?? '-' }}
                             </td>
                             <td class="px-6 py-4 text-right text-skin-base text-[13px]">
                                 {{ number_format($sale->amount, 2) }} {{ $sale->currency }}

@@ -91,9 +91,11 @@ new
             ->map(fn($c) => ['id' => $c->id, 'name' => $c->name])->toArray();
 
         if ($customer) {
+            $this->authorize('customers.view');
             $this->customerId = $customer;
             $this->loadCustomerData();
         } else {
+            $this->authorize('customers.create');
             $this->initNewCustomer();
         }
     }

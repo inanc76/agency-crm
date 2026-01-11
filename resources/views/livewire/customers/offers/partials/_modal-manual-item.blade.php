@@ -1,11 +1,12 @@
 {{--
-@component: _modal_manual_entry.blade.php
-@section: Manuel Kalem Ekleme Modalı
-@description: Ürün/Hizmet veritabanında olmayan kalemlerin manuel olarak teklife eklenmesini sağlayan modal.
-@params: $showManualEntryModal (bool), $manualItems (array), $currency (string)
-@events: saveManualItems, addManualItemRow, removeManualItemRow
+🚀 MODAL: MANUAL ITEM ENTRY
+---------------------------------------------------------------------------------------
+SORUMLULUK: Hizmet veritabanında bulunmayan özel kalemlerin manuel olarak eklenmesi.
+ETKİLEŞİM: 'manualItems' array'i üzerinden satır bazlı veri girişi sağlar.
+YETKİNLİK: Fiyat, adet ve süre bilgilerini dinamik olarak hesaplar.
+BAĞLANTI: HasOfferItems trait'i - saveManualItems(), addManualItemRow()
+---------------------------------------------------------------------------------------
 --}}
-{{-- Manual Entry Modal --}}
 <x-mary-modal wire:model="showManualEntryModal" title="Manuel Kalem Ekle" class="backdrop-blur" box-class="!max-w-6xl">
     <div class="overflow-x-auto min-h-[300px]">
         <table class="w-full text-sm">

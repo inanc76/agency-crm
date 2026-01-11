@@ -1,18 +1,18 @@
 {{--
-@component: _modal_service_selection.blade.php
-@section: Hizmet Seçim Modalı
-@description: Mevcut müşteri hizmetlerini uzatma veya yeni hizmet tanımları ekleme işlemlerinin yapıldığı modal.
-@params: $showServiceModal (bool), $selectedYear (int), $customerServices (array), $categories (array),
-$priceDefinitions (array), $modalCategory (string), $modalServiceName (string)
-@events: addServiceFromExisting, addServiceFromPriceDefinition, closeServiceModal
+🚀 MODAL: SERVICE ITEM SELECTION
+---------------------------------------------------------------------------------------
+SORUMLULUK: Veritabanındaki hazır hizmet tanımlarının veya müşterinin mevcut hizmetlerinin teklife eklenmesi.
+SOL PANEL: Müşterinin geçmiş hizmetlerini (Existing Services) uzatmak için kullanılır.
+SAĞ PANEL: Kategori bazlı yeni hizmet (Price Definitions) seçimi sağlar.
+BAĞLANTI: HasOfferItems trait'i - addServiceFromExisting(), addServiceFromPriceDefinition()
+---------------------------------------------------------------------------------------
 --}}
-{{-- Service Selection Modal --}}
 <x-mary-modal wire:model="showServiceModal" title="Hizmet Ekle" class="backdrop-blur" box-class="!max-w-5xl">
     <div class="grid grid-cols-2 gap-6">
         {{-- Left Panel: Existing Services --}}
         <div class="border-r border-slate-200 pr-6">
             <div class="flex items-center justify-between mb-4">
-                <h4 class="font-bold text-sm" class="text-skin-heading">Mevcut Hizmetleri Uzat</h4>
+                <h4 class="font-bold text-sm text-skin-heading">Mevcut Hizmetleri Uzat</h4>
                 <select wire:model.live="selectedYear" class="select select-sm bg-white border-slate-200">
                     @for($year = date('Y'); $year >= date('Y') - 2; $year--)
                         <option value="{{ $year }}">{{ $year }}</option>
@@ -65,7 +65,7 @@ $priceDefinitions (array), $modalCategory (string), $modalServiceName (string)
 
         {{-- Right Panel: Price Definitions --}}
         <div class="pl-6">
-            <h4 class="font-bold text-sm mb-4" class="text-skin-heading">Yeni Hizmet Ekle</h4>
+            <h4 class="font-bold text-sm mb-4 text-skin-heading">Yeni Hizmet Ekle</h4>
             <p class="text-xs text-slate-500 mb-6 font-medium">Fiyat tanımlarından yeni hizmet ekleyebilirsiniz</p>
 
             <div class="space-y-5">
