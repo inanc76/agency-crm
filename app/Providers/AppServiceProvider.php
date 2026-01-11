@@ -19,6 +19,16 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        \Illuminate\Support\Facades\Gate::before(function ($user, $ability) {
+            if ($user->role && $user->role->name === 'Super Admin') {
+                return true;
+            }
+
+            if (method_exists($user, 'hasPermissionTo') && $user->hasPermissionTo($ability)) {
+                return true;
+            }
+        });
+
         try {
             if (\Illuminate\Support\Facades\Schema::hasTable('storage_settings')) {
                 $setting = \App\Models\StorageSetting::where('is_active', true)->first();

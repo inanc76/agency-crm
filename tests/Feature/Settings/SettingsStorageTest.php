@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Storage;
 
 beforeEach(function () {
     $this->user = User::factory()->create();
+    $this->user->givePermissionTo('settings.edit');
     $this->actingAs($this->user);
 });
 

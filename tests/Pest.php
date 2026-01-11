@@ -22,6 +22,8 @@ pest()->extend(Tests\TestCase::class)
         Illuminate\Support\Facades\Gate::define('services.edit', fn($user) => $user->hasPermissionTo('services.edit'));
         Illuminate\Support\Facades\Gate::define('services.delete', fn($user) => $user->hasPermissionTo('services.delete'));
         Illuminate\Support\Facades\Gate::define('services.view', fn($user) => $user->hasPermissionTo('services.view'));
+        Illuminate\Support\Facades\Gate::define('settings.view', fn($user) => $user->hasPermissionTo('settings.view'));
+        Illuminate\Support\Facades\Gate::define('settings.edit', fn($user) => $user->hasPermissionTo('settings.edit'));
     });
 
 /*

@@ -4,18 +4,24 @@ namespace App\Livewire\Settings\Traits;
 
 use App\Models\MailSetting;
 use Illuminate\Support\Facades\Mail;
+use Carbon\Carbon;
 
-use Mary\Traits\Toast;
-
+/**
+ * 🛡️ MAIL SETTINGS TRAIT
+ * ---------------------------------------------------------
+ * ARCHITECTURE: Logic Layer (Trait)
+ * RESPONSIBILITY: SMTP/Mailgun configuration management and test mail functionality.
+ * SECURITY: Requires 'settings.edit' permission for saving.
+ * ---------------------------------------------------------
+ */
 trait HasMailSettings
 {
-    use Toast;
     public string $provider = 'smtp';
     public bool $is_active = false;
 
     // SMTP Props
     public ?string $smtp_host = null;
-    public $smtp_port = 587;
+    public ?int $smtp_port = 587;
     public ?string $smtp_username = null;
     public ?string $smtp_password = null;
     public bool $smtp_secure = true;
@@ -35,6 +41,9 @@ trait HasMailSettings
     public string $test_subject = 'Test E-postası';
     public string $test_body = 'Bu bir test e-postasıdır. Ayarlarınız başarıyla yapılandırıldı.';
 
+    /**
+     * Initialize mail settings from database.
+     */
     public function mountHasMailSettings(): void
     {
         $settings = MailSetting::first();
@@ -62,9 +71,31 @@ trait HasMailSettings
         }
     }
 
-    public function saveMailSettings(): void
+    /**
+     * Save mail settings to database.
+     * 🔐 SECURITY: Restricted to 'settings.edit' permission.
+     * ⚠️ PERSISTENCE WARNING: Changes saved here immediately overwrite system mail configuration 
+     * and affect all outgoing transactional emails.
+     */
+    public function save(): void
     {
-        $this->validate($this->mailRules());
+        $this->authorize('settings.edit');
+
+        /**
+         * DYNAMIC VALIDATION (Required If):
+         * Rules are context-aware. If provider is 'smtp', SMTP fields are mandated.
+         * If provider is 'mailgun', API Key and Domain become mandatory.
+         */
+        $this->validate([
+            'provider' => 'required|in:smtp,mailgun',
+            'is_active' => 'boolean',
+            'smtp_host' => 'required_if:provider,smtp',
+            'smtp_port' => 'required_if:provider,smtp|nullable|integer',
+            'smtp_from_email' => 'required|email',
+            'smtp_from_name' => 'required',
+            'mailgun_api_key' => 'required_if:provider,mailgun',
+            'mailgun_domain' => 'required_if:provider,mailgun',
+        ]);
 
         $data = [
             'provider' => $this->provider,
@@ -83,18 +114,23 @@ trait HasMailSettings
             'mailgun_region' => $this->mailgun_region,
         ];
 
-        $settings = MailSetting::first();
-
-        if ($settings) {
-            $settings->update($data);
-        } else {
-            MailSetting::create($data);
-        }
+        MailSetting::updateOrCreate([], $data);
 
         $this->success('Ayarlar Kaydedildi', 'Mail ayarları başarıyla güncellendi.');
     }
 
-    public function sendTestMail(): void
+    /**
+     * Open test mail modal.
+     */
+    public function test(): void
+    {
+        $this->showTestModal = true;
+    }
+
+    /**
+     * Send a test email using current unsaved settings.
+     */
+    public function sendTest(): void
     {
         $this->validate([
             'test_email' => 'required|email',
@@ -104,6 +140,7 @@ trait HasMailSettings
         ]);
 
         try {
+            // Backup original config
             $originalConfig = config('mail');
 
             if ($this->provider === 'smtp') {
@@ -136,7 +173,9 @@ trait HasMailSettings
 
                 config([
                     'mail.default' => 'mailgun',
-                    'mail.mailers.mailgun' => ['transport' => 'mailgun'],
+                    'mail.mailers.mailgun' => [
+                        'transport' => 'mailgun',
+                    ],
                     'services.mailgun.domain' => $this->mailgun_domain,
                     'services.mailgun.secret' => $this->mailgun_api_key,
                     'services.mailgun.endpoint' => $this->mailgun_region === 'EU' ? 'api.eu.mailgun.net' : 'api.mailgun.net',
@@ -145,32 +184,20 @@ trait HasMailSettings
                 ]);
             }
 
+            // Send Test Email
             Mail::raw($this->test_body, function ($message) {
-                $message->to($this->test_email)->subject($this->test_subject);
+                $message->to($this->test_email)
+                    ->subject($this->test_subject);
             });
 
+            // Restore config
             config($originalConfig);
 
             $this->showTestModal = false;
             $this->success('Başarılı', "Test e-postası {$this->test_email} adresine gönderildi.");
+
         } catch (\Exception $e) {
             $this->error('Hata', 'Mail gönderilemedi: ' . $e->getMessage());
         }
-    }
-
-    protected function mailRules(): array
-    {
-        return [
-            'provider' => 'required|in:smtp,mailgun',
-            'is_active' => 'boolean',
-            // SMTP Rules (conditional usually but simpler here)
-            'smtp_host' => 'required_if:provider,smtp',
-            'smtp_port' => 'required_if:provider,smtp|integer',
-            'smtp_from_email' => 'required|email',
-            'smtp_from_name' => 'required',
-            // Mailgun Rules
-            'mailgun_api_key' => 'required_if:provider,mailgun',
-            'mailgun_domain' => 'required_if:provider,mailgun',
-        ];
     }
 }

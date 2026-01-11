@@ -210,7 +210,7 @@ new class extends Component {
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-3">
                                     <div class="flex-shrink-0 w-6 text-center">
-                                        @if($contact->gender === 'MALE')
+                                        @if(strtolower($contact->gender ?? '') === 'male')
                                             {{-- Male Symbol (Mars) --}}
                                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
                                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -219,7 +219,7 @@ new class extends Component {
                                                 <path d="M21 3l-7 7"></path>
                                                 <circle cx="10" cy="14" r="7"></circle>
                                             </svg>
-                                        @elseif($contact->gender === 'FEMALE')
+                                        @elseif(strtolower($contact->gender ?? '') === 'female')
                                             {{-- Female Symbol (Venus) --}}
                                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
                                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"

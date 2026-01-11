@@ -8,6 +8,7 @@ use Livewire\Volt\Volt;
 
 beforeEach(function () {
     $this->user = User::factory()->create();
+    $this->user->givePermissionTo('settings.edit');
     $this->actingAs($this->user);
 
     ReferenceCategory::create(['name' => 'Service Category', 'key' => 'SERVICE_CATEGORY']);

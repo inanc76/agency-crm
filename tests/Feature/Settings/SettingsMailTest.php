@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Mail;
 
 beforeEach(function () {
     $this->user = User::factory()->create();
+    $this->user->givePermissionTo('settings.edit');
     $this->actingAs($this->user);
 });
 
@@ -145,5 +146,5 @@ test('25. unauthorized user cannot access settings if they lack permission', fun
     // This assumes simple auth check, adding more specific permission check if roles present
     $guest = User::factory()->create();
     $this->actingAs($guest);
-    $this->get(route('settings.mail'))->assertOk(); // Change to assertForbidden if permission middleware added
+    $this->get(route('settings.mail'))->assertForbidden();
 });

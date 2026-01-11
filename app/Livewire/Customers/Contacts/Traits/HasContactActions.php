@@ -94,9 +94,19 @@ trait HasContactActions
     public function save(): void
     {
         $this->validate([
-            'customer_id' => 'required',
-            'name' => 'required|min:2',
-            'status' => 'required',
+            'customer_id' => 'required|exists:customers,id',
+            'name' => 'required|string|min:2|max:150',
+            'status' => 'required|in:WORKING,LEFT',
+            'gender' => 'nullable|string|in:male,female,other',
+            'position' => 'nullable|string|max:100',
+            'birth_date' => 'nullable|date|before:today',
+            'emails' => 'array',
+            'emails.*' => 'nullable|email|max:150',
+            'phones' => 'array',
+            'phones.*.number' => 'nullable|string|max:20',
+            'phones.*.extension' => 'nullable|string|max:10',
+            'social_profiles' => 'array',
+            'social_profiles.*.url' => 'nullable|url|max:255',
         ]);
 
         // Format phones for storage

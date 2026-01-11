@@ -196,11 +196,17 @@ trait HasServiceActions
         }
 
         $this->validate([
-            'customer_id' => 'required',
-            'asset_id' => 'required',
+            'customer_id' => 'required|exists:customers,id',
+            'asset_id' => 'required|exists:assets,id',
             'start_date' => 'required|date',
-            'services.*.category' => 'required',
-            'services.*.service_name' => 'required',
+            'services' => 'required|array|min:1',
+            'services.*.category' => 'required|string',
+            'services.*.service_name' => 'required|string|max:200',
+            'services.*.service_price' => 'required|numeric|min:0',
+            'services.*.service_currency' => 'required|string|size:3',
+            'services.*.service_duration' => 'required|string',
+            'services.*.status' => 'required|in:ACTIVE,PASSIVE,EXPIRED',
+            'services.*.description' => 'nullable|string|max:1000',
         ]);
 
         $startDate = Carbon::parse($this->start_date);
