@@ -106,7 +106,7 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Volt::route('dashboard/settings/two-factor', 'settings.two-factor')
-    ->middleware(['auth', 'verified', 'password.confirm'])
+    ->middleware(['auth', 'verified'])
     ->name('two-factor.show');
 
 // Debug route for testing

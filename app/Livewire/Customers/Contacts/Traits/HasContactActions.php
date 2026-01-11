@@ -93,6 +93,13 @@ trait HasContactActions
 
     public function save(): void
     {
+        // 🔐 Security: Authorization check based on operation type (contacts.create or contacts.edit)
+        if ($this->contactId) {
+            $this->authorize('contacts.edit');
+        } else {
+            $this->authorize('contacts.create');
+        }
+
         $this->validate([
             'customer_id' => 'required|exists:customers,id',
             'name' => 'required|string|min:2|max:150',
@@ -166,11 +173,17 @@ trait HasContactActions
 
     public function toggleEditMode(): void
     {
+        // 🔐 Security: Require edit permission to enter edit mode
+        $this->authorize('contacts.edit');
+
         $this->isViewMode = false;
     }
 
     public function delete(): void
     {
+        // 🔐 Security: Require delete permission
+        $this->authorize('contacts.delete');
+
         if ($this->contactId) {
             $contact = Contact::findOrFail($this->contactId);
             $customer_id = $contact->customer_id;

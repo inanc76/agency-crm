@@ -1,4 +1,55 @@
 <?php
+/**
+ * ╔══════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+ * ║                                    🏛️ MİMARIN NOTU - CONSTITUTION V11                                            ║
+ * ║                                                                                                                  ║
+ * ║  📋 SORUMLULUK ALANI: Sidebar Navigation Component                                                              ║
+ * ║  🎯 ANA GÖREV: Ana navigasyon menüsü ve alt menü hiyerarşisi                                                    ║
+ * ║                                                                                                                  ║
+ * ║  🔧 TEMEL YETKİNLİKLER:                                                                                         ║
+ * ║  • Collapsible Sidebar: $collapsed state ile açılır/kapanır menü                                                ║
+ * ║  • Expandable Items: $expandedItems array ile alt menü kontrolü                                                 ║
+ * ║  • Multi-level Hierarchy: 3 seviyeye kadar iç içe menü desteği                                                 ║
+ * ║  • Active State Detection: request()->is() ile aktif sayfa tespiti                                             ║
+ * ║                                                                                                                  ║
+ * ║  🔐 GÜVENLİK (Permission-Based Visibility):                                                                     ║
+ * ║  • Her menü öğesinde 'permission' anahtarı tanımlı (örn: CUSTOMERS, SETTINGS)                                  ║
+ * ║  • TODO: @can directive ile yetki bazlı görünürlük implementasyonu                                              ║
+ * ║  • Şu an tüm menü öğeleri görünür, yetki kontrolü eklenecek                                                     ║
+ * ║                                                                                                                  ║
+ * ║  📊 MENÜ HİYERARŞİSİ:                                                                                           ║
+ * ║  ├── 📊 Gösterge Paneli (Dashboard)                                                                             ║
+ * ║  ├── 🏢 Müşteriler (Customers)                                                                                   ║
+ * ║  ├── 🌐 Varlıklar (Assets)                                                                                       ║
+ * ║  ├── 🛠️ Hizmetler (Services)                                                                                     ║
+ * ║  ├── 📄 Teklifler (Offers)                                                                                       ║
+ * ║  ├── 💰 Satışlar (Sales)                                                                                         ║
+ * ║  ├── ✉️ Mailler (Mails)                                                                                          ║
+ * ║  └── ⚙️ Ayarlar (Settings)                                                                                       ║
+ * ║       ├── 👤 Hesabım (Account)                                                                                   ║
+ * ║       └── 📋 Tanımlar (Definitions)                                                                              ║
+ * ║            ├── 👥 Kullanıcılar                                                                                   ║
+ * ║            ├── 💲 Fiyat Tanımları                                                                                ║
+ * ║            ├── 🗂️ Reference Data                                                                                 ║
+ * ║            └── 📧 Mail Şablonları                                                                                ║
+ * ║                                                                                                                  ║
+ * ║  🎨 CSS VARİABLE KULLANIMI:                                                                                     ║
+ * ║  • --sidebar-bg: Ana arka plan rengi                                                                            ║
+ * ║  • --sidebar-text: Varsayılan metin rengi                                                                       ║
+ * ║  • --sidebar-hover-bg / --sidebar-hover-text: Hover durumu                                                      ║
+ * ║  • --sidebar-active-bg / --sidebar-active-text: Aktif sayfa durumu                                              ║
+ * ║  • --sidebar-collapsed-width: Daraltılmış genişlik (CSS variable)                                               ║
+ * ║                                                                                                                  ║
+ * ║  📦 STATE YÖNETİMİ:                                                                                             ║
+ * ║  • $collapsed (bool): Sidebar açık/kapalı durumu                                                                ║
+ * ║  • $expandedItems (array): Açık olan alt menü ID'leri                                                           ║
+ * ║                                                                                                                  ║
+ * ║  🔧 MARYUI BİLEŞEN KULLANIMI:                                                                                   ║
+ * ║  • Bu dosyada MaryUI kullanılmıyor, native HTML + Tailwind CSS                                                  ║
+ * ║  • Emoji iconları kullanılıyor (Lucide/Heroicons yerine)                                                        ║
+ * ║                                                                                                                  ║
+ * ╚══════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+ */
 
 use Livewire\Volt\Component;
 use function Livewire\Volt\{state};

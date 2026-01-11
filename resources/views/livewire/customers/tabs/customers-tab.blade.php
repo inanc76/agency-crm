@@ -1,4 +1,27 @@
 <?php
+/**
+ * ╔══════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+ * ║                                    🏛️ MİMARIN NOTU - CONSTITUTION V11 (ATOMIC)                                   ║
+ * ║                                                                                                                  ║
+ * ║  📋 SORUMLULUK ALANI: Müşteri Listesi Tab                                                                       ║
+ * ║  🎯 ANA GÖREV: Müşteri listeleme, filtreleme, arama ve toplu işlemler                                          ║
+ * ║                                                                                                                  ║
+ * ║  📦 PARTIAL YAPISI:                                                                                             ║
+ * ║  • _customers-header.blade.php: Başlık, sayaç ve aksiyon butonları                                             ║
+ * ║  • _customers-row.blade.php: Tablo satırı (avatar, şehir badge, count göstergeleri)                            ║
+ * ║                                                                                                                  ║
+ * ║  🔧 TEMEL YETKİNLİKLER:                                                                                         ║
+ * ║  • Arama: ilike ile case-insensitive arama                                                                      ║
+ * ║  • Harf Filtresi: A-Z ve 0-9 alfabetik filtreleme                                                              ║
+ * ║  • Toplu Seçim: Checkbox ile çoklu müşteri seçimi ve toplu silme                                               ║
+ * ║  • Sayfalama: Dinamik perPage ile pagination                                                                    ║
+ * ║                                                                                                                  ║
+ * ║  🔗 EXTERNAL COMPONENTS:                                                                                        ║
+ * ║  • x-customer-management.filter-panel: Filtreleme paneli                                                        ║
+ * ║  • x-customer-management.action-button: Yeni müşteri butonu                                                     ║
+ * ║                                                                                                                  ║
+ * ╚══════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+ */
 
 use Livewire\Volt\Component;
 use Livewire\WithPagination;
@@ -21,36 +44,22 @@ new class extends Component {
     public bool $selectAll = false;
 
     // Reset pagination when filtering
-    public function updatedSearch()
-    {
-        $this->resetPage();
-    }
-    public function updatedLetter()
-    {
-        $this->resetPage();
-    }
-    public function updatedPerPage()
-    {
-        $this->resetPage();
-    }
+    public function updatedSearch() { $this->resetPage(); }
+    public function updatedLetter() { $this->resetPage(); }
+    public function updatedPerPage() { $this->resetPage(); }
 
     public function updatedSelectAll($value)
     {
-        if ($value) {
-            $this->selected = $this->getQuery()->pluck('id')->map(fn($id) => (string) $id)->toArray();
-        } else {
-            $this->selected = [];
-        }
+        $this->selected = $value 
+            ? $this->getQuery()->pluck('id')->map(fn($id) => (string) $id)->toArray() 
+            : [];
     }
 
     public function deleteSelected()
     {
-        if (empty($this->selected)) {
-            return;
-        }
+        if (empty($this->selected)) return;
 
         Customer::whereIn('id', $this->selected)->delete();
-
         $this->success('İşlem Başarılı', count($this->selected) . ' müşteri silindi.');
         $this->selected = [];
         $this->selectAll = false;
@@ -59,22 +68,17 @@ new class extends Component {
     private function getQuery(): Builder
     {
         return Customer::query()
-            ->when($this->search, function (Builder $query) {
-                $query->where('name', 'ilike', '%' . $this->search . '%');
-            })
-            ->when($this->letter, function (Builder $query) {
-                if ($this->letter === '0-9') {
-                    $query->whereRaw("name ~ '^[0-9]'");
-                } else {
-                    $query->where('name', 'ilike', $this->letter . '%');
-                }
+            ->when($this->search, fn(Builder $q) => $q->where('name', 'ilike', '%' . $this->search . '%'))
+            ->when($this->letter, function (Builder $q) {
+                return $this->letter === '0-9' 
+                    ? $q->whereRaw("name ~ '^[0-9]'") 
+                    : $q->where('name', 'ilike', $this->letter . '%');
             })
             ->orderBy('name');
     }
 
     public function with(ReferenceDataService $service): array
     {
-        // Safe City Lookup for mixed types (UUID vs Plate Code)
         $cities = City::all();
         $cityMap = [];
         $cityColorMap = [];
@@ -82,21 +86,14 @@ new class extends Component {
         $schemeCount = count($schemes);
 
         foreach ($cities as $c) {
-            $cityMap[(string) $c->id] = $c->name; // UUID key
-
-            // Deterministic color generation based on city name
-            // Use simple hashing to pick a color index
+            $cityMap[(string) $c->id] = $c->name;
             $colorIndex = crc32($c->name) % $schemeCount;
-            $scheme = $schemes[$colorIndex];
-            $colorClass = "{$scheme['bg']} {$scheme['text']} {$scheme['border']}";
-
+            $colorClass = "{$schemes[$colorIndex]['bg']} {$schemes[$colorIndex]['text']} {$schemes[$colorIndex]['border']}";
             $cityColorMap[(string) $c->id] = $colorClass;
 
             if ($c->plate_code) {
-                // Handle plate code with and without leading zero just in case
                 $cityMap[(string) $c->plate_code] = $c->name;
-                $cityMap[(int) $c->plate_code] = $c->name; // For integer lookups (17)
-
+                $cityMap[(int) $c->plate_code] = $c->name;
                 $cityColorMap[(string) $c->plate_code] = $colorClass;
                 $cityColorMap[(int) $c->plate_code] = $colorClass;
             }
@@ -112,41 +109,21 @@ new class extends Component {
     }
 }; ?>
 
-{{-- Müşteriler Tab --}}
 <div>
-    {{-- Header with Action Button --}}
-    <div class="flex items-center justify-between mb-4">
-        <div>
-            <h2 class="text-lg font-bold" class="text-skin-heading">Müşteriler</h2>
-            <p class="text-sm opacity-60">Tüm müşterilerinizi görüntüleyin ve
-                yönetin</p>
-        </div>
-        <div class="flex items-center gap-4">
-            @if(count($selected) > 0)
-                <button wire:click="deleteSelected"
-                    wire:confirm="Seçili {{ count($selected) }} müşteriyi silmek istediğinize emin misiniz?"
-                    class="btn-danger-outline">
-                    <x-mary-icon name="o-trash" class="w-4 h-4" />
-                    Seçilileri Sil ({{ count($selected) }})
-                </button>
-            @endif
+    {{-- SECTION: Header --}}
+    @include('livewire.customers.tabs.partials._customers-header', [
+        'selected' => $selected,
+        'customers' => $customers
+    ])
 
-            <span class="text-sm opacity-60">
-                <span class="font-medium" style="color: var(--btn-save-bg);">Aktif</span>
-                {{ $customers->total() }} müşteri</span>
-            <x-customer-management.action-button label="Yeni Müşteri" href="/dashboard/customers/create" />
-        </div>
-    </div>
-
-    {{-- Filter Panel --}}
+    {{-- SECTION: Filter Panel --}}
     <x-customer-management.filter-panel :showCategories="true" :showAlphabet="true" :showStatus="false"
-        categoryLabel="Tüm Kategoriler" statusLabel="Aktif" :letter="$letter">
-    </x-customer-management.filter-panel>
+        categoryLabel="Tüm Kategoriler" statusLabel="Aktif" :letter="$letter" />
 
-    {{-- Data Table --}}
+    {{-- SECTION: Data Table --}}
     @php
         $headers = [
-            ['label' => '', 'sortable' => false, 'width' => '40px'], // Checkbox column
+            ['label' => '', 'sortable' => false, 'width' => '40px'],
             ['label' => 'Müşteri', 'sortable' => true],
             ['label' => 'Şehir', 'sortable' => true],
             ['label' => 'Kişiler', 'sortable' => false, 'align' => 'center'],
@@ -169,8 +146,7 @@ new class extends Component {
                                 class="checkbox checkbox-xs rounded border-slate-300">
                         </th>
                         @foreach(array_slice($headers, 1) as $header)
-                            <th
-                                class="px-6 py-3 font-semibold text-skin-base {{ isset($header['align']) && $header['align'] == 'center' ? 'text-center' : '' }}">
+                            <th class="px-6 py-3 font-semibold text-skin-base {{ isset($header['align']) && $header['align'] == 'center' ? 'text-center' : '' }}">
                                 {{ $header['label'] }}
                             </th>
                         @endforeach
@@ -178,89 +154,11 @@ new class extends Component {
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                     @forelse($customers as $customer)
-                        @php
-                            $char = mb_substr($customer->name, 0, 1);
-                        @endphp
-                        <tr class="group hover:bg-[var(--list-card-hover-bg)] transition-all duration-200 cursor-pointer"
-                            onclick="window.location.href='/dashboard/customers/{{ $customer->id }}'">
-                            <td class="px-6 py-4" onclick="event.stopPropagation()">
-                                <input type="checkbox" wire:model.live="selected" value="{{ $customer->id }}"
-                                    class="checkbox checkbox-xs rounded border-slate-300">
-                            </td>
-                            <td class="px-6 py-4">
-                                <div class="flex items-center gap-3">
-                                    <div class="flex-shrink-0">
-                                        <x-mary-avatar placeholder="{{ $char }}"
-                                            class="!w-9 !h-9 font-semibold text-xs shadow-sm"
-                                            style="background-color: var(--table-avatar-bg); border: 1px solid var(--table-avatar-border); color: var(--table-avatar-text);" />
-                                    </div>
-                                    <div>
-                                        <div class="text-[13px] group-hover:opacity-80 transition-opacity"
-                                            style="color: var(--list-card-link-color);">
-                                            {{ $customer->name }}
-                                        </div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4">
-                                @php
-                                    $cityName = $cityMap[$customer->city_id] ?? 'Belirtilmedi';
-                                    $cityColor = $cityColorMap[$customer->city_id] ?? 'bg-skin-hover text-skin-muted border-skin-light';
-                                @endphp
-                                @if($cityName !== 'Belirtilmedi')
-                                    <span
-                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border {{ $cityColor }}">
-                                        {{ $cityName }}
-                                    </span>
-                                @else
-                                    <span class="text-skin-muted italic text-xs">-</span>
-                                @endif
-                            </td>
-
-                            {{-- Counts Columns --}}
-                            <td class="px-6 py-4 text-center">
-                                <span
-                                    class="inline-flex items-center justify-center w-6 h-6 rounded-full text-[11px] border"
-                                    style="background-color: var(--card-bg); color: var(--color-text-heading); border-color: var(--card-border);">
-                                    {{ $customer->contacts_count ?? 0 }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 text-center">
-                                <span
-                                    class="inline-flex items-center justify-center w-6 h-6 rounded-full text-[11px] border"
-                                    style="background-color: var(--card-bg); color: var(--color-text-heading); border-color: var(--card-border);">
-                                    {{ $customer->assets_count ?? 0 }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 text-center">
-                                <span
-                                    class="inline-flex items-center justify-center w-6 h-6 rounded-full text-[11px] border"
-                                    style="background-color: var(--card-bg); color: var(--color-text-heading); border-color: var(--card-border);">
-                                    {{ $customer->services_count ?? 0 }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 text-center">
-                                <span
-                                    class="inline-flex items-center justify-center w-6 h-6 rounded-full text-[11px] border"
-                                    style="background-color: var(--card-bg); color: var(--color-text-heading); border-color: var(--card-border);">
-                                    {{ $customer->offers_count ?? 0 }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 text-center">
-                                <span
-                                    class="inline-flex items-center justify-center w-6 h-6 rounded-full text-[11px] border"
-                                    style="background-color: var(--card-bg); color: var(--color-text-heading); border-color: var(--card-border);">
-                                    {{ $customer->sales_count ?? 0 }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 text-center">
-                                <span
-                                    class="inline-flex items-center justify-center w-6 h-6 rounded-full text-[11px] border"
-                                    style="background-color: var(--card-bg); color: var(--color-text-heading); border-color: var(--card-border);">
-                                    {{ $customer->messages_count ?? 0 }}
-                                </span>
-                            </td>
-                        </tr>
+                        @include('livewire.customers.tabs.partials._customers-row', [
+                            'customer' => $customer,
+                            'cityMap' => $cityMap,
+                            'cityColorMap' => $cityColorMap
+                        ])
                     @empty
                         <tr>
                             <td colspan="9" class="px-6 py-12 text-center text-skin-muted">
@@ -276,7 +174,7 @@ new class extends Component {
             </table>
         </div>
 
-        {{-- Pagination --}}
+        {{-- SECTION: Pagination --}}
         <div class="px-6 py-4 border-t border-skin-light flex items-center justify-between">
             <div class="flex items-center gap-2">
                 <span class="text-xs text-skin-muted">Göster:</span>
@@ -288,11 +186,7 @@ new class extends Component {
                     <option value="500">500</option>
                 </select>
             </div>
-
-            <div>
-                {{ $customers->links() }}
-            </div>
-
+            <div>{{ $customers->links() }}</div>
             <div class="text-[10px] text-skin-muted font-mono">
                 {{ number_format(microtime(true) - (defined('LARAVEL_START') ? LARAVEL_START : request()->server('REQUEST_TIME_FLOAT')), 3) }}s
             </div>

@@ -24,6 +24,13 @@ trait HasCustomerActions
      */
     public function save(): void
     {
+        // 🔐 Security: Authorization check based on operation type
+        if ($this->customerId) {
+            $this->authorize('customers.edit');
+        } else {
+            $this->authorize('customers.create');
+        }
+
         $this->validate([
             'customer_type' => 'required|string',
             'name' => 'required|string|max:255',

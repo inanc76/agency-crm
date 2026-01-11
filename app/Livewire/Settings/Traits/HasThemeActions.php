@@ -5,6 +5,44 @@ namespace App\Livewire\Settings\Traits;
 use App\Repositories\PanelSettingRepository;
 use Illuminate\Support\Facades\Cache;
 
+/**
+ * ╔══════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+ * ║                                    🏛️ MİMARIN NOTU - CONSTITUTION V11                                            ║
+ * ║                                                                                                                  ║
+ * ║  📋 SORUMLULUK ALANI: HasThemeActions Trait (UI Theme Management)                                               ║
+ * ║  🎯 ANA GÖREV: Panel görünüm ayarlarının yüklenmesi ve kaydedilmesi                                            ║
+ * ║                                                                                                                  ║
+ * ║  🔧 TEMEL YETKİNLİKLER:                                                                                         ║
+ * ║  • mountHasThemeSettings(): Tüm tema değişkenlerini DB'den yükler ve fallback'ler uygular                       ║
+ * ║  • saveThemeSettings(): Validasyondan geçen tema verilerini kaydeder ve cache'i temizler                        ║
+ * ║  • resetThemeToDefaults(): Tüm ayarları varsayılan değerlere sıfırlar                                           ║
+ * ║                                                                                                                  ║
+ * ║  🎨 RENK YÖNETİMİ STRATEJİSİ:                                                                                   ║
+ * ║  • Fallback Pattern: Her renk için null-coalescing (??) ile varsayılan değer                                   ║
+ * ║  • Transparent Guard: 'transparent' değerleri hex'e çevrilir (header_border_color örneği)                      ║
+ * ║  • Format Validation: str_starts_with('#') ile hex format kontrolü                                              ║
+ * ║                                                                                                                  ║
+ * ║  🔗 CSS VARIABLE MAPPING:                                                                                       ║
+ * ║  • $xxx_bg_color      → --xxx-bg      (Arka plan renkleri)                                                     ║
+ * ║  • $xxx_text_color    → --xxx-text    (Yazı renkleri)                                                          ║
+ * ║  • $xxx_border_color  → --xxx-border  (Kenarlık renkleri)                                                      ║
+ * ║  • $xxx_hover_color   → --xxx-hover   (Hover durumu renkleri)                                                  ║
+ * ║                                                                                                                  ║
+ * ║  🌈 COLOR-MIX KULLANIMI (Dashboard Stats):                                                                      ║
+ * ║  • Dashboard stats kartlarında "color-mix(in srgb, $color, white 90%)" kullanılır                              ║
+ * ║  • Bu teknik: Ana renkten %90 beyazla karıştırarak pastel ton oluşturur                                        ║
+ * ║  • Örnek: #3b82f6 (mavi) → color-mix ile açık mavi arka plan üretilir                                          ║
+ * ║                                                                                                                  ║
+ * ║  📦 TRAIT BAĞIMLILIKLARI:                                                                                       ║
+ * ║  • HasThemeProperties: Tüm public property tanımları                                                           ║
+ * ║  • HasThemeValidation: themeRules() validasyon kuralları                                                       ║
+ * ║                                                                                                                  ║
+ * ║  🔐 GÜVENLİK:                                                                                                   ║
+ * ║  • Cache Invalidation: Kaydetme sonrası 'theme_settings' cache'i temizlenir                                    ║
+ * ║  • Repository Pattern: Doğrudan DB erişimi yerine PanelSettingRepository kullanılır                            ║
+ * ║                                                                                                                  ║
+ * ╚══════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+ */
 trait HasThemeActions
 {
     public function mountHasThemeSettings(): void

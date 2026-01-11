@@ -4,13 +4,24 @@ use App\Models\Customer;
 use App\Models\Asset;
 use App\Models\Service;
 use App\Models\PriceDefinition;
+use App\Models\User;
 use Carbon\Carbon;
 use Livewire\Volt\Volt;
 use Illuminate\Support\Str;
+use function Pest\Laravel\actingAs;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
 beforeEach(function () {
+    // 🔐 Create authenticated user with offer permissions
+    seedReferenceData();
+    $this->user = User::factory()->create();
+    $this->user->givePermissionTo('offers.create');
+    $this->user->givePermissionTo('offers.edit');
+    $this->user->givePermissionTo('offers.delete');
+    $this->user->givePermissionTo('offers.view');
+    actingAs($this->user);
+
     // Setup common data
     $this->customer = Customer::create([
         'name' => 'Test Customer',

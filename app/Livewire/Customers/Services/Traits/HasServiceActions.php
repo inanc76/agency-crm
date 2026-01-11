@@ -1,8 +1,33 @@
 <?php
 
+/**
+ * ╔══════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+ * ║                                    🏛️ MİMARIN NOTU - CONSTITUTION V11 (SLIM)                                     ║
+ * ║                                                                                                                  ║
+ * ║  📋 SORUMLULUK ALANI: HasServiceActions Trait (Core CRUD Operations)                                            ║
+ * ║  🎯 ANA GÖREV: Hizmet yaşam döngüsü yönetimi - Create, Update, Delete                                           ║
+ * ║                                                                                                                  ║
+ * ║  📦 TRAIT BAĞIMLILIKLARI (Composition):                                                                         ║
+ * ║  • HasServiceDataLoader: Veri yükleme (mount, loadServiceData, loadAssets, watchers)                           ║
+ * ║                                                                                                                  ║
+ * ║  🔧 TEMEL YETKİNLİKLER:                                                                                         ║
+ * ║  • save(): Çoklu hizmet oluşturma veya tekli güncelleme (DB Transaction)                                       ║
+ * ║  • cancel(): İptal ve yönlendirme                                                                               ║
+ * ║  • toggleEditMode(): Görüntüleme ↔ Düzenleme modu                                                               ║
+ * ║  • delete(): Kalıcı silme                                                                                       ║
+ * ║  • addService/removeService: Servis array yönetimi                                                              ║
+ * ║                                                                                                                  ║
+ * ║  🔐 GÜVENLİK KATMANLARI:                                                                                        ║
+ * ║  • services.create: Yeni hizmet oluşturma                                                                       ║
+ * ║  • services.edit: Mevcut hizmet düzenleme                                                                       ║
+ * ║  • services.delete: Hizmet silme                                                                                ║
+ * ║                                                                                                                  ║
+ * ╚══════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+ */
+
 namespace App\Livewire\Customers\Services\Traits;
 
-use App\Models\Asset;
+use App\Livewire\Traits\HasServiceCalculations;
 use App\Models\Customer;
 use App\Models\PriceDefinition;
 use App\Models\Service;
@@ -12,17 +37,13 @@ use Illuminate\Support\Str;
 
 trait HasServiceActions
 {
-    // Varlık Seçimi
+    use HasServiceCalculations; // 📊 Veri yükleme ve hesaplama trait'i
+
+    // State Fields
     public string $customer_id = '';
     public string $asset_id = '';
-
-    // Tarih (Shared)
     public ?string $start_date = null;
-
-    // Services Array (Multiple Services)
     public array $services = [];
-
-    // State Management
     public bool $isViewMode = false;
     public ?string $serviceId = null;
     public string $activeTab = 'info';
@@ -32,6 +53,12 @@ trait HasServiceActions
     public $assets = [];
     public $categories = [];
 
+    /**
+     * @purpose Livewire bileşeninin başlatılması
+     * @param string|null $service Düzenlenecek hizmet ID'si
+     * @return void
+     * 🔐 Security: Genel erişim
+     */
     public function mount(?string $service = null): void
     {
         // Load Customers
@@ -49,55 +76,24 @@ trait HasServiceActions
         // Default start date
         $this->start_date = Carbon::now()->format('Y-m-d');
 
-        // If service ID is provided, load data (edit mode)
         if ($service) {
             $this->serviceId = $service;
-            $this->loadServiceData();
-
-            // Set active tab from URL if present
+            $this->loadServiceData(); // From HasServiceCalculations
             $this->activeTab = request()->query('tab', 'info');
         } else {
-            // Check for customer query parameter
             $customerId = request()->query('customer');
             if ($customerId && collect($this->customers)->firstWhere('id', $customerId)) {
                 $this->customer_id = $customerId;
                 $this->loadAssets();
             }
-            // Initialize with one empty service
             $this->addService();
         }
     }
 
-    private function loadServiceData(): void
-    {
-        $service = Service::findOrFail($this->serviceId);
-
-        $this->customer_id = $service->customer_id;
-        $this->loadAssets();
-        $this->asset_id = $service->asset_id;
-        $this->start_date = Carbon::parse($service->start_date)->format('Y-m-d');
-
-        // Load single service into array
-        $this->services = [
-            [
-                'category' => $service->service_category,
-                'service_name' => $service->service_name,
-                'price_definition_id' => $service->price_definition_id,
-                'status' => $service->status,
-                'service_price' => $service->service_price,
-                'description' => $service->description ?? '',
-                'service_duration' => $service->service_duration,
-                'service_currency' => $service->service_currency,
-                'services_list' => [],
-            ]
-        ];
-
-        // Load services list for the category
-        $this->loadServicesForIndex(0);
-
-        $this->isViewMode = true;
-    }
-
+    /**
+     * @purpose Yeni boş hizmet satırı ekleme (max 5)
+     * @return void
+     */
     public function addService(): void
     {
         if (count($this->services) < 5) {
@@ -115,85 +111,30 @@ trait HasServiceActions
         }
     }
 
+    /**
+     * @purpose Hizmet satırını kaldırma
+     * @param int $index Kaldırılacak satır indeksi
+     * @return void
+     */
     public function removeService(int $index): void
     {
         if (count($this->services) > 1) {
             unset($this->services[$index]);
-            $this->services = array_values($this->services); // Re-index
+            $this->services = array_values($this->services);
         }
     }
 
-    // Dynamic Loaders
-    public function updatedCustomerId()
-    {
-        $this->loadAssets();
-        $this->asset_id = '';
-    }
-
-    public function loadAssets()
-    {
-        if ($this->customer_id) {
-            $this->assets = Asset::where('customer_id', $this->customer_id)
-                ->orderBy('name')
-                ->get(['id', 'name'])
-                ->map(fn($a) => ['id' => $a->id, 'name' => $a->name])
-                ->toArray();
-        } else {
-            $this->assets = [];
-        }
-    }
-
-    public function updatedServices($value, $key)
-    {
-        // Parse key to get index and field
-        // Format: "0.category" or "1.service_name"
-        $parts = explode('.', $key);
-        if (count($parts) === 2) {
-            $index = (int) $parts[0];
-            $field = $parts[1];
-
-            if ($field === 'category') {
-                $this->loadServicesForIndex($index);
-                $this->services[$index]['service_name'] = '';
-                $this->services[$index]['service_price'] = 0;
-            } elseif ($field === 'service_name') {
-                $this->updateServicePrice($index);
-            }
-        }
-    }
-
-    private function loadServicesForIndex(int $index): void
-    {
-        if (!empty($this->services[$index]['category'])) {
-            $this->services[$index]['services_list'] = PriceDefinition::where('category', $this->services[$index]['category'])
-                ->where('is_active', true)
-                ->get()
-                ->toArray();
-        } else {
-            $this->services[$index]['services_list'] = [];
-        }
-    }
-
-    private function updateServicePrice(int $index): void
-    {
-        $serviceName = $this->services[$index]['service_name'];
-        $priceDef = collect($this->services[$index]['services_list'])->firstWhere('name', $serviceName);
-
-        if ($priceDef) {
-            $this->services[$index]['service_price'] = $priceDef['price'];
-            $this->services[$index]['service_duration'] = $priceDef['duration'];
-            $this->services[$index]['service_currency'] = $priceDef['currency'];
-            $this->services[$index]['price_definition_id'] = $priceDef['id'];
-        }
-    }
-
+    /**
+     * @purpose Hizmet kaydetme (yeni oluşturma veya güncelleme)
+     * @return void
+     * 🔐 Security: services.create (new) or services.edit (existing)
+     * 📢 Events: Success toast, 'service-saved' dispatch
+     * 🔗 Side Effects: Bulk insert for new services, atomic transaction
+     */
     public function save(): void
     {
-        if ($this->serviceId) {
-            $this->authorize('services.edit');
-        } else {
-            $this->authorize('services.create');
-        }
+        // 🔐 Security Check
+        $this->authorize($this->serviceId ? 'services.edit' : 'services.create');
 
         $this->validate([
             'customer_id' => 'required|exists:customers,id',
@@ -212,72 +153,97 @@ trait HasServiceActions
         $startDate = Carbon::parse($this->start_date);
 
         if ($this->serviceId) {
-            // Edit mode - update single service
-            $service = Service::findOrFail($this->serviceId);
-            $endDate = $this->calculateEndDate($startDate, $this->services[0]['service_duration']);
-
-            $service->update([
-                'customer_id' => $this->customer_id,
-                'asset_id' => $this->asset_id,
-                'price_definition_id' => $this->services[0]['price_definition_id'],
-                'service_name' => $this->services[0]['service_name'],
-                'service_category' => $this->services[0]['category'],
-                'service_duration' => $this->services[0]['service_duration'],
-                'service_price' => $this->services[0]['service_price'],
-                'service_currency' => $this->services[0]['service_currency'],
-                'start_date' => $startDate,
-                'end_date' => $endDate,
-                'description' => $this->services[0]['description'],
-                'status' => $this->services[0]['status'],
-                'is_active' => $this->services[0]['status'] === 'ACTIVE',
-            ]);
-
-            $this->success('İşlem Başarılı', 'Hizmet bilgileri güncellendi.');
-            $this->dispatch('service-saved');
-            $this->isViewMode = true;
+            $this->updateSingleService($startDate);
         } else {
-            // Create mode - create multiple services
-            DB::transaction(function () use ($startDate) {
-                foreach ($this->services as $serviceData) {
-                    $endDate = $this->calculateEndDate($startDate, $serviceData['service_duration']);
-
-                    Service::create([
-                        'id' => Str::uuid()->toString(),
-                        'customer_id' => $this->customer_id,
-                        'asset_id' => $this->asset_id,
-                        'price_definition_id' => $serviceData['price_definition_id'],
-                        'service_name' => $serviceData['service_name'],
-                        'service_category' => $serviceData['category'],
-                        'service_duration' => $serviceData['service_duration'],
-                        'service_price' => $serviceData['service_price'],
-                        'service_currency' => $serviceData['service_currency'],
-                        'start_date' => $startDate,
-                        'end_date' => $endDate,
-                        'description' => $serviceData['description'],
-                        'status' => $serviceData['status'],
-                        'is_active' => $serviceData['status'] === 'ACTIVE',
-                    ]);
-                }
-            });
-
-            $count = count($this->services);
-            $this->success('İşlem Başarılı', "{$count} adet hizmet başarıyla oluşturuldu.");
-            $this->dispatch('service-saved');
-            $this->redirect('/dashboard/customers?tab=services');
+            $this->createMultipleServices($startDate);
         }
     }
 
+    /**
+     * @purpose Tekli hizmet güncelleme
+     * @param Carbon $startDate Başlangıç tarihi
+     * @return void
+     */
+    private function updateSingleService(Carbon $startDate): void
+    {
+        $service = Service::findOrFail($this->serviceId);
+        $endDate = $this->calculateEndDate($startDate, $this->services[0]['service_duration']);
+
+        $service->update([
+            'customer_id' => $this->customer_id,
+            'asset_id' => $this->asset_id,
+            'price_definition_id' => $this->services[0]['price_definition_id'],
+            'service_name' => $this->services[0]['service_name'],
+            'service_category' => $this->services[0]['category'],
+            'service_duration' => $this->services[0]['service_duration'],
+            'service_price' => $this->services[0]['service_price'],
+            'service_currency' => $this->services[0]['service_currency'],
+            'start_date' => $startDate,
+            'end_date' => $endDate,
+            'description' => $this->services[0]['description'],
+            'status' => $this->services[0]['status'],
+            'is_active' => $this->services[0]['status'] === 'ACTIVE',
+        ]);
+
+        $this->success('İşlem Başarılı', 'Hizmet bilgileri güncellendi.');
+        $this->dispatch('service-saved');
+        $this->isViewMode = true;
+    }
+
+    /**
+     * @purpose Çoklu hizmet oluşturma (Bulk Insert)
+     * @param Carbon $startDate Başlangıç tarihi
+     * @return void
+     * 🔗 Side Effects: DB Transaction, redirect on success
+     */
+    private function createMultipleServices(Carbon $startDate): void
+    {
+        DB::transaction(function () use ($startDate) {
+            foreach ($this->services as $serviceData) {
+                $endDate = $this->calculateEndDate($startDate, $serviceData['service_duration']);
+
+                Service::create([
+                    'id' => Str::uuid()->toString(),
+                    'customer_id' => $this->customer_id,
+                    'asset_id' => $this->asset_id,
+                    'price_definition_id' => $serviceData['price_definition_id'],
+                    'service_name' => $serviceData['service_name'],
+                    'service_category' => $serviceData['category'],
+                    'service_duration' => $serviceData['service_duration'],
+                    'service_price' => $serviceData['service_price'],
+                    'service_currency' => $serviceData['service_currency'],
+                    'start_date' => $startDate,
+                    'end_date' => $endDate,
+                    'description' => $serviceData['description'],
+                    'status' => $serviceData['status'],
+                    'is_active' => $serviceData['status'] === 'ACTIVE',
+                ]);
+            }
+        });
+
+        $count = count($this->services);
+        $this->success('İşlem Başarılı', "{$count} adet hizmet başarıyla oluşturuldu.");
+        $this->dispatch('service-saved');
+        $this->redirect('/dashboard/customers?tab=services');
+    }
+
+    /**
+     * @purpose Bitiş tarihi hesaplama
+     * @param Carbon $startDate Başlangıç tarihi
+     * @param string $duration Süre string'i
+     * @return Carbon Bitiş tarihi
+     */
     private function calculateEndDate(Carbon $startDate, string $duration): Carbon
     {
-        $endDate = $startDate->copy()->addYear(); // Default fallback
-
-        if (str_contains(strtolower($duration), 'month')) {
-            $endDate = $startDate->copy()->addMonth();
-        }
-
-        return $endDate;
+        return str_contains(strtolower($duration), 'month')
+            ? $startDate->copy()->addMonth()
+            : $startDate->copy()->addYear();
     }
 
+    /**
+     * @purpose İptal işlemi
+     * @return void
+     */
     public function cancel(): void
     {
         if ($this->serviceId) {
@@ -287,12 +253,22 @@ trait HasServiceActions
         }
     }
 
+    /**
+     * @purpose Düzenleme moduna geçiş
+     * @return void
+     * 🔐 Security: services.edit
+     */
     public function toggleEditMode(): void
     {
         $this->authorize('services.edit');
         $this->isViewMode = false;
     }
 
+    /**
+     * @purpose Hizmeti silme
+     * @return void
+     * 🔐 Security: services.delete
+     */
     public function delete(): void
     {
         $this->authorize('services.delete');

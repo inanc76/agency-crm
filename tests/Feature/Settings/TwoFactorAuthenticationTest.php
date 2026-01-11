@@ -27,13 +27,14 @@ test('two factor settings page can be rendered', function () {
         ->assertSee('Devre Dışı');
 });
 
-test('two factor settings page requires password confirmation when enabled', function () {
+test('two factor settings page is accessible without password confirmation', function () {
     $user = User::factory()->withoutTwoFactor()->create();
 
     $response = $this->actingAs($user)
         ->get(route('two-factor.show'));
 
-    $response->assertRedirect(route('password.confirm'));
+    // password.confirm middleware kaldırıldı, direkt erişim mümkün
+    $response->assertOk();
 });
 
 test('two factor settings page returns forbidden response when two factor is disabled', function () {

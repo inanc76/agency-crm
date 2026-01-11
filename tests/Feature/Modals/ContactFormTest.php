@@ -9,8 +9,11 @@ use function Pest\Laravel\actingAs;
 beforeEach(function () {
     seedReferenceData();
     $this->user = User::factory()->create();
-    $this->user->givePermissionTo('customers.edit'); // Permission for create/edit
-    $this->user->givePermissionTo('customers.view'); // Permission for view
+    // 🔐 Grant contact-specific permissions for authorization tests
+    $this->user->givePermissionTo('contacts.create');
+    $this->user->givePermissionTo('contacts.edit');
+    $this->user->givePermissionTo('contacts.delete');
+    $this->user->givePermissionTo('contacts.view');
     actingAs($this->user);
 });
 

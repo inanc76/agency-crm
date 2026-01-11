@@ -2,59 +2,40 @@
 
 namespace App\Livewire\Variables\Traits;
 
-use App\Models\ReferenceCategory;
 use App\Models\ReferenceItem;
 use App\Repositories\ReferenceDataRepository;
 use App\Services\ReferenceDataService;
 
 /**
  * ╔══════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
- * ║                                          🏛️ MİMARIN NOTU - CONSTITUTION V10                                      ║
+ * ║                                    🏛️ MİMARIN NOTU - CONSTITUTION V11 (SLIM)                                     ║
  * ║                                                                                                                  ║
- * ║  📋 SORUMLULUK ALANI: HasVariableActions Trait                                                                  ║
- * ║  🎯 ANA GÖREV: Referans veri yönetimi ve kategori-öğe ilişkileri                                               ║
+ * ║  📋 SORUMLULUK ALANI: HasVariableActions Trait (Main Coordinator)                                               ║
+ * ║  🎯 ANA GÖREV: Referans veri yönetimi koordinasyonu ve Item CRUD işlemleri                                      ║
+ * ║                                                                                                                  ║
+ * ║  📦 TRAIT BAĞIMLILIKLARI (Composition):                                                                         ║
+ * ║  • HasCategoryActions: Kategori CRUD işlemleri (openCreateCategoryModal, saveCategory, etc.)                   ║
  * ║                                                                                                                  ║
  * ║  🔧 TEMEL YETKİNLİKLER:                                                                                         ║
- * ║  • Kategori Yönetimi: ReferenceCategory CRUD işlemleri ve anahtar benzersizlik kontrolü                        ║
- * ║  • Öğe Yönetimi: ReferenceItem CRUD işlemleri, renk metadata'sı ve sıralama                                    ║
- * ║  • Sıralama Kontrolü: Öğelerin kategori içinde yukarı/aşağı taşınması                                          ║
- * ║  • Modal State Yönetimi: Kategori ve öğe düzenleme modallarının açılma/kapanma durumları                       ║
- * ║  • Renk Sistemi: Tailwind CSS renk sınıfları ile görsel kategorizasyon                                         ║
+ * ║  • boot(): Dependency injection (Repository & Service)                                                          ║
+ * ║  • selectCategory(): Kategori seçimi                                                                            ║
+ * ║  • Item CRUD: openCreateModal, editItem, saveItem, deleteItem                                                   ║
+ * ║  • Sorting: moveItemUp, moveItemDown                                                                            ║
+ * ║  • getTailwindColor(): Renk sınıfı dönüşümü                                                                     ║
  * ║                                                                                                                  ║
  * ║  🔐 GÜVENLİK KATMANLARI:                                                                                        ║
- * ║  • Form Validasyonu: Laravel validation rules ile veri doğrulama                                               ║
- * ║  • Anahtar Benzersizliği: Kategori key'lerinin tekrar kontrolü                                                  ║
- * ║  • Repository Pattern: Veri erişimi için güvenli katman                                                         ║
- * ║                                                                                                                  ║
- * ║  📊 BAĞIMLILIK HARİTASI:                                                                                        ║
- * ║  • $this->selectedCategoryKey: Aktif seçili kategori anahtarı                                                   ║
- * ║  • $this->repository: ReferenceDataRepository instance                                                          ║
- * ║  • $this->service: ReferenceDataService instance                                                                ║
- * ║  • Modal form states: showItemModal, showCategoryModal ve ilgili form alanları                                  ║
+ * ║  • Form Validasyonu: Laravel validation rules                                                                   ║
+ * ║  • Repository Pattern: Güvenli veri erişimi                                                                     ║
  * ║                                                                                                                  ║
  * ╚══════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
  */
 trait HasVariableActions
 {
+    use HasCategoryActions; // 📁 Kategori CRUD işlemleri
+
     // Services
     protected ReferenceDataRepository $repository;
     protected ReferenceDataService $service;
-
-    /**
-     * @purpose Repository ve Service bağımlılıklarının enjekte edilmesi
-     * @param ReferenceDataRepository $repository Veri erişim katmanı
-     * @param ReferenceDataService $service İş mantığı katmanı
-     * @return void
-     * 🔐 Security: Dependency injection ile güvenli servis erişimi
-     * 📢 Events: Servis bağımlılıkları hazırlanır
-     * 
-     * State Dependencies: $this->repository, $this->service
-     */
-    public function boot(ReferenceDataRepository $repository, ReferenceDataService $service)
-    {
-        $this->repository = $repository;
-        $this->service = $service;
-    }
 
     // State
     public string $search = '';
@@ -69,21 +50,21 @@ trait HasVariableActions
     public bool $is_default = false;
     public string $selectedColor = 'gray';
 
-    // Category Form State
-    public bool $showCategoryModal = false;
-    public string $categoryId = '';
-    public string $categoryName = '';
-    public string $categoryKey = '';
-    public string $categoryDescription = '';
+    /**
+     * @purpose Repository ve Service bağımlılıklarının enjekte edilmesi
+     * @return void
+     * 🔐 Security: Dependency injection ile güvenli servis erişimi
+     */
+    public function boot(ReferenceDataRepository $repository, ReferenceDataService $service)
+    {
+        $this->repository = $repository;
+        $this->service = $service;
+    }
 
     /**
      * @purpose Kategori seçimi ve öğe formunun sıfırlanması
      * @param string $key Seçilecek kategori anahtarı
      * @return void
-     * 🔐 Security: Kategori anahtarı string kontrolü
-     * 📢 Events: $this->selectedCategoryKey güncellenir, resetItemForm() çağrısı
-     * 
-     * State Dependencies: $this->selectedCategoryKey
      */
     public function selectCategory(string $key): void
     {
@@ -93,149 +74,11 @@ trait HasVariableActions
 
     /**
      * @purpose Renk ID'sine göre Tailwind CSS sınıflarını alma
-     * @param string $colorId Renk tanımlayıcısı
      * @return string Tailwind CSS sınıf string'i
-     * 🔐 Security: Service katmanı üzerinden güvenli renk sınıfı erişimi
-     * 📢 Events: UI renk güncellemesi
-     * 
-     * State Dependencies: $this->service
      */
     public function getTailwindColor($colorId)
     {
         return $this->service->getColorClasses($colorId);
-    }
-
-    // --- Category Actions ---
-
-    /**
-     * @purpose Yeni kategori oluşturma modalını açma
-     * @return void
-     * 🔐 Security: Genel erişim - özel yetki kontrolü yok
-     * 📢 Events: $this->showCategoryModal = true, resetCategoryForm() çağrısı
-     * 
-     * State Dependencies: $this->showCategoryModal
-     */
-    public function openCreateCategoryModal(): void
-    {
-        $this->resetCategoryForm();
-        $this->showCategoryModal = true;
-    }
-
-    /**
-     * @purpose Mevcut kategoriyi düzenleme moduna alma
-     * @param string $id Düzenlenecek kategori ID'si
-     * @return void
-     * 🔐 Security: Kategori varlığı kontrolü, ID validasyonu
-     * 📢 Events: $this->showCategoryModal = true, form alanları doldurulur
-     * 
-     * State Dependencies: $this->categoryId, $this->categoryName, $this->categoryKey, $this->categoryDescription
-     */
-    public function editCategory(string $id): void
-    {
-        $category = ReferenceCategory::find($id);
-        if (!$category)
-            return;
-
-        $this->categoryId = $category->id;
-        $this->categoryName = $category->name;
-        $this->categoryKey = $category->key;
-        $this->categoryDescription = $category->description ?? '';
-        $this->showCategoryModal = true;
-    }
-
-    /**
-     * @purpose Kategori kaydetme (yeni oluşturma veya güncelleme)
-     * @return void
-     * 🔐 Security: Form validasyonu, kategori anahtarı benzersizlik kontrolü
-     * 📢 Events: Success/error toast, modal kapatma, selectedCategoryKey güncelleme
-     * 
-     * State Dependencies: $this->categoryId, $this->selectedCategoryKey, kategori form alanları
-     */
-    public function saveCategory(): void
-    {
-        $this->validate([
-            'categoryName' => 'required|string|max:255',
-            'categoryKey' => 'required|string|max:255',
-            'categoryDescription' => 'nullable|string',
-        ]);
-
-        try {
-            $query = ReferenceCategory::where('key', $this->categoryKey);
-            if ($this->categoryId) {
-                $query->where('id', '!=', $this->categoryId);
-            }
-            if ($query->exists()) {
-                $this->addError('categoryKey', 'Bu anahtar zaten kullanılıyor.');
-                return;
-            }
-
-            $data = [
-                'name' => $this->categoryName,
-                'key' => $this->categoryKey,
-                'description' => $this->categoryDescription,
-            ];
-
-            if ($this->categoryId) {
-                $this->repository->updateCategory($this->categoryId, $data);
-                if ($this->selectedCategoryKey && $this->categoryId === ReferenceCategory::where('key', $this->selectedCategoryKey)->first()?->id) {
-                    $this->selectedCategoryKey = $this->categoryKey;
-                }
-                $this->success('Kategori güncellendi.');
-            } else {
-                $this->repository->createCategory($data);
-                $this->success('Yeni kategori oluşturuldu.');
-            }
-
-            $this->showCategoryModal = false;
-            $this->resetCategoryForm();
-        } catch (\Exception $e) {
-            $this->error($e->getMessage());
-        }
-    }
-
-    /**
-     * @purpose Kategoriyi ve bağlı öğeleri silme
-     * @param string $id Silinecek kategori ID'si
-     * @return void
-     * 🔐 Security: Kategori varlığı kontrolü, cascade silme yetkisi
-     * 📢 Events: Success/error toast, selectedCategoryKey sıfırlama
-     * 
-     * State Dependencies: $this->selectedCategoryKey
-     */
-    public function deleteCategory(string $id): void
-    {
-        try {
-            $category = ReferenceCategory::find($id);
-            if (!$category)
-                return;
-            $key = $category->key;
-
-            $this->repository->deleteCategory($id);
-
-            if ($this->selectedCategoryKey === $key) {
-                $this->selectedCategoryKey = null;
-            }
-            $this->success('Kategori silindi.');
-        } catch (\Exception $e) {
-            $this->error($e->getMessage());
-        }
-    }
-
-    /**
-     * @purpose Kategori form alanlarını sıfırlama
-     * @return void
-     * 🔐 Security: Private metot - sadece trait içinden erişilebilir
-     * 📢 Events: Form alanları temizlenir, hata mesajları sıfırlanır
-     * 
-     * State Dependencies: $this->categoryId, $this->categoryName, $this->categoryKey, $this->categoryDescription
-     */
-    private function resetCategoryForm(): void
-    {
-        $this->categoryId = '';
-        $this->categoryName = '';
-        $this->categoryKey = '';
-        $this->categoryDescription = '';
-        $this->resetErrorBag();
     }
 
     // --- Item Actions ---
@@ -244,9 +87,6 @@ trait HasVariableActions
      * @purpose Yeni öğe oluşturma modalını açma
      * @return void
      * 🔐 Security: Kategori seçimi zorunlu - selectedCategoryKey kontrolü
-     * 📢 Events: $this->showItemModal = true, error toast (kategori yoksa)
-     * 
-     * State Dependencies: $this->selectedCategoryKey, $this->showItemModal
      */
     public function openCreateModal(): void
     {
@@ -262,10 +102,7 @@ trait HasVariableActions
      * @purpose Mevcut öğeyi düzenleme moduna alma
      * @param string $id Düzenlenecek öğe ID'si
      * @return void
-     * 🔐 Security: Öğe varlığı kontrolü, ID validasyonu
-     * 📢 Events: $this->showItemModal = true, form alanları doldurulur
-     * 
-     * State Dependencies: $this->itemId, öğe form alanları, $this->selectedColor
+     * 🔐 Security: Öğe varlığı kontrolü
      */
     public function editItem(string $id): void
     {
@@ -285,10 +122,8 @@ trait HasVariableActions
     /**
      * @purpose Referans öğesi kaydetme (yeni oluşturma veya güncelleme)
      * @return void
-     * 🔐 Security: Form validasyonu, kategori anahtarı kontrolü, renk validasyonu
-     * 📢 Events: Success/error toast, modal kapatma, resetItemForm() çağrısı
-     * 
-     * State Dependencies: $this->itemId, $this->selectedCategoryKey, öğe form alanları
+     * 🔐 Security: Form validasyonu, kategori kontrolü
+     * 📢 Events: Success/error toast, modal kapatma
      */
     public function saveItem(): void
     {
@@ -330,10 +165,7 @@ trait HasVariableActions
      * @purpose Referans öğesini silme
      * @param string $id Silinecek öğe ID'si
      * @return void
-     * 🔐 Security: Öğe varlığı kontrolü, silme yetkisi
-     * 📢 Events: Success/error toast
-     * 
-     * State Dependencies: Yok (sadece veritabanı işlemi)
+     * 🔐 Security: Öğe varlığı kontrolü
      */
     public function deleteItem(string $id): void
     {
@@ -349,10 +181,7 @@ trait HasVariableActions
      * @purpose Öğeyi sıralamada yukarı taşıma
      * @param string $id Taşınacak öğe ID'si
      * @return void
-     * 🔐 Security: Öğe varlığı kontrolü, sort_order manipülasyon yetkisi
-     * 📢 Events: Success/error toast, UI sıralama güncelleme
-     * 
-     * State Dependencies: Yok (veritabanı sort_order değişikliği)
+     * 🔐 Security: sort_order manipülasyon yetkisi
      */
     public function moveItemUp(string $id): void
     {
@@ -367,10 +196,8 @@ trait HasVariableActions
                 $tempOrder = $item->sort_order;
                 $item->sort_order = $previousItem->sort_order;
                 $previousItem->sort_order = $tempOrder;
-
                 $item->save();
                 $previousItem->save();
-
                 $this->success('Sıralama güncellendi.');
             }
         } catch (\Exception $e) {
@@ -382,10 +209,7 @@ trait HasVariableActions
      * @purpose Öğeyi sıralamada aşağı taşıma
      * @param string $id Taşınacak öğe ID'si
      * @return void
-     * 🔐 Security: Öğe varlığı kontrolü, sort_order manipülasyon yetkisi
-     * 📢 Events: Success/error toast, UI sıralama güncelleme
-     * 
-     * State Dependencies: Yok (veritabanı sort_order değişikliği)
+     * 🔐 Security: sort_order manipülasyon yetkisi
      */
     public function moveItemDown(string $id): void
     {
@@ -400,10 +224,8 @@ trait HasVariableActions
                 $tempOrder = $item->sort_order;
                 $item->sort_order = $nextItem->sort_order;
                 $nextItem->sort_order = $tempOrder;
-
                 $item->save();
                 $nextItem->save();
-
                 $this->success('Sıralama güncellendi.');
             }
         } catch (\Exception $e) {
@@ -414,10 +236,6 @@ trait HasVariableActions
     /**
      * @purpose Öğe form alanlarını sıfırlama
      * @return void
-     * 🔐 Security: Private metot - sadece trait içinden erişilebilir
-     * 📢 Events: Form alanları temizlenir, hata mesajları sıfırlanır
-     * 
-     * State Dependencies: $this->itemId, öğe form alanları, $this->selectedColor
      */
     private function resetItemForm(): void
     {
