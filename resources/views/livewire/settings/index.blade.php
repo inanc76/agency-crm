@@ -88,6 +88,13 @@ new
                 'color' => 'bg-pink-50 text-pink-500',
                 'link' => '#'
             ],
+            [
+                'title' => 'Güvenlik',
+                'subtitle' => 'İki faktörlü doğrulama ve güvenlik ayarları',
+                'icon' => 'o-shield-check',
+                'color' => 'bg-green-50 text-green-600',
+                'link' => route('two-factor.show')
+            ],
         ];
 
         if (empty($this->search)) {
@@ -118,9 +125,9 @@ new
     {{-- Settings Grid --}}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
         @forelse($this->cards() as $card)
-            <a href="{{ $card['link'] }}" class="group block h-full">
+            <a href="{{ $card['link'] }}" class="group block">
                 <x-mary-card shadow
-                    class="theme-card shadow-sm hover:shadow-md transition-all duration-300 h-full overflow-hidden">
+                    class="theme-card shadow-sm hover:shadow-md transition-all duration-300 h-[120px] overflow-hidden">
                     <div class="flex items-start gap-4 h-full relative p-1">
                         {{-- Icon Box --}}
                         <div

@@ -257,6 +257,9 @@
             --dashboard-stats-3:
                 {{ $theme?->dashboard_stats_3_color ?? '#f59e0b' }}
             ;
+            --dashboard-stats-4:
+                {{ $theme?->dashboard_stats_4_color ?? '#8b5cf6' }}
+            ;
 
             /* User Menu & Dropdown */
             --avatar-gradient-start:

@@ -8,9 +8,12 @@ use Laravel\Fortify\Fortify;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Validate;
 use Livewire\Volt\Component;
+use Livewire\Attributes\Layout;
 use Symfony\Component\HttpFoundation\Response;
 
-new class extends Component {
+new
+    #[Layout('components.layouts.app', ['title' => 'İki Faktörlü Doğrulama'])]
+    class extends Component {
     #[Locked]
     public bool $twoFactorEnabled;
 
@@ -155,68 +158,103 @@ new class extends Component {
     {
         if ($this->twoFactorEnabled) {
             return [
-                'title' => __('Two-Factor Authentication Enabled'),
-                'description' => __('Two-factor authentication is now enabled. Scan the QR code or enter the setup key in your authenticator app.'),
-                'buttonText' => __('Close'),
+                'title' => __('İki Faktörlü Doğrulama Etkinleştirildi'),
+                'description' => __('İki faktörlü doğrulama artık etkinleştirildi. QR kodunu tarayın veya kurulum anahtarını doğrulayıcı uygulamanıza girin.'),
+                'buttonText' => __('Kapat'),
             ];
         }
 
         if ($this->showVerificationStep) {
             return [
-                'title' => __('Verify Authentication Code'),
-                'description' => __('Enter the 6-digit code from your authenticator app.'),
-                'buttonText' => __('Continue'),
+                'title' => __('Doğrulama Kodunu Girin'),
+                'description' => __('Doğrulayıcı uygulamanızdan 6 haneli kodu girin.'),
+                'buttonText' => __('Devam Et'),
             ];
         }
 
         return [
-            'title' => __('Enable Two-Factor Authentication'),
-            'description' => __('To finish enabling two-factor authentication, scan the QR code or enter the setup key in your authenticator app.'),
-            'buttonText' => __('Continue'),
+            'title' => __('İki Faktörlü Doğrulamayı Etkinleştir'),
+            'description' => __('İki faktörlü doğrulamayı etkinleştirmeyi tamamlamak için QR kodunu tarayın veya kurulum anahtarını doğrulayıcı uygulamanıza girin.'),
+            'buttonText' => __('Devam Et'),
         ];
     }
 } ?>
 
-<section class="w-full">
-    @include('partials.settings-heading')
+<div class="p-6 min-h-screen" style="background-color: var(--page-bg);">
+    <div class="w-full lg:w-3/4 mx-auto">
+        {{-- Back Button --}}
+        <a href="/dashboard/settings"
+            class="inline-flex items-center gap-2 text-skin-base hover:text-skin-heading mb-6 transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+            <span class="text-sm font-medium">Geri</span>
+        </a>
 
-    <x-settings.layout :heading="__('Two Factor Authentication')" :subheading="__('Manage your two-factor authentication settings')">
-        <div class="flex flex-col w-full mx-auto space-y-6 text-sm" wire:cloak>
-            @if ($twoFactorEnabled)
-                <div class="space-y-4">
-                    <div class="flex items-center gap-3">
-                        <flux:badge color="success">{{ __('Enabled') }}</flux:badge>
-                    </div>
-
-                    <flux:text>
-                        {{ __('With two-factor authentication enabled, you will be prompted for a secure, random pin during login, which you can retrieve from the TOTP-supported application on your phone.') }}
-                    </flux:text>
-
-                    <livewire:settings.two-factor.recovery-codes :$requiresConfirmation />
-
-                    <div class="flex justify-start">
-                        <flux:button variant="danger" icon="shield-exclamation" icon:variant="outline" wire:click="disable">
-                            {{ __('Disable 2FA') }}
-                        </flux:button>
-                    </div>
-                </div>
-            @else
-                <div class="space-y-4">
-                    <div class="flex items-center gap-3">
-                        <flux:badge color="danger">{{ __('Disabled') }}</flux:badge>
-                    </div>
-
-                    <flux:text variant="subtle">
-                        {{ __('When you enable two-factor authentication, you will be prompted for a secure pin during login. This pin can be retrieved from a TOTP-supported application on your phone.') }}
-                    </flux:text>
-
-                    <flux:button variant="primary" icon="shield-check" icon:variant="outline" wire:click="enable">
-                        {{ __('Enable 2FA') }}
-                    </flux:button>
-                </div>
-            @endif
+        {{-- Header --}}
+        <div class="mb-8">
+            <h1 class="text-2xl font-bold text-skin-heading">İki Faktörlü Doğrulama</h1>
+            <p class="text-sm text-skin-muted mt-1">Hesabınızın güvenliği için iki faktörlü doğrulama ayarlarını yönetin.</p>
         </div>
-    </x-settings.layout>
+
+        {{-- Main Card --}}
+        <div class="theme-card p-6 shadow-sm">
+            {{-- Card Header --}}
+            <div class="flex items-center justify-between pb-4 mb-6 border-b border-skin-light">
+                <h2 class="text-sm font-medium text-skin-base">2FA Durumu</h2>
+                @if ($twoFactorEnabled)
+                    <span class="px-2 py-1 text-xs font-medium rounded-full" style="background-color: var(--alert-success-bg); color: var(--alert-success-text); border: 1px solid var(--alert-success-border);">
+                        Etkin
+                    </span>
+                @else
+                    <span class="px-2 py-1 text-xs font-medium rounded-full" style="background-color: var(--alert-danger-bg); color: var(--alert-danger-text); border: 1px solid var(--alert-danger-border);">
+                        Devre Dışı
+                    </span>
+                @endif
+            </div>
+
+            {{-- Content --}}
+            <div class="grid grid-cols-1 gap-6" wire:cloak>
+                @if ($twoFactorEnabled)
+                    <div class="space-y-4">
+                        <div class="p-4 rounded-lg" style="background-color: var(--alert-success-bg); border: 1px solid var(--alert-success-border);">
+                            <p class="text-sm" style="color: var(--alert-success-text);">
+                                {{ __('İki faktörlü doğrulama etkinleştirildiğinde, giriş sırasında telefonunuzdaki TOTP destekli uygulamadan alabileceğiniz güvenli, rastgele bir pin girmeniz istenecektir.') }}
+                            </p>
+                        </div>
+
+                        <livewire:settings.two-factor.recovery-codes :$requiresConfirmation />
+
+                        <div class="flex justify-start">
+                            <button wire:click="disable" class="theme-btn-delete">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                                </svg>
+                                <span>{{ __('2FA\'yı Devre Dışı Bırak') }}</span>
+                            </button>
+                        </div>
+                    </div>
+                @else
+                    <div class="space-y-4">
+                        <div class="p-4 rounded-lg" style="background-color: var(--alert-warning-bg); border: 1px solid var(--alert-warning-border);">
+                            <p class="text-sm" style="color: var(--alert-warning-text);">
+                                {{ __('İki faktörlü doğrulamayı etkinleştirdiğinizde, giriş sırasında güvenli bir pin girmeniz istenecektir. Bu pin telefonunuzdaki TOTP destekli bir uygulamadan alınabilir.') }}
+                            </p>
+                        </div>
+
+                        <button wire:click="enable" class="theme-btn-save">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.031 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                            </svg>
+                            <span>{{ __('2FA\'yı Etkinleştir') }}</span>
+                        </button>
+                    </div>
+                @endif
+            </div>
+        </div>
+    </div>
+
+    {{-- Modal remains the same --}}
 
     <flux:modal name="two-factor-setup-modal" class="max-w-md md:min-w-md" @close="closeModal" wire:model="showModal">
         <div class="space-y-6">
@@ -257,12 +295,12 @@ new class extends Component {
 
                     <div class="flex items-center space-x-3">
                         <flux:button variant="outline" class="flex-1" wire:click="resetVerification">
-                            {{ __('Back') }}
+                            {{ __('Geri') }}
                         </flux:button>
 
                         <flux:button variant="primary" class="flex-1" wire:click="confirmTwoFactor"
                             x-bind:disabled="$wire.code.length < 6">
-                            {{ __('Confirm') }}
+                            {{ __('Onayla') }}
                         </flux:button>
                     </div>
                 </div>
@@ -303,7 +341,7 @@ new class extends Component {
                         </div>
                         <span
                             class="relative px-2 text-sm bg-[var(--card-bg)] dark:bg-[var(--card-bg)] text-[var(--color-text-base)] dark:text-[var(--color-text-muted)]">
-                            {{ __('or, enter the code manually') }}
+                            {{ __('veya, kodu manuel olarak girin') }}
                         </span>
                     </div>
 

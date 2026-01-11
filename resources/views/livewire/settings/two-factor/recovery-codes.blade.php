@@ -50,10 +50,10 @@ new class extends Component {
     <div class="px-6 space-y-2">
         <div class="flex items-center gap-2">
             <flux:icon.lock-closed variant="outline" class="size-4" />
-            <flux:heading size="lg" level="3">{{ __('2FA Recovery Codes') }}</flux:heading>
+            <flux:heading size="lg" level="3">{{ __('2FA Kurtarma Kodları') }}</flux:heading>
         </div>
         <flux:text variant="subtle">
-            {{ __('Recovery codes let you regain access if you lose your 2FA device. Store them in a secure password manager.') }}
+            {{ __('Kurtarma kodları, 2FA cihazınızı kaybetmeniz durumunda erişimi yeniden kazanmanızı sağlar. Bunları güvenli bir şifre yöneticisinde saklayın.') }}
         </flux:text>
     </div>
 
@@ -61,18 +61,18 @@ new class extends Component {
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <flux:button x-show="!showRecoveryCodes" icon="eye" icon:variant="outline" variant="primary"
                 @click="showRecoveryCodes = true;" aria-expanded="false" aria-controls="recovery-codes-section">
-                {{ __('View Recovery Codes') }}
+                {{ __('Kurtarma Kodlarını Göster') }}
             </flux:button>
 
             <flux:button x-show="showRecoveryCodes" icon="eye-slash" icon:variant="outline" variant="primary"
                 @click="showRecoveryCodes = false" aria-expanded="true" aria-controls="recovery-codes-section">
-                {{ __('Hide Recovery Codes') }}
+                {{ __('Kurtarma Kodlarını Gizle') }}
             </flux:button>
 
             @if (filled($recoveryCodes))
                 <flux:button x-show="showRecoveryCodes" icon="arrow-path" variant="filled"
                     wire:click="regenerateRecoveryCodes">
-                    {{ __('Regenerate Codes') }}
+                    {{ __('Kodları Yeniden Oluştur') }}
                 </flux:button>
             @endif
         </div>
@@ -94,7 +94,7 @@ new class extends Component {
                         @endforeach
                     </div>
                     <flux:text variant="subtle" class="text-xs">
-                        {{ __('Each recovery code can be used once to access your account and will be removed after use. If you need more, click Regenerate Codes above.') }}
+                        {{ __('Her kurtarma kodu hesabınıza erişmek için bir kez kullanılabilir ve kullanıldıktan sonra kaldırılır. Daha fazlasına ihtiyacınız varsa, yukarıdaki Kodları Yeniden Oluştur\'a tıklayın.') }}
                     </flux:text>
                 @endif
             </div>

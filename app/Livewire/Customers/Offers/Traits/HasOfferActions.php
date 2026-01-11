@@ -15,13 +15,36 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
+/**
+ * ╔══════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+ * ║                                          🏛️ MİMARIN NOTU - CONSTITUTION V10                                      ║
+ * ║                                                                                                                  ║
+ * ║  📋 SORUMLULUK ALANI: HasOfferActions Trait                                                                     ║
+ * ║  🎯 ANA GÖREV: Teklif yaşam döngüsü yönetimi ve iş süreçleri                                                   ║
+ * ║                                                                                                                  ║
+ * ║  🔧 TEMEL YETKİNLİKLER:                                                                                         ║
+ * ║  • Fiyatlandırma Hesaplamaları: KDV, indirim ve toplam tutar hesaplamaları                                     ║
+ * ║  • PDF Üretimi ve Dosya Yönetimi: MinIO entegrasyonu ile ek dosya işlemleri                                    ║
+ * ║  • Durum (Lifecycle) Yönetimi: DRAFT → SENT → APPROVED → REJECTED akış kontrolü                               ║
+ * ║  • Modal State Kontrolü: Servis ve ek dosya modallarının açılma/kapanma durumları                              ║
+ * ║  • Veri Yükleme ve Senkronizasyon: Müşteri servisleri ve referans verilerinin dinamik yüklenmesi               ║
+ * ║                                                                                                                  ║
+ * ║  🔐 GÜVENLİK KATMANLARI:                                                                                        ║
+ * ║  • Form Validasyonu: Laravel validation rules ile veri doğrulama                                               ║
+ * ║  • Dosya Güvenliği: Minio ile güvenli dosya depolama ve erişim kontrolü                                        ║
+ * ║  • Transaction Yönetimi: DB işlemlerinde atomik operasyonlar                                                    ║
+ * ║                                                                                                                  ║
+ * ║  📊 BAĞIMLILIK HARİTASI:                                                                                        ║
+ * ║  • $this->offer: Ana teklif verisi (Offer model instance)                                                      ║
+ * ║  • $this->items: Teklif kalemleri array'i                                                                      ║
+ * ║  • $this->attachments: Ek dosyalar array'i                                                                     ║
+ * ║  • $this->customer_id: Seçili müşteri ID'si                                                                    ║
+ * ║  • $this->customerServices: Müşteriye ait aktif servisler                                                      ║
+ * ║                                                                                                                  ║
+ * ╚══════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+ */
 trait HasOfferActions
 {
-    /**
-     * @trait HasOfferActions
-     * @purpose CRUD işlemleri (Kaydet/Sil), dosya yükleme, modal state yönetimi ve veri yüklemeyi yönetir.
-     * @methods mount(), initReferenceData(), loadOfferData(), save(), cancel(), delete(), saveAttachment(), loadCustomerServices()
-     */
     // Offer Fields
     public $customer_id = '';
     public $title = '';
@@ -59,6 +82,15 @@ trait HasOfferActions
     public $attachmentFile = null;
     public $editingAttachmentIndex = null;
 
+    /**
+     * @purpose Livewire bileşeninin başlatılması ve başlangıç verilerinin yüklenmesi
+     * @param string|null $offer Düzenlenecek teklif ID'si (opsiyonel)
+     * @return void
+     * 🔐 Security: Genel erişim - özel yetki kontrolü yok
+     * 📢 Events: Sayfa yönlendirmesi yok, sadece veri yükleme
+     * 
+     * State Dependencies: $this->customers, $this->customerServices, $this->offerId
+     */
     public function mount(?string $offer = null): void
     {
         $this->initReferenceData();
@@ -86,6 +118,14 @@ trait HasOfferActions
 
 
 
+    /**
+     * @purpose Referans verilerinin yüklenmesi (müşteriler, kategoriler, KDV oranları)
+     * @return void
+     * 🔐 Security: Private metot - sadece trait içinden erişilebilir
+     * 📢 Events: Veri yükleme işlemi, UI güncellemesi yok
+     * 
+     * State Dependencies: $this->customers, $this->categories, $this->priceDefinitions, $this->vatRates
+     */
     private function initReferenceData(): void
     {
         // Load Customers
@@ -145,6 +185,14 @@ trait HasOfferActions
         }
     }
 
+    /**
+     * @purpose Mevcut teklif verilerinin veritabanından yüklenmesi ve form alanlarına doldurulması
+     * @return void
+     * 🔐 Security: Private metot - $this->offerId kontrolü ile güvenli erişim
+     * 📢 Events: $this->isViewMode = true ile görüntüleme moduna geçiş
+     * 
+     * State Dependencies: $this->offerId, $this->items, $this->attachments, $this->customer_id
+     */
     private function loadOfferData(): void
     {
         $offer = Offer::with('items')->findOrFail($this->offerId);
@@ -188,11 +236,27 @@ trait HasOfferActions
         $this->isViewMode = true;
     }
 
+    /**
+     * @purpose Müşteri değiştiğinde otomatik servis listesi güncelleme
+     * @return void
+     * 🔐 Security: Livewire property watcher - otomatik tetiklenir
+     * 📢 Events: loadCustomerServices() çağrısı ile UI güncelleme
+     * 
+     * State Dependencies: $this->customer_id, $this->customerServices
+     */
     public function updatedCustomerId(): void
     {
         $this->loadCustomerServices();
     }
 
+    /**
+     * @purpose Seçili müşterinin aktif servislerini yıla göre filtreleyerek yükleme
+     * @return void
+     * 🔐 Security: Private metot - customer_id kontrolü ile güvenli erişim
+     * 📢 Events: $this->customerServices array'inin güncellenmesi
+     * 
+     * State Dependencies: $this->customer_id, $this->selectedYear, $this->customerServices
+     */
     private function loadCustomerServices(): void
     {
         if ($this->customer_id) {
@@ -206,11 +270,27 @@ trait HasOfferActions
         }
     }
 
+    /**
+     * @purpose Yıl değiştiğinde müşteri servislerini yeniden yükleme
+     * @return void
+     * 🔐 Security: Livewire property watcher - otomatik tetiklenir
+     * 📢 Events: loadCustomerServices() çağrısı ile UI güncelleme
+     * 
+     * State Dependencies: $this->selectedYear, $this->customerServices
+     */
     public function updatedSelectedYear(): void
     {
         $this->loadCustomerServices();
     }
 
+    /**
+     * @purpose Servis seçim modalını açma ve müşteri kontrolü
+     * @return void
+     * 🔐 Security: Müşteri seçimi zorunlu - customer_id kontrolü
+     * 📢 Events: $this->showServiceModal = true, error toast (müşteri yoksa)
+     * 
+     * State Dependencies: $this->customer_id, $this->showServiceModal
+     */
     public function openServiceModal(): void
     {
         if (!$this->customer_id) {
@@ -221,6 +301,14 @@ trait HasOfferActions
         $this->loadCustomerServices();
     }
 
+    /**
+     * @purpose Servis seçim modalını kapatma ve form temizleme
+     * @return void
+     * 🔐 Security: Genel erişim - özel yetki kontrolü yok
+     * 📢 Events: $this->showServiceModal = false, modal form alanları temizlenir
+     * 
+     * State Dependencies: $this->showServiceModal, $this->modalCategory, $this->modalServiceName
+     */
     public function closeServiceModal(): void
     {
         $this->showServiceModal = false;
@@ -229,18 +317,42 @@ trait HasOfferActions
     }
 
     // Attachment Methods
+    /**
+     * @purpose Ek dosya yükleme modalını açma ve form temizleme
+     * @return void
+     * 🔐 Security: Genel erişim - özel yetki kontrolü yok
+     * 📢 Events: $this->showAttachmentModal = true, resetAttachmentForm() çağrısı
+     * 
+     * State Dependencies: $this->showAttachmentModal
+     */
     public function openAttachmentModal(): void
     {
         $this->resetAttachmentForm();
         $this->showAttachmentModal = true;
     }
 
+    /**
+     * @purpose Ek dosya modalını kapatma ve form temizleme
+     * @return void
+     * 🔐 Security: Genel erişim - özel yetki kontrolü yok
+     * 📢 Events: $this->showAttachmentModal = false, resetAttachmentForm() çağrısı
+     * 
+     * State Dependencies: $this->showAttachmentModal
+     */
     public function closeAttachmentModal(): void
     {
         $this->showAttachmentModal = false;
         $this->resetAttachmentForm();
     }
 
+    /**
+     * @purpose Ek dosya form alanlarını sıfırlama
+     * @return void
+     * 🔐 Security: Private metot - sadece trait içinden erişilebilir
+     * 📢 Events: Form alanları temizlenir, düzenleme modu sıfırlanır
+     * 
+     * State Dependencies: $this->attachmentTitle, $this->attachmentDescription, $this->attachmentPrice, $this->attachmentFile, $this->editingAttachmentIndex
+     */
     private function resetAttachmentForm(): void
     {
         $this->attachmentTitle = '';
@@ -250,6 +362,14 @@ trait HasOfferActions
         $this->editingAttachmentIndex = null;
     }
 
+    /**
+     * @purpose Ek dosya kaydetme (yeni ekleme veya güncelleme) ve MinIO'ya yükleme
+     * @return void
+     * 🔐 Security: Form validasyonu, dosya tipi kontrolü (PDF, DOC, DOCX), boyut limiti (25MB)
+     * 📢 Events: Success/error toast, closeAttachmentModal() çağrısı
+     * 
+     * State Dependencies: $this->attachments, $this->editingAttachmentIndex, $this->attachmentFile, $this->currency
+     */
     public function saveAttachment(): void
     {
         $this->resetErrorBag();
@@ -318,6 +438,15 @@ trait HasOfferActions
         }
     }
 
+    /**
+     * @purpose Mevcut ek dosyayı düzenleme moduna alma
+     * @param int $index Düzenlenecek ek dosyanın array indeksi
+     * @return void
+     * 🔐 Security: Array indeks kontrolü, mevcut dosya varlığı kontrolü
+     * 📢 Events: $this->showAttachmentModal = true, form alanları doldurulur
+     * 
+     * State Dependencies: $this->attachments, $this->editingAttachmentIndex, attachment form fields
+     */
     public function editAttachment(int $index): void
     {
         $attachment = $this->attachments[$index];
@@ -328,6 +457,15 @@ trait HasOfferActions
         $this->showAttachmentModal = true;
     }
 
+    /**
+     * @purpose Ek dosyayı listeden ve MinIO'dan silme
+     * @param int $index Silinecek ek dosyanın array indeksi
+     * @return void
+     * 🔐 Security: Array indeks kontrolü, MinIO dosya silme yetkisi
+     * 📢 Events: Success/error toast, $this->attachments array güncelleme
+     * 
+     * State Dependencies: $this->attachments
+     */
     public function removeAttachment(int $index): void
     {
         try {
@@ -353,6 +491,15 @@ trait HasOfferActions
         }
     }
 
+    /**
+     * @purpose MinIO'dan ek dosyayı indirme
+     * @param int $index İndirilecek ek dosyanın array indeksi
+     * @return mixed Download response veya null (hata durumunda)
+     * 🔐 Security: Dosya varlığı kontrolü, MinIO erişim yetkisi
+     * 📢 Events: Error toast (hata durumunda), dosya indirme başlatılır
+     * 
+     * State Dependencies: $this->attachments
+     */
     public function downloadAttachment(int $index): mixed
     {
         $attachment = $this->attachments[$index] ?? null;
@@ -375,6 +522,14 @@ trait HasOfferActions
         }
     }
 
+    /**
+     * @purpose Teklifi veritabanına kaydetme (yeni oluşturma veya güncelleme)
+     * @return void
+     * 🔐 Security: Form validasyonu, DB transaction, UUID güvenliği
+     * 📢 Events: Success toast, 'offer-saved' dispatch, redirect to customers page
+     * 
+     * State Dependencies: $this->offerId, $this->items, $this->attachments, tüm form alanları
+     */
     public function save(): void
     {
         $this->validate([
@@ -458,6 +613,14 @@ trait HasOfferActions
         $this->redirect('/dashboard/customers?tab=offers');
     }
 
+    /**
+     * @purpose Teklif düzenlemeyi iptal etme ve geçici dosyaları temizleme
+     * @return void
+     * 🔐 Security: Geçici dosya temizleme, MinIO'dan silme yetkisi
+     * 📢 Events: Redirect (yeni teklif) veya loadOfferData() (mevcut teklif)
+     * 
+     * State Dependencies: $this->offerId, $this->attachments
+     */
     public function cancel(): void
     {
         // Clean up unsaved attachments from Minio
@@ -487,11 +650,27 @@ trait HasOfferActions
         }
     }
 
+    /**
+     * @purpose Görüntüleme modundan düzenleme moduna geçiş
+     * @return void
+     * 🔐 Security: Genel erişim - özel yetki kontrolü yok
+     * 📢 Events: $this->isViewMode = false ile düzenleme moduna geçiş
+     * 
+     * State Dependencies: $this->isViewMode
+     */
     public function toggleEditMode(): void
     {
         $this->isViewMode = false;
     }
 
+    /**
+     * @purpose Teklifi veritabanından kalıcı olarak silme
+     * @return void
+     * 🔐 Security: Teklif varlığı kontrolü, silme yetkisi
+     * 📢 Events: Success toast, redirect to customers page
+     * 
+     * State Dependencies: $this->offerId
+     */
     public function delete(): void
     {
         if ($this->offerId) {

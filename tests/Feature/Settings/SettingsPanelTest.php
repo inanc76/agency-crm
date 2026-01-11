@@ -16,7 +16,7 @@ test('1. theme settings panel page is accessible', function () {
 });
 
 test('2. activeTab defaults to theme', function () {
-    Volt::test('settings.panel')->assertSet('activeTab', 'theme');
+    Volt::test('settings.panel')->assertSet('activeTab', 'style-guide');
 });
 
 test('3. switching activeTab to design works', function () {

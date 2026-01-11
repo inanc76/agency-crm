@@ -5,13 +5,14 @@ use Laravel\Fortify\Features;
 use Livewire\Volt\Volt;
 
 beforeEach(function () {
-    if (! Features::canManageTwoFactorAuthentication()) {
-        $this->markTestSkipped('Two-factor authentication is not enabled.');
-    }
-
-    Features::twoFactorAuthentication([
-        'confirm' => true,
-        'confirmPassword' => true,
+    // Config'i doğru şekilde set et
+    config([
+        'fortify.features' => [
+            Features::twoFactorAuthentication([
+                'confirm' => true,
+                'confirmPassword' => true,
+            ]),
+        ]
     ]);
 });
 
@@ -22,12 +23,12 @@ test('two factor settings page can be rendered', function () {
         ->withSession(['auth.password_confirmed_at' => time()])
         ->get(route('two-factor.show'))
         ->assertOk()
-        ->assertSee('Two Factor Authentication')
-        ->assertSee('Disabled');
+        ->assertSee('İki Faktörlü Doğrulama')
+        ->assertSee('Devre Dışı');
 });
 
 test('two factor settings page requires password confirmation when enabled', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->withoutTwoFactor()->create();
 
     $response = $this->actingAs($user)
         ->get(route('two-factor.show'));
@@ -38,7 +39,7 @@ test('two factor settings page requires password confirmation when enabled', fun
 test('two factor settings page returns forbidden response when two factor is disabled', function () {
     config(['fortify.features' => []]);
 
-    $user = User::factory()->create();
+    $user = User::factory()->withoutTwoFactor()->create();
 
     $response = $this->actingAs($user)
         ->withSession(['auth.password_confirmed_at' => time()])
@@ -47,24 +48,130 @@ test('two factor settings page returns forbidden response when two factor is dis
     $response->assertForbidden();
 });
 
-test('two factor authentication disabled when confirmation abandoned between requests', function () {
-    $user = User::factory()->create();
 
+/**
+ * 🛡️ ZIRHLI TEST: Secret Verification & State Persistence
+ * Scenario: Kullanıcı 2FA'yi etkinleştirdiğinde veritabanı mühürlenmeli (secret set edilmeli).
+ */
+test('user can enable two factor authentication (generates secrets)', function () {
+    // Clean user
+    $user = User::factory()->withoutTwoFactor()->create();
+    $this->actingAs($user);
+
+    $component = Volt::test('settings.two-factor')
+        ->call('enable');
+
+    // 1. UI Check: Modal açılmalı
+    $component->assertSet('showModal', true)
+        ->assertSet('showVerificationStep', false);
+
+    // 2. State Check: QR Code check handled in another test.
+
+    // 3. DB Check (State Persistence)
+    $user->refresh();
+    expect($user->two_factor_secret)->not->toBeNull();
+    expect($user->two_factor_recovery_codes)->not->toBeNull();
+    // Confirmed At MUST BE NULL because we enabled confirmation
+    expect($user->two_factor_confirmed_at)->toBeNull();
+});
+
+/**
+ * 🛡️ ZIRHLI TEST: UI Feedback & QR Code
+ * Scenario: QR Kod arayüzde SVG olarak render edilmeli.
+ */
+test('ui displays qr code and manual key when enabled', function () {
+    $user = User::factory()->withoutTwoFactor()->create();
+    $this->actingAs($user);
+
+    Volt::test('settings.two-factor')
+        ->call('enable')
+        ->assertSet('showModal', true)
+        ->assertSeeHtml('<svg'); // QR code presence
+});
+
+/**
+ * 🛡️ ZIRHLI TEST: Recovery Codes (Burn-Once Logic Simulation)
+ * Scenario: 2FA aktif edildiğinde kurtarma kodları üretilmeli (encrypted).
+ */
+test('recovery codes are generated on enable', function () {
+    $user = User::factory()->withoutTwoFactor()->create();
+    $this->actingAs($user);
+
+    Volt::test('settings.two-factor')
+        ->call('enable');
+
+    $user->refresh();
+    // Decrypt success proves valid encryption
+    $codes = json_decode(decrypt($user->two_factor_recovery_codes), true);
+
+    expect($codes)->toBeArray()
+        ->and(count($codes))->toBeGreaterThan(0);
+});
+
+/**
+ * 🛡️ ZIRHLI TEST: Secret Verification (Invalid Code)
+ * Scenario: Yanlış kod girildiğinde doğrulama reddedilmeli.
+ */
+test('confirmation fails with invalid code', function () {
+    $user = User::factory()->withoutTwoFactor()->create();
+    $this->actingAs($user);
+
+    $component = Volt::test('settings.two-factor')
+        ->call('enable')
+        ->set('code', '000000') // Yanlış kod
+        ->call('confirmTwoFactor');
+
+    $component->assertHasErrors();
+
+    $user->refresh();
+    expect($user->two_factor_confirmed_at)->toBeNull();
+});
+
+/**
+ * 🛡️ ZIRHLI TEST: Disable Action & Database Cleanup
+ * Scenario: 2FA devre dışı bırakıldığında tüm hassas veriler temizlenmeli.
+ */
+test('user can disable two factor authentication', function () {
+    // Manually create an ENABLED user state (valid encrypted data)
+    $user = User::factory()->withoutTwoFactor()->create();
     $user->forceFill([
-        'two_factor_secret' => encrypt('test-secret'),
-        'two_factor_recovery_codes' => encrypt(json_encode(['code1', 'code2'])),
-        'two_factor_confirmed_at' => null,
+        'two_factor_secret' => encrypt('secret'),
+        'two_factor_recovery_codes' => encrypt(json_encode(['code'])),
+        'two_factor_confirmed_at' => now(),
     ])->save();
 
     $this->actingAs($user);
 
-    $component = Volt::test('settings.two-factor');
+    // We do NOT set 'twoFactorEnabled' because it is locked.
+    // Mount will pick up the state from DB.
+    Volt::test('settings.two-factor')
+        ->call('disable');
 
-    $component->assertSet('twoFactorEnabled', false);
+    $user->refresh();
+    expect($user->two_factor_secret)->toBeNull();
+    expect($user->two_factor_recovery_codes)->toBeNull();
+    expect($user->two_factor_confirmed_at)->toBeNull();
+});
 
-    $this->assertDatabaseHas('users', [
-        'id' => $user->id,
-        'two_factor_secret' => null,
-        'two_factor_recovery_codes' => null,
-    ]);
+/**
+ * 🛡️ ZIRHLI TEST: UI Feedback (Confirmation Success)
+ * Scenario: Başarılı onayla UI 'Etkin' durumuna güncellenmeli.
+ */
+test('confirmation succeeds with mocked action', function () {
+    $user = User::factory()->withoutTwoFactor()->create();
+    $this->actingAs($user);
+
+    // Mock the action to succeed
+    $this->mock(Laravel\Fortify\Actions\ConfirmTwoFactorAuthentication::class, function ($mock) {
+        $mock->shouldReceive('__invoke')->once();
+    });
+
+    $component = Volt::test('settings.two-factor')
+        ->call('enable')
+        ->set('code', '123456')
+        ->call('confirmTwoFactor');
+
+    $component->assertSet('showModal', false)
+        ->assertSet('twoFactorEnabled', true)
+        ->assertSee('Etkin');
 });

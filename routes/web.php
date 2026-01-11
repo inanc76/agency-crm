@@ -103,15 +103,22 @@ Route::middleware(['auth'])->group(function () {
     Volt::route('settings/profile', 'settings.profile')->name('profile.edit');
     Volt::route('settings/password', 'settings.password')->name('user-password.edit');
     Volt::route('settings/appearance', 'settings.appearance')->name('appearance.edit');
-
-    Volt::route('settings/two-factor', 'settings.two-factor')
-        ->middleware(
-            when(
-                Features::canManageTwoFactorAuthentication()
-                && Features::optionEnabled(Features::twoFactorAuthentication(), 'confirmPassword'),
-                ['password.confirm'],
-                [],
-            ),
-        )
-        ->name('two-factor.show');
 });
+
+Volt::route('dashboard/settings/two-factor', 'settings.two-factor')
+    ->middleware(['auth', 'verified', 'password.confirm'])
+    ->name('two-factor.show');
+
+// Debug route for testing
+Route::get('debug/2fa', function () {
+    if (!auth()->check()) {
+        return 'User not authenticated';
+    }
+
+    $user = auth()->user();
+    return [
+        'user' => $user->email,
+        'has_2fa' => $user->hasEnabledTwoFactorAuthentication(),
+        'fortify_enabled' => Laravel\Fortify\Features::enabled(Laravel\Fortify\Features::twoFactorAuthentication()),
+    ];
+})->middleware(['auth']);

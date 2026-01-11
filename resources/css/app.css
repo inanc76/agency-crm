@@ -118,6 +118,17 @@
         --color-info-bg-base: #eff4ff;
         --color-info-border-base: #bfdbfe;
 
+        /* Alert Colors */
+        --alert-success-bg: #f0fdf4;
+        --alert-success-border: #bbf7d0;
+        --alert-success-text: #166534;
+        --alert-warning-bg: #fffbeb;
+        --alert-warning-border: #fed7aa;
+        --alert-warning-text: #92400e;
+        --alert-danger-bg: #fef2f2;
+        --alert-danger-border: #fecaca;
+        --alert-danger-text: #dc2626;
+
         /* Semantic Actions */
         --color-danger-base: #dc2626;
         /* text-red-600 */
