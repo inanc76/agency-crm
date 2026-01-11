@@ -5,6 +5,42 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 🎨 PanelSetting Model - UI Tema ve Görünüm Ayarları
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 
+ * @package App\Models
+ * @version Constitution V10
+ * 
+ * 🔑 UUID: ✅ ACTIVE (HasUuids) | PK: string | Incrementing: false
+ * 
+ * PanelSetting, sistemin TÜM UI TEMA AYARLARINI saklar:
+ * 
+ * **Kategoriler:**
+ * 1. **Branding**: site_name, logo_path, favicon_path, logo_scale
+ * 2. **Typography**: font_family, base_text_color, heading_color, font sizes
+ * 3. **Header & Menu**: header_bg_color, menu_bg_color, menu_text_color, borders
+ * 4. **Sidebar**: sidebar_bg_color, sidebar_text_color, hover/active states
+ * 5. **Inputs**: input_border_color, focus_ring_color, error states, padding, radius
+ * 6. **Buttons**: Granular control (create, edit, delete, cancel, save) - bg, text, hover, border
+ * 7. **Cards**: card_bg_color, card_border_color, card_border_radius, table_hover
+ * 8. **Dashboard**: dashboard_card_bg_color, stats colors (1-3)
+ * 9. **Avatar & Dropdowns**: gradient colors, notification badge
+ * 
+ * **Kullanım:**
+ * - Ayarlar sayfasında yönetilir (/dashboard/settings/panel)
+ * - CSS variables olarak inject edilir (--card-bg-color, vb.)
+ * - Tüm UI bileşenleri bu değişkenleri kullanır (Zero Hard-Coding)
+ * - is_active: Tek bir kayıt aktif olmalı
+ * 
+ * **Önemli:**
+ * - 100+ alan içerir (granular control)
+ * - Guarded: Tüm alanlar mass-assignable
+ * - Değişiklikler anında UI'ya yansır (CSS variables)
+ * 
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
 class PanelSetting extends Model
 {
     use HasUuids;

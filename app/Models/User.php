@@ -10,6 +10,41 @@ use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 👨‍💼 User Model - Sistem Kullanıcıları ve Yetkilendirme
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 
+ * @package App\Models
+ * @version Constitution V10
+ * 
+ * 🔑 UUID: ✅ ACTIVE (HasUuids) | PK: string | Incrementing: false
+ * 
+ * @property string $id                  UUID primary key
+ * @property string $name                Kullanıcı adı soyadı
+ * @property string $email               E-posta (unique, login için)
+ * @property string $password            Hashed şifre
+ * @property string|null $role_id        Rol UUID (FK: roles)
+ * @property \Carbon\Carbon|null $email_verified_at E-posta doğrulama zamanı
+ * @property string|null $remember_token Remember me token
+ * @property string|null $two_factor_secret 2FA secret (encrypted)
+ * @property string|null $two_factor_recovery_codes 2FA recovery codes (encrypted)
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * 
+ * @property-read Role|null $role        BelongsTo: Kullanıcının rolü
+ * 
+ * User modeli, sistemdeki KULLANICILARI ve YETKİLENDİRMEYİ yönetir:
+ * - Laravel Fortify ile authentication (login, 2FA)
+ * - Role-based access control (RBAC): User -> Role -> Permissions
+ * - hasPermissionTo(): Permission kontrolü
+ * - givePermissionTo(): Test/setup için permission atama
+ * - initials(): Avatar için baş harfler (örn: "VK")
+ * 
+ * ⚠️ Güvenlik: password hashed, 2FA secret encrypted
+ * 
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */

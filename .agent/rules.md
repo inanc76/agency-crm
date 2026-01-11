@@ -66,3 +66,5 @@ Documentation Check: Dosya başına "Kimlik Kartı" planlandı mı?
 Next.js DNA Sync: Tasarım aslıyla %100 örtüşüyor mu?
 
 Test Status: Beklemede (Sadece /test komutuyla).
+
+"MÜHÜR KORUMA KURALI: Dosyada yapılan her kod değişikliği, ilgili 'Mimarın Notu' ve DocBlock yorum satırlarına yansıtılmalıdır. Eğer bir metodun parametresi veya iş mantığı değişirse, üzerindeki açıklama satırı anında güncellenmelidir. Yorumu güncellenmemiş kod, 'Constitution V10' uyarınca hatalı kabul edilir."

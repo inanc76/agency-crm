@@ -118,9 +118,9 @@ new class extends Component {
     {{-- Card Header --}}
     <div class="flex items-center justify-between pb-4 mb-6 border-b border-[var(--card-border)]">
         <h2 class="text-sm font-medium text-skin-heading">Header & Sidebar Görünüm Ayarları</h2>
-        <x-mary-button label="Kaydet" icon="o-check" class="btn-sm text-white"
-            style="background-color: var(--btn-save-bg); border-color: var(--btn-save-border);" wire:click="save"
-            spinner="save" />
+        <x-mary-button label="Kaydet" icon="o-check" class="btn-sm"
+            style="background-color: var(--btn-save-bg) !important; color: var(--btn-save-text) !important; border-color: var(--btn-save-border) !important;"
+            wire:click="save" spinner="save" />
     </div>
 
     {{-- Accordion Sections --}}

@@ -13,7 +13,7 @@ new
     use Toast;
     use WithFileUploads;
 
-    public string $activeTab = 'theme';
+    public string $activeTab = 'style-guide';
 
     // Branding moved to Header Component
 
@@ -107,6 +107,16 @@ new
         </div>
 
         <x-mary-tabs wire:model="activeTab" class="bg-transparent">
+            {{-- Tasarım Rehberi (Default First) --}}
+            <x-mary-tab name="style-guide" icon="o-swatch">
+                <x-slot:label>
+                    <span class="font-semibold">Tasarım Rehberi</span>
+                </x-slot:label>
+
+                <livewire:settings.style-guide lazy />
+            </x-mary-tab>
+
+            {{-- Tema Ayarları --}}
             <x-mary-tab name="theme" icon="o-adjustments-horizontal">
                 <x-slot:label>
                     <span class="font-semibold">Tema Ayarları</span>
@@ -123,14 +133,6 @@ new
                         <livewire:settings.theme.cards lazy />
                     </div>
                 </div>
-            </x-mary-tab>
-
-            <x-mary-tab name="style-guide" icon="o-swatch">
-                <x-slot:label>
-                    <span class="font-semibold">Tasarım Rehberi</span>
-                </x-slot:label>
-
-                <livewire:settings.style-guide lazy />
             </x-mary-tab>
         </x-mary-tabs>
     </div>

@@ -53,9 +53,9 @@ new class extends Component {
             <x-mary-icon name="o-language" class="w-5 h-5 text-[var(--brand-primary)]" />
             <span class="font-semibold text-skin-heading">Global Tipografi</span>
         </div>
-        <x-mary-button label="Kaydet" icon="o-check" class="btn-sm text-white"
-            style="background-color: var(--btn-save-bg); border-color: var(--btn-save-border);" wire:click="save"
-            spinner="save" />
+        <x-mary-button label="Kaydet" icon="o-check" class="btn-sm"
+            style="background-color: var(--btn-save-bg) !important; color: var(--btn-save-text) !important; border-color: var(--btn-save-border) !important;"
+            wire:click="save" spinner="save" />
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

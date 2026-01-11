@@ -74,9 +74,9 @@ new class extends Component {
             <x-mary-icon name="o-pencil-square" class="w-5 h-5 text-[var(--brand-primary)]" />
             <span class="font-semibold text-skin-heading">Input & Validation</span>
         </div>
-        <x-mary-button label="Kaydet" icon="o-check" class="btn-sm text-white"
-            style="background-color: var(--btn-save-bg); border-color: var(--btn-save-border);" wire:click="save"
-            spinner="save" />
+        <x-mary-button label="Kaydet" icon="o-check" class="btn-sm"
+            style="background-color: var(--btn-save-bg) !important; color: var(--btn-save-text) !important; border-color: var(--btn-save-border) !important;"
+            wire:click="save" spinner="save" />
     </div>
 
     <div class="space-y-6">
@@ -119,7 +119,7 @@ new class extends Component {
                     <label class="block text-sm font-medium text-skin-base mb-2">Error Border Color</label>
                     <div class="flex items-center gap-2">
                         <input type="color" wire:model.live="input_error_border_color"
-                            class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
+                            class="w-12 h-10 rounded border border-[var(--card-border)] cursor-pointer">
                         <x-mary-input wire:model.live="input_error_border_color" placeholder="#ef4444" class="flex-1" />
                     </div>
                 </div>
@@ -127,7 +127,7 @@ new class extends Component {
                     <label class="block text-sm font-medium text-skin-base mb-2">Error Text Color</label>
                     <div class="flex items-center gap-2">
                         <input type="color" wire:model.live="input_error_text_color"
-                            class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
+                            class="w-12 h-10 rounded border border-[var(--card-border)] cursor-pointer">
                         <x-mary-input wire:model.live="input_error_text_color" placeholder="#ef4444" class="flex-1" />
                     </div>
                 </div>
@@ -136,7 +136,7 @@ new class extends Component {
 
         {{-- Geometry & Fonts --}}
         <div>
-            <h3 class="text-sm font-semibold text-slate-900 mb-3 block">Input Geometry & Typography</h3>
+            <h3 class="text-sm font-semibold text-skin-heading mb-3 block">Input Geometry & Typography</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <x-mary-input label="Vertical Padding" wire:model="input_vertical_padding" hint="Örn: 8px" />
                 <x-mary-input label="Border Radius" wire:model="input_border_radius" hint="Örn: 6px veya rounded-md" />
@@ -147,7 +147,7 @@ new class extends Component {
 
         {{-- Helper & Error Typography --}}
         <div>
-            <h3 class="text-sm font-semibold text-slate-900 mb-3 block">Validation Typography</h3>
+            <h3 class="text-sm font-semibold text-skin-heading mb-3 block">Validation Typography</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <x-mary-input label="Error Message Font Size" wire:model="error_font_size" suffix="px"
                     hint="Default: 12px" />

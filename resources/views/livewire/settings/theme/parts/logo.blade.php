@@ -20,7 +20,7 @@
                 <div class="flex items-center gap-2">
                     @if($current_logo_path)
                         <img src="{{ asset('storage/' . $current_logo_path) }}" alt="Current Logo"
-                            class="h-10 object-contain border border-[var(--card-border)] rounded p-1 bg-white">
+                            class="h-10 object-contain border border-[var(--card-border)] rounded p-1 bg-[var(--card-bg)]">
                     @endif
                     <div class="flex-1">
                         <x-mary-file wire:model="logo" accept=".png,.jpg,.jpeg,.svg"
@@ -28,17 +28,17 @@
                     </div>
                     <div class="flex gap-1">
                         <button type="button" wire:click="$set('logo_scale', 1)"
-                            class="px-2 py-1 text-xs font-medium rounded {{ $logo_scale == 1 ? 'text-white' : 'bg-slate-200 text-slate-700' }}"
+                            class="px-2 py-1 text-xs font-medium rounded {{ $logo_scale == 1 ? 'text-white' : 'bg-skin-input text-slate-700' }}"
                             style="{{ $logo_scale == 1 ? 'background-color: var(--btn-create-bg)' : '' }}">
                             1x
                         </button>
                         <button type="button" wire:click="$set('logo_scale', 1.5)"
-                            class="px-2 py-1 text-xs font-medium rounded {{ $logo_scale == 1.5 ? 'text-white' : 'bg-slate-200 text-slate-700' }}"
+                            class="px-2 py-1 text-xs font-medium rounded {{ $logo_scale == 1.5 ? 'text-white' : 'bg-skin-input text-slate-700' }}"
                             style="{{ $logo_scale == 1.5 ? 'background-color: var(--btn-create-bg)' : '' }}">
                             1.5x
                         </button>
                         <button type="button" wire:click="$set('logo_scale', 2)"
-                            class="px-2 py-1 text-xs font-medium rounded {{ $logo_scale == 2 ? 'text-white' : 'bg-slate-200 text-slate-700' }}"
+                            class="px-2 py-1 text-xs font-medium rounded {{ $logo_scale == 2 ? 'text-white' : 'bg-skin-input text-slate-700' }}"
                             style="{{ $logo_scale == 2 ? 'background-color: var(--btn-create-bg)' : '' }}">
                             2x
                         </button>

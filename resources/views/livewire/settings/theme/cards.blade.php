@@ -85,8 +85,9 @@ new class extends Component {
                 <x-mary-icon name="o-rectangle-group" class="w-5 h-5 text-[var(--brand-primary)]" />
                 <span class="font-semibold text-skin-heading">Kart & Konteyner</span>
             </div>
-            <x-mary-button label="Kaydet" icon="o-check" class="btn-sm text-white"
-                style="background-color: var(--btn-save-bg); border-color: var(--btn-save-border);" wire:click="save" />
+            <x-mary-button label="Kaydet" icon="o-check" class="btn-sm"
+                style="background-color: var(--btn-save-bg) !important; color: var(--btn-save-text) !important; border-color: var(--btn-save-border) !important;"
+                wire:click="save" />
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 py-2">
@@ -94,7 +95,7 @@ new class extends Component {
                 <label class="block text-sm font-medium text-skin-base mb-2">Card Background</label>
                 <div class="flex items-center gap-2">
                     <input type="color" wire:model.live="card_bg_color"
-                        class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
+                        class="w-12 h-10 rounded border border-[var(--card-border)] cursor-pointer">
                     <x-mary-input wire:model.live="card_bg_color" placeholder="#eff4ff" class="flex-1" />
                 </div>
             </div>
@@ -117,11 +118,12 @@ new class extends Component {
         class="theme-card p-6 shadow-sm border border-[var(--card-border)] rounded-[var(--card-radius)] bg-[var(--card-bg)]">
         <div class="flex items-center justify-between pb-4 mb-6 border-b border-[var(--card-border)]">
             <div class="flex items-center gap-3">
-                <x-mary-icon name="o-table-cells" class="w-5 h-5 text-indigo-500" />
+                <x-mary-icon name="o-table-cells" class="w-5 h-5 text-[var(--brand-primary)]" />
                 <span class="font-semibold text-skin-base">Tablo & Liste Ayarları</span>
             </div>
-            <x-mary-button label="Kaydet" icon="o-check" class="btn-sm text-white"
-                style="background-color: var(--btn-save-bg); border-color: var(--btn-save-border);" wire:click="save" />
+            <x-mary-button label="Kaydet" icon="o-check" class="btn-sm"
+                style="background-color: var(--btn-save-bg) !important; color: var(--btn-save-text) !important; border-color: var(--btn-save-border) !important;"
+                wire:click="save" />
         </div>
 
         <div class="space-y-6">
@@ -130,7 +132,7 @@ new class extends Component {
                     <label class="block text-sm font-medium text-skin-base mb-2">Row Hover Background Color</label>
                     <div class="flex items-center gap-2">
                         <input type="color" wire:model.live="table_hover_bg_color"
-                            class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
+                            class="w-12 h-10 rounded border border-[var(--card-border)] cursor-pointer">
                         <x-mary-input wire:model.live="table_hover_bg_color" placeholder="#f8fafc" class="flex-1" />
                     </div>
                 </div>
@@ -138,21 +140,21 @@ new class extends Component {
                     <label class="block text-sm font-medium text-skin-base mb-2">Row Hover Text Color</label>
                     <div class="flex items-center gap-2">
                         <input type="color" wire:model.live="table_hover_text_color"
-                            class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
+                            class="w-12 h-10 rounded border border-[var(--card-border)] cursor-pointer">
                         <x-mary-input wire:model.live="table_hover_text_color" placeholder="#0f172a" class="flex-1" />
                     </div>
                 </div>
             </div>
 
             {{-- Table Avatar Settings --}}
-            <div class="border-t border-slate-100 pt-6 mt-6">
-                <h3 class="text-sm font-semibold text-slate-900 mb-3 block">Table Avatar Styling</h3>
+            <div class="border-t border-[var(--card-border)] pt-6 mt-6">
+                <h3 class="text-sm font-semibold text-skin-heading mb-3 block">Table Avatar Styling</h3>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
                         <label class="block text-sm font-medium text-skin-base mb-2">Avatar Background</label>
                         <div class="flex items-center gap-2">
                             <input type="color" wire:model.live="table_avatar_bg_color"
-                                class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
+                                class="w-12 h-10 rounded border border-[var(--card-border)] cursor-pointer">
                             <x-mary-input wire:model.live="table_avatar_bg_color" placeholder="#f1f5f9"
                                 class="flex-1" />
                         </div>
@@ -161,7 +163,7 @@ new class extends Component {
                         <label class="block text-sm font-medium text-skin-base mb-2">Avatar Border Color</label>
                         <div class="flex items-center gap-2">
                             <input type="color" wire:model.live="table_avatar_border_color"
-                                class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
+                                class="w-12 h-10 rounded border border-[var(--card-border)] cursor-pointer">
                             <x-mary-input wire:model.live="table_avatar_border_color" placeholder="#e2e8f0"
                                 class="flex-1" />
                         </div>
@@ -170,7 +172,7 @@ new class extends Component {
                         <label class="block text-sm font-medium text-skin-base mb-2">Avatar Text Color</label>
                         <div class="flex items-center gap-2">
                             <input type="color" wire:model.live="table_avatar_text_color"
-                                class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
+                                class="w-12 h-10 rounded border border-[var(--card-border)] cursor-pointer">
                             <x-mary-input wire:model.live="table_avatar_text_color" placeholder="#475569"
                                 class="flex-1" />
                         </div>
@@ -179,14 +181,14 @@ new class extends Component {
             </div>
 
             {{-- List Card Settings --}}
-            <div class="border-t border-slate-100 pt-6 mt-6">
-                <h3 class="text-sm font-semibold text-slate-900 mb-3 block">List Card Styling</h3>
+            <div class="border-t border-[var(--card-border)] pt-6 mt-6">
+                <h3 class="text-sm font-semibold text-skin-heading mb-3 block">List Card Styling</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label class="block text-sm font-medium text-skin-base mb-2">List Card Background</label>
                         <div class="flex items-center gap-2">
                             <input type="color" wire:model.live="list_card_bg_color"
-                                class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
+                                class="w-12 h-10 rounded border border-[var(--card-border)] cursor-pointer">
                             <x-mary-input wire:model.live="list_card_bg_color" placeholder="#ffffff" class="flex-1" />
                         </div>
                     </div>
@@ -194,7 +196,7 @@ new class extends Component {
                         <label class="block text-sm font-medium text-skin-base mb-2">List Card Border Color</label>
                         <div class="flex items-center gap-2">
                             <input type="color" wire:model.live="list_card_border_color"
-                                class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
+                                class="w-12 h-10 rounded border border-[var(--card-border)] cursor-pointer">
                             <x-mary-input wire:model.live="list_card_border_color" placeholder="#e2e8f0"
                                 class="flex-1" />
                         </div>
@@ -203,7 +205,7 @@ new class extends Component {
                         <label class="block text-sm font-medium text-skin-base mb-2">List Card Link Color</label>
                         <div class="flex items-center gap-2">
                             <input type="color" wire:model.live="list_card_link_color"
-                                class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
+                                class="w-12 h-10 rounded border border-[var(--card-border)] cursor-pointer">
                             <x-mary-input wire:model.live="list_card_link_color" placeholder="#4f46e5" class="flex-1" />
                         </div>
                     </div>
@@ -211,7 +213,7 @@ new class extends Component {
                         <label class="block text-sm font-medium text-skin-base mb-2">List Card Hover Color</label>
                         <div class="flex items-center gap-2">
                             <input type="color" wire:model.live="list_card_hover_color"
-                                class="w-12 h-10 rounded border border-slate-200 cursor-pointer">
+                                class="w-12 h-10 rounded border border-[var(--card-border)] cursor-pointer">
                             <x-mary-input wire:model.live="list_card_hover_color" placeholder="#f8fafc"
                                 class="flex-1" />
                         </div>
