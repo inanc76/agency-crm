@@ -1,159 +1,185 @@
 <?php
+/**
+ * 🛡️ PRICES SETTINGS (PURE FUNCTIONAL VOLT)
+ * ---------------------------------------------------------
+ * ARCHITECTURE: Functional Livewire Volt.
+ * UI DESIGN: Balanced Architecture (_price-list, _price-form).
+ * SECURITY: Restricted via 'settings.view' and 'settings.edit' gates.
+ * VALIDATION: Strict numeric and required checks.
+ * ---------------------------------------------------------
+ */
 
-use Livewire\Volt\Component;
-use Livewire\Attributes\Layout;
 use App\Models\PriceDefinition;
 use App\Models\ReferenceItem;
-use App\Repositories\ReferenceDataRepository;
 use Mary\Traits\Toast;
 use Illuminate\Support\Facades\DB;
+use Livewire\Volt\Component;
 
-new #[Layout('components.layouts.app', ['title' => 'Fiyat Tanımları'])]
-    class extends Component {
-    use Toast;
+// Functional API imports
+use function Livewire\Volt\{state, mount, uses, with, layout};
 
+// Define Layout
+layout('components.layouts.app', ['title' => 'Fiyat Tanımları']);
+
+// Traits
+uses(Toast::class);
+
+// State
+state([
     // Filters & Search
-    public string $search = '';
-    public string $filterCategory = '';
-    public string $filterDuration = '';
+    'search' => '',
+    'filterCategory' => '',
+    'filterDuration' => '',
 
     // Modal State
-    public bool $showModal = false;
-    public ?string $selectedId = null;
+    'showModal' => false,
+    'selectedId' => null,
 
     // Form State
-    public string $name = '';
-    public string $category = '';
-    public string $duration = '';
-    public float $price = 0;
-    public string $currency = 'TRY';
-    public string $description = '';
-    public bool $is_active = true;
+    'name' => '',
+    'category' => '',
+    'duration' => '',
+    'price' => 0,
+    'currency' => 'TRY',
+    'description' => '',
+    'is_active' => true,
+]);
 
-    public function with(): array
-    {
-        $prices = PriceDefinition::query()
-            ->when($this->search, function ($q) {
-                $search = mb_strtolower($this->search);
-                $q->where(function ($sq) use ($search) {
-                    $sq->whereRaw('LOWER(name) LIKE ?', ["%{$search}%"])
-                        ->orWhereRaw('LOWER(description) LIKE ?', ["%{$search}%"]);
-                });
-            })
-            ->when($this->filterCategory, fn($q) => $q->where('category', $this->filterCategory))
-            ->when($this->filterDuration, fn($q) => $q->where('duration', $this->filterDuration))
-            ->orderBy('created_at', 'desc')
-            ->get();
+// Mounting
+mount(function () {
+    $this->authorize('settings.view');
+});
 
-        $categories = ReferenceItem::where('category_key', 'SERVICE_CATEGORY')
-            ->where('is_active', true)
-            ->orderBy('display_label')
-            ->get();
-
-        $durations = ReferenceItem::where('category_key', 'SERVICE_EXTENSION_YEARS')
-            ->where('is_active', true)
-            ->orderBy('sort_order', 'asc')
-            ->orderBy('created_at', 'asc')
-            ->get();
-
-        $currencies = ReferenceItem::where('category_key', 'CURRENCY')
-            ->where('is_active', true)
-            ->get();
-
-        return [
-            'prices' => $prices,
-            'categories' => $categories,
-            'durations' => $durations,
-            'currencies' => $currencies,
-        ];
-    }
-
-    public function openCreateModal(): void
-    {
-        $this->resetForm();
-        $this->showModal = true;
-    }
-
-    public function edit(string $id): void
-    {
-        $price = PriceDefinition::findOrFail($id);
-        $this->selectedId = $price->id;
-        $this->name = $price->name;
-        $this->category = $price->category;
-        $this->duration = $price->duration;
-        $this->price = $price->price;
-        $this->currency = $price->currency;
-        $this->description = $price->description ?? '';
-        $this->is_active = $price->is_active;
-
-        $this->showModal = true;
-    }
-
-    public function save(): void
-    {
-        $this->validate([
-            'name' => 'required|string|max:255',
-            'category' => 'required|string',
-            'duration' => 'required|string',
-            'price' => 'required|numeric|min:0',
-            'currency' => 'required|string',
-            'description' => 'nullable|string',
-        ]);
-
-        try {
-            DB::transaction(function () {
-                $data = [
-                    'name' => $this->name,
-                    'category' => $this->category,
-                    'duration' => $this->duration,
-                    'price' => $this->price,
-                    'currency' => $this->currency,
-                    'description' => $this->description,
-                    'is_active' => $this->is_active,
-                ];
-
-                if ($this->selectedId) {
-                    PriceDefinition::findOrFail($this->selectedId)->update($data);
-                    $this->success('Fiyat tanımı güncellendi.');
-                } else {
-                    PriceDefinition::create($data);
-                    $this->success('Yeni fiyat tanımı oluşturuldu.');
-                }
+// Computed Properties via with()
+with(function () {
+    $prices = PriceDefinition::query()
+        ->when($this->search, function ($q) {
+            $search = mb_strtolower($this->search);
+            $q->where(function ($sq) use ($search) {
+                $sq->whereRaw('LOWER(name) LIKE ?', ["%{$search}%"])
+                    ->orWhereRaw('LOWER(description) LIKE ?', ["%{$search}%"]);
             });
+        })
+        ->when($this->filterCategory, fn($q) => $q->where('category', $this->filterCategory))
+        ->when($this->filterDuration, fn($q) => $q->where('duration', $this->filterDuration))
+        ->orderBy('created_at', 'desc')
+        ->get();
 
-            $this->showModal = false;
-            $this->resetForm();
-        } catch (\Exception $e) {
-            $this->error('Bir hata oluştu: ' . $e->getMessage());
-        }
-    }
+    $categories = ReferenceItem::where('category_key', 'SERVICE_CATEGORY')
+        ->where('is_active', true)
+        ->orderBy('display_label')
+        ->get();
 
-    public function toggleStatus(string $id): void
-    {
-        $price = PriceDefinition::findOrFail($id);
-        $price->update(['is_active' => !$price->is_active]);
-        $this->success('Durum güncellendi.');
-    }
+    $durations = ReferenceItem::where('category_key', 'SERVICE_EXTENSION_YEARS')
+        ->where('is_active', true)
+        ->orderBy('sort_order', 'asc')
+        ->orderBy('created_at', 'asc')
+        ->get();
 
-    public function delete(string $id): void
-    {
-        PriceDefinition::findOrFail($id)->delete();
-        $this->success('Fiyat tanımı silindi.');
-    }
+    $currencies = ReferenceItem::where('category_key', 'CURRENCY')
+        ->where('is_active', true)
+        ->get();
 
-    public function clearFilters(): void
-    {
-        $this->reset(['search', 'filterCategory', 'filterDuration']);
-    }
+    return [
+        'prices' => $prices,
+        'categories' => $categories,
+        'durations' => $durations,
+        'currencies' => $currencies,
+    ];
+});
 
-    private function resetForm(): void
-    {
-        $this->reset(['selectedId', 'name', 'category', 'duration', 'price', 'currency', 'description', 'is_active']);
-        $this->currency = 'TRY';
-        $this->is_active = true;
-        $this->price = 0;
+// Actions
+$openCreateModal = function () {
+    $this->authorize('settings.edit');
+    $this->resetForm();
+    $this->showModal = true;
+};
+
+$edit = function ($id) {
+    $this->authorize('settings.edit');
+    $price = PriceDefinition::findOrFail($id);
+    $this->selectedId = $price->id;
+    $this->name = $price->name;
+    $this->category = $price->category;
+    $this->duration = $price->duration;
+    $this->price = $price->price;
+    $this->currency = $price->currency;
+    $this->description = $price->description ?? '';
+    $this->is_active = $price->is_active;
+
+    $this->showModal = true;
+};
+
+$save = function () {
+    $this->authorize('settings.edit');
+    $this->validate([
+        'name' => 'required|string|max:255',
+        'category' => 'required|string',
+        'duration' => 'required|string',
+        'price' => 'required|numeric|min:0',
+        'currency' => 'required|string',
+        'description' => 'nullable|string',
+    ]);
+
+    try {
+        DB::transaction(function () {
+            $data = [
+                'name' => $this->name,
+                'category' => $this->category,
+                'duration' => $this->duration,
+                'price' => $this->price,
+                'currency' => $this->currency,
+                'description' => $this->description,
+                'is_active' => $this->is_active,
+            ];
+
+            if ($this->selectedId) {
+                PriceDefinition::findOrFail($this->selectedId)->update($data);
+                $this->success('Fiyat tanımı güncellendi.');
+            } else {
+                PriceDefinition::create($data);
+                $this->success('Yeni fiyat tanımı oluşturuldu.');
+            }
+        });
+
+        $this->showModal = false;
+        $this->resetForm();
+    } catch (\Exception $e) {
+        $this->error('Bir hata oluştu: ' . $e->getMessage());
     }
-}; ?>
+};
+
+$toggleStatus = function ($id) {
+    $this->authorize('settings.edit');
+    $price = PriceDefinition::findOrFail($id);
+    $price->update(['is_active' => !$price->is_active]);
+    $this->success('Durum güncellendi.');
+};
+
+$delete = function ($id) {
+    $this->authorize('settings.edit');
+    PriceDefinition::findOrFail($id)->delete();
+    $this->success('Fiyat tanımı silindi.');
+};
+
+$clearFilters = function () {
+    $this->search = '';
+    $this->filterCategory = '';
+    $this->filterDuration = '';
+};
+
+$resetForm = function () {
+    $this->selectedId = null;
+    $this->name = '';
+    $this->category = '';
+    $this->duration = '';
+    $this->price = 0;
+    $this->currency = 'TRY';
+    $this->description = '';
+    $this->is_active = true;
+};
+
+?>
 
 <div class="p-6 min-h-screen" style="background-color: var(--page-bg);">
     <div class="w-full lg:w-3/4 mx-auto">
@@ -169,14 +195,15 @@ new #[Layout('components.layouts.app', ['title' => 'Fiyat Tanımları'])]
         {{-- Page Header --}}
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
             <div>
-                <h1 class="text-2xl font-bold" class="text-skin-heading">Fiyat Tanımları</h1>
-                <p class="text-sm opacity-60 mt-1">Hizmet fiyat tanımlarını
-                    görüntüleyin ve yönetin</p>
+                <h1 class="text-2xl font-bold text-skin-heading">Fiyat Tanımları</h1>
+                <p class="text-sm opacity-60 mt-1">Hizmet fiyat tanımlarını görüntüleyin ve yönetin</p>
             </div>
-            <button class="theme-btn-save" wire:click="openCreateModal">
-                <x-mary-icon name="o-plus" class="w-4 h-4 mr-1" />
-                Yeni Fiyat Ekle
-            </button>
+            @can('settings.edit')
+                <button class="theme-btn-save" wire:click="openCreateModal">
+                    <x-mary-icon name="o-plus" class="w-4 h-4 mr-1" />
+                    Yeni Fiyat Ekle
+                </button>
+            @endcan
         </div>
 
         {{-- Filters Card --}}
@@ -202,107 +229,24 @@ new #[Layout('components.layouts.app', ['title' => 'Fiyat Tanımları'])]
             {{ $prices->count() }} tanım gösteriliyor (toplam {{ \App\Models\PriceDefinition::count() }} tanımdan)
         </div>
 
-        {{-- Table Card --}}
-        <div class="theme-card shadow-sm overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="border-b border-skin-light bg-skin-hover">
-                            <th class="px-4 py-3 text-[11px] font-bold uppercase tracking-wider opacity-50">Durum</th>
-                            <th class="px-4 py-3 text-[11px] font-bold uppercase tracking-wider opacity-50">Hizmet Adı
-                            </th>
-                            <th class="px-4 py-3 text-[11px] font-bold uppercase tracking-wider opacity-50">Kategori
-                            </th>
-                            <th class="px-4 py-3 text-[11px] font-bold uppercase tracking-wider opacity-50">Süre</th>
-                            <th class="px-4 py-3 text-[11px] font-bold uppercase tracking-wider opacity-50">Fiyat</th>
-                            <th class="px-4 py-3 text-[11px] font-bold uppercase tracking-wider opacity-50">Oluşturulma
-                            </th>
-                            <th class="px-4 py-3 text-[11px] font-bold uppercase tracking-wider opacity-50">İşlemler
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-skin-light">
-                        @forelse($prices as $price)
-                            <tr class="hover:bg-skin-hover transition-colors group">
-                                <td class="px-4 py-4">
-                                    <div class="flex items-center gap-2">
-                                        <div
-                                            class="w-2 h-2 rounded-full {{ $price->is_active ? 'bg-[var(--status-active)] shadow-[0_0_8px_rgba(34,197,94,0.4)]' : 'bg-[var(--status-inactive)]' }}">
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-4 text-sm" class="text-skin-heading">
-                                    {{ $price->name }}
-                                </td>
-                                <td class="px-4 py-4 text-sm opacity-70">
-                                    {{ $categories->firstWhere('key', $price->category)?->display_label ?? $price->category }}
-                                </td>
-                                <td class="px-4 py-4 text-sm opacity-70">
-                                    {{ $durations->firstWhere('key', $price->duration)?->display_label ?? $price->duration }}
-                                </td>
-                                <td class="px-4 py-4 text-sm" class="text-skin-heading">
-                                    {{ number_format($price->price, 2) }} {{ $price->currency }}
-                                </td>
-                                <td class="px-4 py-4 text-sm opacity-60">{{ $price->created_at->format('d.m.Y') }}</td>
-                                <td class="px-4 py-4">
-                                    <div class="flex items-center gap-1">
-                                        <x-mary-button icon="o-pencil" class="btn-ghost btn-xs text-skin-muted"
-                                            wire:click="edit('{{ $price->id }}')" />
-                                        <x-mary-button icon="o-trash" class="btn-ghost btn-xs text-skin-muted"
-                                            wire:click="delete('{{ $price->id }}')"
-                                            wire:confirm="Bu fiyat tanımını silmek istediğinize emin misiniz?" />
-                                    </div>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="7" class="px-4 py-12 text-center">
-                                    <div class="flex flex-col items-center justify-center opacity-40">
-                                        <x-mary-icon name="o-banknotes" class="w-12 h-12 mb-2" />
-                                        <p class="text-sm font-medium">Herhangi bir fiyat tanımı bulunamadı.</p>
-                                    </div>
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-        </div>
+        {{-- Table Partial (uses $prices from with()) --}}
+        @include('livewire.settings.parts._price-list', [
+            'prices' => $prices,
+            'categories' => $categories,
+            'durations' => $durations
+        ])
     </div>
-
     {{-- Create/Edit Modal --}}
     <x-mary-modal wire:model="showModal" title="{{ $selectedId ? 'Fiyat Tanımı Düzenle' : 'Yeni Fiyat Tanımı Ekle' }}"
         class="backdrop-blur" box-class="!max-w-2xl">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="md:col-span-2">
-                <x-mary-input label="Hizmet Adı *" placeholder="Örn: Premium Domain, SSL Sertifikası"
-                    wire:model="name" />
-            </div>
-
-            <x-mary-select label="Hizmet Kategorisi *" placeholder="Kategori Seçin" :options="$categories"
-                option-value="key" option-label="display_label" wire:model="category" />
-
-            <x-mary-select label="Hizmet Süresi *" placeholder="Süre Seçin" :options="$durations" option-value="key"
-                option-label="display_label" wire:model="duration" />
-
-            <x-mary-input label="Fiyat *" type="number" wire:model="price" />
-
-            <x-mary-select label="Para Birimi *" placeholder="Para Birimi Seçin" :options="$currencies"
-                option-value="key" option-label="display_label" wire:model="currency" />
-
-            <div class="md:col-span-2">
-                <x-mary-textarea label="Açıklama" placeholder="Hizmet detaylarını açıklayın..." rows="4"
-                    wire:model="description" />
-            </div>
-
-            <div class="md:col-span-2 flex items-center gap-3">
-                <span
-                    class="text-sm font-medium {{ !$is_active ? 'text-skin-danger' : 'text-skin-muted' }}">Pasif</span>
-                <x-mary-toggle wire:model="is_active" class="toggle-success" />
-                <span
-                    class="text-sm font-medium {{ $is_active ? 'text-skin-success' : 'text-skin-muted' }}">Aktif</span>
-            </div>
-        </div>
+        
+        {{-- Form Partial --}}
+        @include('livewire.settings.parts._price-form', [
+            'categories' => $categories,
+            'durations' => $durations,
+            'currencies' => $currencies,
+            'is_active' => $is_active
+        ])
 
         <x-slot:actions>
             <x-mary-button label="İptal" class="btn-ghost" wire:click="$set('showModal', false)" />

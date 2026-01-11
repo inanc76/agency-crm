@@ -120,6 +120,12 @@ class SmartTestManager
             if ($moduleId === 'OffersCreate' && str_contains($base, 'CreateOfferTest')) {
                 return $file;
             }
+            if ($moduleId === 'AssetsTab' && str_contains($base, 'AssetFormTest')) {
+                return $file;
+            }
+            if ($moduleId === 'ContactsTab' && str_contains($base, 'ContactFormTest')) {
+                return $file;
+            }
             if (str_contains($base, $moduleId)) {
                 return $file;
             }

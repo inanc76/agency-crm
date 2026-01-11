@@ -5,10 +5,12 @@ use App\Models\PriceDefinition;
 use App\Models\ReferenceItem;
 use App\Models\ReferenceCategory;
 use Livewire\Volt\Volt;
+use Livewire\Livewire;
 
 beforeEach(function () {
     $this->user = User::factory()->create();
     $this->user->givePermissionTo('settings.edit');
+    $this->user->givePermissionTo('settings.view');
     $this->actingAs($this->user);
 
     ReferenceCategory::create(['name' => 'Service Category', 'key' => 'SERVICE_CATEGORY']);
@@ -18,6 +20,13 @@ beforeEach(function () {
     ReferenceItem::create(['category_key' => 'SERVICE_CATEGORY', 'key' => 'WEB', 'display_label' => 'Web Design', 'is_active' => true]);
     ReferenceItem::create(['category_key' => 'SERVICE_EXTENSION_YEARS', 'key' => '1Y', 'display_label' => '1 Year', 'is_active' => true, 'sort_order' => 1]);
     ReferenceItem::create(['category_key' => 'CURRENCY', 'key' => 'TRY', 'display_label' => 'TL', 'is_active' => true]);
+
+    // 2. Mocking ve State Hazırlığı: Veritabanını PriceDefinition ile besle
+    PriceDefinition::factory()->count(1)->create([
+        'category' => 'WEB',
+        'duration' => '1Y',
+        'currency' => 'TRY'
+    ]);
 });
 
 // A. Listing & Accessibility (1-5)
@@ -110,7 +119,7 @@ test('17. saving while editing updates the record instead of creating new', func
     $p = PriceDefinition::create(['name' => 'Old', 'category' => 'WEB', 'duration' => '1Y', 'price' => 100, 'currency' => 'TRY']);
     Volt::test('settings.prices')->call('edit', $p->id)->set('name', 'Updated')->call('save');
     expect($p->fresh()->name)->toBe('Updated');
-    expect(PriceDefinition::count())->toBe(1);
+    expect(PriceDefinition::count())->toBe(2);
 });
 
 test('18. toggling status changes is_active value', function () {
@@ -122,7 +131,7 @@ test('18. toggling status changes is_active value', function () {
 test('19. delete action removes record from DB', function () {
     $p = PriceDefinition::create(['name' => 'Bye', 'category' => 'WEB', 'duration' => '1Y', 'price' => 1, 'currency' => 'TRY']);
     Volt::test('settings.prices')->call('delete', $p->id);
-    expect(PriceDefinition::count())->toBe(0);
+    expect(PriceDefinition::count())->toBe(1);
 });
 
 test('20. currencies list includes TRY as default', function () {
@@ -154,6 +163,6 @@ test('24. success on toggle status', function () {
 test('25. count of listed items is returned in view', function () {
     PriceDefinition::create(['name' => 'A', 'category' => 'WEB', 'duration' => '1Y', 'price' => 1, 'currency' => 'TRY']);
     Volt::test('settings.prices')->assertViewHas('prices', function ($prices) {
-        return $prices->count() === 1;
+        return $prices->count() === 2;
     });
 });

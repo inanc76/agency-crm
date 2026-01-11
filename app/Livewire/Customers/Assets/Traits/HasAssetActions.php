@@ -69,9 +69,10 @@ trait HasAssetActions
     public function save(): void
     {
         $this->validate([
-            'customer_id' => 'required',
-            'name' => 'required|min:2',
-            'type' => 'required',
+            'customer_id' => 'required|exists:customers,id',
+            'name' => 'required|string|min:2|max:150',
+            'type' => 'required|string',
+            'url' => 'nullable|url|max:255',
         ]);
 
         $data = [
