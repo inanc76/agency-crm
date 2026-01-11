@@ -13,7 +13,16 @@
 
 pest()->extend(Tests\TestCase::class)
     ->use(Illuminate\Foundation\Testing\RefreshDatabase::class)
-    ->in('Feature');
+    ->in('Feature', 'Unit')
+    ->beforeEach(function () {
+        Illuminate\Support\Facades\Gate::define('customers.create', fn($user) => $user->hasPermissionTo('customers.create'));
+        Illuminate\Support\Facades\Gate::define('customers.edit', fn($user) => $user->hasPermissionTo('customers.edit'));
+        Illuminate\Support\Facades\Gate::define('customers.view', fn($user) => $user->hasPermissionTo('customers.view'));
+        Illuminate\Support\Facades\Gate::define('services.create', fn($user) => $user->hasPermissionTo('services.create'));
+        Illuminate\Support\Facades\Gate::define('services.edit', fn($user) => $user->hasPermissionTo('services.edit'));
+        Illuminate\Support\Facades\Gate::define('services.delete', fn($user) => $user->hasPermissionTo('services.delete'));
+        Illuminate\Support\Facades\Gate::define('services.view', fn($user) => $user->hasPermissionTo('services.view'));
+    });
 
 /*
 |--------------------------------------------------------------------------
@@ -41,7 +50,53 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
+/**
+ * Seeds essential reference data for tests (Countries, Cities, Customer Types).
+ * Prevents foreign key constraint violations during test execution.
+ */
+function seedReferenceData()
 {
-    // ..
+    // Countries
+    if (!\Illuminate\Support\Facades\DB::table('countries')->where('id', 'TR')->exists()) {
+        \Illuminate\Support\Facades\DB::table('countries')->insert([
+            'id' => 'TR',
+            'code' => 'TR',
+            'name' => 'Türkiye',
+            'is_active' => true,
+            'sort_order' => 1
+        ]);
+    }
+
+    // Cities
+    if (!\Illuminate\Support\Facades\DB::table('cities')->where('id', '34')->exists()) {
+        \Illuminate\Support\Facades\DB::table('cities')->insert([
+            'id' => '34',
+            'country_id' => 'TR',
+            'name' => 'İstanbul',
+            'is_active' => true,
+            'sort_order' => 1
+        ]);
+    }
+
+    // Reference Categories
+    if (!\Illuminate\Support\Facades\DB::table('reference_categories')->where('key', 'CUSTOMER_TYPE')->exists()) {
+        \Illuminate\Support\Facades\DB::table('reference_categories')->insert([
+            'id' => \Illuminate\Support\Str::uuid()->toString(),
+            'key' => 'CUSTOMER_TYPE',
+            'name' => 'Müşteri Tipleri',
+            'is_active' => true,
+        ]);
+    }
+
+    // Reference Items
+    if (!\App\Models\ReferenceItem::where('key', 'CUSTOMER')->exists()) {
+        \App\Models\ReferenceItem::create([
+            'category_key' => 'CUSTOMER_TYPE',
+            'key' => 'CUSTOMER',
+            'display_label' => 'Müşteri',
+            'is_default' => true,
+            'is_active' => true,
+            'sort_order' => 1
+        ]);
+    }
 }

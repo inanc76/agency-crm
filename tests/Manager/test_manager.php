@@ -31,6 +31,11 @@ class SmartTestManager
             $id = basename($file, '.md');
             $title = $this->extractTitle($content) ?? $id;
             $scenarios = substr_count($content, '- [ ]') + substr_count($content, '- [x]');
+            if ($scenarios === 0) {
+                // Try numeric list pattern: 1. [UI] or 1. [Validation]
+                preg_match_all('/^\d+\.\s*\[/m', $content, $numericMatches);
+                $scenarios = count($numericMatches[0]);
+            }
 
             // Find corresponding PHP Test file
             // Heuristic: OffersCreate -> tests/Feature/Offers/CreateOfferTest.php
@@ -111,11 +116,13 @@ class SmartTestManager
 
         foreach ($files as $file) {
             $base = basename($file);
-            // Check specific Matches
-            if (str_contains($base, 'CreateOfferTest'))
-                return $file; // Hard mapping for known file
-            if (str_contains($base, $moduleId))
+            // Search for exact moduleId matches or variations
+            if ($moduleId === 'OffersCreate' && str_contains($base, 'CreateOfferTest')) {
                 return $file;
+            }
+            if (str_contains($base, $moduleId)) {
+                return $file;
+            }
         }
 
         return null;

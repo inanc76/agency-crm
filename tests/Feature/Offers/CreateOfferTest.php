@@ -55,7 +55,7 @@ beforeEach(function () {
 });
 
 test('T01-Ara Toplam (Subtotal): Kalemlerin birim_fiyat * adet çarpımlarının doğru toplandığını doğrula', function () {
-    $component = Volt::test('customers.offers.create')
+    $component = Volt::test('modals.offer-form')
         ->set('items', [
             [
                 'service_id' => null,
@@ -84,7 +84,7 @@ test('T01-Ara Toplam (Subtotal): Kalemlerin birim_fiyat * adet çarpımlarının
 });
 
 test('T02-İndirim (Yüzdesel): %10 gibi yüzdesel indirim seçildiğinde hesaplamanın doğruluğunu kontrol et', function () {
-    $component = Volt::test('customers.offers.create')
+    $component = Volt::test('modals.offer-form')
         ->set('items', [
             [
                 'service_id' => null,
@@ -108,7 +108,7 @@ test('T02-İndirim (Yüzdesel): %10 gibi yüzdesel indirim seçildiğinde hesapl
 });
 
 test('T03-İndirim (Sabit Tutar): Sabit tutar indirimi ve sınır kontrolünü doğrula', function () {
-    $component = Volt::test('customers.offers.create')
+    $component = Volt::test('modals.offer-form')
         ->set('items', [
             [
                 'service_id' => null,
@@ -135,7 +135,7 @@ test('T03-İndirim (Sabit Tutar): Sabit tutar indirimi ve sınır kontrolünü d
 });
 
 test('T04-KDV Hesaplaması: (Ara Toplam - İndirim) * KDV Oranı doğruluğunu kontrol et', function () {
-    $component = Volt::test('customers.offers.create')
+    $component = Volt::test('modals.offer-form')
         ->set('items', [
             [
                 'service_name' => 'Service 1',
@@ -157,7 +157,7 @@ test('T04-KDV Hesaplaması: (Ara Toplam - İndirim) * KDV Oranı doğruluğunu k
 });
 
 test('T05-Genel Toplam (Grand Total): İndirimli Ara Toplam + KDV sonucunu doğrula', function () {
-    $component = Volt::test('customers.offers.create')
+    $component = Volt::test('modals.offer-form')
         ->set('items', [
             [
                 'service_name' => 'Service 1',
@@ -179,7 +179,7 @@ test('T05-Genel Toplam (Grand Total): İndirimli Ara Toplam + KDV sonucunu doğr
 });
 
 test('T13-Zorunlu Alan Kontrolü: Başlık, Müşteri ve Tarih boşsa kaydedilemez', function () {
-    Volt::test('customers.offers.create')
+    Volt::test('modals.offer-form')
         ->set('customer_id', '')
         ->set('title', '')
         ->set('valid_until', '')
@@ -188,7 +188,7 @@ test('T13-Zorunlu Alan Kontrolü: Başlık, Müşteri ve Tarih boşsa kaydedilem
 });
 
 test('T14-Boş Sepet Kontrolü: Hiçbir hizmet kalemi yoksa kaydedilemez', function () {
-    Volt::test('customers.offers.create')
+    Volt::test('modals.offer-form')
         ->set('customer_id', $this->customer->id)
         ->set('title', 'Valid Title')
         ->set('valid_until', now()->addDays(30))
@@ -205,7 +205,7 @@ use Mockery\MockInterface;
 use App\Models\Offer;
 
 test('T06-Geçerlilik Tarihi: Gün sayısı değiştiğinde tarih güncellenmeli', function () {
-    $component = Volt::test('customers.offers.create')
+    $component = Volt::test('modals.offer-form')
         ->set('valid_days', 30);
 
     // Trigger update automatically via set
@@ -221,7 +221,7 @@ test('T06-Geçerlilik Tarihi: Gün sayısı değiştiğinde tarih güncellenmeli
 });
 
 test('T07-Döviz Tutarlılığı: Farklı döviz birimi eklenmeye çalışıldığında hata vermeli', function () {
-    $component = Volt::test('customers.offers.create')
+    $component = Volt::test('modals.offer-form')
         ->set('currency', 'USD')
         ->set('items', [
             [
@@ -264,7 +264,7 @@ test('T07-Döviz Tutarlılığı: Farklı döviz birimi eklenmeye çalışıldı
 });
 
 test('T09-Referans Hizmet Aktarımı: Seçilen hizmetin fiyata dahil edilmesi', function () {
-    $component = Volt::test('customers.offers.create')
+    $component = Volt::test('modals.offer-form')
         ->set('currency', 'USD') // Ensure base currency matches
         ->set('items', []);
 
@@ -280,7 +280,7 @@ test('T09-Referans Hizmet Aktarımı: Seçilen hizmetin fiyata dahil edilmesi', 
 });
 
 test('T10-Manuel Kalem Girişi: Veritabanında olmayan kalem ekleme', function () {
-    $component = Volt::test('customers.offers.create')
+    $component = Volt::test('modals.offer-form')
         ->call('openManualEntryModal')
         ->set('manualItems', [
             [
@@ -301,7 +301,7 @@ test('T10-Manuel Kalem Girişi: Veritabanında olmayan kalem ekleme', function (
 });
 
 test('T11-Kalem Açıklama Düzenleme: Kalem açıklaması güncellenebilmeli', function () {
-    $component = Volt::test('customers.offers.create')
+    $component = Volt::test('modals.offer-form')
         ->set('items', [
             [
                 'service_name' => 'Item 1',
@@ -329,7 +329,7 @@ test('T15-Dosya Güvenliği: Geçersiz dosya tipleri ve boyut reddedilmeli', fun
     // Invalid Type (txt is not in allowed list usually)
     $file = UploadedFile::fake()->create('test.txt', 1000, 'text/plain');
 
-    $component = Volt::test('customers.offers.create')
+    $component = Volt::test('modals.offer-form')
         ->set('attachmentTitle', 'Specs')
         ->set('attachmentPrice', 100)
         ->set('attachmentFile', $file);
@@ -339,7 +339,7 @@ test('T15-Dosya Güvenliği: Geçersiz dosya tipleri ve boyut reddedilmeli', fun
 });
 
 test('T18-Tab Navigasyonu: Sekmeler arası geçiş yapılabilmeli', function () {
-    $component = Volt::test('customers.offers.create');
+    $component = Volt::test('modals.offer-form');
 
     expect($component->get('activeTab'))->toBe('info');
 
@@ -363,7 +363,7 @@ test('T23-Edit Modu: Var olan teklif yüklenebilmeli', function () {
         'valid_until' => now()->addDays(10)
     ]);
 
-    $component = Volt::test('customers.offers.create', ['offer' => $offer->id]);
+    $component = Volt::test('modals.offer-form', ['offer' => $offer->id]);
 
     expect($component->get('title'))->toBe('Existing Offer');
     expect($component->get('isViewMode'))->toBeTrue();
@@ -385,7 +385,7 @@ test('T24-Cascade Delete: Teklif silindiğinde DB temizlenmeli', function () {
         'valid_until' => now()
     ]);
 
-    $component = Volt::test('customers.offers.create')
+    $component = Volt::test('modals.offer-form')
         ->set('offerId', $offer->id)
         ->call('delete');
 
@@ -393,7 +393,7 @@ test('T24-Cascade Delete: Teklif silindiğinde DB temizlenmeli', function () {
 });
 
 test('T08-Hizmet Seçimi: Müşteriye ait hizmetlerin listelendiğini doğrula', function () {
-    $component = Volt::test('customers.offers.create')
+    $component = Volt::test('modals.offer-form')
         ->set('customer_id', $this->customer->id);
 
     $services = $component->get('customerServices');
@@ -402,7 +402,7 @@ test('T08-Hizmet Seçimi: Müşteriye ait hizmetlerin listelendiğini doğrula',
 });
 
 test('T12-Ek Dosya Yönetimi: Dosya bilgilerinin state üzerinde tutulduğunu doğrula', function () {
-    $component = Volt::test('customers.offers.create')
+    $component = Volt::test('modals.offer-form')
         ->set('attachmentTitle', 'Files')
         ->set('attachmentPrice', 500);
 
@@ -412,7 +412,7 @@ test('T12-Ek Dosya Yönetimi: Dosya bilgilerinin state üzerinde tutulduğunu do
 
 test('T16-XSS/Input Sanitization: Script etiketlerinin temizlendiğini/zararsız olduğunu doğrula', function () {
     $badContent = '<script>alert("XSS")</script>Normal Content';
-    $component = Volt::test('customers.offers.create')
+    $component = Volt::test('modals.offer-form')
         ->set('items', [
             [
                 'service_name' => 'Item',
@@ -433,7 +433,7 @@ test('T16-XSS/Input Sanitization: Script etiketlerinin temizlendiğini/zararsız
 });
 
 test('T17-Explicit Scope: Partial verilerinin eksiksiz olduğunu doğrula', function () {
-    $component = Volt::test('customers.offers.create')
+    $component = Volt::test('modals.offer-form')
         ->set('customer_id', $this->customer->id);
 
     expect($component->get('customer_id'))->toBe($this->customer->id);
@@ -441,7 +441,7 @@ test('T17-Explicit Scope: Partial verilerinin eksiksiz olduğunu doğrula', func
 });
 
 test('T19-Feedback Mekanizması: İşlem sonrası bildirimleri doğrula', function () {
-    $component = Volt::test('customers.offers.create');
+    $component = Volt::test('modals.offer-form');
     // Cannot easily test Toast in backend test. 
     $this->markTestSkipped('UI Toast Notification test requires browser/Dusk or Mocking Toast service');
 });
@@ -472,7 +472,7 @@ test('T22-Minio Upload: Dosyaların servise gönderildiğini doğrula', function
     ]);
     $this->app->instance(MinioService::class, $minioMock);
 
-    $component = Volt::test('customers.offers.create')
+    $component = Volt::test('modals.offer-form')
         ->set('attachmentTitle', 'Contract')
         ->set('attachmentPrice', 0)
         ->set('attachmentFile', $file);
@@ -487,7 +487,7 @@ test('T22-Minio Upload: Dosyaların servise gönderildiğini doğrula', function
 
 // --- Advanced Calculations (T25-T28) ---
 test('T25-İndirim %101 Kontrolü: 100 üzeri indirim 100e eşitlenmeli', function () {
-    $component = Volt::test('customers.offers.create')
+    $component = Volt::test('modals.offer-form')
         ->set('discount_type', 'PERCENTAGE')
         ->set('discount_value', 150);
 
@@ -499,7 +499,7 @@ test('T25-İndirim %101 Kontrolü: 100 üzeri indirim 100e eşitlenmeli', functi
 });
 
 test('T26-Negatif İndirim Kontrolü: Negatif indirim 0a eşitlenmeli', function () {
-    $component = Volt::test('customers.offers.create')
+    $component = Volt::test('modals.offer-form')
         ->set('discount_type', 'PERCENTAGE')
         ->set('discount_value', -10);
 
@@ -509,7 +509,7 @@ test('T26-Negatif İndirim Kontrolü: Negatif indirim 0a eşitlenmeli', function
 });
 
 test('T27-İndirim Türü Değişimi: Tür değişince değer sıfırlanmalı', function () {
-    $component = Volt::test('customers.offers.create')
+    $component = Volt::test('modals.offer-form')
         ->set('discount_type', 'PERCENTAGE')
         ->set('discount_value', 10);
 
@@ -521,7 +521,7 @@ test('T27-İndirim Türü Değişimi: Tür değişince değer sıfırlanmalı', 
 });
 
 test('T28-Farklı KDV Oranları: Çeşitli KDV oranlarında hesaplama doğruluğu', function () {
-    $component = Volt::test('customers.offers.create')
+    $component = Volt::test('modals.offer-form')
         ->set('items', [
             ['service_name' => 'S1', 'price' => 100, 'quantity' => 1, 'currency' => 'USD', 'duration' => 1, 'description' => '']
         ]);
@@ -541,7 +541,7 @@ test('T28-Farklı KDV Oranları: Çeşitli KDV oranlarında hesaplama doğruluğ
 
 // --- Modal Behaviors (T29-T32) ---
 test('T29-Tek Satır Silme Koruması: Manuel modalda tek satır silinememeli', function () {
-    $component = Volt::test('customers.offers.create')
+    $component = Volt::test('modals.offer-form')
         ->set('manualItems', [
             ['service_name' => 'Item 1', 'price' => 100]
         ]);
@@ -558,7 +558,7 @@ test('T29-Tek Satır Silme Koruması: Manuel modalda tek satır silinememeli', f
 });
 
 test('T30-Hizmet Yıl Filtresi: Yıl değişince servis listesi güncellenmeli', function () {
-    $component = Volt::test('customers.offers.create')
+    $component = Volt::test('modals.offer-form')
         ->set('customer_id', $this->customer->id);
 
     // Default year is current year. Service created in beforeEach is current (active).
@@ -587,7 +587,7 @@ test('T31-Kategori-Hizmet Bağlantısı: Kategori değişince filtreleme', funct
 test('T32-Modal Vazgeç Davranışı: Vazgeçince veri eklenmemeli', function () {
     // UI behavior. Backend doesn't persist until 'Save' is called.
     // If we call 'closeManualEntryModal' without 'saveManualItems', items shouldn't change.
-    $component = Volt::test('customers.offers.create')
+    $component = Volt::test('modals.offer-form')
         ->set('items', [])
         ->set('manualItems', [['service_name' => 'New', 'price' => 10]])
         ->call('closeManualEntryModal');
@@ -597,7 +597,7 @@ test('T32-Modal Vazgeç Davranışı: Vazgeçince veri eklenmemeli', function ()
 
 // --- Data Boundaries (T33-T36) ---
 test('T33-Maksimum Tutar: Büyük sayılar işlenebilmeli', function () {
-    $component = Volt::test('customers.offers.create')
+    $component = Volt::test('modals.offer-form')
         ->set('items', [
             ['service_name' => 'Mega Service', 'price' => 999999999, 'quantity' => 1, 'currency' => 'USD', 'duration' => 1, 'description' => '']
         ]);
@@ -607,7 +607,7 @@ test('T33-Maksimum Tutar: Büyük sayılar işlenebilmeli', function () {
 });
 
 test('T34-Minimum Tutar: 0.01 kabul edilmeli, negatif rededilmeli', function () {
-    $component = Volt::test('customers.offers.create')
+    $component = Volt::test('modals.offer-form')
         ->set('items', [['service_name' => 'Micro', 'price' => 0.01, 'quantity' => 1, 'currency' => 'USD', 'duration' => 1, 'description' => '']]);
 
     $totals = $component->instance()->calculateTotals();
@@ -621,7 +621,7 @@ test('T34-Minimum Tutar: 0.01 kabul edilmeli, negatif rededilmeli', function () 
 });
 
 test('T35-Adet Ondalık Kontrolü: 1.5 adet kabul edilmeli', function () {
-    $component = Volt::test('customers.offers.create')
+    $component = Volt::test('modals.offer-form')
         ->set('items', [['service_name' => 'Half', 'price' => 100, 'quantity' => 1.5, 'currency' => 'USD', 'duration' => 1, 'description' => '']]);
 
     $totals = $component->instance()->calculateTotals();
@@ -630,7 +630,7 @@ test('T35-Adet Ondalık Kontrolü: 1.5 adet kabul edilmeli', function () {
 
 test('T36-Karakter Limiti: Hizmet adı uzunluk kontrolü', function () {
     $longName = str_repeat('A', 256);
-    $component = Volt::test('customers.offers.create')
+    $component = Volt::test('modals.offer-form')
         ->set('customer_id', $this->customer->id) // Required for save
         ->set('title', 'Test')
         ->set('items', [['service_name' => $longName, 'price' => 10, 'quantity' => 1, 'currency' => 'USD', 'duration' => 1, 'description' => '']])
@@ -649,7 +649,7 @@ test('T38-Dinamik Toplam Güncelleme: Blur olmadan hesaplama', function () {
     // We can simulate updatedItems hook if exists, or calculateTotals being called.
     // If calculateTotals is computed property, it auto updates.
     // Calling calculateTotals explicitly verifies logic works.
-    $component = Volt::test('customers.offers.create')
+    $component = Volt::test('modals.offer-form')
         ->set('items', [['service_name' => 'Dyanmic', 'price' => 100, 'quantity' => 1, 'currency' => 'USD', 'duration' => 1, 'description' => '']]);
 
     $component->instance()->calculateTotals();
@@ -658,7 +658,7 @@ test('T38-Dinamik Toplam Güncelleme: Blur olmadan hesaplama', function () {
 });
 
 test('T39-Müşteri Değişiminde Hizmet Yenileme', function () {
-    $component = Volt::test('customers.offers.create')
+    $component = Volt::test('modals.offer-form')
         ->set('customer_id', $this->customer->id);
 
     // Expect previous service loaded (via hook)
@@ -684,7 +684,7 @@ test('T42-Yetim Veri Bütünlüğü: Müşteri silinse bile teklif açılabilmel
     // If our DB uses foreign keys without cascade delete on offers, or if we rely on soft deletes.
     // Assuming SoftDeletes on Customer.
     // $this->customer->delete();
-    // $component = Volt::test('customers.offers.create', ['offer' => ...])
+    // $component = Volt::test('modals.offer-form', ['offer' => ...])
     $this->markTestSkipped('Requires SoftDelete implementation methodology confirmation');
 });
 
@@ -692,7 +692,7 @@ test('T43-Boş Dosya (0 Byte) Engelleme', function () {
     Storage::fake('minio');
     $file = UploadedFile::fake()->create('empty.pdf', 0, 'application/pdf');
 
-    $component = Volt::test('customers.offers.create')
+    $component = Volt::test('modals.offer-form')
         ->set('attachmentTitle', 'Empty')
         ->set('attachmentPrice', 10)
         ->set('attachmentFile', $file);
@@ -712,7 +712,7 @@ test('T44-Çoklu Dosya Yükleme: Sıralı hatasız', function () {
     $file1 = UploadedFile::fake()->create('1.pdf', 100);
     $file2 = UploadedFile::fake()->create('2.pdf', 100);
 
-    $component = Volt::test('customers.offers.create')
+    $component = Volt::test('modals.offer-form')
         ->set('attachmentTitle', 'F1')
         ->set('attachmentPrice', 100)
         ->set('attachmentFile', $file1)
@@ -734,7 +734,7 @@ test('T45-1000 Kalem Performansı', function () {
     }
 
     $start = microtime(true);
-    $component = Volt::test('customers.offers.create')
+    $component = Volt::test('modals.offer-form')
         ->set('items', $items);
     $component->instance()->calculateTotals();
     $end = microtime(true);
@@ -748,7 +748,7 @@ test('T46-Loading Göstergeleri', function () {
 
 // --- Dosya Detayları (T47-T49) ---
 test('T47-Dosya Düzenleme Gösterimi', function () {
-    $component = Volt::test('customers.offers.create')
+    $component = Volt::test('modals.offer-form')
         ->set('attachments', [
             [
                 'title' => 'Doc1',
@@ -775,7 +775,7 @@ test('T49-Kayıp Dosya Hatası: Minio da yoksa', function () {
     // Trying to download non-existing file.
     // If we call downloadAttachment($index)
 
-    $component = Volt::test('customers.offers.create')
+    $component = Volt::test('modals.offer-form')
         ->set('attachments', [
             [
                 'title' => 'Ghost',
@@ -804,7 +804,7 @@ test('T49-Kayıp Dosya Hatası: Minio da yoksa', function () {
 
 test('T50-Başlık Emoji ve Özel Karakter Desteği', function () {
     $emojiTitle = 'Teklif 🚀 🔥 & <script>';
-    $component = Volt::test('customers.offers.create')
+    $component = Volt::test('modals.offer-form')
         ->set('customer_id', $this->customer->id)
         ->set('title', $emojiTitle)
         ->set('items', [['service_name' => 'S1', 'price' => 100, 'quantity' => 1, 'currency' => 'USD', 'duration' => 1, 'description' => '']])

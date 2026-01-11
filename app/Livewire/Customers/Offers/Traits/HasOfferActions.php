@@ -454,6 +454,7 @@ trait HasOfferActions
         });
 
         $this->success('İşlem Başarılı', 'Teklif başarıyla kaydedildi.');
+        $this->dispatch('offer-saved');
         $this->redirect('/dashboard/customers?tab=offers');
     }
 
