@@ -17,7 +17,7 @@
 @endphp
 
 <tr class="group hover:bg-[var(--list-card-hover-bg)] transition-all duration-200 cursor-pointer"
-    wire:click="$dispatch('open-modal', { component: 'modals.asset-form', arguments: { asset_id: '{{ $asset->id }}' } })">
+    onclick="window.location.href='/dashboard/customers/assets/{{ $asset->id }}'">
 
     {{-- Checkbox --}}
     <td class="px-6 py-4" onclick="event.stopPropagation()">
