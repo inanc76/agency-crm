@@ -62,6 +62,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the user's role
+     */
+    public function role()
+    {
+        return $this->belongsTo(Role::class);
+    }
+
+    /**
      * Get the user's initials
      */
     public function initials(): string

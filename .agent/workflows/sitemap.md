@@ -2,26 +2,40 @@
 description: Projenin mimari röntgenini (sitemap) çıkarır ve dosyaları analiz eder.
 ---
 
-Projenin mimari röntgenini çekmek için aşağıdaki yönergelere göre analiz yap ve sonuçları sun:
+1. Fiziksel Tarama Kapsamı:
 
-1. **Tarama Kapsamı**: 
-   - `resources/views` ve `app/Livewire` (veya Volt bileşenleri) klasörlerini fiziksel olarak tara.
-   - Dosyaları şu kategorilere ayır:
-     - **Listeleme Sayfaları (Tabs)**: `/dashboard/customers?tab=...` rotasına bağlı tüm bileşenler.
-     - **Form & İşlem Sayfaları**: `create.blade.php`, `edit.blade.php` ve modal bileşenleri.
-     - **Ayarlar & Admin**: `settings/` klasörü altındaki tüm sayfalar.
-     - **Layout & Global**: Ana şablonlar ve ortak kullanılan komponentler.
+resources/views/livewire ve app/Livewire klasörlerini (Volt dahil) derinlemesine tara.
 
-2. **Tablo Sütunları**: Sonuçları şu sütunlarla bir tablo halinde sun:
-   - **Modül / Sayfa Adı**: Fonksiyonel adı.
-   - **URL / Rota**: Tarayıcıdan erişilen path.
-   - **Dosya Yolu**: Fiziksel konumu.
-   - **LOC (Satır Sayısı)**: `wc -l` komutuyla hesaplanmış gerçek satır sayısı.
-   - **UI Status**: 'Zırhlı' (Hardcoded renk yok) veya 'Sızıntı' (Kalıntı var).
-   - **Complexity**: İçerdiği `wire:model`, `@if` ve `@foreach` yoğunluğuna göre (Düşük/Orta/Yüksek).
+Kategoriler: - Tabs (Listing): /dashboard/customers?tab=... rotalarına bağlı sekmeler.
 
-3. **Mimari Denetim (Strict 250)**: 
-   - Satır sayısı 250'yi geçen dosyaları tabloda **KALIN VE KIRMIZI (🚨)** olarak işaretle ve yanına 'Refactor Gerekli' notu düş.
+Forms (Atomic): create.blade.php, edit.blade.php ve livewire/modals altındaki bileşenler.
 
-4. **Özet İstatistik**: 
-   - Tablonun altına toplam dosya sayısı, toplam satır sayısı ve ortalama karmaşıklık raporunu ekle.
+Settings: settings/ klasörü altındaki tüm sayfalar ve paneller.
+
+Core: Layoutlar ve global bileşenler.
+
+2. Mimari Denetim Tablosu (Sütunlar):
+
+Modül / Sayfa Adı: (Örn: Müşteri Listesi, Tema Ayarları)
+
+URL / Rota: Tarayıcı erişim yolu.
+
+Dosya Yolu: Fiziksel konum.
+
+LOC (Line Count): wc -l ile hesaplanmış gerçek satır sayısı.
+
+UI Status: 'Armor' (Zırhlı/Standart) veya 'Leak' (Hardcoded/Eski stil).
+
+Complexity: Logic yoğunluğuna göre (Low/Medium/High).
+
+3. Strict 250 Kuralı (Kritik Uyarı):
+
+LOC > 250 olan tüm dosyaları tabloda 🚨 REFACTOR GEREKLİ (Kırmızı) olarak işaretle.
+
+Özellikle settings/panel.blade.php (1155 satır) ve parts/basic-design.blade.php (920 satır) gibi 'canavarları' listenin en başına koy.
+
+4. İstatistiksel Özet:
+
+Toplam dosya sayısı, projenin toplam satır yükü ve 'Leak' (Sızıntı) oranı nedir?
+
+Mimarın Emri: Bu rapor, yarınki 'Settings' operasyonumuzun savaş haritası olacak. Verileri en saf ve şeffaf haliyle getir!"

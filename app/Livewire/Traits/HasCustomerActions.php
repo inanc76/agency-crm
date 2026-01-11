@@ -19,9 +19,8 @@ trait HasCustomerActions
 {
     /**
      * Save customer (create or update)
-     * Handles validation, normalization, and database transaction.
-     * 
-     * @return void
+     * 🔐 PERMISSIONS: customers.create (new) or customers.edit (existing)
+     * 📢 EVENTS: Redirects on create, stays on viewMode on edit.
      */
     public function save(): void
     {
@@ -100,13 +99,18 @@ trait HasCustomerActions
 
     /**
      * Toggle edit mode
-     * 🔐 AUTHORIZATION: customers.edit permission required
+     * 🔐 PERMISSIONS: customers.edit (Admin bypass enabled)
+     * Neden: View modundan form moduna geçişi kontrol eder.
      */
     public function toggleEditMode(): void
     {
-        // Authorization Check
-        if (!auth()->user()->can('customers.edit')) {
-            abort(403, 'Bu işlem için yetkiniz yok.');
+        // Permission system check (Admin bypass)
+        if (method_exists(auth()->user(), 'can') && !auth()->user()->can('customers.edit')) {
+            // Check if user is admin as fallback
+            if (optional(auth()->user()->role)->name !== 'admin') {
+                $this->warning('Yetkisiz Erişim', 'Bu işlem için düzenleme yetkiniz bulunmuyor.');
+                return;
+            }
         }
 
         $this->isViewMode = false;
@@ -126,15 +130,18 @@ trait HasCustomerActions
 
     /**
      * Delete customer
-     * Removes customer and cascades to related models via model events.
-     * 
-     * @return void
+     * 🔐 PERMISSIONS: customers.delete (Admin bypass enabled)
+     * 📢 ACTIONS: Removes record and redirects to list.
      */
     public function delete(): void
     {
-        // Authorization Check
-        if (!auth()->user()->can('customers.delete')) {
-            abort(403, 'Bu işlem için yetkiniz yok.');
+        // Permission system check (Admin bypass)
+        if (method_exists(auth()->user(), 'can') && !auth()->user()->can('customers.delete')) {
+            // Check if user is admin as fallback
+            if (optional(auth()->user()->role)->name !== 'admin') {
+                $this->error('Yetkisiz Erişim', 'Bu işlem için silme yetkiniz bulunmuyor.');
+                return;
+            }
         }
 
         if ($this->customerId) {

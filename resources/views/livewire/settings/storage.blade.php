@@ -117,9 +117,19 @@ new
         $disk->files();
     }
 
-    public function store(): void
+    public function save(): void
     {
         $repository = app(StorageSettingRepository::class);
+
+        // CLEANUP INPUT: Remove protocols and slashes BEFORE validation
+        $this->endpoint = str_replace(['https://', 'http://'], '', $this->endpoint);
+        $this->endpoint = rtrim($this->endpoint, '/');
+
+        // Remove port suffix if present
+        $parts = explode(':', $this->endpoint);
+        if (count($parts) > 1 && is_numeric(end($parts))) {
+            $this->endpoint = $parts[0];
+        }
 
         $data = $this->validate([
             'endpoint' => 'required|string',
@@ -132,17 +142,6 @@ new
 
         // Force provider to MINIO as per current requirement
         $data['provider'] = 'MINIO';
-
-        // Remove https/http from endpoint if present, we handle it with use_ssl and dynamic construction
-        $data['endpoint'] = str_replace(['https://', 'http://'], '', $data['endpoint']);
-        // Remove trailing slash and port if explicitly added in text (though port is separate field)
-        $parts = explode(':', $data['endpoint']);
-        if (count($parts) > 1 && is_numeric(end($parts))) {
-            // Use the port from string if user typed it, or stick to the int field?
-            // Let's stick to the separated fields to match UI perfectly.
-            // Just clean the endpoint.
-            $data['endpoint'] = $parts[0];
-        }
 
         $repository->saveSettings($data);
 
@@ -215,15 +214,15 @@ new
 
             {{-- Footer Actions --}}
             <div class="pt-6 mt-6 border-t border-skin-light flex justify-end gap-3">
-                <button type="button" wire:click="store" wire:loading.attr="disabled" class="theme-btn-save">
-                    <svg wire:loading wire:target="store" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                <button type="button" wire:click="save" wire:loading.attr="disabled" class="theme-btn-save">
+                    <svg wire:loading wire:target="save" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
                         </circle>
                         <path class="opacity-75" fill="currentColor"
                             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
                         </path>
                     </svg>
-                    <svg wire:loading.remove wire:target="store" class="w-4 h-4" fill="none" stroke="currentColor"
+                    <svg wire:loading.remove wire:target="save" class="w-4 h-4" fill="none" stroke="currentColor"
                         viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                     </svg>

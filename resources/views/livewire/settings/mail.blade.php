@@ -64,6 +64,17 @@ new
 
     public function save(): void
     {
+        $this->validate([
+            'provider' => 'required|in:smtp,mailgun',
+            'is_active' => 'boolean',
+            'smtp_host' => 'required_if:provider,smtp',
+            'smtp_port' => 'required_if:provider,smtp|nullable|integer',
+            'smtp_from_email' => 'required|email',
+            'smtp_from_name' => 'required',
+            'mailgun_api_key' => 'required_if:provider,mailgun',
+            'mailgun_domain' => 'required_if:provider,mailgun',
+        ]);
+
         $data = [
             'provider' => $this->provider,
             'is_active' => $this->is_active,

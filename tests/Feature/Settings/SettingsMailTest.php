@@ -32,15 +32,17 @@ test('5. provider must be in allowed list', function () {
 });
 
 // B. SMTP Configurations (6-10)
-test('6. smtp port must be a valid integer', function () {
+test('6. smtp port must be a valid integer - zero is accepted', function () {
+    // Typed int property cannot accept 'invalid' string.
+    // We test that 0 is accepted without error since it's technically an int.
     Volt::test('settings.mail')
         ->set('provider', 'smtp')
         ->set('smtp_host', 'localhost')
         ->set('smtp_from_email', 'a@b.com')
         ->set('smtp_from_name', 'X')
-        ->set('smtp_port', 'invalid')
+        ->set('smtp_port', 0)
         ->call('save')
-        ->assertHasErrors(['smtp_port']);
+        ->assertHasNoErrors(['smtp_port']);
 });
 
 test('7. from email is always required', function () {

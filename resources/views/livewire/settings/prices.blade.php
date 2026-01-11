@@ -34,9 +34,10 @@ new #[Layout('components.layouts.app', ['title' => 'Fiyat Tanımları'])]
     {
         $prices = PriceDefinition::query()
             ->when($this->search, function ($q) {
-                $q->where(function ($sq) {
-                    $sq->where('name', 'ilike', "%{$this->search}%")
-                        ->orWhere('description', 'ilike', "%{$this->search}%");
+                $search = mb_strtolower($this->search);
+                $q->where(function ($sq) use ($search) {
+                    $sq->whereRaw('LOWER(name) LIKE ?', ["%{$search}%"])
+                        ->orWhereRaw('LOWER(description) LIKE ?', ["%{$search}%"]);
                 });
             })
             ->when($this->filterCategory, fn($q) => $q->where('category', $this->filterCategory))

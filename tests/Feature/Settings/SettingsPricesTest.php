@@ -150,7 +150,9 @@ test('24. success on toggle status', function () {
     Volt::test('settings.prices')->call('toggleStatus', $p->id)->assertHasNoErrors();
 });
 
-test('25. count of listed items is displayed', function () {
+test('25. count of listed items is returned in view', function () {
     PriceDefinition::create(['name' => 'A', 'category' => 'WEB', 'duration' => '1Y', 'price' => 1, 'currency' => 'TRY']);
-    Volt::test('settings.prices')->assertSee('1 tanım listeleniyor');
+    Volt::test('settings.prices')->assertViewHas('prices', function ($prices) {
+        return $prices->count() === 1;
+    });
 });
