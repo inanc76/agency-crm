@@ -28,9 +28,9 @@ UI Status: 'Armor' (Zırhlı/Standart) veya 'Leak' (Hardcoded/Eski stil).
 
 Complexity: Logic yoğunluğuna göre (Low/Medium/High).
 
-3. Strict 250 Kuralı (Kritik Uyarı):
+3. Strict 400 Kuralı (Kritik Uyarı):
 
-LOC > 250 olan tüm dosyaları tabloda 🚨 REFACTOR GEREKLİ (Kırmızı) olarak işaretle.
+LOC > 400 olan tüm dosyaları tabloda 🚨 REFACTOR GEREKLİ (Kırmızı) olarak işaretle.
 
 Özellikle settings/panel.blade.php (1155 satır) ve parts/basic-design.blade.php (920 satır) gibi 'canavarları' listenin en başına koy.
 

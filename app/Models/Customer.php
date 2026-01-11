@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Traits\HasBlameable;
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════
@@ -95,12 +97,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * 
  * 5. **Güvenlik**: Customer verisi GDPR/KVKK kapsamındadır. Silme ve
  *    güncelleme işlemlerinde authorization kontrolü zorunludur.
+ *    🛡️ Audit: SoftDeletes + Blameable aktif
  * 
  * ═══════════════════════════════════════════════════════════════════════════
  */
 class Customer extends Model
 {
-    use HasUuids, HasFactory;
+    use HasUuids, HasFactory, SoftDeletes, HasBlameable;
     protected $keyType = 'string';
     public $incrementing = false;
 

@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Traits\HasBlameable;
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════
@@ -84,7 +86,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Contact extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes, HasBlameable;
     protected $keyType = 'string';
     public $incrementing = false;
 

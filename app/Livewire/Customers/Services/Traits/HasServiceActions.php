@@ -277,7 +277,7 @@ trait HasServiceActions
             $service = Service::findOrFail($this->serviceId);
             $customer_id = $service->customer_id;
             $service->delete();
-            $this->success('Hizmet Silindi', 'Hizmet kaydı başarıyla silindi.');
+            $this->success('Hizmet Arşivlendi', 'Hizmet kaydı başarıyla arşivlendi ve çöp kutusuna taşındı.');
             $this->redirect('/dashboard/customers/' . $customer_id . '?tab=services');
         }
     }

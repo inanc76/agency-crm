@@ -4,11 +4,13 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Laravel\Fortify\TwoFactorAuthenticatable;
+use App\Traits\HasBlameable;
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════
@@ -42,13 +44,14 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * - initials(): Avatar için baş harfler (örn: "VK")
  * 
  * ⚠️ Güvenlik: password hashed, 2FA secret encrypted
+ * 🛡️ Audit: SoftDeletes + Blameable aktif
  * 
  * ═══════════════════════════════════════════════════════════════════════════
  */
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, TwoFactorAuthenticatable, HasUuids;
+    use HasFactory, Notifiable, TwoFactorAuthenticatable, HasUuids, SoftDeletes, HasBlameable;
 
     /**
      * Indicates if the IDs are auto-incrementing.

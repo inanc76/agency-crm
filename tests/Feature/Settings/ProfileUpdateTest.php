@@ -56,7 +56,9 @@ test('user can delete their account', function () {
         ->assertHasNoErrors()
         ->assertRedirect('/');
 
-    expect($user->fresh())->toBeNull();
+    // SoftDeletes kullanıldığından, deleted_at dolmuş olmalı
+    $user->refresh();
+    expect($user->deleted_at)->not->toBeNull();
     expect(auth()->check())->toBeFalse();
 });
 

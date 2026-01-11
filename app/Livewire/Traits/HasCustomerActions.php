@@ -139,7 +139,7 @@ trait HasCustomerActions
 
         if ($this->customerId) {
             Customer::findOrFail($this->customerId)->delete();
-            $this->success('Müşteri Silindi', 'Müşteri kaydı başarıyla silindi.');
+            $this->success('Müşteri Arşivlendi', 'Müşteri kaydı başarıyla arşivlendi ve çöp kutusuna taşındı.');
             $this->redirect('/dashboard/customers?tab=customers');
         }
     }

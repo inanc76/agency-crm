@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Traits\HasBlameable;
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════
@@ -92,12 +94,13 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
  *    - Teklif oluşturma/güncelleme: OFFER_CREATE/OFFER_UPDATE permission
  *    - Silme işlemi: OFFER_DELETE permission + Atomic Transaction
  *    - Public tracking: Token doğrulaması yeterli (auth gerekmez)
+ *    🛡️ Audit: SoftDeletes + Blameable aktif
  * 
  * ═══════════════════════════════════════════════════════════════════════════
  */
 class Offer extends Model
 {
-    use HasUuids, HasFactory;
+    use HasUuids, HasFactory, SoftDeletes, HasBlameable;
 
     protected $fillable = [
         'id',

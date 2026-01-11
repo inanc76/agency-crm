@@ -313,7 +313,7 @@ trait HasOfferActions
 
         if ($this->offerId) {
             Offer::findOrFail($this->offerId)->delete();
-            $this->success('Teklif Silindi', 'Teklif başarıyla silindi.');
+            $this->success('Teklif Arşivlendi', 'Teklif başarıyla arşivlendi ve çöp kutusuna taşındı.');
             $this->redirect('/dashboard/customers?tab=offers');
         }
     }

@@ -113,27 +113,7 @@ new class extends Component {
 
 {{-- Varlıklar Tab --}}
 <div>
-    {{-- Header with Action Button --}}
-    <div class="flex items-center justify-between mb-4">
-        <div>
-            <h2 class="text-lg font-bold" class="text-skin-heading">Varlıklar</h2>
-            <p class="text-sm opacity-60">Müşterilere ait varlıkları görüntüleyin
-                ve yönetin</p>
-        </div>
-        <div class="flex items-center gap-4">
-            @if(count($selected) > 0)
-                <button wire:click="deleteSelected"
-                    wire:confirm="Seçili {{ count($selected) }} varlığı silmek istediğinize emin misiniz?"
-                    class="btn-danger-outline">
-                    <x-mary-icon name="o-trash" class="w-4 h-4" />
-                    Seçilileri Sil ({{ count($selected) }})
-                </button>
-            @endif
-
-            <span class="text-sm opacity-60">{{ $assets->total() }} varlık</span>
-            <x-customer-management.action-button label="Yeni Varlık" href="{{ route('customers.assets.create') }}" />
-        </div>
-    </div>
+    @include('livewire.customers.tabs.partials._assets-header', ['selected' => $selected, 'assets' => $assets])
 
     {{-- Filter Panel --}}
     <x-mary-card class="theme-card shadow-sm mb-6" shadow separator>
@@ -199,52 +179,7 @@ new class extends Component {
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                     @forelse($assets as $asset)
-                        @php
-                            $char = mb_substr($asset->name, 0, 1);
-                        @endphp
-                        <tr class="group hover:bg-[var(--list-card-hover-bg)] transition-all duration-200 cursor-pointer"
-                            onclick="window.location.href='/dashboard/customers/assets/{{ $asset->id }}'">
-                            <td class="px-6 py-4" onclick="event.stopPropagation()">
-                                <input type="checkbox" wire:model.live="selected" value="{{ $asset->id }}"
-                                    class="checkbox checkbox-xs rounded border-slate-300">
-                            </td>
-                            <td class="px-6 py-4">
-                                <div class="flex items-center gap-3">
-                                    <div class="flex-shrink-0">
-                                        <div class="w-9 h-9 rounded-full flex items-center justify-center text-xs shadow-sm"
-                                            style="background-color: var(--table-avatar-bg); color: var(--table-avatar-text); border: 1px solid var(--table-avatar-border);">
-                                            {{ $char }}
-                                        </div>
-                                    </div>
-                                    <div class="text-[13px] group-hover:opacity-80 transition-opacity"
-                                        style="color: var(--list-card-link-color);">
-                                        {{ $asset->name }}
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4">
-                                @php
-                                    $typeData = $typeMap[$asset->type] ?? null;
-                                    $typeLabel = $typeData['label'] ?? $asset->type;
-                                    $typeClass = $typeData['class'] ?? 'bg-skin-hover text-skin-muted border border-skin-light';
-                                @endphp
-                                <span
-                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border {{ $typeClass }}">
-                                    {{ $typeLabel }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 text-[13px] font-medium">
-                                {{ $asset->customer->name ?? '-' }}
-                            </td>
-                            <td class="px-6 py-4 text-[12px] font-medium hover:underline">
-                                @if($asset->url)
-                                    <a href="{{ $asset->url }}" target="_blank"
-                                        style="color: var(--action-link-color);">{{ parse_url($asset->url, PHP_URL_HOST) ?: $asset->url }}</a>
-                                @else
-                                    -
-                                @endif
-                            </td>
-                        </tr>
+                        @include('livewire.customers.tabs.partials._assets-row', ['asset' => $asset, 'typeMap' => $typeMap, 'selected' => $selected])
                     @empty
                         <tr>
                             <td colspan="5" class="px-6 py-12 text-center text-skin-muted">

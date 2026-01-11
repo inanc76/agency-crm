@@ -13,7 +13,7 @@
 
 pest()->extend(Tests\TestCase::class)
     ->use(Illuminate\Foundation\Testing\RefreshDatabase::class)
-    ->in('Feature', 'Unit')
+    ->in('Feature', 'Unit', 'TestCases')
     ->beforeEach(function () {
         Illuminate\Support\Facades\Gate::define('customers.create', fn($user) => $user->hasPermissionTo('customers.create'));
         Illuminate\Support\Facades\Gate::define('customers.edit', fn($user) => $user->hasPermissionTo('customers.edit'));
