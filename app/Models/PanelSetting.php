@@ -9,14 +9,13 @@ use Illuminate\Database\Eloquent\Model;
  * ═══════════════════════════════════════════════════════════════════════════
  * 🎨 PanelSetting Model - UI Tema ve Görünüm Ayarları
  * ═══════════════════════════════════════════════════════════════════════════
- * 
- * @package App\Models
+ *
  * @version Constitution V10
- * 
+ *
  * 🔑 UUID: ✅ ACTIVE (HasUuids) | PK: string | Incrementing: false
- * 
+ *
  * PanelSetting, sistemin TÜM UI TEMA AYARLARINI saklar:
- * 
+ *
  * **Kategoriler:**
  * 1. **Branding**: site_name, logo_path, favicon_path, logo_scale
  * 2. **Typography**: font_family, base_text_color, heading_color, font sizes
@@ -27,18 +26,18 @@ use Illuminate\Database\Eloquent\Model;
  * 7. **Cards**: card_bg_color, card_border_color, card_border_radius, table_hover
  * 8. **Dashboard**: dashboard_card_bg_color, stats colors (1-3)
  * 9. **Avatar & Dropdowns**: gradient colors, notification badge
- * 
+ *
  * **Kullanım:**
  * - Ayarlar sayfasında yönetilir (/dashboard/settings/panel)
  * - CSS variables olarak inject edilir (--card-bg-color, vb.)
  * - Tüm UI bileşenleri bu değişkenleri kullanır (Zero Hard-Coding)
  * - is_active: Tek bir kayıt aktif olmalı
- * 
+ *
  * **Önemli:**
  * - 100+ alan içerir (granular control)
  * - Guarded: Tüm alanlar mass-assignable
  * - Değişiklikler anında UI'ya yansır (CSS variables)
- * 
+ *
  * ═══════════════════════════════════════════════════════════════════════════
  */
 class PanelSetting extends Model
@@ -137,6 +136,26 @@ class PanelSetting extends Model
         'dropdown_header_bg_start_color',
         'dropdown_header_bg_end_color',
         'notification_badge_color',
+        // PDF Template Settings
+        'pdf_logo_path',
+        'pdf_logo_height',
+        'pdf_header_bg_color',
+        'pdf_header_text_color',
+        'pdf_font_family',
+        'pdf_primary_color',
+        'pdf_secondary_color',
+        'pdf_footer_text',
+        'pdf_discount_color',
+        'pdf_total_color',
+        'pdf_table_header_bg_color',
+        'pdf_table_header_text_color',
+        'pdf_limit_eager_loads', // Optional optimization
+        // Existing PDF Fields
+        'pdf_terms_conditions',
+        'pdf_bank_details',
+        'pdf_payment_terms',
+        'pdf_notes',
+        'pdf_show_logo',
     ];
 
     protected function casts(): array

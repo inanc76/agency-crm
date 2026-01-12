@@ -7,12 +7,17 @@ use App\Repositories\PanelSettingRepository;
 use Mary\Traits\Toast;
 use Illuminate\Support\Facades\Cache;
 
+use Livewire\Attributes\Url;
+
 new
     #[Layout('components.layouts.app', ['title' => 'Tema Ayarları'])]
     class extends Component {
     use Toast;
     use WithFileUploads;
 
+
+
+    #[Url(as: 'tab')]
     public string $activeTab = 'style-guide';
 
     // Branding moved to Header Component
@@ -134,6 +139,8 @@ new
                     </div>
                 </div>
             </x-mary-tab>
+
+
         </x-mary-tabs>
     </div>
 </div>

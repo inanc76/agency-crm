@@ -32,39 +32,58 @@ trait HasOfferDataLoader
 {
     // Offer Fields
     public $customer_id = '';
+
+    public $number = '';
+
     public $title = '';
+
     public $status = 'DRAFT';
+
     public $description = '';
+
     public $valid_days = 30;
+
     public $valid_until = null;
+
     public $discount_value = 0;
+
     public $discount_type = 'AMOUNT'; // PERCENTAGE or AMOUNT
+
     public $vat_rate = 20;
+
     public $currency = 'USD';
 
     // State Management
     public $isViewMode = false;
+
     public $offerId = null;
+
     public string $activeTab = 'info';
 
     // Reference Data
     public $customers = [];
+
     public $customerServices = [];
+
     public $priceDefinitions = [];
+
     public $categories = [];
+
     public $vatRates = [];
 
     // Service Modal State
     public $showServiceModal = false;
+
     public $selectedYear = 0;
 
     /**
      * @purpose Livewire bileşeninin başlatılması ve başlangıç verilerinin yüklenmesi
-     * @param string|null $offer Düzenlenecek teklif ID'si (opsiyonel)
+     *
+     * @param  string|null  $offer  Düzenlenecek teklif ID'si (opsiyonel)
      * @return void
-     * 🔐 Security: Genel erişim - özel yetki kontrolü yok
-     * 📢 Events: Sayfa yönlendirmesi yok, sadece veri yükleme
-     * 
+     *              🔐 Security: Genel erişim - özel yetki kontrolü yok
+     *              📢 Events: Sayfa yönlendirmesi yok, sadece veri yükleme
+     *
      * State Dependencies: $this->customers, $this->customerServices, $this->offerId
      */
     public function mount(?string $offer = null): void
@@ -83,6 +102,16 @@ trait HasOfferDataLoader
             // Set active tab from URL if present
             $this->activeTab = request()->query('tab', 'info');
         } else {
+            // New offer defaults
+            $this->title = '';
+            $this->sections = [
+                [
+                    'id' => null,
+                    'title' => 'Teklif Bölümü - 1',
+                    'description' => '',
+                    'items' => [],
+                ],
+            ];
             // Check for customer query parameter
             $customerId = request()->query('customer');
             if ($customerId && collect($this->customers)->firstWhere('id', $customerId)) {
@@ -94,10 +123,11 @@ trait HasOfferDataLoader
 
     /**
      * @purpose Referans verilerinin yüklenmesi (müşteriler, kategoriler, KDV oranları)
+     *
      * @return void
-     * 🔐 Security: Private metot - sadece trait içinden erişilebilir
-     * 📢 Events: Veri yükleme işlemi, UI güncellemesi yok
-     * 
+     *              🔐 Security: Private metot - sadece trait içinden erişilebilir
+     *              📢 Events: Veri yükleme işlemi, UI güncellemesi yok
+     *
      * State Dependencies: $this->customers, $this->categories, $this->priceDefinitions, $this->vatRates
      */
     private function initReferenceData(): void
@@ -105,7 +135,7 @@ trait HasOfferDataLoader
         // Load Customers
         $this->customers = Customer::orderBy('name')
             ->get(['id', 'name'])
-            ->map(fn($c) => ['id' => $c->id, 'name' => $c->name])
+            ->map(fn ($c) => ['id' => $c->id, 'name' => $c->name])
             ->toArray();
 
         // Load Categories with Display Labels
@@ -122,7 +152,7 @@ trait HasOfferDataLoader
         $this->categories = collect($usedCategoryKeys)->map(function ($key) use ($categoryDefinitions) {
             return [
                 'id' => $key,
-                'name' => $categoryDefinitions[$key]->display_label ?? $key
+                'name' => $categoryDefinitions[$key]->display_label ?? $key,
             ];
         })->sortBy('name')->values()->toArray();
 
@@ -141,9 +171,10 @@ trait HasOfferDataLoader
                 if (preg_match('/(\d+)/', $item->display_label, $matches)) {
                     $rate = (float) $matches[1];
                 }
+
                 return [
                     'rate' => $rate,
-                    'label' => $item->display_label
+                    'label' => $item->display_label,
                 ];
             })
             ->toArray();
@@ -161,41 +192,78 @@ trait HasOfferDataLoader
 
     /**
      * @purpose Mevcut teklif verilerinin veritabanından yüklenmesi ve form alanlarına doldurulması
+     *
      * @return void
-     * 🔐 Security: Private metot - $this->offerId kontrolü ile güvenli erişim
-     * 📢 Events: $this->isViewMode = true ile görüntüleme moduna geçiş
-     * 
+     *              🔐 Security: Private metot - $this->offerId kontrolü ile güvenli erişim
+     *              📢 Events: $this->isViewMode = true ile görüntüleme moduna geçiş
+     *
      * State Dependencies: $this->offerId, $this->items, $this->attachments, $this->customer_id
      */
     private function loadOfferData(): void
     {
-        $offer = Offer::with('items')->findOrFail($this->offerId);
+        $offer = Offer::with(['sections.items', 'attachments'])->findOrFail($this->offerId);
 
         $this->customer_id = $offer->customer_id;
+        $this->number = $offer->number;
         $this->loadCustomerServices();
 
         $this->title = $offer->title ?? '';
         $this->status = $offer->status;
         $this->description = $offer->description ?? '';
-        $this->discount_value = $offer->discount_percentage > 0 ? $offer->discount_percentage : ($offer->original_amount - $offer->total_amount);
-        $this->discount_type = $offer->discount_percentage > 0 ? 'PERCENTAGE' : 'AMOUNT';
+
+        // Correct Discount Loading: If PERCENTAGE, use discount_percentage. If AMOUNT, use stored discounted_amount.
+        if ($offer->discount_percentage > 0) {
+            $this->discount_value = (float) $offer->discount_percentage;
+            $this->discount_type = 'PERCENTAGE';
+        } else {
+            $this->discount_value = (float) $offer->discounted_amount;
+            $this->discount_type = 'AMOUNT';
+        }
         $this->vat_rate = (float) $offer->vat_rate;
         $this->currency = $offer->currency;
         $this->valid_until = Carbon::parse($offer->valid_until)->format('Y-m-d');
 
-        // Load items
-        $this->items = $offer->items->map(fn($item) => [
-            'service_id' => $item->service_id,
-            'service_name' => $item->service_name,
-            'description' => $item->description,
-            'price' => $item->price,
-            'currency' => $item->currency,
-            'duration' => $item->duration,
-            'quantity' => $item->quantity,
+        $this->vat_rate = (float) $offer->vat_rate;
+        $this->currency = $offer->currency;
+
+        // Load sections and their items
+        $this->sections = $offer->sections->map(fn ($section) => [
+            'id' => $section->id,
+            'title' => $section->title,
+            'description' => $section->description,
+            'items' => $section->items->map(fn ($item) => [
+                'service_id' => $item->service_id,
+                'service_name' => $item->service_name,
+                'description' => $item->description,
+                'price' => (float) $item->price,
+                'currency' => $item->currency,
+                'duration' => $item->duration,
+                'quantity' => (int) $item->quantity,
+            ])->toArray(),
         ])->toArray();
 
+        // Fallback for old data or migration edge cases
+        if (empty($this->sections)) {
+            $this->sections = [
+                [
+                    'id' => null,
+                    'title' => 'Teklif Bölümü - 1',
+                    'description' => '',
+                    'items' => $offer->items->map(fn ($item) => [
+                        'service_id' => $item->service_id,
+                        'service_name' => $item->service_name,
+                        'description' => $item->description,
+                        'price' => (float) $item->price,
+                        'currency' => $item->currency,
+                        'duration' => $item->duration,
+                        'quantity' => (int) $item->quantity,
+                    ])->toArray(),
+                ],
+            ];
+        }
+
         // Load attachments
-        $this->attachments = $offer->attachments->map(fn($att) => [
+        $this->attachments = $offer->attachments->map(fn ($att) => [
             'id' => $att->id,
             'title' => $att->title,
             'description' => $att->description,
@@ -212,10 +280,11 @@ trait HasOfferDataLoader
 
     /**
      * @purpose Müşteri değiştiğinde otomatik servis listesi güncelleme
+     *
      * @return void
-     * 🔐 Security: Livewire property watcher - otomatik tetiklenir
-     * 📢 Events: loadCustomerServices() çağrısı ile UI güncelleme
-     * 
+     *              🔐 Security: Livewire property watcher - otomatik tetiklenir
+     *              📢 Events: loadCustomerServices() çağrısı ile UI güncelleme
+     *
      * State Dependencies: $this->customer_id, $this->customerServices
      */
     public function updatedCustomerId(): void
@@ -225,10 +294,11 @@ trait HasOfferDataLoader
 
     /**
      * @purpose Seçili müşterinin aktif servislerini yıla göre filtreleyerek yükleme
+     *
      * @return void
-     * 🔐 Security: Private metot - customer_id kontrolü ile güvenli erişim
-     * 📢 Events: $this->customerServices array'inin güncellenmesi
-     * 
+     *              🔐 Security: Private metot - customer_id kontrolü ile güvenli erişim
+     *              📢 Events: $this->customerServices array'inin güncellenmesi
+     *
      * State Dependencies: $this->customer_id, $this->selectedYear, $this->customerServices
      */
     private function loadCustomerServices(): void
@@ -246,47 +316,15 @@ trait HasOfferDataLoader
 
     /**
      * @purpose Yıl değiştiğinde müşteri servislerini yeniden yükleme
+     *
      * @return void
-     * 🔐 Security: Livewire property watcher - otomatik tetiklenir
-     * 📢 Events: loadCustomerServices() çağrısı ile UI güncelleme
-     * 
+     *              🔐 Security: Livewire property watcher - otomatik tetiklenir
+     *              📢 Events: loadCustomerServices() çağrısı ile UI güncelleme
+     *
      * State Dependencies: $this->selectedYear, $this->customerServices
      */
     public function updatedSelectedYear(): void
     {
         $this->loadCustomerServices();
-    }
-
-    /**
-     * @purpose Servis seçim modalını açma ve müşteri kontrolü
-     * @return void
-     * 🔐 Security: Müşteri seçimi zorunlu - customer_id kontrolü
-     * 📢 Events: $this->showServiceModal = true, error toast (müşteri yoksa)
-     * 
-     * State Dependencies: $this->customer_id, $this->showServiceModal
-     */
-    public function openServiceModal(): void
-    {
-        if (!$this->customer_id) {
-            $this->error('Uyarı', 'Lütfen önce bir müşteri seçin.');
-            return;
-        }
-        $this->showServiceModal = true;
-        $this->loadCustomerServices();
-    }
-
-    /**
-     * @purpose Servis seçim modalını kapatma ve form temizleme
-     * @return void
-     * 🔐 Security: Genel erişim - özel yetki kontrolü yok
-     * 📢 Events: $this->showServiceModal = false, modal form alanları temizlenir
-     * 
-     * State Dependencies: $this->showServiceModal, $this->modalCategory, $this->modalServiceName
-     */
-    public function closeServiceModal(): void
-    {
-        $this->showServiceModal = false;
-        $this->modalCategory = '';
-        $this->modalServiceName = '';
     }
 }

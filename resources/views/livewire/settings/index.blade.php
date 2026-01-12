@@ -72,7 +72,7 @@ new
                 'subtitle' => 'Teklif PDF şablonunu ve ayarlarını özelleştirin',
                 'icon' => 'o-document-text',
                 'color' => 'bg-blue-50 text-blue-500',
-                'link' => '#'
+                'link' => route('settings.pdf-template')
             ],
             [
                 'title' => 'Veri Aktarımı',
@@ -141,8 +141,7 @@ new
                                 class="text-skin-heading">
                                 {{ $card['title'] }}
                             </h3>
-                            <p class="text-[13px] leading-relaxed line-clamp-2 pr-4 opacity-70"
-                               >
+                            <p class="text-[13px] leading-relaxed line-clamp-2 pr-4 opacity-70">
                                 {{ $card['subtitle'] }}
                             </p>
                         </div>

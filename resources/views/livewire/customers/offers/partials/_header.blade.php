@@ -9,14 +9,14 @@
 @component: _header.blade.php
 @section: Teklif Oluşturma Üst Başlık
 @description: Sayfa başlığı, geri dön butonu ve ana aksiyon butonlarını (İptal, Kaydet, Sil) içerir.
-@params: $isViewMode (bool), $title (string), $offerId (string|null)
+@params: $isViewMode (bool), $title (string), $number (string|null), $offerId (string|null)
 @events: cancel, delete, toggleEditMode, save
 --}}
 <div class="flex items-start justify-between mb-6">
     <div>
         <h1 class="text-2xl font-bold tracking-tight" class="text-skin-heading">
             @if($isViewMode)
-                {{ $title }}
+                {{ $number ?? $title }}
             @elseif($offerId)
                 Düzenle: {{ $title }}
             @else
@@ -38,6 +38,16 @@
 
     <div class="flex items-center gap-3">
         @if($isViewMode)
+            {{-- PDF Butonu --}}
+            @php
+                $pdfOfferId = is_object($offerId) ? $offerId->id : (is_array($offerId) ? ($offerId['id'] ?? $offerId) : $offerId);
+            @endphp
+            <a href="/dashboard/customers/offers/{{ $pdfOfferId }}/pdf" wire:key="btn-pdf-{{ $pdfOfferId }}" target="_blank"
+                class="theme-btn-save flex items-center gap-2 px-4 py-2 text-sm" title="PDF Görüntüle">
+                <x-mary-icon name="o-document-text" class="w-4 h-4" />
+                PDF
+            </a>
+
             <button type="button" wire:click="delete" wire:confirm="Bu teklifi silmek istediğinize emin misiniz?"
                 wire:key="btn-delete-{{ $offerId }}" class="theme-btn-delete flex items-center gap-2 px-4 py-2 text-sm">
                 <x-mary-icon name="o-trash" class="w-4 h-4" />

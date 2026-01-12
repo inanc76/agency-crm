@@ -10,6 +10,29 @@
 <div class="theme-card p-6 shadow-sm">
     <h2 class="text-base font-bold mb-4 text-skin-heading">Müşteri Bilgileri
     </h2>
+    <div class="grid grid-cols-1 gap-4 mb-4 pb-4 border-b border-slate-100">
+        <div>
+            <label class="block text-xs font-medium mb-1 opacity-60">Teklif Başlığı *</label>
+            @if($isViewMode)
+                <div class="text-sm font-medium">{{ $title }}</div>
+            @else
+                <input type="text" wire:model.live="title" placeholder="Örn: Web Sitesi Yenileme Teklifi"
+                    class="input w-full bg-white">
+                @error('title') <span class="text-skin-danger text-xs">{{ $message }}</span> @enderror
+            @endif
+        </div>
+        <div>
+            <label class="block text-xs font-medium mb-1 opacity-60">Genel Açıklama</label>
+            @if($isViewMode)
+                <div class="text-sm font-medium whitespace-pre-wrap">{{ $description ?: '-' }}</div>
+            @else
+                <textarea wire:model.live="description" class="textarea w-full bg-white" rows="2"
+                    placeholder="Teklif hakkında genel notlar..."></textarea>
+                @error('description') <span class="text-skin-danger text-xs">{{ $message }}</span> @enderror
+            @endif
+        </div>
+    </div>
+
     <div class="grid grid-cols-2 gap-6">
         <div>
             <label class="block text-xs font-medium mb-1 opacity-60">Müşteri *</label>

@@ -1,12 +1,18 @@
 <?php
 
+use App\Http\Controllers\MinioProxyController;
 use Illuminate\Support\Facades\Route;
-use Laravel\Fortify\Features;
 use Livewire\Volt\Volt;
 
 Route::get('/', function () {
     return view('welcome');
 })->name('home');
+
+// Minio Proxy Route - serves files from Minio through Laravel
+Route::get('storage/minio/{path}', [MinioProxyController::class, 'serve'])
+    ->where('path', '.*')
+    ->middleware(['auth'])
+    ->name('minio.proxy');
 
 Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
@@ -14,9 +20,10 @@ Route::view('dashboard', 'dashboard')
 
 // Müşteri Yönetimi
 Route::get('dashboard/customers', function () {
-    if (!request()->has('tab')) {
-        return redirect()->to(url()->current() . '?tab=customers');
+    if (! request()->has('tab')) {
+        return redirect()->to(url()->current().'?tab=customers');
     }
+
     return view('customers.index');
 })->middleware(['auth', 'verified', 'can:customers.view'])->name('customers.index');
 
@@ -64,6 +71,11 @@ Volt::route('dashboard/customers/offers/{offer}', 'customers.offers.create')
     ->middleware(['auth', 'verified', 'can:offers.view'])
     ->name('customers.offers.edit');
 
+// PDF Preview
+Volt::route('dashboard/customers/offers/{offer}/pdf', 'customers.offers.pdf-preview')
+    ->middleware(['auth', 'verified', 'can:offers.view'])
+    ->name('offers.pdf.preview');
+
 // Ayarlar
 // Ayarlar
 Volt::route('dashboard/settings', 'settings.index')
@@ -94,8 +106,9 @@ Volt::route('dashboard/settings/prices', 'settings.prices')
     ->middleware(['auth', 'verified', 'can:settings.edit'])
     ->name('settings.prices');
 
-
-
+Volt::route('dashboard/settings/pdf-template', 'settings.pdf-template')
+    ->middleware(['auth', 'verified', 'can:settings.edit'])
+    ->name('settings.pdf-template');
 
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');
@@ -111,11 +124,12 @@ Volt::route('dashboard/settings/two-factor', 'settings.two-factor')
 
 // Debug route for testing
 Route::get('debug/2fa', function () {
-    if (!auth()->check()) {
+    if (! auth()->check()) {
         return 'User not authenticated';
     }
 
     $user = auth()->user();
+
     return [
         'user' => $user->email,
         'has_2fa' => $user->hasEnabledTwoFactorAuthentication(),

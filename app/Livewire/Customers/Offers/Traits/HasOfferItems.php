@@ -8,35 +8,46 @@ trait HasOfferItems
 {
     /**
      * @trait HasOfferItems
+     *
      * @purpose Hizmet kalemleri (items), manuel giriş ve kalem açıklamalarını yönetir.
+     *
      * @methods openManualEntryModal(), addManualItemRow(), removeManualItemRow(), saveManualItems(), updatedModalCategory(), addServiceFromExisting(), addServiceFromPriceDefinition(), removeItem(), openItemDescriptionModal(), saveItemDescription()
      */
-    // Offer Items
-    public $items = [];
+    // Offer Sections & Items
+    public $sections = [];
 
     // Manual Entry Modal State
     public $showManualEntryModal = false;
+
     public $manualItems = [];
+
+    public $activeSectionIndex = 0; // Tracks which section is being edited
 
     // Item Description Modal State
     public $showItemDescriptionModal = false;
+
     public $editingItemIndex = null;
+
+    public $editingSectionIndex = null;
+
     public $itemDescriptionTemp = '';
 
     // Service Modal State (related vars)
     public $modalCategory = '';
+
     public $modalServiceName = '';
 
-    public function openManualEntryModal(): void
+    public function openManualEntryModal(int $sectionIndex): void
     {
+        $this->activeSectionIndex = $sectionIndex;
         $this->manualItems = [
             [
                 'service_name' => '',
                 'description' => '',
                 'duration' => null,
                 'price' => 0,
-                'quantity' => 1
-            ]
+                'quantity' => 1,
+            ],
         ];
         $this->showManualEntryModal = true;
     }
@@ -54,7 +65,7 @@ trait HasOfferItems
             'description' => '',
             'duration' => null,
             'price' => 0,
-            'quantity' => 1
+            'quantity' => 1,
         ];
     }
 
@@ -80,7 +91,7 @@ trait HasOfferItems
         $count = count($this->manualItems);
 
         foreach ($this->manualItems as $item) {
-            $this->items[] = [
+            $this->sections[$this->activeSectionIndex]['items'][] = [
                 'service_id' => null, // Manual item
                 'service_name' => $item['service_name'],
                 'description' => $item['description'] ?? '',
@@ -93,7 +104,30 @@ trait HasOfferItems
 
         $this->showManualEntryModal = false;
         $this->manualItems = [];
-        $this->success('Başarılı', $count . ' kalem eklendi.');
+        $this->success('Başarılı', $count.' kalem eklendi.');
+    }
+
+    public function openServiceModal(int $sectionIndex): void
+    {
+        if (! $this->customer_id) {
+            $this->error('Uyarı', 'Lütfen önce bir müşteri seçin.');
+
+            return;
+        }
+
+        $this->activeSectionIndex = $sectionIndex;
+        $this->showServiceModal = true;
+
+        if (method_exists($this, 'loadCustomerServices')) {
+            $this->loadCustomerServices();
+        }
+    }
+
+    public function closeServiceModal(): void
+    {
+        $this->showServiceModal = false;
+        $this->modalCategory = '';
+        $this->modalServiceName = '';
     }
 
     public function updatedModalCategory(): void
@@ -107,19 +141,20 @@ trait HasOfferItems
 
         if ($service) {
             // Currency sync & validation
-            if (count($this->items) > 0) {
+            if (count($this->sections[$this->activeSectionIndex]['items'] ?? []) > 0 || count($this->sections) > 1) {
                 if ($service['service_currency'] !== $this->currency) {
                     $this->error('Para Birimi Uyumsuzluğu', "Bu teklif {$this->currency} cinsindendir. {$service['service_currency']} birimli bir hizmet ekleyemezsiniz.");
+
                     return;
                 }
             } else {
                 $this->currency = $service['service_currency'];
             }
 
-            $this->items[] = [
+            $this->sections[$this->activeSectionIndex]['items'][] = [
                 'service_id' => $service['id'],
                 'service_name' => $service['service_name'],
-                'description' => ($service['description'] ?? '') . " (Uzatma)",
+                'description' => ($service['description'] ?? '').' (Uzatma)',
                 'price' => $service['service_price'],
                 'currency' => $service['service_currency'],
                 'duration' => $service['service_duration'] ?? 1,
@@ -133,8 +168,9 @@ trait HasOfferItems
 
     public function addServiceFromPriceDefinition(): void
     {
-        if (!$this->modalServiceName) {
+        if (! $this->modalServiceName) {
             $this->error('Uyarı', 'Lütfen bir hizmet seçin.');
+
             return;
         }
 
@@ -144,16 +180,17 @@ trait HasOfferItems
 
         if ($priceDef) {
             // Currency sync & validation
-            if (count($this->items) > 0) {
+            if (count($this->sections[$this->activeSectionIndex]['items'] ?? []) > 0 || count($this->sections) > 1) {
                 if ($priceDef['currency'] !== $this->currency) {
                     $this->error('Para Birimi Uyumsuzluğu', "Bu teklif {$this->currency} cinsindendir. {$priceDef['currency']} birimli bir hizmet ekleyemezsiniz.");
+
                     return;
                 }
             } else {
                 $this->currency = $priceDef['currency'];
             }
 
-            $this->items[] = [
+            $this->sections[$this->activeSectionIndex]['items'][] = [
                 'service_id' => null,
                 'service_name' => $priceDef['name'],
                 'description' => $priceDef['description'] ?? '',
@@ -168,27 +205,54 @@ trait HasOfferItems
         }
     }
 
-    public function removeItem(int $index): void
+    public function removeItem(int $sectionIndex, int $itemIndex): void
     {
-        unset($this->items[$index]);
-        $this->items = array_values($this->items);
+        unset($this->sections[$sectionIndex]['items'][$itemIndex]);
+        $this->sections[$sectionIndex]['items'] = array_values($this->sections[$sectionIndex]['items']);
     }
 
-    public function openItemDescriptionModal(int $index): void
+    public function openItemDescriptionModal(int $sectionIndex, int $itemIndex): void
     {
-        $this->editingItemIndex = $index;
-        $this->itemDescriptionTemp = $this->items[$index]['description'] ?? '';
+        $this->editingSectionIndex = $sectionIndex;
+        $this->editingItemIndex = $itemIndex;
+        $this->itemDescriptionTemp = $this->sections[$sectionIndex]['items'][$itemIndex]['description'] ?? '';
         $this->showItemDescriptionModal = true;
     }
 
     public function saveItemDescription(): void
     {
-        if ($this->editingItemIndex !== null) {
-            $this->items[$this->editingItemIndex]['description'] = Str::limit($this->itemDescriptionTemp, 50, '');
+        if ($this->editingSectionIndex !== null && $this->editingItemIndex !== null) {
+            $this->sections[$this->editingSectionIndex]['items'][$this->editingItemIndex]['description'] = Str::limit($this->itemDescriptionTemp, 50, '');
             $this->showItemDescriptionModal = false;
+            $this->editingSectionIndex = null;
             $this->editingItemIndex = null;
             $this->itemDescriptionTemp = '';
             $this->success('Başarılı', 'Açıklama güncellendi.');
         }
+    }
+
+    public function addSection(): void
+    {
+        $nextNum = count($this->sections) + 1;
+        $this->sections[] = [
+            'id' => null,
+            'title' => "Teklif Bölümü - {$nextNum}",
+            'description' => '',
+            'items' => [],
+        ];
+        $this->success('Başarılı', 'Yeni bölüm eklendi.');
+    }
+
+    public function removeSection(int $index): void
+    {
+        if (count($this->sections) <= 1) {
+            $this->error('Uyarı', 'En az bir bölüm bulunmalıdır.');
+
+            return;
+        }
+
+        unset($this->sections[$index]);
+        $this->sections = array_values($this->sections);
+        $this->success('Başarılı', 'Bölüm kaldırıldı.');
     }
 }

@@ -20,6 +20,7 @@
         "livewire/livewire": "^3.7",
         "livewire/volt": "^1.10",
         "robsontenorio/mary": "^2.0",
+        "spatie/browsershot": "^5.2",
         "spatie/laravel-db-snapshots": "^2.7",
         "symfony/http-client": "^8.0",
         "symfony/mailgun-mailer": "^8.0"

@@ -1,9 +1,8 @@
 <?php
 
-use App\Models\User;
 use App\Models\PanelSetting;
+use App\Models\User;
 use Livewire\Volt\Volt;
-use Illuminate\Support\Facades\Cache;
 
 beforeEach(function () {
     $this->user = User::factory()->create();

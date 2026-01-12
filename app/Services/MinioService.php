@@ -2,11 +2,11 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Http\UploadedFile;
 use App\Models\StorageSetting;
 use Aws\S3\S3Client;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class MinioService
 {
@@ -14,12 +14,12 @@ class MinioService
     {
         $setting = StorageSetting::where('is_active', true)->first();
 
-        if (!$setting) {
+        if (! $setting) {
             throw new \Exception('Minio ayarları bulunamadı. Lütfen önce depolama ayarlarını yapılandırın.');
         }
 
         $protocol = $setting->use_ssl ? 'https://' : 'http://';
-        $endpoint = $protocol . $setting->endpoint . ($setting->port == 443 || $setting->port == 80 ? '' : ':' . $setting->port);
+        $endpoint = $protocol.$setting->endpoint.($setting->port == 443 || $setting->port == 80 ? '' : ':'.$setting->port);
 
         $config = [
             'driver' => 's3',
@@ -41,12 +41,12 @@ class MinioService
     private function getS3Client()
     {
         $setting = StorageSetting::where('is_active', true)->first();
-        if (!$setting) {
+        if (! $setting) {
             throw new \Exception('Minio ayarları bulunamadı.');
         }
 
         $protocol = $setting->use_ssl ? 'https://' : 'http://';
-        $endpoint = $protocol . $setting->endpoint . ($setting->port == 443 || $setting->port == 80 ? '' : ':' . $setting->port);
+        $endpoint = $protocol.$setting->endpoint.($setting->port == 443 || $setting->port == 80 ? '' : ':'.$setting->port);
 
         return new S3Client([
             'version' => 'latest',
@@ -73,8 +73,8 @@ class MinioService
             $path = $filename; // Store directly in bucket root or prefix if needed: $directory . '/' . $filename;
 
             // User requested 'offers' directory, so let's honor $directory
-            if (!empty($directory)) {
-                $path = rtrim($directory, '/') . '/' . $filename;
+            if (! empty($directory)) {
+                $path = rtrim($directory, '/').'/'.$filename;
             }
 
             // Attempt Deductive Upload Strategy
@@ -91,7 +91,7 @@ class MinioService
                     }
 
                     // Helper method: cleanup temporary file if desired (but user asked to keep it simple for now)
-                    // $this->cleanupTemporaryFile($realPath); 
+                    // $this->cleanupTemporaryFile($realPath);
 
                     return [
                         'path' => $path,
@@ -111,7 +111,7 @@ class MinioService
 
         } catch (\Exception $e) {
             $fullPath = isset($file) ? $file->getRealPath() : 'unknown';
-            Log::error("Minio upload HATASI (Path: {$fullPath}): " . $e->getMessage());
+            Log::error("Minio upload HATASI (Path: {$fullPath}): ".$e->getMessage());
             throw $e;
         }
     }
@@ -119,7 +119,8 @@ class MinioService
     public function deleteFile(?string $path): bool
     {
         if (empty($path)) {
-            Log::warning("Minio silme denemesi: Yol boş.");
+            Log::warning('Minio silme denemesi: Yol boş.');
+
             return false;
         }
 
@@ -152,8 +153,8 @@ class MinioService
                 }
             }
 
-            if (!empty($toDelete)) {
-                Log::info("Minio: " . count($toDelete) . " adet sürüm temizleniyor.");
+            if (! empty($toDelete)) {
+                Log::info('Minio: '.count($toDelete).' adet sürüm temizleniyor.');
                 $client->deleteObjects([
                     'Bucket' => $bucket,
                     'Delete' => [
@@ -162,7 +163,7 @@ class MinioService
                     ],
                 ]);
             } else {
-                Log::info("Minio: Sürüm bulunamadı, standart silme deneniyor.");
+                Log::info('Minio: Sürüm bulunamadı, standart silme deneniyor.');
                 $client->deleteObject([
                     'Bucket' => $bucket,
                     'Key' => $path,
@@ -170,9 +171,11 @@ class MinioService
             }
 
             Log::info("Minio silme işlemi tamamlandı: {$path}");
+
             return true;
         } catch (\Exception $e) {
-            Log::error("Minio silme HATASI - Yol: {$path} - Hata: " . $e->getMessage());
+            Log::error("Minio silme HATASI - Yol: {$path} - Hata: ".$e->getMessage());
+
             return false;
         }
     }
@@ -191,11 +194,14 @@ class MinioService
         try {
             $disk = $this->getDisk();
             if ($disk->exists($path)) {
-                return $disk->url($path);
+                // Return Laravel proxy URL instead of direct Minio URL
+                // This bypasses CORS and SSL issues
+                return route('minio.proxy', ['path' => $path]);
             }
         } catch (\Exception $e) {
             // URL generation error
         }
+
         return null;
     }
 
@@ -203,7 +209,7 @@ class MinioService
     {
         $disk = $this->getDisk();
 
-        if (!$disk->exists($path)) {
+        if (! $disk->exists($path)) {
             throw new \Exception("Dosya bulunamadı: {$path}");
         }
 

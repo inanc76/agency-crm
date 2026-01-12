@@ -52,7 +52,7 @@ $valid_until (string), $items (array)
         </div>
     </div>
 
-    @if(!$isViewMode && count($items) > 0)
+    @if(!$isViewMode && count($sections) > 0)
         <div class="mt-4 text-xs text-slate-400 text-center">
             Fiyatlar KDV dahil değildir
         </div>

@@ -14,7 +14,7 @@ new class extends Component {
 
 <div class="max-w-7xl mx-auto">
     {{-- Back Button --}}
-    @include('livewire.customers.offers.partials._header', ['isViewMode' => $isViewMode, 'title' => $title, 'offerId' => $offerId])
+    @include('livewire.customers.offers.partials._header', ['isViewMode' => $isViewMode, 'title' => $title, 'number' => $number, 'offerId' => $offerId])
 
     {{-- Tab Navigation --}}
     @include('livewire.customers.offers.partials._tabs', ['isViewMode' => $isViewMode, 'activeTab' => $activeTab])
@@ -24,6 +24,17 @@ new class extends Component {
         <div class="col-span-8">
             @if($activeTab === 'info')
                 <div class="space-y-6">
+                    {{-- Validation Errors Summary --}}
+                    @if($errors->any())
+                        <div class="p-4 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+                            <ul class="list-disc list-inside">
+                                @foreach($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
                     @include('livewire.customers.offers.partials._customer_info', [
                         'isViewMode' => $isViewMode,
                         'customers' => $customers,
@@ -36,21 +47,29 @@ new class extends Component {
                         'vat_rate' => $vat_rate,
                         'vatRates' => $vatRates
                     ])
-                        @include('livewire.customers.offers.partials._title_description', [
-                            'isViewMode' => $isViewMode,
-                            'title' => $title,
-                            'description' => $description
-                        ])
-                    @include('livewire.customers.offers.partials._items_table', [
-                        'isViewMode' => $isViewMode,
-                        'items' => $items
-                    ])
+                            @foreach($sections as $index => $section)
+                                @include('livewire.customers.offers.partials._section_row', [
+                                    'isViewMode' => $isViewMode,
+                                    'section' => $section,
+                                    'index' => $index
+                                ])
+                            @endforeach
 
-                    @include('livewire.customers.offers.partials._attachments', [
-                        'isViewMode' => $isViewMode,
-                        'attachments' => $attachments
-                    ])
-                    </div>
+                            @if(!$isViewMode)
+                                <div class="flex justify-center mt-4">
+                                    <button type="button" wire:click="addSection" 
+                                        class="flex items-center gap-2 px-4 py-2 text-xs font-bold bg-white border border-slate-200 rounded-lg shadow-sm hover:bg-slate-50 cursor-pointer transition-all text-slate-700">
+                                        <x-mary-icon name="o-plus-circle" class="w-4 h-4" />
+                                        Bölüm Ekle
+                                    </button>
+                                </div>
+                            @endif
+
+                        @include('livewire.customers.offers.partials._attachments', [
+                            'isViewMode' => $isViewMode,
+                            'attachments' => $attachments
+                        ])
+                        </div>
             @endif
             @if($activeTab === 'messages')
                 <div class="theme-card p-6 shadow-sm text-center text-slate-500 py-12">
@@ -83,7 +102,7 @@ new class extends Component {
                 'discount_value' => $discount_value,
                 'vat_rate' => $vat_rate,
                 'valid_until' => $valid_until,
-                'items' => $items
+                'sections' => $sections
             ])
 
         </div>

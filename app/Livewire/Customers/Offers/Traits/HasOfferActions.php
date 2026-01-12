@@ -5,6 +5,7 @@ namespace App\Livewire\Customers\Offers\Traits;
 use App\Models\Offer;
 use App\Models\OfferAttachment;
 use App\Models\OfferItem;
+use App\Models\OfferSection;
 use App\Services\MinioService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -40,15 +41,17 @@ use Illuminate\Support\Str;
  */
 trait HasOfferActions
 {
-    use HasOfferDataLoader;   // 📊 Veri yükleme trait'i
-    use HasOfferAttachments;  // 📎 Ek dosya yönetimi trait'i
+    // 📊 Veri yükleme trait'i
+    use HasOfferAttachments;
+    use HasOfferDataLoader;  // 📎 Ek dosya yönetimi trait'i
 
     /**
      * @purpose Teklifi veritabanına kaydetme (yeni oluşturma veya güncelleme)
+     *
      * @return void
-     * 🔐 Security: offers.create (new) or offers.edit (existing) - Authorization enforced
-     * 📢 Events: Success toast, 'offer-saved' dispatch, redirect to customers page
-     * 
+     *              🔐 Security: offers.create (new) or offers.edit (existing) - Authorization enforced
+     *              📢 Events: Success toast, 'offer-saved' dispatch, redirect to customers page
+     *
      * State Dependencies: $this->offerId, $this->items, $this->attachments, tüm form alanları
      */
     public function save(): void
@@ -64,13 +67,19 @@ trait HasOfferActions
             'customer_id' => 'required',
             'title' => 'required|string|max:255',
             'valid_until' => 'required|date',
-            'items' => 'required|array|min:1',
-            'items.*.service_name' => 'required|string|max:255',
-            'items.*.price' => 'required|numeric|min:0.01',
-            'items.*.quantity' => 'required|numeric|min:1',
+            'sections' => 'required|array|min:1',
+            'sections.*.title' => 'required|string|max:255',
+            'sections.*.description' => 'nullable|string',
+            'sections.*.items' => 'required|array|min:1',
+            'sections.*.items.*.service_name' => 'required|string|max:255',
+            'sections.*.items.*.price' => 'required|numeric|min:0.01',
+            'sections.*.items.*.quantity' => 'required|numeric|min:1',
         ], [
-            'items.*.service_name.required' => 'Hizmet adı zorunludur.',
-            'items.*.price.min' => 'Fiyat 0.01 veya daha büyük olmalıdır.',
+            'sections.required' => 'Teklif en az bir bölüm içermelidir.',
+            'sections.*.title.required' => 'Bölüm başlığı zorunludur.',
+            'sections.*.items.required' => 'Her bölüm en az bir hizmet kalemi içermelidir.',
+            'sections.*.items.*.service_name.required' => 'Hizmet adı zorunludur.',
+            'sections.*.items.*.price.min' => 'Fiyat 0.01 veya daha büyük olmalıdır.',
         ]);
 
         $totals = $this->calculateTotals();
@@ -95,6 +104,8 @@ trait HasOfferActions
             if ($this->offerId) {
                 $offer = Offer::findOrFail($this->offerId);
                 $offer->update($offerData);
+                // Clear old sections and items (cascading handled by model booted event or manual delete)
+                $offer->sections()->delete();
                 $offer->items()->delete();
             } else {
                 $this->offerId = Str::uuid()->toString();
@@ -102,19 +113,30 @@ trait HasOfferActions
                 $offer = Offer::create($offerData);
             }
 
-            // Create items
-            foreach ($this->items as $item) {
-                OfferItem::create([
+            // Create sections and items
+            foreach ($this->sections as $sIndex => $sectionData) {
+                $section = OfferSection::create([
                     'id' => Str::uuid()->toString(),
                     'offer_id' => $offer->id,
-                    'service_id' => $item['service_id'] ?? null,
-                    'service_name' => $item['service_name'],
-                    'description' => $item['description'] ?? '',
-                    'price' => $item['price'],
-                    'currency' => $item['currency'],
-                    'duration' => $item['duration'],
-                    'quantity' => $item['quantity'],
+                    'title' => $sectionData['title'],
+                    'description' => $sectionData['description'] ?? '',
+                    'sort_order' => $sIndex,
                 ]);
+
+                foreach ($sectionData['items'] as $item) {
+                    OfferItem::create([
+                        'id' => Str::uuid()->toString(),
+                        'offer_id' => $offer->id,
+                        'section_id' => $section->id,
+                        'service_id' => $item['service_id'] ?? null,
+                        'service_name' => $item['service_name'],
+                        'description' => $item['description'] ?? '',
+                        'price' => $item['price'],
+                        'currency' => $item['currency'],
+                        'duration' => $item['duration'],
+                        'quantity' => $item['quantity'],
+                    ]);
+                }
             }
 
             // Sync Attachments
@@ -138,33 +160,40 @@ trait HasOfferActions
 
         $this->success('İşlem Başarılı', 'Teklif başarıyla kaydedildi.');
         $this->dispatch('offer-saved');
-        $this->redirect('/dashboard/customers?tab=offers');
+
+        if ($this->offerId) {
+            $this->loadOfferData();
+        } else {
+            // New offer created, redirect to its detail page
+            $this->redirect("/dashboard/customers/offers/{$this->offerId}", navigate: true);
+        }
     }
 
     /**
      * @purpose Teklif düzenlemeyi iptal etme ve geçici dosyaları temizleme
+     *
      * @return void
-     * 🔐 Security: Geçici dosya temizleme, MinIO'dan silme yetkisi
-     * 📢 Events: Redirect (yeni teklif) veya loadOfferData() (mevcut teklif)
-     * 
+     *              🔐 Security: Geçici dosya temizleme, MinIO'dan silme yetkisi
+     *              📢 Events: Redirect (yeni teklif) veya loadOfferData() (mevcut teklif)
+     *
      * State Dependencies: $this->offerId, $this->attachments
      */
     public function cancel(): void
     {
         // Clean up unsaved attachments from Minio
-        if (!empty($this->attachments)) {
+        if (! empty($this->attachments)) {
             $minioService = app(MinioService::class);
 
             foreach ($this->attachments as $attachment) {
                 // If the attachment doesn't have an ID, it means it hasn't been saved to the DB yet
                 // and was just uploaded in this session.
-                if (!isset($attachment['id'])) {
+                if (! isset($attachment['id'])) {
                     if (isset($attachment['file_path'])) {
                         try {
                             $minioService->deleteFile($attachment['file_path']);
-                            Log::info("Cancelled Offer Creation: Deleted temporary file: " . $attachment['file_path']);
+                            Log::info('Cancelled Offer Creation: Deleted temporary file: '.$attachment['file_path']);
                         } catch (\Exception $e) {
-                            Log::error("Failed to delete file on cancel: " . $e->getMessage());
+                            Log::error('Failed to delete file on cancel: '.$e->getMessage());
                         }
                     }
                 }
@@ -180,10 +209,11 @@ trait HasOfferActions
 
     /**
      * @purpose Görüntüleme modundan düzenleme moduna geçiş
+     *
      * @return void
-     * 🔐 Security: offers.edit - Authorization enforced
-     * 📢 Events: $this->isViewMode = false ile düzenleme moduna geçiş
-     * 
+     *              🔐 Security: offers.edit - Authorization enforced
+     *              📢 Events: $this->isViewMode = false ile düzenleme moduna geçiş
+     *
      * State Dependencies: $this->isViewMode
      */
     public function toggleEditMode(): void
@@ -196,22 +226,24 @@ trait HasOfferActions
 
     /**
      * 🔄 statusChange
+     *
      * @purpose Teklifin yaşam döngüsü statüsünü (DRAFT/SENT/APPROVED/REJECTED) yönetir.
-     * @param string $newStatus Yeni statü değeri
+     *
+     * @param  string  $newStatus  Yeni statü değeri
      * @return void
-     * 
+     *
      * 🔐 Security: authorize('offers.status') - Yetkisiz statü değişimlerini engeller
      * 📢 Events: Dispatch 'offer-status-updated' for UI & Notification sync
      * 🔗 Side Effects:
      *    - Statü değişikliği için polymorphic sistem notu oluşturur
      *    - APPROVED durumunda ilişkili servislerin aktivasyon potansiyelini hazırlar
      *    - Tarihçe (history) kaydı tutar
-     * 
+     *
      * 🎯 Business Rules:
      *    - Sadece geçerli statüler: DRAFT, SENT, APPROVED, REJECTED
      *    - APPROVED/REJECTED final states → sadece DRAFT'a dönüş izinli
      *    - Her statü değişimi sistem notu ile loglanır
-     * 
+     *
      * State Dependencies: $this->offerId, $this->status
      */
     public function statusChange(string $newStatus): void
@@ -221,13 +253,15 @@ trait HasOfferActions
 
         // Validate status
         $validStatuses = ['DRAFT', 'SENT', 'APPROVED', 'REJECTED'];
-        if (!in_array($newStatus, $validStatuses)) {
+        if (! in_array($newStatus, $validStatuses)) {
             $this->error('Hata', 'Geçersiz durum değeri.');
+
             return;
         }
 
-        if (!$this->offerId) {
+        if (! $this->offerId) {
             $this->error('Hata', 'Teklif bulunamadı.');
+
             return;
         }
 
@@ -237,12 +271,14 @@ trait HasOfferActions
         // Prevent changing from final states (except to DRAFT)
         if (in_array($oldStatus, ['APPROVED', 'REJECTED']) && $newStatus !== 'DRAFT') {
             $this->error('Uyarı', 'Onaylanmış veya reddedilmiş teklifler sadece taslağa döndürülebilir.');
+
             return;
         }
 
         // Prevent no-op changes
         if ($oldStatus === $newStatus) {
             $this->warning('Bilgi', 'Teklif zaten bu durumda.');
+
             return;
         }
 
@@ -300,10 +336,11 @@ trait HasOfferActions
 
     /**
      * @purpose Teklifi veritabanından kalıcı olarak silme
+     *
      * @return void
-     * 🔐 Security: offers.delete - Authorization enforced
-     * 📢 Events: Success toast, redirect to customers page
-     * 
+     *              🔐 Security: offers.delete - Authorization enforced
+     *              📢 Events: Success toast, redirect to customers page
+     *
      * State Dependencies: $this->offerId
      */
     public function delete(): void
