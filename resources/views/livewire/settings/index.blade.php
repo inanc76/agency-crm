@@ -69,7 +69,7 @@ new
             ],
             [
                 'title' => 'Teklif Şablonu',
-                'subtitle' => 'Teklif PDF şablonunu ve ayarlarını özelleştirin',
+                'subtitle' => 'Teklif ve İndirme Sayfası ayarlarını özelleştirin',
                 'icon' => 'o-document-text',
                 'color' => 'bg-blue-50 text-blue-500',
                 'link' => route('settings.pdf-template')

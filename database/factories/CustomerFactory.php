@@ -17,8 +17,8 @@ class CustomerFactory extends Factory
             'phone' => fake()->phoneNumber(),
             'address' => fake()->address(),
             'customer_type' => 'CUSTOMER',
-            'city_id' => '34', // Default İstanbul
-            'country_id' => 'TR', // Default Türkiye
+            // 'city_id' => '34',
+            // 'country_id' => 'TR',
             'emails' => [fake()->email()],
             'phones' => [fake()->phoneNumber()],
             'websites' => [fake()->url()],

@@ -156,12 +156,19 @@ class PanelSetting extends Model
         'pdf_payment_terms',
         'pdf_notes',
         'pdf_show_logo',
+        // Download Page Settings
+        'dl_logo_path',
+        'dl_logo_height',
+        'dl_header_bg_color',
+        'dl_header_text_color',
+        'introduction_files',
     ];
 
     protected function casts(): array
     {
         return [
             'is_active' => 'boolean',
+            'introduction_files' => 'array',
         ];
     }
 }

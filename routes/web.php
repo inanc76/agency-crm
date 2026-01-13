@@ -14,14 +14,18 @@ Route::get('storage/minio/{path}', [MinioProxyController::class, 'serve'])
     ->middleware(['auth'])
     ->name('minio.proxy');
 
+// Public Offer Download Route
+Volt::route('offer/{token}', 'public.offer-download')
+    ->name('offer.download');
+
 Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
 // Müşteri Yönetimi
 Route::get('dashboard/customers', function () {
-    if (! request()->has('tab')) {
-        return redirect()->to(url()->current().'?tab=customers');
+    if (!request()->has('tab')) {
+        return redirect()->to(url()->current() . '?tab=customers');
     }
 
     return view('customers.index');
@@ -124,7 +128,7 @@ Volt::route('dashboard/settings/two-factor', 'settings.two-factor')
 
 // Debug route for testing
 Route::get('debug/2fa', function () {
-    if (! auth()->check()) {
+    if (!auth()->check()) {
         return 'User not authenticated';
     }
 

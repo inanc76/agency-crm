@@ -42,7 +42,12 @@ new
 
         public bool $isAttachmentsDownloadable = true;
 
-        public bool $isDownloadableAfterExpiry = false;
+        public bool $blockAfterExpiry = true;
+
+        public array $availableIntroductionFiles = [];
+        public array $selectedIntroductionFiles = [];
+
+
 
         public function mount($offer): void
         {
@@ -103,7 +108,11 @@ new
 
             $this->isPdfDownloadable = $this->offer->is_pdf_downloadable ?? true;
             $this->isAttachmentsDownloadable = $this->offer->is_attachments_downloadable ?? true;
-            $this->isDownloadableAfterExpiry = $this->offer->is_downloadable_after_expiry ?? false;
+            $this->isAttachmentsDownloadable = $this->offer->is_attachments_downloadable ?? true;
+            $this->blockAfterExpiry = !($this->offer->is_downloadable_after_expiry ?? false);
+
+            $this->availableIntroductionFiles = $this->settings->introduction_files ?? [];
+            $this->selectedIntroductionFiles = $this->offer->selected_introduction_files ?? [];
         }
 
         public function saveSettings()
@@ -111,7 +120,9 @@ new
             $this->offer->update([
                 'is_pdf_downloadable' => $this->isPdfDownloadable,
                 'is_attachments_downloadable' => $this->isAttachmentsDownloadable,
-                'is_downloadable_after_expiry' => $this->isDownloadableAfterExpiry,
+                'is_attachments_downloadable' => $this->isAttachmentsDownloadable,
+                'is_downloadable_after_expiry' => !$this->blockAfterExpiry,
+                'selected_introduction_files' => $this->selectedIntroductionFiles,
             ]);
 
             session()->flash('success', 'Ayarlar kaydedildi.');
@@ -407,7 +418,7 @@ new
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                                 </svg>
-                                <span wire:loading.remove wire:target="downloadPdf">İndir</span>
+                                <span wire:loading.remove wire:target="downloadPdf">İndir (PDF)</span>
                             </button>
 
                             <button onclick="window.print()"
@@ -421,7 +432,7 @@ new
                         </div>
 
                         {{-- İndirme Sayfası (Yeni Buton) --}}
-                        <a href="{{ route('offers.pdf.preview', $offer->id) }}" target="_blank"
+                        <a href="{{ route('offer.download', $offer->tracking_token ?? '') }}" target="_blank"
                             class="w-full theme-btn-delete flex items-center justify-center gap-2 no-underline">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -439,7 +450,7 @@ new
                                     <input type="checkbox" wire:model="isPdfDownloadable" 
                                         class="checkbox checkbox-xs checkbox-primary mt-0.5 rounded-sm">
                                     <span class="text-[11px] font-medium text-gray-600 group-hover:text-gray-900 transition-colors">
-                                        PDF teklif indirilebilir.
+                                        PDF teklif (yandaki) indirilebilir.
                                     </span>
                                 </label>
 
@@ -447,18 +458,38 @@ new
                                     <input type="checkbox" wire:model="isAttachmentsDownloadable" 
                                         class="checkbox checkbox-xs checkbox-primary mt-0.5 rounded-sm">
                                     <span class="text-[11px] font-medium text-gray-600 group-hover:text-gray-900 transition-colors">
-                                        Teklif ekleri indirilebilir.
+                                        Teklif ekleri (varsa) indirilebilir.
                                     </span>
                                 </label>
 
                                 <label class="flex items-start gap-3 cursor-pointer group">
-                                    <input type="checkbox" wire:model="isDownloadableAfterExpiry" 
+                                    <input type="checkbox" wire:model="blockAfterExpiry" 
                                         class="checkbox checkbox-xs checkbox-primary mt-0.5 rounded-sm">
                                     <span class="text-[11px] font-medium text-gray-600 group-hover:text-gray-900 transition-colors">
-                                        Geçerlilik süresi sonunda indirilebilir
+                                        Geçerlilik tarihinden sonra indirilemez.
                                     </span>
                                 </label>
                             </div>
+
+                            {{-- Tanıtım Dosyaları --}}
+                            @if(count($availableIntroductionFiles) > 0)
+                                <div class="mb-6">
+                                    <h3 class="text-xs font-bold text-gray-900 mb-3">Tanıtım Dosyaları</h3>
+                                    <div class="space-y-2">
+                                        @foreach($availableIntroductionFiles as $index => $file)
+                                            <label class="flex items-center gap-3 cursor-pointer group p-2 rounded-lg border border-transparent hover:bg-gray-50 hover:border-gray-100 transition-all">
+                                                <input type="checkbox" value="{{ $index }}" wire:model="selectedIntroductionFiles" 
+                                                    class="checkbox checkbox-xs checkbox-primary rounded-sm">
+                                                <div class="flex-1 min-w-0">
+                                                    <div class="text-[11px] font-medium text-gray-600 group-hover:text-gray-900 truncate" title="{{ $file['name'] }}">
+                                                        {{ $file['name'] }}
+                                                    </div>
+                                                </div>
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
 
                             <button wire:click="saveSettings" 
                                     class="w-full theme-btn-save flex items-center justify-center gap-2 py-2 text-xs relative">

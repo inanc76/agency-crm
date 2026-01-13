@@ -16,7 +16,8 @@ trait HasOfferCalculations
      */
     public function updatedValidDays(): void
     {
-        $this->valid_until = Carbon::now()->addDays($this->valid_days)->format('Y-m-d');
+        $days = (int) ($this->valid_days ?? 0);
+        $this->valid_until = Carbon::now()->addDays($days)->format('Y-m-d');
     }
 
     public function updatedDiscountValue(): void
@@ -51,7 +52,7 @@ trait HasOfferCalculations
     {
         $original = 0;
         foreach ($this->sections as $section) {
-            $original += collect($section['items'])->sum(fn ($item) => (float) ($item['price'] ?? 0) * (float) ($item['quantity'] ?? 1));
+            $original += collect($section['items'])->sum(fn($item) => (float) ($item['price'] ?? 0) * (float) ($item['quantity'] ?? 1));
         }
 
         $discountValue = (float) ($this->discount_value ?? 0);
@@ -90,9 +91,9 @@ trait HasOfferCalculations
 
         // Get customer prefix (first 3 letters of customer name, uppercase)
         $prefix = 'GEN'; // Default fallback
-        if (! empty($this->customer_id)) {
+        if (!empty($this->customer_id)) {
             $customer = \App\Models\Customer::find($this->customer_id);
-            if ($customer && ! empty($customer->name)) {
+            if ($customer && !empty($customer->name)) {
                 // Get first 3 letters, handle Turkish characters
                 $name = mb_strtoupper(trim($customer->name), 'UTF-8');
                 $prefix = mb_substr($name, 0, 3, 'UTF-8');
@@ -101,7 +102,7 @@ trait HasOfferCalculations
 
         // Get the highest sequence number for this prefix and year
         // Database-agnostic approach: fetch all matching numbers and parse in PHP
-        $offers = Offer::where('number', 'LIKE', $prefix.'-'.$year.'-%')
+        $offers = Offer::where('number', 'LIKE', $prefix . '-' . $year . '-%')
             ->pluck('number');
 
         $maxSequence = 0;

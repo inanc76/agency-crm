@@ -123,6 +123,7 @@ class Offer extends Model
         'is_pdf_downloadable',
         'is_attachments_downloadable',
         'is_downloadable_after_expiry',
+        'selected_introduction_files',
     ];
 
     protected function casts(): array
@@ -137,7 +138,9 @@ class Offer extends Model
             'valid_until' => 'datetime',
             'is_pdf_downloadable' => 'boolean',
             'is_attachments_downloadable' => 'boolean',
+            'is_attachments_downloadable' => 'boolean',
             'is_downloadable_after_expiry' => 'boolean',
+            'selected_introduction_files' => 'array',
         ];
     }
 
@@ -163,6 +166,17 @@ class Offer extends Model
 
     protected static function booted(): void
     {
+        static::creating(function (Offer $offer) {
+            if (empty($offer->tracking_token)) {
+                $offer->tracking_token = \Illuminate\Support\Str::uuid();
+            }
+            // Defaults
+            if (is_null($offer->is_pdf_downloadable))
+                $offer->is_pdf_downloadable = true;
+            if (is_null($offer->is_attachments_downloadable))
+                $offer->is_attachments_downloadable = true;
+        });
+
         static::deleting(function (Offer $offer) {
             // Delete attachments to trigger their deleting event for file cleanup
             $offer->attachments()->each(function ($attachment) {

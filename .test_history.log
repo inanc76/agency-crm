@@ -9,3 +9,6 @@
 2026-01-12 20:53:18|All Tests|SUCCESS|253 passed, 523 assertions, 26.46s - PDF Template Updates Verified
 2026-01-13 13:22:29|All Tests|FAIL|Memory exhausted while rendering Flux components. 128MB limit hit.
 2026-01-13 13:24:17|All Tests|SUCCESS|Batched Run: 314 passed, 10 skipped, 1 risky. Full coverage verified across 4 batches.
+2026-01-13 16:18:53|All Tests|FAIL|Memory exhausted (128MB limit hit) during test execution.
+2026-01-13 16:20:28|All Tests|SUCCESS|Memory limit increased to 512M. 323 tests passed.
+2026-01-13 21:49:40|All Tests|SUCCESS|329 passed, 10 skipped, 1 risky. Duration: 31.03s
