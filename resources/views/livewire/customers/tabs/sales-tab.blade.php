@@ -106,7 +106,6 @@ new class extends Component {
             @endif
 
             <span class="text-sm opacity-60">{{ $sales->total() }} satış</span>
-            <x-customer-management.action-button label="Yeni Satış" href="#" />
         </div>
     </div>
 

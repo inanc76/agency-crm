@@ -466,16 +466,15 @@
 
 <body>
     {{-- YÖNETİCİ ÖZETİ SAYFASI --}}
-    @if(count($sections) > 1)
-        <div class="page">
-            <div class="page-content">
-                <div class="page-badge">YÖNETİCİ ÖZETİ</div>
+    <div class="page">
+        <div class="page-content">
+            <div class="page-badge">YÖNETİCİ ÖZETİ</div>
 
-                {{-- Header --}}
-                <div class="pdf-header">
-                    <div class="header-logo-cell">
-                        @if(!empty($logoUrl))
-                            <img src="{{ $logoUrl }}" class="logo-img" alt="Logo">
+            {{-- Header --}}
+            <div class="pdf-header">
+                <div class="header-logo-cell">
+                    @if(!empty($logoUrl))
+                        <img src="{{ $logoUrl }}" class="logo-img" alt="Logo">
                         @else
                             <span class="logo-text">{{ config('app.name') }}</span>
                         @endif
@@ -586,14 +585,14 @@
                 @endif
             </div>
         </div>
-        <div class="page-break"></div>
-    @endif
+    </div>
+    <div class="page-break"></div>
 
     {{-- DETAY SAYFALARI (BÖLÜMLER) --}}
     @foreach($sections as $index => $section)
         <div class="page">
             <div class="page-content">
-                <div class="page-badge">SAYFA {{ count($sections) > 1 ? ($index + 2) : 1 }}</div>
+                <div class="page-badge">SAYFA {{ $index + 2 }}</div>
 
                 {{-- Header --}}
                 <div class="pdf-header">
@@ -656,12 +655,6 @@
                 {{-- Açıklama ve Özet --}}
                 <div class="summary-wrapper">
                     <div class="summary-left">
-                        @if(count($sections) == 1 && $offer->description)
-                            <div class="description-box">
-                                <div class="description-title">Teklif Açıklaması</div>
-                                <p class="description-text">{{ $offer->description }}</p>
-                            </div>
-                        @endif
                     </div>
                     <div class="summary-right">
                         <div class="premium-summary">

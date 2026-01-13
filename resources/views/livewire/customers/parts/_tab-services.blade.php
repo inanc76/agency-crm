@@ -9,10 +9,7 @@
                 <option value="PASSIVE">Pasif</option>
             </select>
         </div>
-        <a href="/dashboard/customers/services/create?customer={{ $customerId }}"
-            class="text-xs font-bold px-3 py-1.5 rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] hover:bg-[var(--dropdown-hover-bg)] transition-colors text-skin-primary">
-            + Yeni Hizmet
-        </a>
+        <x-customer-management.action-button label="Yeni Hizmet" href="/dashboard/customers/services/create?customer={{ $customerId }}" />
     </div>
     @php
         $filteredServices = collect($relatedServices)->when($servicesStatusFilter, function ($collection) {

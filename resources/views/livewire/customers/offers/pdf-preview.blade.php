@@ -110,8 +110,7 @@ new
                     {{-- İçerik (Sayfa Yapıları) --}}
                     <div class="p-8 space-y-12">
                         {{-- YÖNETİCİ ÖZETİ SAYFASI --}}
-                        @if(count($sections) > 1)
-                            <div class="bg-white rounded-[24px] shadow-2xl overflow-hidden relative border border-gray-100 p-12 transition-all hover:shadow-indigo-100">
+                        <div class="bg-white rounded-[24px] shadow-2xl overflow-hidden relative border border-gray-100 p-12 transition-all hover:shadow-indigo-100">
                                 <div class="absolute top-0 right-0 px-6 py-2 bg-gray-100 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 rounded-bl-xl">YÖNETİCİ ÖZETİ</div>
                                 
                                 {{-- Header --}}
@@ -230,18 +229,16 @@ new
                                 </div>
                             </div>
                             
-                            {{-- HTML Önizleme için Sayfa Sonu Ayırıcı --}}
                             <div class="py-12 flex items-center justify-center gap-4">
                                 <div class="h-px flex-1 bg-gray-200"></div>
                                 <span class="bg-gray-200 text-gray-500 px-4 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.3em]">SAYFA SONU</span>
                                 <div class="h-px flex-1 bg-gray-200"></div>
                             </div>
-                        @endif
                         
                         {{-- Detay Bölümleri --}}
                         @foreach($sections as $index => $section)
                             <div class="bg-white rounded-[24px] shadow-2xl overflow-hidden relative border border-gray-100 p-12 transition-all hover:shadow-indigo-100">
-                                <div class="absolute top-0 right-0 px-6 py-2 bg-gray-100 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 rounded-bl-xl">SAYFA {{ count($sections) > 1 ? ($index + 2) : 1 }}</div>
+                                <div class="absolute top-0 right-0 px-6 py-2 bg-gray-100 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 rounded-bl-xl">SAYFA {{ $index + 2 }}</div>
                                 
                                 {{-- Header --}}
                                 <div class="flex justify-between items-center mb-10 p-6 rounded-xl" 
@@ -315,12 +312,6 @@ new
 
                                 <div class="grid grid-cols-12 gap-10 items-start mt-8">
                                     <div class="col-span-7">
-                                        @if(count($sections) == 1 && $description)
-                                            <div class="p-6 bg-white rounded-xl border-l-4 border-gray-200 shadow-sm italic text-gray-500 text-sm">
-                                                <h2 class="text-[9px] uppercase tracking-widest font-black mb-3 text-gray-400">Teklif Açıklaması</h2>
-                                                <p class="leading-relaxed whitespace-pre-line">{{ $description }}</p>
-                                            </div>
-                                        @endif
                                     </div>
                                     <div class="col-span-5">
                                         <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm relative">

@@ -121,8 +121,9 @@ class GenerateOfferPdfTest extends TestCase
             ]), $sections),
         ])->render();
 
-        $this->assertStringNotContainsString('Yönetici Özeti', $html);
+        $this->assertStringContainsString('Yönetici Özeti', $html);
         $this->assertStringContainsString('Teklif Özeti', $html);
+        $this->assertStringContainsString('SAYFA 2', $html);
     }
 
     public function test_it_uses_custom_header_colors_from_settings()

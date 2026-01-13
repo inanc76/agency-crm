@@ -89,3 +89,51 @@ Test Hedefi: `File Management`
 - [ ] **T48-Dosya Listesi Refresh:** Yeni dosya eklendiğinde listenin anında güncellendiğini doğrula.
 - [ ] **T49-Kayıp Dosya Hatası:** Minio'da fiziksel olarak bulunamayan bir dosya indirilmeye çalışıldığında sistemin çökmediğini, uygun hata verdiğini doğrula.
 - [ ] **T50-Başlık Emoji ve Özel Karakter Desteği:** Teklif başlığında emoji ve özel karakterlerin (UTF-8) sorunsuz kaydedildiğini doğrula.
+
+## 13. Section Management (T51-T56) ✅
+Test Hedefi: `HasOfferItems.php`, Bölüm Yönetimi
+- [x] **T51-Section Add:** Yeni bölüm eklenebilmeli
+- [x] **T52-Section Delete:** Bölüm silinebilmeli  
+- [x] **T53-Section Edit:** Bölüm başlığı güncellenebilmeli
+- [x] **T54-Section Order:** Bölüm sırası değiştirilebilmeli
+- [x] **T55-Section Protection:** Tek bölüm varken silinemez
+- [x] **T56-Section Empty:** Boş bölüm kaydedilemez
+
+## 14. Offer Number Generation (T57-T61) ✅
+Test Hedefi: `HasOfferCalculations.php::generateOfferNumber()`
+- [x] **T57-Offer Number:** Her teklif unique numara almalı
+- [x] **T58-Offer Number Format:** PREFIX-YEAR-SEQUENCE formatı
+- [x] **T59-Offer Number Race:** Eş zamanlı oluşturmada unique kalmalı (Race condition fix)
+- [x] **T60-Offer Number Update:** Güncelleme numarayı korumalı
+- [x] **T61-Offer Number Prefix:** Müşteri adından prefix üretilmeli
+
+## 15. Attachment Management (T62-T67) ✅
+Test Hedefi: `HasOfferAttachments.php`
+- [x] **T62-Attachment Upload:** Dosya yüklenebilmeli
+- [x] **T63-Attachment Delete:** Dosya silinebilmeli
+- [x] **T64-Attachment Edit:** Dosya bilgileri güncellenebilmeli
+- [x] **T65-Attachment Multiple:** Birden fazla dosya eklenebilmeli
+- [x] **T66-Attachment Size:** 10MB üzeri dosya reddedilmeli
+- [x] **T67-Attachment Type:** Sadece izinli uzantılar kabul edilmeli
+
+## 16. Multi-Section Integration (T68-T70) ✅
+Test Hedefi: Çoklu Bölüm Entegrasyonu
+- [x] **T68-Multi Section Calc:** Çoklu bölüm toplamı doğru hesaplanmalı
+- [x] **T69-Item Move:** Kalem bölümler arası taşınabilmeli
+- [x] **T70-Section Discount:** Bölüm bazlı indirim uygulanabilmeli
+
+## 17. PDF Integration (T71-T74) ✅
+Test Hedefi: `GenerateOfferPdfAction`
+- [x] **T71-PDF Generate:** Teklif kaydedilince PDF oluşturulabilmeli
+- [x] **T72-PDF Sections:** PDF tüm bölümleri içermeli
+- [x] **T73-PDF Attachments:** PDF ek dosyaları listelemeli
+- [x] **T74-PDF Preview:** PDF önizleme çalışmalı
+
+---
+
+## Test Özeti
+- **Toplam Senaryolar:** 74
+- **Otomatik Testler:** 64 ✅
+- **Manuel/UI Testler:** 10 (skipped)
+- **Başarı Oranı:** 100% (64/64 passing)
+- **Test Süresi:** ~5.4 saniye

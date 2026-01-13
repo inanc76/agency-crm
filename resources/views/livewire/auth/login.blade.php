@@ -13,22 +13,24 @@
 
             <!-- Email Address -->
             <div>
-                <flux:input name="email" :label="__('Email address')" value="admin@mediaclick.com.tr" type="email"
-                    required autofocus autocomplete="email" placeholder="admin@mediaclick.com.tr"
-                    class="input-modern w-full px-4 py-3 rounded-xl border-2 border-[var(--card-border)] focus:border-[var(--color-focus)] focus:ring-4 focus:ring-[var(--brand-primary)]/20 transition-all" />
+                <flux:input name="email" :label="__('Email address')" type="email" required autofocus
+                    autocomplete="email" placeholder="Email adresinizi girin"
+                    style="border: none; background: rgba(0,0,0,0.03); color: var(--heading-color);"
+                    class="input-modern w-full px-4 py-3 rounded-xl transition-all hover:border hover:border-[var(--input-border)] focus:bg-white focus:border focus:border-[var(--input-border)] focus:ring-2 focus:ring-[var(--input-focus-ring)]" />
             </div>
 
             <!-- Password -->
             <div class="relative">
-                <flux:input name="password" :label="__('Password')" type="password" value="admin" required
-                    autocomplete="current-password" :placeholder="__('Password')" viewable
-                    class="input-modern w-full px-4 py-3 rounded-xl border-2 border-[var(--card-border)] focus:border-[var(--color-focus)] focus:ring-4 focus:ring-[var(--brand-primary)]/20 transition-all" />
+                <flux:input name="password" :label="__('Password')" type="password" required
+                    autocomplete="current-password" placeholder="Şifrenizi girin" viewable
+                    style="border: none; background: rgba(0,0,0,0.03); color: var(--heading-color);"
+                    class="input-modern w-full px-4 py-3 rounded-xl transition-all hover:border hover:border-[var(--input-border)] focus:bg-white focus:border focus:border-[var(--input-border)] focus:ring-2 focus:ring-[var(--input-focus-ring)]" />
 
                 @if (Route::has('password.request'))
                     <div class="text-right mt-2">
                         <flux:link class="text-sm font-medium hover:opacity-80 transition-opacity text-skin-primary"
                             :href="route('password.request')" wire:navigate>
-                            {{ __('Forgot your password?') }}
+                            Şifrenizi mi unuttunuz?
                         </flux:link>
                     </div>
                 @endif
@@ -36,12 +38,12 @@
 
 
             <!-- Login Button -->
-            <div class="pt-2">
-                <flux:button variant="primary" type="submit"
-                    class="w-full py-3 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-200 bg-skin-primary"
+            <div class="pt-2 flex justify-center">
+                <button type="submit"
+                    class="theme-btn-action max-w-xs px-12 py-3 font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-200"
                     data-test="login-button">
                     {{ __('Log in') }}
-                </flux:button>
+                </button>
             </div>
         </form>
 

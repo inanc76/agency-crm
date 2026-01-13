@@ -1,11 +1,10 @@
 <?php
 
-use App\Models\User;
 use App\Models\Customer;
-use App\Models\ReferenceItem;
+use App\Models\User;
 use Livewire\Volt\Volt;
-use Illuminate\Support\Facades\DB;
-use function Pest\Laravel\{actingAs, get};
+
+use function Pest\Laravel\actingAs;
 
 /**
  * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -15,7 +14,6 @@ use function Pest\Laravel\{actingAs, get};
  * Categories: Authorization, N+1 Performance, Validation, Business Logic
  * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  */
-
 beforeEach(function () {
     seedReferenceData();
 });
@@ -54,11 +52,8 @@ test('T04: Yetkisiz kullanıcı düzenleme moduna geçemez (Authorization Check)
         ->assertForbidden(); // 403 Bekleniyor
 });
 
-
 // 🔗 B. N+1 Query Tests (Performans Yaması Doğrulama)
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-
 
 // ✅ C. Validation Tests
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -95,4 +90,19 @@ test('T39: Varsayılan ülke Türkiye gelir', function () {
     Volt::actingAs($user)
         ->test('customers.create')
         ->assertSet('country_id', 'TR');
+});
+
+// ============================================================================
+// VERIFICATION OF BUTTON LINKS
+// ============================================================================
+
+test('T41-UI: New Customer button has correct href on customers tab', function () {
+    $user = User::factory()->create();
+    $user->givePermissionTo('customers.view');
+
+    actingAs($user)
+        ->get('/dashboard/customers?tab=customers')
+        ->assertStatus(200)
+        ->assertSee('Yeni Müşteri')
+        ->assertSee('/dashboard/customers/create');
 });

@@ -2,10 +2,8 @@
 <div class="theme-card p-6 shadow-sm">
     <div class="flex items-center justify-between mb-4">
         <h2 class="text-base font-bold text-skin-heading">Varlıklar</h2>
-        <a href="/dashboard/customers/assets/create?customer={{ $customerId }}"
-            class="text-xs font-bold px-3 py-1.5 rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] hover:bg-[var(--dropdown-hover-bg)] transition-colors text-skin-primary">
-            + Yeni Varlık
-        </a>
+        <x-customer-management.action-button label="Yeni Varlık"
+            href="/dashboard/customers/assets/create?customer={{ $customerId }}" />
     </div>
     @if(count($relatedAssets) > 0)
         <div class="overflow-x-auto">

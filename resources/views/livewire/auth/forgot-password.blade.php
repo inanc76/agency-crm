@@ -1,25 +1,39 @@
 <x-layouts.auth>
-    <div class="flex flex-col gap-6">
-        <x-auth-header :title="__('Forgot password')" :description="__('Enter your email to receive a password reset link')" />
+    <div class="space-y-6">
+        <div class="text-center mb-6">
+            <h2 class="text-2xl font-bold mb-1 text-skin-heading">Şifremi Unuttum</h2>
+            <p class="text-sm text-skin-base">E-posta adresinizi girin, şifre sıfırlama bağlantısı gönderelim</p>
+        </div>
 
         <!-- Session Status -->
         <x-auth-session-status class="text-center" :status="session('status')" />
 
-        <form method="POST" action="{{ route('password.email') }}" class="flex flex-col gap-6">
+        <form method="POST" action="{{ route('password.email') }}" class="space-y-5">
             @csrf
 
             <!-- Email Address -->
-            <flux:input name="email" :label="__('Email Address')" type="email" required autofocus
-                placeholder="email@example.com" />
+            <div>
+                <flux:input name="email" :label="__('Email Address')" type="email" required autofocus
+                    placeholder="Email adresinizi girin"
+                    style="border: none; background: rgba(0,0,0,0.03); color: var(--heading-color);"
+                    class="input-modern w-full px-4 py-3 rounded-xl transition-all hover:border hover:border-[var(--input-border)] focus:bg-white focus:border focus:border-[var(--input-border)] focus:ring-2 focus:ring-[var(--input-focus-ring)]" />
+            </div>
 
-            <flux:button variant="primary" type="submit" class="w-full" data-test="email-password-reset-link-button">
-                {{ __('Email password reset link') }}
-            </flux:button>
+            <!-- Submit Button -->
+            <div class="pt-2 flex justify-center">
+                <button type="submit"
+                    class="theme-btn-action w-full max-w-xs py-3 font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-200"
+                    data-test="email-password-reset-link-button">
+                    Şifre Sıfırlama Bağlantısı Gönder
+                </button>
+            </div>
         </form>
 
-        <div class="space-x-1 rtl:space-x-reverse text-center text-sm text-[var(--color-text-muted)]">
-            <span>{{ __('Or, return to') }}</span>
-            <flux:link :href="route('login')" wire:navigate>{{ __('log in') }}</flux:link>
+        <div class="text-center text-sm" style="color: var(--base-text);">
+            <span>veya </span>
+            <flux:link :href="route('login')" wire:navigate
+                class="font-medium hover:opacity-80 transition-opacity text-skin-primary">giriş sayfasına dön
+            </flux:link>
         </div>
     </div>
 </x-layouts.auth>

@@ -107,7 +107,6 @@ new class extends Component {
             @endif
 
             <span class="text-sm text-skin-muted">{{ $messages->total() }} mesaj</span>
-            <x-customer-management.action-button label="Yeni Mesaj" href="#" />
         </div>
     </div>
 

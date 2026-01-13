@@ -25,6 +25,6 @@
         @endif
 
         <span class="text-sm opacity-60">{{ $assets->total() }} varlık</span>
-        <x-customer-management.action-button label="Yeni Varlık" :showModal="true" modalTarget="asset-form" />
+        <x-customer-management.action-button label="Yeni Varlık" href="{{ route('customers.assets.create') }}" />
     </div>
 </div>

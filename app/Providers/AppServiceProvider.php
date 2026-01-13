@@ -34,7 +34,7 @@ class AppServiceProvider extends ServiceProvider
                 $setting = \App\Models\StorageSetting::where('is_active', true)->first();
 
                 if ($setting) {
-                    $endpoint = ($setting->use_ssl ? 'https://' : 'http://') . $setting->endpoint . ':' . $setting->port;
+                    $endpoint = ($setting->use_ssl ? 'https://' : 'http://').$setting->endpoint.':'.$setting->port;
 
                     config([
                         'filesystems.disks.s3.driver' => 's3',
@@ -49,6 +49,40 @@ class AppServiceProvider extends ServiceProvider
 
                     // Set S3 as default if active
                     config(['filesystems.default' => 's3']);
+                }
+            }
+
+            // Load mail settings from database
+            if (\Illuminate\Support\Facades\Schema::hasTable('mail_settings')) {
+                $mailSetting = \App\Models\MailSetting::where('is_active', true)->first();
+
+                if ($mailSetting) {
+                    if ($mailSetting->provider === 'mailgun') {
+                        config([
+                            'mail.default' => 'mailgun',
+                            'mail.mailers.mailgun' => [
+                                'transport' => 'mailgun',
+                            ],
+                            'services.mailgun' => [
+                                'domain' => $mailSetting->mailgun_domain,
+                                'secret' => $mailSetting->mailgun_api_key,
+                                'endpoint' => $mailSetting->mailgun_region === 'EU' ? 'api.eu.mailgun.net' : 'api.mailgun.net',
+                            ],
+                            'mail.from.address' => $mailSetting->mailgun_from_email,
+                            'mail.from.name' => $mailSetting->mailgun_from_name,
+                        ]);
+                    } elseif ($mailSetting->provider === 'smtp') {
+                        config([
+                            'mail.default' => 'smtp',
+                            'mail.mailers.smtp.host' => $mailSetting->smtp_host,
+                            'mail.mailers.smtp.port' => $mailSetting->smtp_port,
+                            'mail.mailers.smtp.username' => $mailSetting->smtp_username,
+                            'mail.mailers.smtp.password' => $mailSetting->smtp_password,
+                            'mail.mailers.smtp.encryption' => $mailSetting->smtp_secure ? 'tls' : null,
+                            'mail.from.address' => $mailSetting->smtp_from_email,
+                            'mail.from.name' => $mailSetting->smtp_from_name,
+                        ]);
+                    }
                 }
             }
         } catch (\Exception $e) {

@@ -11,10 +11,7 @@
                 <option value="REJECTED">Reddedildi</option>
             </select>
         </div>
-        <a href="/dashboard/customers/offers/create?customer={{ $customerId }}"
-            class="text-xs font-bold px-3 py-1.5 rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] hover:bg-[var(--dropdown-hover-bg)] transition-colors text-skin-primary">
-            + Yeni Teklif
-        </a>
+        <x-customer-management.action-button label="Yeni Teklif" href="/dashboard/customers/offers/create?customer={{ $customerId }}" />
     </div>
     @php
         $filteredOffers = collect($relatedOffers)->when($offersStatusFilter, function ($collection) {

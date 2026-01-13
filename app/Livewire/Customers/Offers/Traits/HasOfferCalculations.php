@@ -78,10 +78,18 @@ trait HasOfferCalculations
 
     private function generateOfferNumber(): string
     {
+        // If updating existing offer, keep the same number
+        if ($this->offerId) {
+            $existingOffer = Offer::find($this->offerId);
+            if ($existingOffer && $existingOffer->number) {
+                return $existingOffer->number;
+            }
+        }
+
         $year = Carbon::now()->year;
 
         // Get customer prefix (first 3 letters of customer name, uppercase)
-        $prefix = 'TKL'; // Default fallback
+        $prefix = 'GEN'; // Default fallback
         if (! empty($this->customer_id)) {
             $customer = \App\Models\Customer::find($this->customer_id);
             if ($customer && ! empty($customer->name)) {
@@ -91,12 +99,23 @@ trait HasOfferCalculations
             }
         }
 
-        // Count offers for THIS customer in current year
-        $customerOfferCount = Offer::where('customer_id', $this->customer_id)
-            ->whereYear('created_at', $year)
-            ->count();
+        // Get the highest sequence number for this prefix and year
+        // Database-agnostic approach: fetch all matching numbers and parse in PHP
+        $offers = Offer::where('number', 'LIKE', $prefix.'-'.$year.'-%')
+            ->pluck('number');
 
-        $sequence = $customerOfferCount + 1;
+        $maxSequence = 0;
+        foreach ($offers as $number) {
+            // Extract last 4 digits: PREFIX-YEAR-XXXX
+            if (preg_match('/-(\d{4})$/', $number, $matches)) {
+                $seq = (int) $matches[1];
+                if ($seq > $maxSequence) {
+                    $maxSequence = $seq;
+                }
+            }
+        }
+
+        $sequence = $maxSequence + 1;
 
         return sprintf('%s-%d-%04d', $prefix, $year, $sequence);
     }

@@ -94,6 +94,9 @@ new
             $this->authorize('customers.view');
             $this->customerId = $customer;
             $this->loadCustomerData();
+
+            // Set active tab from URL if present
+            $this->activeTab = request()->query('tab', 'info');
         } else {
             $this->authorize('customers.create');
             $this->initNewCustomer();

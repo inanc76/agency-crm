@@ -1,13 +1,14 @@
 <?php
 
-use App\Models\User;
-use App\Models\Customer;
 use App\Models\Asset;
-use App\Models\Service;
+use App\Models\Customer;
 use App\Models\PriceDefinition;
-use Livewire\Volt\Volt;
+use App\Models\Service;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
-use function Pest\Laravel\{actingAs};
+use Livewire\Volt\Volt;
+
+use function Pest\Laravel\actingAs;
 
 /**
  * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -17,7 +18,6 @@ use function Pest\Laravel\{actingAs};
  * Categories: Authorization, N+1 Performance, Validation, Bulk Insert
  * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  */
-
 beforeEach(function () {
     seedReferenceData();
     // Setup Data
@@ -28,7 +28,7 @@ beforeEach(function () {
         'price' => 100,
         'currency' => 'USD',
         'duration' => '1 Year',
-        'is_active' => true
+        'is_active' => true,
     ]);
 });
 
@@ -75,7 +75,7 @@ test('T15: Bulk Insert Check (5 hizmet tek sorguda eklenmeli)', function () {
         'description' => 'Test Service',
         'service_duration' => '1 Year',
         'service_currency' => 'USD',
-        'services_list' => []
+        'services_list' => [],
     ]);
 
     $component = Volt::actingAs($user)
@@ -96,8 +96,6 @@ test('T15: Bulk Insert Check (5 hizmet tek sorguda eklenmeli)', function () {
 
     // Transaction ve insert kullanımı Trait içinde optimize edildi (HasServiceActions).
 });
-
-
 
 // ✅ C. Validation Tests
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -150,8 +148,8 @@ test('T36: Bitiş tarihi otomatik hesaplanır', function () {
             'service_duration' => '1 Year',
             'service_currency' => 'USD',
             'description' => '',
-            'services_list' => []
-        ]
+            'services_list' => [],
+        ],
     ];
 
     Volt::actingAs($user)
@@ -165,4 +163,36 @@ test('T36: Bitiş tarihi otomatik hesaplanır', function () {
     $createdService = Service::first();
     // 1 Yıl eklenmeli: 2024-01-01 -> 2025-01-01
     expect($createdService->end_date->format('Y-m-d'))->toBe('2025-01-01');
+});
+
+// ============================================================================
+// VERIFICATION OF BUTTON LINKS
+// ============================================================================
+
+test('T41-UI: New Service button has correct href on services tab', function () {
+    $user = User::factory()->create();
+    $user->givePermissionTo('customers.view');
+    $user->givePermissionTo('services.view');
+
+    $response = actingAs($user)
+        ->get('/dashboard/customers?tab=services');
+
+    $response->assertStatus(200);
+    $response->assertSee('Yeni Hizmet');
+    $response->assertSee('/dashboard/customers/services/create');
+});
+
+test('T42-UI: New Service button has correct href on customer services tab', function () {
+    $user = User::factory()->create();
+    $user->givePermissionTo('customers.view');
+    $user->givePermissionTo('services.view');
+    $customer = Customer::factory()->create();
+
+    $response = actingAs($user)
+        ->get("/dashboard/customers/{$customer->id}?tab=services");
+
+    $response->assertStatus(200);
+    $response->assertSee('Yeni Hizmet');
+    $response->assertSee('/dashboard/customers/services/create');
+    $response->assertSee('customer='.$customer->id);
 });
