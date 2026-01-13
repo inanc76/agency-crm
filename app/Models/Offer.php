@@ -41,6 +41,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string|null $tracking_token Teklif takip token'ı (public link)
  * @property float $vat_rate KDV oranı (örn: 20.00)
  * @property float $vat_amount KDV tutarı
+ * @property bool $is_pdf_downloadable PDF indirilebilir mi?
+ * @property bool $is_attachments_downloadable Ekler indirilebilir mi?
+ * @property bool $is_downloadable_after_expiry Süresi dolunca indirilebilir mi?
  * @property \Carbon\Carbon $created_at Kayıt oluşturma zamanı
  * @property \Carbon\Carbon $updated_at Son güncelleme zamanı
  *
@@ -117,6 +120,9 @@ class Offer extends Model
         'tracking_token',
         'vat_rate',
         'vat_amount',
+        'is_pdf_downloadable',
+        'is_attachments_downloadable',
+        'is_downloadable_after_expiry',
     ];
 
     protected function casts(): array
@@ -129,6 +135,9 @@ class Offer extends Model
             'vat_rate' => 'decimal:2',
             'vat_amount' => 'decimal:2',
             'valid_until' => 'datetime',
+            'is_pdf_downloadable' => 'boolean',
+            'is_attachments_downloadable' => 'boolean',
+            'is_downloadable_after_expiry' => 'boolean',
         ];
     }
 
