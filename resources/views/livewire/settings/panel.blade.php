@@ -94,7 +94,7 @@ new
 }; ?>
 
 <div class="p-6 min-h-screen" style="background-color: var(--page-bg);">
-    <div class="w-full lg:w-4/5 mx-auto pb-20">
+    <div class="max-w-7xl mx-auto pb-20">
         {{-- Back Button --}}
         <a href="/dashboard/settings"
             class="inline-flex items-center gap-2 text-slate-600 hover:text-slate-900 mb-6 transition-colors">

@@ -1,8 +1,8 @@
-{{-- 
-    SECTION: Contacts Data Grid & Listing
-    Mimarın Notu: Bu bölüm kişi kartları veya listesini içerir.
-    İş Mantığı Şerhi: Contact modeli ile konuşur, Customer ilişkisini kullanır, gender field'ı için icon mapping yapar.
-    Mühür Koruması: Table styling, gender icons ve hover effects korunmalıdır.
+{{--
+SECTION: Contacts Data Grid & Listing
+Mimarın Notu: Bu bölüm kişi kartları veya listesini içerir.
+İş Mantığı Şerhi: Contact modeli ile konuşur, Customer ilişkisini kullanır, gender field'ı için icon mapping yapar.
+Mühür Koruması: Table styling, gender icons ve hover effects korunmalıdır.
 --}}
 
 {{-- Data Table --}}
@@ -77,7 +77,7 @@
                                         </svg>
                                     @endif
                                 </div>
-                                <div class="text-[13px] group-hover:opacity-80 transition-opacity"
+                                <div class="text-[13px] group-hover:opacity-80 transition-opacity font-medium"
                                     style="color: var(--list-card-link-color);">
                                     {{ $contact->name }}
                                 </div>

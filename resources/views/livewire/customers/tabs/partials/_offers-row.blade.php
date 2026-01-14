@@ -29,13 +29,14 @@
     <td class="px-6 py-4">
         <div class="flex items-center gap-3">
             <div class="flex-shrink-0">
-                <div class="w-9 h-9 rounded-full flex items-center justify-center text-xs shadow-sm"
+                <div class="w-9 h-9 rounded-full flex items-center justify-center text-xs shadow-sm font-semibold"
                     style="background-color: var(--table-avatar-bg); color: var(--table-avatar-text); border: 1px solid var(--table-avatar-border);">
                     {{ $char }}
                 </div>
             </div>
             <div>
-                <div class="text-[13px] group-hover:opacity-80 transition-opacity" class="text-skin-heading">
+                <div class="text-[13px] group-hover:opacity-80 transition-opacity font-medium"
+                    style="color: var(--list-card-link-color);">
                     {{ $offer->title }}
                 </div>
                 @if(!empty($offer->offer_no))
@@ -76,7 +77,7 @@
     </td>
 
     {{-- Price --}}
-    <td class="px-6 py-4 text-right text-[13px]" class="text-skin-heading">
+    <td class="px-6 py-4 text-right text-[13px] text-skin-heading">
         {{ number_format($offer->total_amount, 2) }} {{ $offer->currency }}
     </td>
 </tr>

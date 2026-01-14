@@ -26,7 +26,7 @@ new
 }; ?>
 
 <div class="p-6 min-h-screen" style="background-color: var(--page-bg);">
-    <div class="w-full lg:w-3/4 mx-auto">
+    <div class="max-w-7xl mx-auto">
         
         {{-- 1. Header & Provider Selector & Save Button --}}
         @include('livewire.settings.parts._mail-header', [

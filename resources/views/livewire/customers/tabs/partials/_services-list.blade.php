@@ -1,8 +1,8 @@
-{{-- 
-    SECTION: Services Data Table & Listing
-    Mimarın Notu: Bu bölüm hizmetlerin listelendiği tablo ve filtreleme sonuçlarını içerir.
-    İş Mantığı Şerhi: Service modeli ile konuşur, Customer ve Asset ilişkilerini kullanır.
-    Mühür Koruması: Table styling, hover effects ve pagination bileşenleri korunmalıdır.
+{{--
+SECTION: Services Data Table & Listing
+Mimarın Notu: Bu bölüm hizmetlerin listelendiği tablo ve filtreleme sonuçlarını içerir.
+İş Mantığı Şerhi: Service modeli ile konuşur, Customer ve Asset ilişkilerini kullanır.
+Mühür Koruması: Table styling, hover effects ve pagination bileşenleri korunmalıdır.
 --}}
 
 {{-- Data Table --}}
@@ -56,7 +56,7 @@
                                     </div>
                                 </div>
                                 <div>
-                                    <div class="text-[13px] group-hover:opacity-80 transition-opacity"
+                                    <div class="text-[13px] group-hover:opacity-80 transition-opacity font-medium"
                                         style="color: var(--list-card-link-color);">
                                         {{ $service->asset->name ?? 'Varlık Yok' }}
                                     </div>

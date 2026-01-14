@@ -20,5 +20,7 @@ new
 }; ?>
 
 <div class="p-6 min-h-screen" style="background-color: var(--page-bg);">
-    <livewire:modals.service-form :service="$service" />
+    <div class="max-w-7xl mx-auto">
+        <livewire:modals.service-form :service="$service" />
+    </div>
 </div>

@@ -135,11 +135,10 @@ new class extends Component {
         ];
     @endphp
 
-    <div class="theme-card shadow-sm overflow-hidden">
+    <div class="bg-white rounded-xl border border-skin-light shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-left text-sm">
-                <thead class="border-b"
-                    style="background-color: var(--table-hover-bg); border-color: var(--card-border); color: var(--table-hover-text);">
+                <thead class="bg-slate-50 border-b border-skin-light">
                     <tr>
                         <th class="px-6 py-3 w-10">
                             <input type="checkbox" wire:model.live="selectAll"

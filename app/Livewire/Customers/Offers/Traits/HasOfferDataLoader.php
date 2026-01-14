@@ -104,6 +104,7 @@ trait HasOfferDataLoader
         } else {
             // New offer defaults
             $this->title = '';
+            $this->description = 'Bu sayfadaki fiyat alt sayfaların toplamıdır. Ayrı bir ürün ya da hizmet içermez.';
             $this->sections = [
                 [
                     'id' => null,
@@ -135,7 +136,7 @@ trait HasOfferDataLoader
         // Load Customers
         $this->customers = Customer::orderBy('name')
             ->get(['id', 'name'])
-            ->map(fn ($c) => ['id' => $c->id, 'name' => $c->name])
+            ->map(fn($c) => ['id' => $c->id, 'name' => $c->name])
             ->toArray();
 
         // Load Categories with Display Labels
@@ -227,11 +228,11 @@ trait HasOfferDataLoader
         $this->currency = $offer->currency;
 
         // Load sections and their items
-        $this->sections = $offer->sections->map(fn ($section) => [
+        $this->sections = $offer->sections->map(fn($section) => [
             'id' => $section->id,
             'title' => $section->title,
             'description' => $section->description,
-            'items' => $section->items->map(fn ($item) => [
+            'items' => $section->items->map(fn($item) => [
                 'service_id' => $item->service_id,
                 'service_name' => $item->service_name,
                 'description' => $item->description,
@@ -249,7 +250,7 @@ trait HasOfferDataLoader
                     'id' => null,
                     'title' => 'Teklif Bölümü - 1',
                     'description' => '',
-                    'items' => $offer->items->map(fn ($item) => [
+                    'items' => $offer->items->map(fn($item) => [
                         'service_id' => $item->service_id,
                         'service_name' => $item->service_name,
                         'description' => $item->description,
@@ -263,7 +264,7 @@ trait HasOfferDataLoader
         }
 
         // Load attachments
-        $this->attachments = $offer->attachments->map(fn ($att) => [
+        $this->attachments = $offer->attachments->map(fn($att) => [
             'id' => $att->id,
             'title' => $att->title,
             'description' => $att->description,

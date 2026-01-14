@@ -89,7 +89,7 @@
             </div>
 
             {{-- Login Card --}}
-            <div class="rounded-3xl shadow-2xl p-8" style="background-color: var(--card-bg);">
+            <div class="theme-card shadow-2xl p-8">
                 {{ $slot }}
             </div>
 

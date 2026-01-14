@@ -287,7 +287,7 @@ new #[Layout('components.layouts.app', ['title' => 'Teklif Şablonu'])] class ex
 }; ?>
 
 <div class="p-6 min-h-screen" style="background-color: var(--page-bg);">
-    <div class="max-w-5xl lg:w-4/5 mx-auto pb-20">
+    <div class="max-w-7xl mx-auto pb-20">
     {{-- Back Button & Page Title --}}
     {{-- Back Button --}}
     <a href="{{ route('settings.index') }}"

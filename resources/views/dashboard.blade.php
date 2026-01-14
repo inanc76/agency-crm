@@ -1,5 +1,5 @@
 <x-layouts.app title="Dashboard">
-    <div class="space-y-6 w-full max-w-[80%] mx-auto mt-[30px]">
+    <div class="space-y-6 max-w-7xl mx-auto mt-[30px]">
         <!-- Page Header -->
         <div class="theme-card p-6">
             <h1 class="text-3xl font-bold mb-2 text-skin-heading">Gösterge Paneli</h1>
@@ -76,7 +76,8 @@
                         style="background-color: color-mix(in srgb, var(--dashboard-stats-4), white 90%); color: var(--dashboard-stats-4);">Gönderildi</span>
                 </div>
                 <h2 class="text-2xl font-bold mb-1 text-skin-heading">Teklifler</h2>
-                <p class="text-4xl font-extrabold mb-2 text-skin-heading">{{ \App\Models\Offer::where('status', 'SENT')->count() }}</p>
+                <p class="text-4xl font-extrabold mb-2 text-skin-heading">
+                    {{ \App\Models\Offer::where('status', 'SENT')->count() }}</p>
                 <p class="text-sm text-skin-base">Gönderilen teklif sayısı</p>
             </div>
         </div>

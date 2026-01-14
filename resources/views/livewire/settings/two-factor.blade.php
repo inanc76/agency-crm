@@ -213,7 +213,7 @@ new
 } ?>
 
 <div class="p-6 min-h-screen" style="background-color: var(--page-bg);">
-    <div class="w-full lg:w-3/4 mx-auto">
+    <div class="max-w-7xl mx-auto">
         {{-- Back Button --}}
         <a href="/dashboard/settings"
             class="inline-flex items-center gap-2 text-skin-base hover:text-skin-heading mb-6 transition-colors">
@@ -236,7 +236,7 @@ new
             'requiresConfirmation' => $requiresConfirmation
         ])
     </div>
-    
+        
     {{-- SECTION: QR Code Modal --}}
     @include('livewire.settings.two-factor._two-factor-qr', [
         'showModal' => $showModal,
