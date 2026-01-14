@@ -13,18 +13,18 @@ document.addEventListener('alpine:init', () => {
         init() {
             this.updateDisplayText();
 
+            // Validation and Formatting helpers checks
+
             this.$nextTick(() => {
                 this.picker = flatpickr(this.$refs.calendar, {
                     mode: 'range',
                     inline: false,
                     dateFormat: 'Y-m-d',
-                    defaultDate: this.startDate && this.endDate
-                        ? [this.startDate, this.endDate]
-                        : null,
+                    defaultDate: [this.startDate, this.endDate],
                     locale: {
                         firstDayOfWeek: 1,
                         weekdays: {
-                            shorthand: ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'],
+                            shorthand: ['Pz', 'Pt', 'Sa', 'Ça', 'Pe', 'Cu', 'Ct'],
                             longhand: ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi']
                         },
                         months: {
@@ -34,19 +34,35 @@ document.addEventListener('alpine:init', () => {
                     },
                     onChange: (selectedDates) => {
                         if (selectedDates.length === 2) {
+                            // Update properties (triggers Entangle -> Livewire)
                             this.startDate = this.formatDate(selectedDates[0]);
                             this.endDate = this.formatDate(selectedDates[1]);
                             this.updateDisplayText();
-
-                            // Dispatch to Livewire
-                            this.$dispatch('date-range-updated', {
-                                start: this.startDate,
-                                end: this.endDate
-                            });
                         }
                     }
                 });
+
+                // Watch for external changes (from Livewire)
+                this.$watch('startDate', (value) => this.syncPicker());
+                this.$watch('endDate', (value) => this.syncPicker());
             });
+        },
+
+        syncPicker() {
+            if (!this.picker) return;
+
+            // Avoid infinite loops by checking if dates match currently selected
+            const currentStart = this.picker.selectedDates[0] ? this.formatDate(this.picker.selectedDates[0]) : null;
+            const currentEnd = this.picker.selectedDates[1] ? this.formatDate(this.picker.selectedDates[1]) : null;
+
+            if (this.startDate !== currentStart || this.endDate !== currentEnd) {
+                if (this.startDate && this.endDate) {
+                    this.picker.setDate([this.startDate, this.endDate], false); // false = no onChange trigger
+                } else {
+                    this.picker.clear();
+                }
+                this.updateDisplayText();
+            }
         },
 
         formatDate(date) {
@@ -60,8 +76,8 @@ document.addEventListener('alpine:init', () => {
         formatDisplayDate(dateStr) {
             if (!dateStr) return '';
             const date = new Date(dateStr);
-            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-            return `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+            const months = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+            return `${date.getDate()} ${months[date.getMonth()]}, ${date.getFullYear()}`;
         },
 
         updateDisplayText() {
@@ -77,6 +93,20 @@ document.addEventListener('alpine:init', () => {
         open() {
             if (this.picker) {
                 this.picker.open();
+            }
+        },
+
+        setDates(start, end) {
+            this.startDate = start;
+            this.endDate = end;
+            this.updateDisplayText();
+
+            if (this.picker) {
+                if (start && end) {
+                    this.picker.setDate([start, end], true); // true to trigger onChange
+                } else {
+                    this.picker.clear();
+                }
             }
         }
     }));

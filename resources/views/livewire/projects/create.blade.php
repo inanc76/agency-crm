@@ -36,6 +36,8 @@ new
 
         public string $status_id = '';
 
+        public array $team_members = [];
+
         public string $timezone = 'Europe/Istanbul';
 
         // Tarihler
@@ -66,13 +68,32 @@ new
 
         // Hierarchical Form - Phases & Modules
         public array $phases = [];
+        public array $phaseStatuses = [];
+        public array $moduleStatuses = []; // [NEW] Module Statuses
         
         // Phase Modal State
         public bool $phaseModalOpen = false;
         
         public array $phaseForm = [
             'name' => '',
-            'description' => ''
+            'description' => '',
+            'status_id' => ''
+        ];
+        
+        public ?int $editingPhaseIndex = null;
+
+        // [NEW] Module Modal State
+        public bool $moduleModalOpen = false;
+        public ?int $editingModulePhaseIndex = null;
+        public ?int $editingModuleIndex = null; // null = create
+
+        public array $moduleForm = [
+            'name' => '',
+            'description' => '',
+            'status_id' => '',
+            'start_date' => null,
+            'end_date' => null,
+            'assigned_users' => [], // ID list
         ];
 
         public function mount(?string $project = null): void
@@ -110,6 +131,18 @@ new
                 ->orderBy('sort_order')
                 ->get(['id', 'display_label', 'key'])
                 ->toArray();
+                
+            $this->phaseStatuses = ReferenceItem::where('category_key', 'PHASE_STATUS')
+                ->where('is_active', true)
+                ->orderBy('sort_order')
+                ->get(['id', 'display_label', 'key', 'metadata'])
+                ->toArray();
+
+            $this->moduleStatuses = ReferenceItem::where('category_key', 'MODULE_STATUS')
+                ->where('is_active', true)
+                ->orderBy('sort_order')
+                ->get(['id', 'display_label', 'key', 'metadata'])
+                ->toArray();
         }
 
         private function loadProjectData(): void
@@ -134,6 +167,9 @@ new
                     ];
                 }
 
+                // Load Team Members
+                $this->team_members = $project->users->pluck('id')->toArray();
+
                 // Load phases and modules
                 $this->phases = $project->phases->map(function ($phase) {
                     return [
@@ -146,6 +182,11 @@ new
                             return [
                                 'id' => $module->id,
                                 'name' => $module->name,
+                                'description' => $module->description,
+                                'status_id' => $module->status_id,
+                                'start_date' => $module->start_date?->format('Y-m-d'),
+                                'end_date' => $module->end_date?->format('Y-m-d'),
+                                'assigned_users' => $module->users->pluck('id')->toArray(),
                             ];
                         })->toArray(),
                     ];
@@ -183,33 +224,59 @@ new
             $this->validate(['phaseForm.name' => 'required|string|max:255']);
 
              $colors = ['#3b82f6', '#14b8a6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
-             $colorIndex = count($this->phases) % count($colors);
-
-             $this->phases[] = [
-                 'id' => (string) Str::uuid(), // Ensure ID is generated for keying
-                 'name' => $this->phaseForm['name'],
-                 'description' => $this->phaseForm['description'],
-                 'start_date' => null,
-                 'end_date' => null,
-                 'color' => $colors[$colorIndex],
-                 'modules' => [],
-             ];
+             
+             if ($this->editingPhaseIndex !== null) {
+                 // Update existing phase
+                 $this->phases[$this->editingPhaseIndex]['name'] = $this->phaseForm['name'];
+                 $this->phases[$this->editingPhaseIndex]['description'] = $this->phaseForm['description'];
+                 $this->phases[$this->editingPhaseIndex]['status_id'] = $this->phaseForm['status_id'] ?: null;
+                 
+                 $this->success('Faz Güncellendi', 'Faz bilgileri güncellendi.');
+             } else {
+                 // Create new phase
+                 $colorIndex = count($this->phases) % count($colors);
+                 
+                 $this->phases[] = [
+                     'id' => (string) Str::uuid(),
+                     'name' => $this->phaseForm['name'],
+                     'description' => $this->phaseForm['description'],
+                     'status_id' => $this->phaseForm['status_id'] ?: null,
+                     'start_date' => null,
+                     'end_date' => null,
+                     'color' => $colors[$colorIndex],
+                     'modules' => [],
+                 ];
+                 $this->success('Faz Eklendi', 'Yeni faz listeye eklendi.');
+             }
              
              $this->phaseModalOpen = false;
-             $this->success('Faz Eklendi', 'Yeni faz listeye eklendi.');
         }
 
-        public function openPhaseModal(): void
+        public function openPhaseModal(?int $index = null): void
         {
-            if (count($this->phases) >= 20) {
-                $this->error('Sınır Aşıldı', 'Bir projeye en fazla 20 faz eklenebilir.');
-                return;
+            $this->editingPhaseIndex = $index;
+
+            if ($index !== null) {
+                // Edit Mode
+                $phase = $this->phases[$index];
+                $this->phaseForm = [
+                    'name' => $phase['name'],
+                    'description' => $phase['description'] ?? '',
+                    'status_id' => $phase['status_id'] ?? ''
+                ];
+            } else {
+                // Create Mode
+                if (count($this->phases) >= 20) {
+                    $this->error('Sınır Aşıldı', 'Bir projeye en fazla 20 faz eklenebilir.');
+                    return;
+                }
+                
+                $this->phaseForm = [
+                    'name' => '',
+                    'description' => '',
+                    'status_id' => $this->phaseStatuses[0]['id'] ?? '' 
+                ];
             }
-            
-            $this->phaseForm = [
-                'name' => '',
-                'description' => ''
-            ];
             
             $this->phaseModalOpen = true;
         }
@@ -231,6 +298,141 @@ new
         {
             unset($this->phases[$phaseIndex]['modules'][$moduleIndex]);
             $this->phases[$phaseIndex]['modules'] = array_values($this->phases[$phaseIndex]['modules']);
+            $this->calculatePhaseDates($phaseIndex); // Recalculate on remove
+        }
+
+        // ─────────────────────────────────────────────────────────────────────────
+        // MODULE MANAGEMENT
+        // ─────────────────────────────────────────────────────────────────────────
+
+        public function openModuleModal(int $phaseIndex, ?int $moduleIndex = null): void
+        {
+            $this->editingModulePhaseIndex = $phaseIndex;
+            $this->editingModuleIndex = $moduleIndex;
+
+            if ($moduleIndex !== null) {
+                // Edit Mode
+                $module = $this->phases[$phaseIndex]['modules'][$moduleIndex];
+                
+                // Fallback for legacy data without status
+                $defaultStatus = $this->moduleStatuses[0]['id'] ?? '';
+                $currentStatus = $module['status_id'] ?? '';
+                if(empty($currentStatus)) {
+                    $currentStatus = $defaultStatus;
+                }
+
+                $this->moduleForm = [
+                    'name' => $module['name'],
+                    'description' => $module['description'] ?? '',
+                    'status_id' => $currentStatus,
+                    'start_date' => $module['start_date'] ?? null,
+                    'end_date' => $module['end_date'] ?? null,
+                    'assigned_users' => $module['assigned_users'] ?? [],
+                ];
+                
+                // Dispatch event to update date picker UI
+                $this->dispatch('update-date-range', key: 'module_modal', start: $module['start_date'] ?? null, end: $module['end_date'] ?? null);
+            } else {
+                // Create Mode
+                // Default ACL: All current project participants are CHECKED
+                // We use the full list of participants stored in Team Members + Leader
+                $projectParticipants = $this->team_members;
+                if ($this->leader_id && !in_array($this->leader_id, $projectParticipants)) {
+                    $projectParticipants[] = $this->leader_id;
+                }
+
+                $this->moduleForm = [
+                    'name' => '',
+                    'description' => '',
+                    'status_id' => $this->moduleStatuses[0]['id'] ?? '', // Default to first status
+                    'start_date' => null,
+                    'end_date' => null,
+                    'assigned_users' => $projectParticipants, // [CRITICAL] Default checked
+                ];
+                
+                // Clear date picker UI
+                $this->dispatch('update-date-range', key: 'module_modal', start: null, end: null);
+            }
+
+            $this->moduleModalOpen = true;
+        }
+
+        public function saveModule(): void
+        {
+            $this->validate([
+                'moduleForm.name' => 'required|string|max:255',
+                'moduleForm.status_id' => 'required',
+                // Date validation logic can be added if strict rules needed
+            ]);
+
+            $phaseIdx = $this->editingModulePhaseIndex;
+            
+            // Deep Clone / Explicit Array Retrieval to ensure Livewire Reactivity
+            $phase = $this->phases[$phaseIdx];
+            $modules = $phase['modules'] ?? [];
+            
+            $moduleData = [
+                'name' => $this->moduleForm['name'],
+                'description' => $this->moduleForm['description'],
+                'status_id' => $this->moduleForm['status_id'],
+                'start_date' => $this->moduleForm['start_date'],
+                'end_date' => $this->moduleForm['end_date'],
+                'assigned_users' => $this->moduleForm['assigned_users'],
+            ];
+
+            // Preserve ID if editing
+            if ($this->editingModuleIndex !== null) {
+                 $moduleData['id'] = $modules[$this->editingModuleIndex]['id'] ?? (string) Str::uuid();
+                 $modules[$this->editingModuleIndex] = $moduleData;
+                 $this->success('Modül Güncellendi');
+            } else {
+                 $moduleData['id'] = (string) Str::uuid();
+                 $modules[] = $moduleData;
+                 $this->success('Modül Eklendi');
+            }
+            
+            // Re-assign explicitly to trigger update
+            // [SORTING] Sort modules by Start Date (Ascending), Null dates last
+            usort($modules, function ($a, $b) {
+                $dateA = $a['start_date'] ?? null;
+                $dateB = $b['start_date'] ?? null;
+
+                if ($dateA === $dateB) return 0;
+                if ($dateA === null) return 1; // Null goes last
+                if ($dateB === null) return -1; // Null goes last
+                
+                return $dateA <=> $dateB;
+            });
+
+            $phase['modules'] = array_values($modules); // Re-index
+            $this->phases[$phaseIdx] = $phase;
+
+            // [OBSERVER PATTERN] Propagate Dates
+            $this->calculatePhaseDates($phaseIdx);
+
+            $this->moduleModalOpen = false;
+        }
+
+        private function calculatePhaseDates(int $phaseIndex): void
+        {
+            $modules = $this->phases[$phaseIndex]['modules'] ?? [];
+            if (empty($modules)) return;
+
+            $startDates = [];
+            $endDates = [];
+
+            foreach ($modules as $m) {
+                if (!empty($m['start_date'])) $startDates[] = $m['start_date'];
+                if (!empty($m['end_date'])) $endDates[] = $m['end_date'];
+            }
+
+            if (!empty($startDates)) {
+                $this->phases[$phaseIndex]['start_date'] = min($startDates);
+            }
+            
+            if (!empty($endDates)) {
+                 $this->phases[$phaseIndex]['end_date'] = max($endDates);
+            }
         }
 
         // ─────────────────────────────────────────────────────────────────────────
@@ -303,6 +505,9 @@ new
                         }
                     }
 
+                    // Sync Team Members (Overrides External logic if conflict, but needed for Participants Card)
+                    $project->users()->sync($this->team_members);
+
                     // 2. Hierarchical Form Sync (Phases & Modules)
                     $existingPhaseIds = $project->phases()->pluck('id')->toArray();
                     $submittedPhaseIds = collect($this->phases)->pluck('id')->filter()->toArray();
@@ -344,13 +549,22 @@ new
                                 continue;
                             }
 
-                            $phase->modules()->updateOrCreate(
+                            $module = $phase->modules()->updateOrCreate(
                                 ['id' => $moduleData['id'] ?? null],
                                 [
                                     'name' => $moduleData['name'],
+                                    'description' => $moduleData['description'] ?? null,
+                                    'status_id' => $moduleData['status_id'] ?? null,
+                                    'start_date' => $moduleData['start_date'] ?? null,
+                                    'end_date' => $moduleData['end_date'] ?? null,
                                     'order' => $moduleIndex + 1,
                                 ]
                             );
+                            
+                            // Sync Assigned Users (ACL)
+                            if (isset($moduleData['assigned_users']) && is_array($moduleData['assigned_users'])) {
+                                $module->users()->sync($moduleData['assigned_users']);
+                            }
                         }
                     }
 
@@ -386,7 +600,12 @@ new
         }
     }; ?>
 
-<div class="p-6 min-h-screen" style="background-color: var(--page-bg);">
+<div 
+    x-data="unsavedChangesWatcher"
+    x-on:input="markDirty()"
+    x-on:change="markDirty()"
+    class="p-6 min-h-screen" 
+    style="background-color: var(--page-bg);">
     <div class="max-w-7xl mx-auto">
         {{-- Back Button --}}
         <a href="/dashboard/projects"
@@ -445,6 +664,7 @@ new
                     </button>
                     <button type="button" wire:click="save" wire:loading.attr="disabled"
                         wire:key="btn-save-{{ $projectId ?: 'new' }}"
+                        @click="markClean()"
                         class="theme-btn-save flex items-center gap-2 px-4 py-2 text-sm">
                         <span wire:loading class="loading loading-spinner loading-xs mr-1"></span>
                         <x-mary-icon name="o-check" class="w-4 h-4" />
@@ -493,21 +713,7 @@ new
                             @endif
                         </div>
 
-                        {{-- Leader --}}
-                        <div>
-                            <label class="block text-xs font-medium mb-1 opacity-60 text-skin-base">Proje Lideri</label>
-                            @if($isViewMode)
-                                @php $leaderName = collect($leaders)->firstWhere('id', $leader_id)['name'] ?? '-'; @endphp
-                                <div class="text-sm font-medium text-skin-base">{{ $leaderName }}</div>
-                            @else
-                                <select wire:model="leader_id" class="select w-full">
-                                    <option value="">Proje Lideri Seçin</option>
-                                    @foreach($leaders as $leader)
-                                        <option value="{{ $leader['id'] }}">{{ $leader['name'] }}</option>
-                                    @endforeach
-                                </select>
-                            @endif
-                        </div>
+                        {{-- Leader Removed (Moved to Participants Card) --}}
 
                         {{-- Status --}}
                         <div>
@@ -550,65 +756,59 @@ new
                     </div>
                 </div>
 
-                {{-- Dates Card --}}
+
+
+
+
+                {{-- Participants Card --}}
                 <div class="theme-card p-6 shadow-sm mb-6">
                     <h3 class="text-lg font-semibold text-[var(--color-text-heading)] mb-4 flex items-center gap-2">
-                        <x-mary-icon name="o-calendar-days" class="w-5 h-5" />
-                        Tarih Aralığı
+                        <x-mary-icon name="o-users" class="w-5 h-5" />
+                        Katılımcılar
                     </h3>
-
-                    {{-- Linear-Style Date Range Picker --}}
-                    <x-date-range-picker :startDate="$start_date" :endDate="$target_end_date" :disabled="$isViewMode" />
-                    @error('target_end_date') <span class="text-xs text-red-500 mt-2 block">{{ $message }}</span>
-                    @enderror
-                </div>
-
-                {{-- External User Card --}}
-                <div class="theme-card p-6 shadow-sm mb-6">
-                    <h3 class="text-lg font-semibold text-[var(--color-text-heading)] mb-4 flex items-center gap-2">
-                        <x-mary-icon name="o-user-plus" class="w-5 h-5" />
-                        Dış Katılımcı
-                    </h3>
-
-                    {{-- Toggle Switch --}}
-                    <div class="flex items-center justify-between mb-4">
+                    
+                    <div class="grid grid-cols-1 gap-6">
+                        {{-- Leader --}}
                         <div>
-                            <div class="font-medium text-[var(--color-text-heading)]">Dış Katılımcı Davet Et</div>
-                            <div class="text-sm text-slate-500">Projeye harici kullanıcı ekleyin</div>
+                            <label class="block text-xs font-medium mb-1 opacity-60 text-skin-base">Proje Lideri <span class="text-red-500">*</span></label>
+                            @if($isViewMode)
+                                @php $leaderName = collect($leaders)->firstWhere('id', $leader_id)['name'] ?? '-'; @endphp
+                                <div class="text-sm font-medium text-skin-base">{{ $leaderName }}</div>
+                            @else
+                                <select wire:model="leader_id" class="select w-full">
+                                    <option value="">Proje Lideri Seçin</option>
+                                    @foreach($leaders as $leader)
+                                        <option value="{{ $leader['id'] }}">{{ $leader['name'] }}</option>
+                                    @endforeach
+                                </select>
+                                @error('leader_id') <span class="text-[var(--color-danger)] text-xs">{{ $message }}</span> @enderror
+                            @endif
                         </div>
-                        <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" wire:model.live="inviteExternalUser" class="sr-only peer">
-                            <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-100 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[var(--primary-color)]"></div>
-                        </label>
-                    </div>
 
-                    {{-- External User Form (Conditional) --}}
-                    @if($inviteExternalUser)
-                    <div class="grid grid-cols-2 gap-8 pt-4 border-t border-slate-100" wire:key="external-user-form">
+                         {{-- Team Members --}}
                         <div>
-                            <label class="block text-xs font-medium mb-1 opacity-60 text-skin-base">Ad Soyad *</label>
-                            <input type="text"
-                                wire:model="externalUserName" 
-                                placeholder="Örn: Ahmet Yılmaz"
-                                class="input w-full"
-                            />
-                            @error('externalUserName') <span class="text-[var(--color-danger)] text-xs">{{ $message }}</span> @enderror
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium mb-1 opacity-60 text-skin-base">E-posta Adresi *</label>
-                            <input type="email"
-                                wire:model="externalUserEmail" 
-                                placeholder="ornek@firma.com"
-                                class="input w-full"
-                            />
-                            @error('externalUserEmail') <span class="text-[var(--color-danger)] text-xs">{{ $message }}</span> @enderror
-                        </div>
-                        <div class="col-span-2 flex items-center gap-2 p-3 rounded-lg bg-blue-50 border border-blue-100">
-                            <x-mary-icon name="o-information-circle" class="w-5 h-5 text-blue-600" />
-                            <span class="text-sm text-blue-700">Kullanıcı kaydedilirken otomatik olarak oluşturulur ve projeye eklenir.</span>
+                            <label class="block text-xs font-medium mb-1 opacity-60 text-skin-base">Proje Üyeleri</label>
+                            @if($isViewMode)
+                                @php 
+                                    $memberNames = collect($leaders)
+                                        ->whereIn('id', $team_members)
+                                        ->pluck('name')
+                                        ->join(', ');
+                                @endphp
+                                <div class="text-sm font-medium text-skin-base">{{ $memberNames ?: '-' }}</div>
+                            @else
+                                <x-mary-choices 
+                                    wire:model="team_members" 
+                                    :options="$leaders" 
+                                    option-label="name" 
+                                    option-value="id"
+                                    searchable
+                                    class="w-full"
+                                    no-result-text="Sonuç bulunamadı"
+                                />
+                            @endif
                         </div>
                     </div>
-                    @endif
                 </div>
 
                 {{-- Hierarchical Form Card --}}
@@ -681,8 +881,10 @@ new
     </div>
 
     {{-- Phase Modal --}}
-    <x-mary-modal wire:model="phaseModalOpen" title="Yeni Faz Ekle" class="backdrop-blur-sm">
+    <x-mary-modal wire:model="phaseModalOpen" title="{{ $editingPhaseIndex !== null ? 'Faz Düzenle' : 'Yeni Faz Ekle' }}" class="backdrop-blur-sm">
         <div class="grid gap-4">
+            {{-- Status Selection Removed (Auto-Calculated) --}}
+
             <div>
                 <label class="block text-sm font-medium mb-1">Faz Adı <span class="text-red-500">*</span></label>
                 <input type="text" wire:model="phaseForm.name" placeholder="Örn: Planlama Aşaması" 
@@ -707,7 +909,110 @@ new
         
         <x-slot:actions>
             <button class="btn btn-ghost" wire:click="$set('phaseModalOpen', false)">İptal</button>
-            <button class="btn btn-primary" wire:click="savePhase">Ekle</button>
+            <button class="theme-btn-save" wire:click="savePhase">{{ $editingPhaseIndex !== null ? 'Güncelle' : 'Ekle' }}</button>
+        </x-slot:actions>
+    </x-mary-modal>
+
+    {{-- Module Modal --}}
+    <x-mary-modal wire:model="moduleModalOpen" title="{{ $editingModuleIndex !== null ? 'Modül Düzenle' : 'Yeni Modül Ekle' }}" class="backdrop-blur-sm">
+        <div class="grid gap-4">
+            {{-- Status --}}
+            <div>
+                 <label class="block text-sm font-medium mb-1">Durum <span class="text-red-500">*</span></label>
+                 <select wire:model="moduleForm.status_id" class="select w-full bg-white border-slate-300">
+                     <option value="">Lütfen Seçiniz</option>
+                     @foreach($moduleStatuses as $status)
+                         <option value="{{ $status['id'] }}">{{ $status['display_label'] }}</option>
+                     @endforeach
+                 </select>
+                 @error('moduleForm.status_id') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+            </div>
+
+            {{-- Info --}}
+            <div>
+                <label class="block text-sm font-medium mb-1">Modül Adı <span class="text-red-500">*</span></label>
+                <input type="text" wire:model="moduleForm.name" placeholder="Örn: Login Ekranı Tasarımı" 
+                       class="input w-full bg-white border-slate-300" />
+                @error('moduleForm.name') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium mb-1">Açıklama</label>
+                <textarea wire:model="moduleForm.description" placeholder="Modül detayları..." 
+                          class="textarea w-full bg-white border-slate-300" rows="2"></textarea>
+            </div>
+
+            {{-- Date Picker --}}
+            <div wire:ignore>
+                <label class="block text-sm font-medium mb-1">Zaman Planı</label>
+                <x-date-range-picker 
+                    :startDate="$moduleForm['start_date'] ?? null" 
+                    :endDate="$moduleForm['end_date'] ?? null" 
+                    startWireModel="moduleForm.start_date"
+                    endWireModel="moduleForm.end_date"
+                    eventKey="module_modal"
+                />
+            </div>
+
+            {{-- ACL: Participants --}}
+            <div class="border-t border-slate-100 pt-3 mt-1">
+                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Yetkili Kişiler</label>
+                <div class="space-y-2 max-h-40 overflow-y-auto pr-1">
+                    @php
+                        // Combine Leader and Team Members for the list
+                        $allParticipants = collect($leaders)->whereIn('id', array_merge($team_members, [$leader_id]))->values();
+                    @endphp
+
+                    @forelse($allParticipants as $participant)
+                        <label class="flex items-center gap-2 cursor-pointer hover:bg-slate-50 p-1.5 rounded-lg transition-colors">
+                            <input type="checkbox" value="{{ $participant['id'] }}" wire:model="moduleForm.assigned_users" 
+                                   class="checkbox checkbox-xs checkbox-primary rounded" />
+                            <span class="text-sm text-slate-700">{{ $participant['name'] }}</span>
+                        </label>
+                    @empty
+                        <p class="text-xs text-slate-400 italic">Projeye atanmış katılımcı yok.</p>
+                    @endforelse
+                </div>
+                <p class="text-[10px] text-slate-400 mt-1">* İşaretli olmayan kullanıcılar bu modülü göremez.</p>
+            </div>
+        </div>
+        
+        <x-slot:actions>
+            <button class="btn btn-ghost" wire:click="$set('moduleModalOpen', false)">İptal</button>
+            <button class="theme-btn-save" wire:click="saveModule">{{ $editingModuleIndex !== null ? 'Güncelle' : 'Ekle' }}</button>
         </x-slot:actions>
     </x-mary-modal>
 </div>
+
+@script
+<script>
+    Alpine.data('unsavedChangesWatcher', () => ({
+        isDirty: false,
+        
+        init() {
+            // Warn on browser close / refresh
+            window.addEventListener('beforeunload', (e) => {
+                if (this.isDirty) {
+                    e.preventDefault();
+                    e.returnValue = 'Kaydedilmemiş değişiklikleriniz var. Çıkmak istediğinize emin misiniz?';
+                }
+            });
+
+            // Warn on internal Livewire navigation (if using wire:navigate)
+            document.addEventListener('livewire:navigate', (event) => {
+                if (this.isDirty && !confirm('Kaydedilmemiş değişiklikleriniz var. Çıkmak istediğinize emin misiniz?')) {
+                    event.preventDefault();
+                }
+            });
+        },
+
+        markDirty() {
+            this.isDirty = true;
+        },
+
+        markClean() {
+            this.isDirty = false;
+        }
+    }));
+</script>
+@endscript

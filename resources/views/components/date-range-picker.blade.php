@@ -1,29 +1,19 @@
-{{-- 
-    📅 Linear-Style Date Range Picker Component
-    -------------------------------------------
-    Usage: <x-date-range-picker 
-               wire:model.live="start_date" 
-               wire:model-end.live="target_end_date" 
-               :disabled="$isViewMode"
-           />
---}}
-
 @props([
     'startDate' => null,
     'endDate' => null,
     'disabled' => false,
+    'startWireModel' => 'start_date',
+    'endWireModel' => 'target_end_date',
+    'eventKey' => null,
 ])
 
 <div 
     x-data="dateRangePicker({ 
-        startDate: @js($startDate), 
-        endDate: @js($endDate) 
+        startDate: @entangle($startWireModel), 
+        endDate: @entangle($endWireModel) 
     })"
-    x-on:date-range-updated.window="
-        $wire.set('start_date', $event.detail.start);
-        $wire.set('target_end_date', $event.detail.end);
-    "
     class="relative"
+    {{ $attributes }}
 >
     {{-- Display Header (Linear Style) --}}
     <button 
