@@ -19,6 +19,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // ─────────────────────────────────────────────────────────────────────
+        // 🎯 Project Observers - Domino Effect Otomasyonu
+        // ─────────────────────────────────────────────────────────────────────
+        \App\Models\ProjectPhase::observe(\App\Observers\ProjectPhaseObserver::class);
+        \App\Models\ProjectModule::observe(\App\Observers\ProjectModuleObserver::class);
+
         \Illuminate\Support\Facades\Gate::before(function ($user, $ability) {
             if ($user->role && $user->role->name === 'Super Admin') {
                 return true;

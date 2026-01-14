@@ -9,13 +9,14 @@
  * ---------------------------------------------------------
  */
 
-use Livewire\Volt\Component;
 use App\Livewire\Customers\Services\Traits\HasServiceActions;
+use Livewire\Volt\Component;
 use Mary\Traits\Toast;
 
-new class extends Component {
-    use Toast;
+new class extends Component
+{
     use HasServiceActions;
+    use Toast;
 }; ?>
 
 <div>
@@ -102,9 +103,10 @@ new class extends Component {
             <div class="mb-8"></div>
         @endif
 
-        <div class="flex gap-6">
-            {{-- Left Column (80%) --}}
-            <div class="w-4/5">
+        {{-- Main Layout: 8/12 Left, 4/12 Right --}}
+        <div class="grid grid-cols-12 gap-6">
+            {{-- Left Column (8/12) --}}
+            <div class="col-span-8">
                 @if($activeTab === 'info')
                     @include('livewire.modals.parts.service._service-core', [
                         'customer_id' => $customer_id,
@@ -139,8 +141,8 @@ new class extends Component {
                 @endif
             </div>
 
-            {{-- Right Column (20%) --}}
-            <div class="w-1/5">
+            {{-- Right Column (4/12) --}}
+            <div class="col-span-4">
                 <div class="theme-card p-6 shadow-sm text-center">
                     <h3 class="text-sm font-bold text-skin-heading mb-4">Hizmet Görseli</h3>
                     <div class="w-32 h-32 mx-auto border-2 border-dashed border-[var(--card-border)] rounded-lg flex items-center justify-center mb-4 bg-[var(--card-bg)] overflow-hidden">

@@ -25,6 +25,11 @@
                     style="{{ !request()->is('dashboard') ? 'color: ' . ($theme?->menu_text_color ?? '#ffffff') : '' }}">
                     Dashboard
                 </a>
+                <a href="/dashboard/projects"
+                    class="px-5 py-2 rounded-full text-sm font-medium transition-all duration-200 {{ request()->is('dashboard/projects*') ? 'bg-[var(--header-active-bg)] text-[var(--header-active-text)]' : 'hover:bg-white/10' }}"
+                    style="{{ !request()->is('dashboard/projects*') ? 'color: ' . ($theme?->menu_text_color ?? '#ffffff') : '' }}">
+                    Projeler
+                </a>
                 <a href="/dashboard/customers"
                     class="px-5 py-2 rounded-full text-sm font-medium transition-all duration-200 {{ request()->is('dashboard/customers*') ? 'bg-[var(--header-active-bg)] text-[var(--header-active-text)]' : 'hover:bg-white/10' }}"
                     style="{{ !request()->is('dashboard/customers*') ? 'color: ' . ($theme?->menu_text_color ?? '#ffffff') : '' }}">

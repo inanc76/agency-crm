@@ -1,12 +1,13 @@
 <?php
 
-use Livewire\Volt\Component;
 use App\Livewire\Customers\Assets\Traits\HasAssetActions;
+use Livewire\Volt\Component;
 use Mary\Traits\Toast;
 
-new class extends Component {
-    use Toast;
+new class extends Component
+{
     use HasAssetActions;
+    use Toast;
 }; ?>
 
 <div>
@@ -94,9 +95,10 @@ new class extends Component {
             <div class="mb-8"></div>
         @endif
 
-        <div class="flex gap-6">
-            {{-- Left Column (80%) --}}
-            <div class="w-4/5">
+        {{-- Main Layout: 8/12 Left, 4/12 Right --}}
+        <div class="grid grid-cols-12 gap-6">
+            {{-- Left Column (8/12) --}}
+            <div class="col-span-8">
                 @if($activeTab === 'info')
                     <div class="space-y-6">
                         {{-- Varlık Bilgileri Card --}}
@@ -188,8 +190,8 @@ new class extends Component {
                 @endif
             </div>
 
-            {{-- Right Column (20%) --}}
-            <div class="w-1/5">
+            {{-- Right Column (4/12) --}}
+            <div class="col-span-4">
                 <div class="theme-card p-6 shadow-sm text-center">
                     <h3 class="text-sm font-bold text-slate-900 mb-4">Varlık Görseli</h3>
 

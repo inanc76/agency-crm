@@ -13,6 +13,7 @@
 namespace App\Livewire\Traits;
 
 use App\Models\Customer;
+use App\Services\MinioService;
 use Illuminate\Support\Str;
 
 trait HasCustomerActions
@@ -48,9 +49,9 @@ trait HasCustomerActions
         ]);
 
         // Filter and Normalize
-        $emails = array_filter($this->emails, fn($e) => !empty($e));
-        $phones = array_map(fn($p) => $this->normalizePhone($p), array_filter($this->phones, fn($p) => !empty($p)));
-        $websites = array_map(fn($url) => $this->normalizeUrl($url), array_filter($this->websites, fn($w) => !empty($w)));
+        $emails = array_filter($this->emails, fn ($e) => ! empty($e));
+        $phones = array_map(fn ($p) => $this->normalizePhone($p), array_filter($this->phones, fn ($p) => ! empty($p)));
+        $websites = array_map(fn ($url) => $this->normalizeUrl($url), array_filter($this->websites, fn ($w) => ! empty($w)));
 
         $data = [
             'name' => $this->formatTitleCase($this->name),
@@ -87,8 +88,16 @@ trait HasCustomerActions
 
         // Handle logo upload
         if ($this->logo) {
-            $path = $this->logo->store('uploads/customer-logo', 'public');
-            $customer->update(['logo_url' => '/' . $path]);
+            $minioService = app(MinioService::class);
+
+            // Delete old logo if exists
+            if ($customer->logo_url && str_contains($customer->logo_url, '/storage/minio/')) {
+                $oldPath = str_replace('/storage/minio/', '', $customer->logo_url);
+                $minioService->deleteFile($oldPath);
+            }
+
+            $uploadResult = $minioService->uploadFile($this->logo, 'logos');
+            $customer->update(['logo_url' => '/storage/minio/'.$uploadResult['path']]);
             $this->logo = null; // Reset upload input
         }
 
@@ -98,7 +107,7 @@ trait HasCustomerActions
         $this->success('İşlem Başarılı', $message);
 
         if ($wasCreating) {
-            $this->redirect('/dashboard/customers/' . $this->customerId, navigate: true);
+            $this->redirect('/dashboard/customers/'.$this->customerId, navigate: true);
         } else {
             $this->isViewMode = true;
         }
@@ -138,9 +147,38 @@ trait HasCustomerActions
         $this->authorize('customers.delete');
 
         if ($this->customerId) {
-            Customer::findOrFail($this->customerId)->delete();
+            $customer = Customer::findOrFail($this->customerId);
+
+            // Delete logo from Minio
+            if ($customer->logo_url && str_contains($customer->logo_url, '/storage/minio/')) {
+                $path = str_replace('/storage/minio/', '', $customer->logo_url);
+                app(MinioService::class)->deleteFile($path);
+            }
+
+            $customer->delete();
             $this->success('Müşteri Arşivlendi', 'Müşteri kaydı başarıyla arşivlendi ve çöp kutusuna taşındı.');
             $this->redirect('/dashboard/customers?tab=customers');
+        }
+    }
+
+    /**
+     * Delete only the logo
+     */
+    public function deleteLogo(): void
+    {
+        $this->authorize('customers.edit');
+
+        if ($this->customerId) {
+            $customer = Customer::findOrFail($this->customerId);
+
+            if ($customer->logo_url && str_contains($customer->logo_url, '/storage/minio/')) {
+                $path = str_replace('/storage/minio/', '', $customer->logo_url);
+                app(MinioService::class)->deleteFile($path);
+            }
+
+            $customer->update(['logo_url' => null]);
+            $this->logo_url = '';
+            $this->success('Logo Silindi', 'Müşteri logosu başarıyla kaldırıldı.');
         }
     }
 
@@ -157,7 +195,7 @@ trait HasCustomerActions
      */
     public function addRelatedCustomer(string $customerId): void
     {
-        if (!in_array($customerId, $this->related_customers) && count($this->related_customers) < 10) {
+        if (! in_array($customerId, $this->related_customers) && count($this->related_customers) < 10) {
             $this->related_customers[] = $customerId;
         }
     }
@@ -168,7 +206,7 @@ trait HasCustomerActions
     public function removeRelatedCustomer(string $customerId): void
     {
         $this->related_customers = array_values(
-            array_filter($this->related_customers, fn($id) => $id !== $customerId)
+            array_filter($this->related_customers, fn ($id) => $id !== $customerId)
         );
     }
 
@@ -182,8 +220,8 @@ trait HasCustomerActions
         }
 
         $url = trim($url);
-        if (!preg_match('#^https?://#i', $url)) {
-            return 'https://' . $url;
+        if (! preg_match('#^https?://#i', $url)) {
+            return 'https://'.$url;
         }
 
         return $url;

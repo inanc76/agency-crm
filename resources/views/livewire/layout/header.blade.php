@@ -35,6 +35,11 @@ $handleSignOut = function () {
                 <span>Müşteriler</span>
             </a>
 
+            <a href="/dashboard/projects"
+                class="flex items-center space-x-2 px-4 py-2 rounded-full transition-all duration-300 font-medium text-sm {{ request()->is('dashboard/projects*') ? 'bg-[var(--header-active-bg)] text-[var(--header-active-text)] shadow-md transform scale-105' : 'text-white/90 hover:bg-white/15 hover:text-white hover:scale-102' }}">
+                <span>Projeler</span>
+            </a>
+
             <a href="/dashboard/settings"
                 class="flex items-center space-x-2 px-4 py-2 rounded-full transition-all duration-300 font-medium text-sm {{ request()->is('dashboard/settings*') ? 'bg-[var(--header-active-bg)] text-[var(--header-active-text)] shadow-md transform scale-105' : 'text-white/90 hover:bg-white/15 hover:text-white hover:scale-102' }}">
                 <span>Ayarlar</span>

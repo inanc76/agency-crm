@@ -9,7 +9,8 @@
             @if($logo)
                 <img src="{{ $logo->temporaryUrl() }}" alt="Logo Preview" class="w-full h-full object-contain">
             @elseif($logo_url)
-                <img src="{{ asset('storage' . $logo_url) }}" alt="Logo" class="w-full h-full object-contain">
+                <img src="{{ str_contains($logo_url, '/storage/') ? $logo_url : asset('storage' . $logo_url) }}"
+                    alt="Logo" class="w-full h-full object-contain">
             @else
                 @php
                     $initials = mb_substr($name ?? 'C', 0, 1) ?: 'C';
@@ -21,17 +22,28 @@
             @endif
         </div>
 
-        {{-- Upload Button --}}
-        @if(!$isViewMode)
-            <label class="cursor-pointer">
-                <span
-                    class="inline-flex items-center gap-2 px-4 py-2 bg-[var(--dropdown-hover-bg)]/50 hover:bg-[var(--dropdown-hover-bg)] text-skin-heading rounded-lg text-sm font-medium transition-colors">
-                    <x-mary-icon name="o-arrow-up-tray" class="w-4 h-4" />
-                    Logo Yükle
-                </span>
-                <input type="file" wire:model="logo" accept="image/png,image/jpeg,image/gif" class="hidden">
-            </label>
-        @endif
+        {{-- Actions --}}
+        <div class="flex items-center gap-2">
+            {{-- Upload Button --}}
+            @if(!$isViewMode)
+                <label class="cursor-pointer">
+                    <span
+                        class="inline-flex items-center gap-2 px-4 py-2 bg-[var(--dropdown-hover-bg)]/50 hover:bg-[var(--dropdown-hover-bg)] text-skin-heading rounded-lg text-sm font-medium transition-colors">
+                        <x-mary-icon name="o-arrow-up-tray" class="w-4 h-4" />
+                        {{ $logo_url ? 'Değiştir' : 'Logo Yükle' }}
+                    </span>
+                    <input type="file" wire:model="logo" accept="image/png,image/jpeg,image/gif" class="hidden">
+                </label>
+
+                {{-- Delete Logo Button --}}
+                @if($logo_url)
+                    <button type="button" wire:click="deleteLogo" wire:confirm="Logoyu silmek istediğinize emin misiniz?"
+                        class="theme-btn-delete p-2 rounded-lg" title="Logoyu Sil">
+                        <x-mary-icon name="o-trash" class="w-4 h-4" />
+                    </button>
+                @endif
+            @endif
+        </div>
 
         <p class="text-xs mt-2 text-center opacity-40 text-skin-base">PNG, JPG, GIF (Max 5MB)
         </p>

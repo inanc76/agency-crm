@@ -3,200 +3,242 @@
  * 🚀 CUSTOMER CREATE/VIEW COMPONENT
  * ---------------------------------------------------------
  * MİMARİ: Volt Component (Single File Component)
- * TRAITS: 
+ * TRAITS:
  *  - HasCustomerActions: Save, Delete, ToggleEdit logic.
  *  - HasCustomerData: Load, Init, Reference Data logic.
- * 
- * HİYERARŞİ: 
+ *
+ * HİYERARŞİ:
  *  - Ana Dosya: Layout, State ve Tab Routing yönetir.
  *  - Partials: Form kartları (Basic Info, Address, etc.) ve Sekme içerikleri (_tab-*.blade.php).
  * ---------------------------------------------------------
  */
 
-use Livewire\Volt\Component;
-use Livewire\Attributes\Layout;
-use Livewire\WithFileUploads;
-use App\Models\Customer;
-use App\Models\ReferenceItem;
-use Mary\Traits\Toast;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\DB;
 use App\Livewire\Traits\HasCustomerActions;
 use App\Livewire\Traits\HasCustomerData;
+use App\Models\Customer;
+use App\Models\ReferenceItem;
+use Illuminate\Support\Facades\DB;
+use Livewire\Attributes\Layout;
+use Livewire\Volt\Component;
+use Livewire\WithFileUploads;
+use Mary\Traits\Toast;
 
 new
     #[Layout('components.layouts.app', ['title' => 'Yeni Müşteri Ekle'])]
-    class extends Component {
-    use Toast, WithFileUploads, HasCustomerActions, HasCustomerData;
-
-    // Temel Bilgiler
-    public string $customer_type = 'CUSTOMER';
-    public string $name = '';
-    public array $emails = [''];
-    public array $phones = [''];
-    public array $websites = [''];
-
-    // Adres Bilgileri
-    public string $country_id = '';
-    public string $city_id = '';
-    public string $address = '';
-
-    // Cari Bilgiler
-    public string $title = '';
-    public string $tax_office = '';
-    public string $tax_number = '';
-    public string $current_code = '';
-
-    // İlişkili Firmalar
-    public array $related_customers = [];
-
-    // Logo
-    public $logo;
-    public string $logo_url = '';
-
-    // State Management
-    public bool $isViewMode = false;
-    public ?string $customerId = null;
-    public string $registration_date = '';
-    public string $activeTab = 'info';
-    public array $counts = [
-        'contacts' => 0,
-        'assets' => 0,
-        'services' => 0,
-        'offers' => 0,
-        'sales' => 0,
-        'messages' => 0,
-        'notes' => 0,
-    ];
-
-    // Related Data for Tabs
-    public $relatedContacts = [], $relatedAssets = [], $relatedServices = [];
-    public $relatedOffers = [], $relatedSales = [], $relatedMessages = [], $relatedNotes = [];
-
-    // Tab Filters
-    public string $servicesStatusFilter = '', $offersStatusFilter = '';
-
-    // Reference Data
-    public $customerTypes = [], $countries = [], $cities = [], $existingCustomers = [];
-
-    public function mount(?string $customer = null): void
+    class extends Component
     {
-        $this->customerTypes = ReferenceItem::where('category_key', 'CUSTOMER_TYPE')->where('is_active', true)
-            ->orderBy('sort_order')->get()->map(fn($item) => ['id' => $item->key, 'name' => $item->display_label])->toArray();
+        use HasCustomerActions, HasCustomerData, Toast, WithFileUploads;
 
-        $this->countries = DB::table('countries')->where('is_active', true)->orderBy('sort_order')
-            ->get(['id', 'name'])->map(fn($item) => ['id' => $item->id, 'name' => $item->name])->toArray();
+        // Temel Bilgiler
+        public string $customer_type = 'CUSTOMER';
 
-        $this->existingCustomers = Customer::orderBy('name')->get(['id', 'name'])
-            ->map(fn($c) => ['id' => $c->id, 'name' => $c->name])->toArray();
+        public string $name = '';
 
-        if ($customer) {
-            $this->authorize('customers.view');
-            $this->customerId = $customer;
-            $this->loadCustomerData();
+        public array $emails = [''];
 
-            // Set active tab from URL if present
-            $this->activeTab = request()->query('tab', 'info');
-        } else {
-            $this->authorize('customers.create');
-            $this->initNewCustomer();
+        public array $phones = [''];
+
+        public array $websites = [''];
+
+        // Adres Bilgileri
+        public string $country_id = '';
+
+        public string $city_id = '';
+
+        public string $address = '';
+
+        // Cari Bilgiler
+        public string $title = '';
+
+        public string $tax_office = '';
+
+        public string $tax_number = '';
+
+        public string $current_code = '';
+
+        // İlişkili Firmalar
+        public array $related_customers = [];
+
+        // Logo
+        public $logo;
+
+        public string $logo_url = '';
+
+        // State Management
+        public bool $isViewMode = false;
+
+        public ?string $customerId = null;
+
+        public string $registration_date = '';
+
+        public string $activeTab = 'info';
+
+        public array $counts = [
+            'contacts' => 0,
+            'assets' => 0,
+            'services' => 0,
+            'offers' => 0,
+            'sales' => 0,
+            'messages' => 0,
+            'notes' => 0,
+        ];
+
+        // Related Data for Tabs
+        public $relatedContacts = [];
+
+        public $relatedAssets = [];
+
+        public $relatedServices = [];
+
+        public $relatedOffers = [];
+
+        public $relatedSales = [];
+
+        public $relatedMessages = [];
+
+        public $relatedNotes = [];
+
+        // Tab Filters
+        public string $servicesStatusFilter = '';
+
+        public string $offersStatusFilter = '';
+
+        // Reference Data
+        public $customerTypes = [];
+
+        public $countries = [];
+
+        public $cities = [];
+
+        public $existingCustomers = [];
+
+        public function mount(?string $customer = null): void
+        {
+            $this->customerTypes = ReferenceItem::where('category_key', 'CUSTOMER_TYPE')->where('is_active', true)
+                ->orderBy('sort_order')->get()->map(fn ($item) => ['id' => $item->key, 'name' => $item->display_label])->toArray();
+
+            $this->countries = DB::table('countries')->where('is_active', true)->orderBy('sort_order')
+                ->get(['id', 'name'])->map(fn ($item) => ['id' => $item->id, 'name' => $item->name])->toArray();
+
+            $this->existingCustomers = Customer::orderBy('name')->get(['id', 'name'])
+                ->map(fn ($c) => ['id' => $c->id, 'name' => $c->name])->toArray();
+
+            if ($customer) {
+                $this->authorize('customers.view');
+                $this->customerId = $customer;
+                $this->loadCustomerData();
+
+                // Set active tab from URL if present
+                $this->activeTab = request()->query('tab', 'info');
+            } else {
+                $this->authorize('customers.create');
+                $this->initNewCustomer();
+            }
         }
-    }
 
-    private function loadCustomerData(): void
-    {
-        try {
-            $customer = Customer::with('relatedCustomers')->findOrFail($this->customerId);
-            $this->name = $customer->name;
-            $this->customer_type = $customer->customer_type;
-            $this->emails = (array) ($customer->emails ?: ['']);
-            $this->phones = (array) ($customer->phones ?: ['']);
-            $this->websites = (array) ($customer->websites ?: ['']);
-            $this->country_id = $customer->country_id ?? '';
-            $this->city_id = $customer->city_id ?? '';
-            $this->address = $customer->address ?? '';
-            $this->title = $customer->title ?? '';
-            $this->tax_office = $customer->tax_office ?? '';
-            $this->tax_number = $customer->tax_number ?? '';
-            $this->current_code = $customer->current_code ?? '';
-            $this->logo_url = $customer->logo_url ?? '';
+        private function loadCustomerData(): void
+        {
+            try {
+                $customer = Customer::with('relatedCustomers')->findOrFail($this->customerId);
+                $this->name = $customer->name;
+                $this->customer_type = $customer->customer_type;
+                $this->emails = (array) ($customer->emails ?: ['']);
+                $this->phones = (array) ($customer->phones ?: ['']);
+                $this->websites = (array) ($customer->websites ?: ['']);
+                $this->country_id = $customer->country_id ?? '';
+                $this->city_id = $customer->city_id ?? '';
+                $this->address = $customer->address ?? '';
+                $this->title = $customer->title ?? '';
+                $this->tax_office = $customer->tax_office ?? '';
+                $this->tax_number = $customer->tax_number ?? '';
+                $this->current_code = $customer->current_code ?? '';
+                $this->logo_url = $customer->logo_url ?? '';
 
-            if ($customer->relatedCustomers)
-                $this->related_customers = $customer->relatedCustomers->pluck('id')->toArray();
+                if ($customer->relatedCustomers) {
+                    $this->related_customers = $customer->relatedCustomers->pluck('id')->toArray();
+                }
 
-            $this->loadCities();
-            $this->counts = [
-                'contacts' => $customer->contacts()->count(),
-                'assets' => $customer->assets()->count(),
-                'services' => $customer->services()->count(),
-                'offers' => $customer->offers()->count(),
-                'sales' => $customer->sales()->count(),
-                'messages' => $customer->messages()->count(),
-                'notes' => $customer->notes()->count(),
-            ];
+                $this->loadCities();
+                $this->counts = [
+                    'contacts' => $customer->contacts()->count(),
+                    'assets' => $customer->assets()->count(),
+                    'services' => $customer->services()->count(),
+                    'offers' => $customer->offers()->count(),
+                    'sales' => $customer->sales()->count(),
+                    'messages' => $customer->messages()->count(),
+                    'notes' => $customer->notes()->count(),
+                ];
 
-            $this->relatedContacts = $customer->contacts()->orderBy('name')->get()->toArray();
-            $this->relatedAssets = $customer->assets()->orderBy('name')->get()->toArray();
-            $this->relatedServices = $customer->services()->orderBy('created_at', 'desc')->get()->toArray();
-            $this->relatedOffers = $customer->offers()->orderBy('created_at', 'desc')->get()->toArray();
-            $this->relatedSales = $customer->sales()->orderBy('created_at', 'desc')->get()->toArray();
-            $this->relatedMessages = $customer->messages()->orderBy('created_at', 'desc')->get()->toArray();
-            $this->relatedNotes = $customer->notes()->orderBy('created_at', 'desc')->get()->toArray();
+                $this->relatedContacts = $customer->contacts()->orderBy('name')->get()->toArray();
+                $this->relatedAssets = $customer->assets()->orderBy('name')->get()->toArray();
+                $this->relatedServices = $customer->services()->orderBy('created_at', 'desc')->get()->toArray();
+                $this->relatedOffers = $customer->offers()->orderBy('created_at', 'desc')->get()->toArray();
+                $this->relatedSales = $customer->sales()->orderBy('created_at', 'desc')->get()->toArray();
+                $this->relatedMessages = $customer->messages()->orderBy('created_at', 'desc')->get()->toArray();
+                $this->relatedNotes = $customer->notes()->orderBy('created_at', 'desc')->get()->toArray();
 
-            $this->registration_date = $customer->created_at?->format('d.m.Y H:i') ?? '-';
-            $this->isViewMode = true;
-        } catch (\Exception $e) {
-            $this->error('Müşteri Bulunamadı', 'İstenilen müşteri kaydı bulunamadı.');
-            $this->redirect('/dashboard/customers?tab=customers', navigate: true);
+                $this->registration_date = $customer->created_at?->format('d.m.Y H:i') ?? '-';
+                $this->isViewMode = true;
+            } catch (\Exception $e) {
+                $this->error('Müşteri Bulunamadı', 'İstenilen müşteri kaydı bulunamadı.');
+                $this->redirect('/dashboard/customers?tab=customers', navigate: true);
+            }
         }
-    }
 
-    // Lifecycle Hooks for formatting
-    // Neden: Volt bileşeninde array tabanlı inputları dinlemek için key-value parçalanır.
-    public function updatedWebsites($v, $k): void
-    {
-        $parts = explode('.', $k);
-        if (count($parts) === 2)
-            $this->websites[(int) $parts[1]] = $this->normalizeUrl($v);
-    }
-    public function updatedPhones($v, $k): void
-    {
-        $parts = explode('.', $k);
-        if (count($parts) === 2)
-            $this->phones[(int) $parts[1]] = $this->normalizePhone($v);
-    }
-    // Neden: Veri tabanı tutarlılığı için kullanıcı girişi anında Title Case formatına sokulur.
-    public function updatedName($v): void
-    {
-        $this->name = $this->formatTitleCase($v);
-    }
-    public function updatedTitle($v): void
-    {
-        $this->title = $this->formatTitleCase($v);
-    }
-    public function updatedTaxOffice($v): void
-    {
-        $this->tax_office = $this->formatTitleCase($v);
-    }
-    public function updatedAddress($v): void
-    {
-        $this->address = $this->formatTitleCase($v);
-    }
-    public function updatedCurrentCode($v): void
-    {
-        $this->current_code = $this->formatTitleCase($v);
-    }
-}; ?>
+        // Lifecycle Hooks for formatting
+        // Neden: Volt bileşeninde array tabanlı inputları dinlemek için key-value parçalanır.
+        public function updatedWebsites($v, $k): void
+        {
+            $parts = explode('.', $k);
+            if (count($parts) === 2) {
+                $this->websites[(int) $parts[1]] = $this->normalizeUrl($v);
+            }
+        }
+
+        public function updatedPhones($v, $k): void
+        {
+            $parts = explode('.', $k);
+            if (count($parts) === 2) {
+                $this->phones[(int) $parts[1]] = $this->normalizePhone($v);
+            }
+        }
+
+        // Neden: Veri tabanı tutarlılığı için kullanıcı girişi anında Title Case formatına sokulur.
+        public function updatedName($v): void
+        {
+            $this->name = $this->formatTitleCase($v);
+        }
+
+        public function updatedTitle($v): void
+        {
+            $this->title = $this->formatTitleCase($v);
+        }
+
+        public function updatedTaxOffice($v): void
+        {
+            $this->tax_office = $this->formatTitleCase($v);
+        }
+
+        public function updatedAddress($v): void
+        {
+            $this->address = $this->formatTitleCase($v);
+        }
+
+        public function updatedCurrentCode($v): void
+        {
+            $this->current_code = $this->formatTitleCase($v);
+        }
+    }; ?>
 
 <div class="p-6 min-h-screen" style="background-color: var(--page-bg);">
     <div class="max-w-7xl mx-auto">
         @include('livewire.customers.parts._create-header')
 
 
-        {{-- Main Layout: 80% Left, 20% Right --}}
-        <div class="flex gap-6">
-            {{-- Left Column (80%) --}}
-            <div class="w-4/5">
+        {{-- Main Layout: 8/12 Left, 4/12 Right --}}
+        <div class="grid grid-cols-12 gap-6">
+            {{-- Left Column (8/12) --}}
+            <div class="col-span-8">
                 {{-- Info Tab --}}
                 @if($activeTab === 'info' || !$isViewMode)
                     <div class="space-y-6">
@@ -243,8 +285,8 @@ new
                 @endif
             </div>
 
-            {{-- Right Column (20%) --}}
-            <div class="w-1/5">
+            {{-- Right Column (4/12) --}}
+            <div class="col-span-4">
                 @include('livewire.customers.parts.logo-card')
             </div>
         </div>

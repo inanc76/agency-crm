@@ -24,8 +24,8 @@ Route::view('dashboard', 'dashboard')
 
 // Müşteri Yönetimi
 Route::get('dashboard/customers', function () {
-    if (!request()->has('tab')) {
-        return redirect()->to(url()->current() . '?tab=customers');
+    if (! request()->has('tab')) {
+        return redirect()->to(url()->current().'?tab=customers');
     }
 
     return view('customers.index');
@@ -80,6 +80,25 @@ Volt::route('dashboard/customers/offers/{offer}/pdf', 'customers.offers.pdf-prev
     ->middleware(['auth', 'verified', 'can:offers.view'])
     ->name('offers.pdf.preview');
 
+// ═══════════════════════════════════════════════════════════════════════════
+// 🏗️ PROJE YÖNETİMİ
+// ═══════════════════════════════════════════════════════════════════════════
+Route::get('dashboard/projects', function () {
+    if (! request()->has('tab')) {
+        return redirect()->to(url()->current().'?tab=projects');
+    }
+
+    return view('projects.index');
+})->middleware(['auth', 'verified'])->name('projects.index');
+
+Volt::route('dashboard/projects/create', 'projects.create')
+    ->middleware(['auth', 'verified'])
+    ->name('projects.create');
+
+Volt::route('dashboard/projects/{project}', 'projects.create')
+    ->middleware(['auth', 'verified'])
+    ->name('projects.edit');
+
 // Ayarlar
 // Ayarlar
 Volt::route('dashboard/settings', 'settings.index')
@@ -128,7 +147,7 @@ Volt::route('dashboard/settings/two-factor', 'settings.two-factor')
 
 // Debug route for testing
 Route::get('debug/2fa', function () {
-    if (!auth()->check()) {
+    if (! auth()->check()) {
         return 'User not authenticated';
     }
 
