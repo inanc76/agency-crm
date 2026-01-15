@@ -17,7 +17,7 @@ class GenerateOfferPdfAction
 
         // Resolve Logo as Base64 Data URI for Browsershot
         $logoDataUri = null;
-        if (! empty($settings->pdf_logo_path)) {
+        if (!empty($settings->pdf_logo_path)) {
             try {
                 $logoDataUri = $this->getLogoAsBase64($settings->pdf_logo_path);
             } catch (\Exception $e) {
@@ -39,7 +39,7 @@ class GenerateOfferPdfAction
             'currency' => $offer->currency ?? 'USD',
             'vatRate' => $offer->vat_rate ?? 20,
             'sections' => $offer->sections->map(function ($section) use ($offer) {
-                $subtotal = $section->items->sum(fn ($item) => ($item->quantity ?? 1) * ($item->price ?? 0));
+                $subtotal = $section->items->sum(fn($item) => ($item->quantity ?? 1) * ($item->price ?? 0));
                 $vatRate = $offer->vat_rate ?? 20;
                 $vatAmount = $subtotal * ($vatRate / 100);
                 $totalWithVat = $subtotal + $vatAmount;
@@ -51,11 +51,11 @@ class GenerateOfferPdfAction
                     'subtotal' => $subtotal,
                     'vat_amount' => $vatAmount,
                     'total_with_vat' => $totalWithVat,
-                    'items' => $section->items->map(fn ($item) => [
+                    'items' => $section->items->map(fn($item) => [
                         'name' => $item->service_name ?? $item->name ?? 'Hizmet',
                         'description' => $item->description ?? '',
                         'quantity' => $item->quantity ?? 1,
-                        'duration' => $item->duration ? $item->duration.' Yıl' : '-',
+                        'duration' => $item->duration ? $item->duration . ' Yıl' : '-',
                         'price' => $item->price ?? 0,
                         'total' => ($item->quantity ?? 1) * ($item->price ?? 0),
                     ])->toArray(),
@@ -63,20 +63,21 @@ class GenerateOfferPdfAction
             })->toArray(),
         ])->render();
 
-        $fileName = 'teklif-'.Str::uuid().'.pdf';
+        $fileName = 'teklif-' . Str::uuid() . '.pdf';
         $path = storage_path('app/public/offers/pdfs');
 
-        if (! file_exists($path)) {
+        if (!file_exists($path)) {
             mkdir($path, 0755, true);
         }
 
-        $fullPath = $path.'/'.$fileName;
+        $fullPath = $path . '/' . $fileName;
 
         Browsershot::html($html)
             ->format('A4')
             ->margins(10, 10, 10, 10)
             ->showBackground()
             ->emulateMedia('print')
+            ->noSandbox()
             ->save($fullPath);
 
         return $fullPath;
@@ -89,14 +90,14 @@ class GenerateOfferPdfAction
     {
         $setting = StorageSetting::where('is_active', true)->first();
 
-        if (! $setting) {
+        if (!$setting) {
             \Log::warning('PDF Logo: StorageSetting not found');
 
             return null;
         }
 
         $protocol = $setting->use_ssl ? 'https://' : 'http://';
-        $endpoint = $protocol.$setting->endpoint.($setting->port == 443 || $setting->port == 80 ? '' : ':'.$setting->port);
+        $endpoint = $protocol . $setting->endpoint . ($setting->port == 443 || $setting->port == 80 ? '' : ':' . $setting->port);
 
         $config = [
             'driver' => 's3',
@@ -115,7 +116,7 @@ class GenerateOfferPdfAction
         try {
             $disk = Storage::build($config);
 
-            if (! $disk->exists($path)) {
+            if (!$disk->exists($path)) {
                 \Log::warning("PDF Logo: File not found in Minio - {$path}");
 
                 return null;
@@ -124,11 +125,11 @@ class GenerateOfferPdfAction
             $content = $disk->get($path);
             $mimeType = $disk->mimeType($path) ?? 'image/png';
 
-            \Log::info("PDF Logo: Successfully loaded from Minio - {$path}, size: ".strlen($content).' bytes');
+            \Log::info("PDF Logo: Successfully loaded from Minio - {$path}, size: " . strlen($content) . ' bytes');
 
-            return 'data:'.$mimeType.';base64,'.base64_encode($content);
+            return 'data:' . $mimeType . ';base64,' . base64_encode($content);
         } catch (\Exception $e) {
-            \Log::error('PDF Logo: Error loading from Minio - '.$e->getMessage());
+            \Log::error('PDF Logo: Error loading from Minio - ' . $e->getMessage());
 
             return null;
         }

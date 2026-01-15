@@ -96,6 +96,9 @@ new
             'assigned_users' => [], // ID list
         ];
 
+        // Logic
+        public bool $auto_calculate_end_date = true;
+
         public function mount(?string $project = null): void
         {
             $this->loadReferenceData();
@@ -158,6 +161,7 @@ new
                 $this->timezone = $project->timezone ?? 'Europe/Istanbul';
                 $this->start_date = $project->start_date?->format('Y-m-d');
                 $this->target_end_date = $project->target_end_date?->format('Y-m-d');
+                $this->auto_calculate_end_date = $project->custom_fields['auto_calculate_end_date'] ?? true;
 
                 if ($project->customer) {
                     $this->selectedCustomer = [
@@ -214,6 +218,31 @@ new
                 $this->selectedCustomer = null;
             }
         }
+        
+        public function updatedAutoCalculateEndDate(): void
+        {
+            if ($this->auto_calculate_end_date) {
+                $this->calculateAutoEndDate();
+            }
+        }
+
+        private function calculateAutoEndDate(): void
+        {
+            if (empty($this->phases)) return;
+            
+            $maxDate = null;
+            foreach($this->phases as $phase) {
+                if (!empty($phase['end_date'])) {
+                    if ($maxDate === null || $phase['end_date'] > $maxDate) {
+                        $maxDate = $phase['end_date'];
+                    }
+                }
+            }
+            
+            if ($maxDate) {
+                $this->target_end_date = $maxDate;
+            }
+        }
 
         // ─────────────────────────────────────────────────────────────────────────
         // HIERARCHICAL FORM METHODS
@@ -247,6 +276,11 @@ new
                      'modules' => [],
                  ];
                  $this->success('Faz Eklendi', 'Yeni faz listeye eklendi.');
+             }
+             
+             // If manual update might change dates (though phases usually get dates from modules)
+             if ($this->auto_calculate_end_date) {
+                $this->calculateAutoEndDate();
              }
              
              $this->phaseModalOpen = false;
@@ -285,6 +319,10 @@ new
         {
             unset($this->phases[$index]);
             $this->phases = array_values($this->phases);
+            
+            if ($this->auto_calculate_end_date) {
+                $this->calculateAutoEndDate();
+            }
         }
 
         public function addModule(int $phaseIndex): void
@@ -299,6 +337,10 @@ new
             unset($this->phases[$phaseIndex]['modules'][$moduleIndex]);
             $this->phases[$phaseIndex]['modules'] = array_values($this->phases[$phaseIndex]['modules']);
             $this->calculatePhaseDates($phaseIndex); // Recalculate on remove
+            
+            if ($this->auto_calculate_end_date) {
+                $this->calculateAutoEndDate();
+            }
         }
 
         // ─────────────────────────────────────────────────────────────────────────
@@ -409,6 +451,10 @@ new
 
             // [OBSERVER PATTERN] Propagate Dates
             $this->calculatePhaseDates($phaseIdx);
+            
+            if ($this->auto_calculate_end_date) {
+                $this->calculateAutoEndDate();
+            }
 
             $this->moduleModalOpen = false;
         }
@@ -455,6 +501,7 @@ new
                 'timezone' => 'required|string',
                 'start_date' => 'nullable|date',
                 'target_end_date' => 'nullable|date|after_or_equal:start_date',
+                'auto_calculate_end_date' => 'boolean',
             ];
 
             // External user validation (only for new projects or if switch is toggled and not yet attached)
@@ -468,6 +515,9 @@ new
             }
 
             $validated = $this->validate($rules);
+            
+            // Add custom field persistence
+            $validated['custom_fields'] = ['auto_calculate_end_date' => $this->auto_calculate_end_date];
 
             try {
                 DB::transaction(function () use ($validated) {
@@ -730,6 +780,44 @@ new
                             @endif
                         </div>
 
+                        {{-- Dates --}}
+                        <div>
+                            <label class="block text-xs font-medium mb-1 opacity-60 text-skin-base">Başlangıç Tarihi</label>
+                            @if($isViewMode)
+                                <div class="text-sm font-medium text-skin-base">{{ $start_date ? \Carbon\Carbon::parse($start_date)->format('d.m.Y') : '-' }}</div>
+                            @else
+                                <input type="date" wire:model="start_date" class="input w-full">
+                            @endif
+                        </div>
+
+                        <div>
+                            <div class="flex items-center justify-between mb-1">
+                                <label class="block text-xs font-medium opacity-60 text-skin-base">Hedef Bitiş Tarihi</label>
+                                @if(!$isViewMode)
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-[10px] text-slate-400">Otomatik</span>
+                                        <input type="checkbox" wire:model.live="auto_calculate_end_date" class="toggle toggle-xs toggle-success" />
+                                    </div>
+                                @endif
+                            </div>
+                            
+                            @if($isViewMode)
+                                <div class="text-sm font-medium text-skin-base">{{ $target_end_date ? \Carbon\Carbon::parse($target_end_date)->format('d.m.Y') : '-' }}</div>
+                            @else
+                                <div class="relative">
+                                    <input type="date" wire:model="target_end_date" class="input w-full" @if($auto_calculate_end_date) readonly @endif>
+                                    @if($auto_calculate_end_date)
+                                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                            <x-mary-icon name="o-lock-closed" class="w-4 h-4 text-slate-400" />
+                                        </div>
+                                    @endif
+                                </div>
+                                @if($auto_calculate_end_date)
+                                    <p class="text-[10px] text-slate-400 mt-1">Fazlardan otomatik hesaplanıyor</p>
+                                @endif
+                            @endif
+                        </div>
+
                         {{-- Timezone (Hidden or single row if needed, but let's keep grid) --}}
                         <div>
                              <label class="block text-xs font-medium mb-1 opacity-60 text-skin-base">Zaman Dilimi</label>
@@ -852,23 +940,87 @@ new
             {{-- Right Column (4/12) --}}
             <div class="col-span-4 flex flex-col gap-6" wire:key="customer-preview-{{ $customer_id }}">
                 {{-- Customer Logo Card --}}
-                <div class="theme-card p-6 shadow-sm mb-6">
-                    <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-4">Müşteri</h3>
+                <div class="theme-card p-6 shadow-sm mb-6 sticky top-6">
+                    <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-4">Müşteri Özeti</h3>
 
                     @if($selectedCustomer)
-                        <div class="text-center">
-                            @if($selectedCustomer['logo_url'])
-                                <img src="{{ str_contains($selectedCustomer['logo_url'], '/storage/') ? $selectedCustomer['logo_url'] : asset('storage' . $selectedCustomer['logo_url']) }}" alt="{{ $selectedCustomer['name'] }}"
-                                    class="w-24 h-24 rounded-xl object-cover mx-auto mb-3 shadow-sm" />
+                        <div class="flex items-center gap-4 mb-4">
+                            @if($selectedCustomer["logo_url"])
+                                <img src="{{ str_contains($selectedCustomer["logo_url"], "/storage/") ? $selectedCustomer["logo_url"] : asset("storage" . $selectedCustomer["logo_url"]) }}" alt="{{ $selectedCustomer["name"] }}" class="w-12 h-12 rounded-lg object-cover shadow-sm bg-white" />
                             @else
-                                <div class="w-24 h-24 rounded-xl bg-slate-100 flex items-center justify-center mx-auto mb-3">
-                                    <x-mary-icon name="o-building-office" class="w-10 h-10 text-slate-400" />
+                                <div class="w-12 h-12 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0">
+                                    <x-mary-icon name="o-building-office" class="w-6 h-6 text-slate-400" />
                                 </div>
                             @endif
-                            <div class="font-semibold text-[var(--color-text-heading)]">{{ $selectedCustomer['name'] }}
+                            <div class="font-bold text-[var(--color-text-heading)]">{{ $selectedCustomer["name"] }}
                             </div>
                         </div>
-                    @else
+
+                        {{-- Deadline Logic --}}
+                        {{-- Phases Deadline Logic --}}
+                        @if(!empty($phases))
+                            @foreach($phases as $phase)
+                                @if(!empty($phase['end_date']))
+                                    @php
+                                        $pDeadline = \Carbon\Carbon::parse($phase['end_date'])->startOfDay();
+                                        $today = \Carbon\Carbon::now()->startOfDay();
+                                        $pDiff = $today->diffInDays($pDeadline, false);
+                                        
+                                        $pBusinessDays = $today->diffInDaysFiltered(function(\Carbon\Carbon $date) {
+                                            return !$date->isWeekend();
+                                        }, $pDeadline);
+
+                                        $pColorClass = 'text-green-600';
+                                        $pText = abs($pDiff) . ' Gün var (' . $pBusinessDays . ' İş Günü)';
+                                        
+                                        if ($pDiff < 0) {
+                                            $pColorClass = 'text-red-500';
+                                            $pText = abs($pDiff) . ' Gün geçti (' . $pBusinessDays . ' İş Günü)';
+                                        } elseif ($pDiff <= 7) {
+                                            $pColorClass = 'text-orange-500';
+                                            $pText = abs($pDiff) . ' Gün var (' . $pBusinessDays . ' İş Günü)';
+                                        }
+                                    @endphp
+                                    <div class="flex items-center justify-between text-xs py-1 border-t border-slate-50">
+                                        <span class="text-slate-500 font-medium">{{ $phase['name'] }}:</span>
+                                        <span class="{{ $pColorClass }}">{{ $pText }}</span>
+                                    </div>
+                                @endif
+                            @endforeach
+                        @endif
+
+                        {{-- Project Deadline Logic --}}
+                        @if($target_end_date)
+                            @php
+                                $deadline = \Carbon\Carbon::parse($target_end_date)->startOfDay();
+                                $today = \Carbon\Carbon::now()->startOfDay();
+                                $diff = $today->diffInDays($deadline, false);
+                                
+                                $businessDays = $today->diffInDaysFiltered(function(\Carbon\Carbon $date) {
+                                    return !$date->isWeekend();
+                                }, $deadline);
+
+                                $colorClass = 'text-green-600';
+                                $text = abs($diff) . ' Gün var (' . $businessDays . ' İş Günü)';
+                                
+                                if ($diff < 0) {
+                                    $colorClass = 'text-red-500';
+                                    $text = abs($diff) . ' Gün geçti (' . $businessDays . ' İş Günü)';
+                                } elseif ($diff <= 7) {
+                                    $colorClass = 'text-orange-500';
+                                    $text = abs($diff) . ' Gün var (' . $businessDays . ' İş Günü)';
+                                }
+                            @endphp
+                            <div class="flex items-center justify-between text-base font-bold py-2 border-t-2 border-slate-100 mt-2">
+                                <span class="text-slate-700">Proje Deadline:</span>
+                                <span class="{{ $colorClass }}">{{ $text }}</span>
+                            </div>
+                        @else
+                                <div class="flex items-center justify-between text-base font-bold py-2 border-t-2 border-slate-100 mt-2">
+                                <span class="text-slate-700">Proje Deadline:</span>
+                                <span class="text-slate-400">-</span>
+                            </div>
+                        @endif                    @else
                         <div class="text-center py-8">
                             <x-mary-icon name="o-building-office-2" class="w-12 h-12 mx-auto mb-2 text-slate-300" />
                             <p class="text-sm text-slate-500">Müşteri seçilmedi</p>

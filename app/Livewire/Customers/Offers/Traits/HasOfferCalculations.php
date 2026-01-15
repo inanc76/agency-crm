@@ -14,11 +14,7 @@ trait HasOfferCalculations
      *
      * @methods updatedValidDays(), updatedDiscountValue(), updatedDiscountType(), calculateTotals(), generateOfferNumber()
      */
-    public function updatedValidDays(): void
-    {
-        $days = (int) ($this->valid_days ?? 0);
-        $this->valid_until = Carbon::now()->addDays($days)->format('Y-m-d');
-    }
+
 
     public function updatedDiscountValue(): void
     {

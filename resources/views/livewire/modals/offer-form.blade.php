@@ -102,6 +102,7 @@ new class extends Component {
                 'discount_value' => $discount_value,
                 'vat_rate' => $vat_rate,
                 'valid_until' => $valid_until,
+                'created_at' => $created_at,
                 'sections' => $sections
             ])
 

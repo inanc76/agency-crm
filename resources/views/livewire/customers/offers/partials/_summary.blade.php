@@ -40,9 +40,14 @@ $valid_until (string), $items (array)
                 {{ $currency }}</span>
         </div>
 
+        <div class="flex justify-between">
+            <span class="opacity-60 text-[11px] uppercase tracking-wider">Hazırlanma Tarihi:</span>
+            <span class="font-medium text-[11px]">{{ \Carbon\Carbon::parse($created_at)->format('d.m.Y') }}</span>
+        </div>
         <div class="flex justify-between pt-2 border-t border-slate-200">
             <span class="opacity-60 text-[11px] uppercase tracking-wider">Geçerlilik Tarihi:</span>
-            <span class="font-medium text-[11px]">{{ \Carbon\Carbon::parse($valid_until)->format('d.m.Y') }}</span>
+            <span
+                class="font-medium text-[11px] @if(\Carbon\Carbon::parse($valid_until)->endOfDay()->isPast()) text-skin-danger @endif">{{ \Carbon\Carbon::parse($valid_until)->format('d.m.Y') }}</span>
         </div>
 
         <div class="flex justify-between pt-3 border-t-2 border-slate-300 text-base font-bold"

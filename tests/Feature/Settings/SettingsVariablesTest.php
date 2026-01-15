@@ -50,7 +50,7 @@ test('7. editing a category loads its data', function () {
 test('8. deleting a category removes it from DB', function () {
     $cat = ReferenceCategory::create(['name' => 'Delete', 'key' => 'DEL']);
     Volt::test('settings.variables')->call('deleteCategory', $cat->id);
-    expect(ReferenceCategory::count())->toBe(0);
+    expect(ReferenceCategory::find($cat->id))->toBeNull();
 });
 
 // B. Item Management (9-16)
@@ -89,7 +89,7 @@ test('15. deleting item removes it from DB', function () {
     ReferenceCategory::create(['name' => 'G', 'key' => 'GENDER']);
     $item = ReferenceItem::create(['category_key' => 'GENDER', 'key' => 'M', 'display_label' => 'Male']);
     Volt::test('settings.variables')->set('selectedCategoryKey', 'GENDER')->call('deleteItem', $item->id);
-    expect(ReferenceItem::count())->toBe(0);
+    expect(ReferenceItem::find($item->id))->toBeNull();
 });
 
 test('16. marking item as default works', function () {

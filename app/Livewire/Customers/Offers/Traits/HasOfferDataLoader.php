@@ -45,6 +45,8 @@ trait HasOfferDataLoader
 
     public $valid_until = null;
 
+    public $created_at = null;
+
     public $discount_value = 0;
 
     public $discount_type = 'AMOUNT'; // PERCENTAGE or AMOUNT
@@ -92,6 +94,7 @@ trait HasOfferDataLoader
 
         // Set default valid_until
         $this->valid_until = Carbon::now()->addDays($this->valid_days)->format('Y-m-d');
+        $this->created_at = Carbon::now()->format('Y-m-d H:i:s');
         $this->selectedYear = Carbon::now()->year;
 
         // If offer ID is provided, load data
@@ -223,6 +226,14 @@ trait HasOfferDataLoader
         $this->vat_rate = (float) $offer->vat_rate;
         $this->currency = $offer->currency;
         $this->valid_until = Carbon::parse($offer->valid_until)->format('Y-m-d');
+        $this->created_at = $offer->created_at;
+
+        // Calculate original valid_days
+        if ($this->created_at && $this->valid_until) {
+            $created = Carbon::parse($this->created_at)->startOfDay();
+            $validUntil = Carbon::parse($this->valid_until)->startOfDay();
+            $this->valid_days = (int) $created->diffInDays($validUntil);
+        }
 
         $this->vat_rate = (float) $offer->vat_rate;
         $this->currency = $offer->currency;
@@ -324,6 +335,13 @@ trait HasOfferDataLoader
      *
      * State Dependencies: $this->selectedYear, $this->customerServices
      */
+    public function updatedValidDays(): void
+    {
+        if ($this->created_at && is_numeric($this->valid_days)) {
+            $this->valid_until = Carbon::parse($this->created_at)->addDays((int) $this->valid_days)->format('Y-m-d');
+        }
+    }
+
     public function updatedSelectedYear(): void
     {
         $this->loadCustomerServices();
