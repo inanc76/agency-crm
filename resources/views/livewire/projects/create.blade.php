@@ -34,7 +34,9 @@ new
 
         public string $leader_id = '';
 
-        public string $status_id = '';
+        public ?string $status_id = null;
+
+        public ?string $type_id = null;
 
         public array $team_members = [];
 
@@ -44,6 +46,8 @@ new
         public ?string $start_date = null;
 
         public ?string $target_end_date = null;
+
+        public ?string $completed_at = null;
 
         // State
         public bool $isViewMode = false;
@@ -57,6 +61,8 @@ new
 
         public $statuses = [];
 
+        public $projectTypes = [];
+
         public ?array $selectedCustomer = null;
 
         // External User
@@ -68,23 +74,27 @@ new
 
         // Hierarchical Form - Phases & Modules
         public array $phases = [];
+
         public array $phaseStatuses = [];
+
         public array $moduleStatuses = []; // [NEW] Module Statuses
-        
+
         // Phase Modal State
         public bool $phaseModalOpen = false;
-        
+
         public array $phaseForm = [
             'name' => '',
             'description' => '',
-            'status_id' => ''
+            'status_id' => '',
         ];
-        
+
         public ?int $editingPhaseIndex = null;
 
         // [NEW] Module Modal State
         public bool $moduleModalOpen = false;
+
         public ?int $editingModulePhaseIndex = null;
+
         public ?int $editingModuleIndex = null; // null = create
 
         public array $moduleForm = [
@@ -94,10 +104,14 @@ new
             'start_date' => null,
             'end_date' => null,
             'assigned_users' => [], // ID list
+            'estimated_hours' => null,
+            'is_unlimited' => true,
         ];
 
         // Logic
         public bool $auto_calculate_end_date = true;
+
+        public bool $auto_calculate_start_date = true;
 
         public function mount(?string $project = null): void
         {
@@ -134,7 +148,7 @@ new
                 ->orderBy('sort_order')
                 ->get(['id', 'display_label', 'key'])
                 ->toArray();
-                
+
             $this->phaseStatuses = ReferenceItem::where('category_key', 'PHASE_STATUS')
                 ->where('is_active', true)
                 ->orderBy('sort_order')
@@ -145,6 +159,12 @@ new
                 ->where('is_active', true)
                 ->orderBy('sort_order')
                 ->get(['id', 'display_label', 'key', 'metadata'])
+                ->toArray();
+
+            $this->projectTypes = ReferenceItem::where('category_key', 'PROJECT_TYPE')
+                ->where('is_active', true)
+                ->orderBy('sort_order')
+                ->get(['id', 'display_label'])
                 ->toArray();
         }
 
@@ -158,10 +178,13 @@ new
                 $this->customer_id = $project->customer_id ?? '';
                 $this->leader_id = $project->leader_id ?? '';
                 $this->status_id = $project->status_id ?? '';
+                $this->type_id = $project->type_id ?? '';
                 $this->timezone = $project->timezone ?? 'Europe/Istanbul';
                 $this->start_date = $project->start_date?->format('Y-m-d');
                 $this->target_end_date = $project->target_end_date?->format('Y-m-d');
+                $this->completed_at = $project->completed_at?->toIso8601String();
                 $this->auto_calculate_end_date = $project->custom_fields['auto_calculate_end_date'] ?? true;
+                $this->auto_calculate_start_date = $project->custom_fields['auto_calculate_start_date'] ?? true;
 
                 if ($project->customer) {
                     $this->selectedCustomer = [
@@ -190,13 +213,27 @@ new
                                 'status_id' => $module->status_id,
                                 'start_date' => $module->start_date?->format('Y-m-d'),
                                 'end_date' => $module->end_date?->format('Y-m-d'),
+                                'estimated_hours' => $module->estimated_hours,
                                 'assigned_users' => $module->users->pluck('id')->toArray(),
                             ];
                         })->toArray(),
                     ];
                 })->toArray();
 
+                // Recalculate phase and project dates to ensure sync
+                foreach ($this->phases as $idx => $phase) {
+                    $this->calculatePhaseDates($idx);
+                }
+
                 $this->isViewMode = true;
+
+                // Sync auto calculations if enabled
+                if ($this->auto_calculate_start_date) {
+                    $this->calculateAutoStartDate();
+                }
+                if ($this->auto_calculate_end_date) {
+                    $this->calculateAutoEndDate();
+                }
             } catch (\Exception $e) {
                 $this->error('Proje Bulunamadı', 'İstenilen proje kaydı bulunamadı.');
                 $this->redirect('/dashboard/projects', navigate: true);
@@ -218,7 +255,32 @@ new
                 $this->selectedCustomer = null;
             }
         }
-        
+
+        public function updatedAutoCalculateStartDate(): void
+        {
+            if ($this->auto_calculate_start_date) {
+                $this->calculateAutoStartDate();
+            }
+        }
+
+        private function calculateAutoStartDate(): void
+        {
+            if (! $this->auto_calculate_start_date) {
+                return;
+            }
+
+            $minDate = null;
+            foreach ($this->phases as $phase) {
+                if (! empty($phase['start_date'])) {
+                    if ($minDate === null || $phase['start_date'] < $minDate) {
+                        $minDate = $phase['start_date'];
+                    }
+                }
+            }
+
+            $this->start_date = $minDate;
+        }
+
         public function updatedAutoCalculateEndDate(): void
         {
             if ($this->auto_calculate_end_date) {
@@ -228,20 +290,20 @@ new
 
         private function calculateAutoEndDate(): void
         {
-            if (empty($this->phases)) return;
-            
+            if (! $this->auto_calculate_end_date) {
+                return;
+            }
+
             $maxDate = null;
-            foreach($this->phases as $phase) {
-                if (!empty($phase['end_date'])) {
+            foreach ($this->phases as $phase) {
+                if (! empty($phase['end_date'])) {
                     if ($maxDate === null || $phase['end_date'] > $maxDate) {
                         $maxDate = $phase['end_date'];
                     }
                 }
             }
-            
-            if ($maxDate) {
-                $this->target_end_date = $maxDate;
-            }
+
+            $this->target_end_date = $maxDate;
         }
 
         // ─────────────────────────────────────────────────────────────────────────
@@ -252,38 +314,41 @@ new
         {
             $this->validate(['phaseForm.name' => 'required|string|max:255']);
 
-             $colors = ['#3b82f6', '#14b8a6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
-             
-             if ($this->editingPhaseIndex !== null) {
-                 // Update existing phase
-                 $this->phases[$this->editingPhaseIndex]['name'] = $this->phaseForm['name'];
-                 $this->phases[$this->editingPhaseIndex]['description'] = $this->phaseForm['description'];
-                 $this->phases[$this->editingPhaseIndex]['status_id'] = $this->phaseForm['status_id'] ?: null;
-                 
-                 $this->success('Faz Güncellendi', 'Faz bilgileri güncellendi.');
-             } else {
-                 // Create new phase
-                 $colorIndex = count($this->phases) % count($colors);
-                 
-                 $this->phases[] = [
-                     'id' => (string) Str::uuid(),
-                     'name' => $this->phaseForm['name'],
-                     'description' => $this->phaseForm['description'],
-                     'status_id' => $this->phaseForm['status_id'] ?: null,
-                     'start_date' => null,
-                     'end_date' => null,
-                     'color' => $colors[$colorIndex],
-                     'modules' => [],
-                 ];
-                 $this->success('Faz Eklendi', 'Yeni faz listeye eklendi.');
-             }
-             
-             // If manual update might change dates (though phases usually get dates from modules)
-             if ($this->auto_calculate_end_date) {
+            $colors = ['#3b82f6', '#14b8a6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+
+            if ($this->editingPhaseIndex !== null) {
+                // Update existing phase
+                $this->phases[$this->editingPhaseIndex]['name'] = $this->phaseForm['name'];
+                $this->phases[$this->editingPhaseIndex]['description'] = $this->phaseForm['description'];
+                $this->phases[$this->editingPhaseIndex]['status_id'] = $this->phaseForm['status_id'] ?: null;
+
+                $this->success('Faz Güncellendi', 'Faz bilgileri güncellendi.');
+            } else {
+                // Create new phase
+                $colorIndex = count($this->phases) % count($colors);
+
+                $this->phases[] = [
+                    'id' => (string) Str::uuid(),
+                    'name' => $this->phaseForm['name'],
+                    'description' => $this->phaseForm['description'],
+                    'status_id' => $this->phaseForm['status_id'] ?: null,
+                    'start_date' => null,
+                    'end_date' => null,
+                    'color' => $colors[$colorIndex],
+                    'modules' => [],
+                ];
+                $this->success('Faz Eklendi', 'Yeni faz listeye eklendi.');
+            }
+
+            // If manual update might change dates (though phases usually get dates from modules)
+            if ($this->auto_calculate_end_date) {
                 $this->calculateAutoEndDate();
-             }
-             
-             $this->phaseModalOpen = false;
+            }
+            if ($this->auto_calculate_start_date) {
+                $this->calculateAutoStartDate();
+            }
+
+            $this->phaseModalOpen = false;
         }
 
         public function openPhaseModal(?int $index = null): void
@@ -296,22 +361,23 @@ new
                 $this->phaseForm = [
                     'name' => $phase['name'],
                     'description' => $phase['description'] ?? '',
-                    'status_id' => $phase['status_id'] ?? ''
+                    'status_id' => $phase['status_id'] ?? '',
                 ];
             } else {
                 // Create Mode
                 if (count($this->phases) >= 20) {
                     $this->error('Sınır Aşıldı', 'Bir projeye en fazla 20 faz eklenebilir.');
+
                     return;
                 }
-                
+
                 $this->phaseForm = [
                     'name' => '',
                     'description' => '',
-                    'status_id' => $this->phaseStatuses[0]['id'] ?? '' 
+                    'status_id' => $this->phaseStatuses[0]['id'] ?? '',
                 ];
             }
-            
+
             $this->phaseModalOpen = true;
         }
 
@@ -319,9 +385,12 @@ new
         {
             unset($this->phases[$index]);
             $this->phases = array_values($this->phases);
-            
+
             if ($this->auto_calculate_end_date) {
                 $this->calculateAutoEndDate();
+            }
+            if ($this->auto_calculate_start_date) {
+                $this->calculateAutoStartDate();
             }
         }
 
@@ -337,9 +406,12 @@ new
             unset($this->phases[$phaseIndex]['modules'][$moduleIndex]);
             $this->phases[$phaseIndex]['modules'] = array_values($this->phases[$phaseIndex]['modules']);
             $this->calculatePhaseDates($phaseIndex); // Recalculate on remove
-            
+
             if ($this->auto_calculate_end_date) {
                 $this->calculateAutoEndDate();
+            }
+            if ($this->auto_calculate_start_date) {
+                $this->calculateAutoStartDate();
             }
         }
 
@@ -355,11 +427,11 @@ new
             if ($moduleIndex !== null) {
                 // Edit Mode
                 $module = $this->phases[$phaseIndex]['modules'][$moduleIndex];
-                
+
                 // Fallback for legacy data without status
                 $defaultStatus = $this->moduleStatuses[0]['id'] ?? '';
                 $currentStatus = $module['status_id'] ?? '';
-                if(empty($currentStatus)) {
+                if (empty($currentStatus)) {
                     $currentStatus = $defaultStatus;
                 }
 
@@ -370,8 +442,10 @@ new
                     'start_date' => $module['start_date'] ?? null,
                     'end_date' => $module['end_date'] ?? null,
                     'assigned_users' => $module['assigned_users'] ?? [],
+                    'estimated_hours' => $module['estimated_hours'] ?? null,
+                    'is_unlimited' => ($module['estimated_hours'] ?? null) === null,
                 ];
-                
+
                 // Dispatch event to update date picker UI
                 $this->dispatch('update-date-range', key: 'module_modal', start: $module['start_date'] ?? null, end: $module['end_date'] ?? null);
             } else {
@@ -379,7 +453,7 @@ new
                 // Default ACL: All current project participants are CHECKED
                 // We use the full list of participants stored in Team Members + Leader
                 $projectParticipants = $this->team_members;
-                if ($this->leader_id && !in_array($this->leader_id, $projectParticipants)) {
+                if ($this->leader_id && ! in_array($this->leader_id, $projectParticipants)) {
                     $projectParticipants[] = $this->leader_id;
                 }
 
@@ -390,8 +464,10 @@ new
                     'start_date' => null,
                     'end_date' => null,
                     'assigned_users' => $projectParticipants, // [CRITICAL] Default checked
+                    'estimated_hours' => null,
+                    'is_unlimited' => true,
                 ];
-                
+
                 // Clear date picker UI
                 $this->dispatch('update-date-range', key: 'module_modal', start: null, end: null);
             }
@@ -404,15 +480,15 @@ new
             $this->validate([
                 'moduleForm.name' => 'required|string|max:255',
                 'moduleForm.status_id' => 'required',
-                // Date validation logic can be added if strict rules needed
+                'moduleForm.estimated_hours' => 'nullable|numeric|min:0|max:200',
             ]);
 
             $phaseIdx = $this->editingModulePhaseIndex;
-            
+
             // Deep Clone / Explicit Array Retrieval to ensure Livewire Reactivity
             $phase = $this->phases[$phaseIdx];
             $modules = $phase['modules'] ?? [];
-            
+
             $moduleData = [
                 'name' => $this->moduleForm['name'],
                 'description' => $this->moduleForm['description'],
@@ -420,29 +496,36 @@ new
                 'start_date' => $this->moduleForm['start_date'],
                 'end_date' => $this->moduleForm['end_date'],
                 'assigned_users' => $this->moduleForm['assigned_users'],
+                'estimated_hours' => $this->moduleForm['is_unlimited'] ? null : $this->moduleForm['estimated_hours'],
             ];
 
             // Preserve ID if editing
             if ($this->editingModuleIndex !== null) {
-                 $moduleData['id'] = $modules[$this->editingModuleIndex]['id'] ?? (string) Str::uuid();
-                 $modules[$this->editingModuleIndex] = $moduleData;
-                 $this->success('Modül Güncellendi');
+                $moduleData['id'] = $modules[$this->editingModuleIndex]['id'] ?? (string) Str::uuid();
+                $modules[$this->editingModuleIndex] = $moduleData;
+                $this->success('Modül Güncellendi');
             } else {
-                 $moduleData['id'] = (string) Str::uuid();
-                 $modules[] = $moduleData;
-                 $this->success('Modül Eklendi');
+                $moduleData['id'] = (string) Str::uuid();
+                $modules[] = $moduleData;
+                $this->success('Modül Eklendi');
             }
-            
+
             // Re-assign explicitly to trigger update
             // [SORTING] Sort modules by Start Date (Ascending), Null dates last
             usort($modules, function ($a, $b) {
                 $dateA = $a['start_date'] ?? null;
                 $dateB = $b['start_date'] ?? null;
 
-                if ($dateA === $dateB) return 0;
-                if ($dateA === null) return 1; // Null goes last
-                if ($dateB === null) return -1; // Null goes last
-                
+                if ($dateA === $dateB) {
+                    return 0;
+                }
+                if ($dateA === null) {
+                    return 1;
+                } // Null goes last
+                if ($dateB === null) {
+                    return -1;
+                } // Null goes last
+
                 return $dateA <=> $dateB;
             });
 
@@ -451,9 +534,12 @@ new
 
             // [OBSERVER PATTERN] Propagate Dates
             $this->calculatePhaseDates($phaseIdx);
-            
+
             if ($this->auto_calculate_end_date) {
                 $this->calculateAutoEndDate();
+            }
+            if ($this->auto_calculate_start_date) {
+                $this->calculateAutoStartDate();
             }
 
             $this->moduleModalOpen = false;
@@ -462,22 +548,28 @@ new
         private function calculatePhaseDates(int $phaseIndex): void
         {
             $modules = $this->phases[$phaseIndex]['modules'] ?? [];
-            if (empty($modules)) return;
+            if (empty($modules)) {
+                return;
+            }
 
             $startDates = [];
             $endDates = [];
 
             foreach ($modules as $m) {
-                if (!empty($m['start_date'])) $startDates[] = $m['start_date'];
-                if (!empty($m['end_date'])) $endDates[] = $m['end_date'];
+                if (! empty($m['start_date'])) {
+                    $startDates[] = $m['start_date'];
+                }
+                if (! empty($m['end_date'])) {
+                    $endDates[] = $m['end_date'];
+                }
             }
 
-            if (!empty($startDates)) {
+            if (! empty($startDates)) {
                 $this->phases[$phaseIndex]['start_date'] = min($startDates);
             }
-            
-            if (!empty($endDates)) {
-                 $this->phases[$phaseIndex]['end_date'] = max($endDates);
+
+            if (! empty($endDates)) {
+                $this->phases[$phaseIndex]['end_date'] = max($endDates);
             }
         }
 
@@ -498,10 +590,12 @@ new
                 'customer_id' => 'required|exists:customers,id',
                 'leader_id' => 'nullable|exists:users,id',
                 'status_id' => 'required|exists:reference_items,id',
+                'type_id' => 'required|exists:reference_items,id',
                 'timezone' => 'required|string',
-                'start_date' => 'nullable|date',
-                'target_end_date' => 'nullable|date|after_or_equal:start_date',
+                'start_date' => 'required|date',
+                'target_end_date' => 'required|date|after_or_equal:start_date',
                 'auto_calculate_end_date' => 'boolean',
+                'auto_calculate_start_date' => 'boolean',
             ];
 
             // External user validation (only for new projects or if switch is toggled and not yet attached)
@@ -515,9 +609,13 @@ new
             }
 
             $validated = $this->validate($rules);
-            
+            $validated['type_id'] = $this->type_id ?: null;
+
             // Add custom field persistence
-            $validated['custom_fields'] = ['auto_calculate_end_date' => $this->auto_calculate_end_date];
+            $validated['custom_fields'] = [
+                'auto_calculate_end_date' => $this->auto_calculate_end_date,
+                'auto_calculate_start_date' => $this->auto_calculate_start_date,
+            ];
 
             try {
                 DB::transaction(function () use ($validated) {
@@ -607,10 +705,11 @@ new
                                     'status_id' => $moduleData['status_id'] ?? null,
                                     'start_date' => $moduleData['start_date'] ?? null,
                                     'end_date' => $moduleData['end_date'] ?? null,
+                                    'estimated_hours' => $moduleData['estimated_hours'] ?? null,
                                     'order' => $moduleIndex + 1,
                                 ]
                             );
-                            
+
                             // Sync Assigned Users (ACL)
                             if (isset($moduleData['assigned_users']) && is_array($moduleData['assigned_users'])) {
                                 $module->users()->sync($moduleData['assigned_users']);
@@ -780,19 +879,70 @@ new
                             @endif
                         </div>
 
+                        {{-- Timezone --}}
+                        <div>
+                             <label class="block text-xs font-medium mb-1 opacity-60 text-skin-base">Zaman Dilimi *</label>
+                             @if($isViewMode)
+                                <div class="text-sm font-medium text-skin-base">{{ $timezone }}</div>
+                             @else
+                                <select wire:model="timezone" class="select w-full">
+                                    <option value="Europe/Istanbul">İstanbul (UTC+3)</option>
+                                    <option value="UTC">UTC</option>
+                                </select>
+                                @error('timezone') <span class="text-[var(--color-danger)] text-xs">{{ $message }}</span> @enderror
+                             @endif
+                        </div>
+
+                        {{-- Project Type --}}
+                        <div>
+                             <label class="block text-xs font-medium mb-1 opacity-60 text-skin-base">Proje Tipi *</label>
+                             @if($isViewMode)
+                                @php $typeLabel = collect($projectTypes)->firstWhere('id', $type_id)['display_label'] ?? '-'; @endphp
+                                <div class="text-sm font-medium text-skin-base">{{ $typeLabel }}</div>
+                             @else
+                                <select wire:model="type_id" class="select w-full">
+                                    <option value="">Proje Tipi Seçin</option>
+                                    @foreach($projectTypes as $type)
+                                        <option value="{{ $type['id'] }}">{{ $type['display_label'] }}</option>
+                                    @endforeach
+                                </select>
+                                @error('type_id') <span class="text-[var(--color-danger)] text-xs">{{ $message }}</span> @enderror
+                             @endif
+                        </div>
+
                         {{-- Dates --}}
                         <div>
-                            <label class="block text-xs font-medium mb-1 opacity-60 text-skin-base">Başlangıç Tarihi</label>
+                            <div class="flex items-center justify-between mb-1">
+                                <label class="block text-xs font-medium opacity-60 text-skin-base">Başlangıç Tarihi *</label>
+                                @if(!$isViewMode)
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-[10px] text-slate-400">Otomatik</span>
+                                        <input type="checkbox" wire:model.live="auto_calculate_start_date" class="toggle toggle-xs toggle-success" />
+                                    </div>
+                                @endif
+                            </div>
+                            
                             @if($isViewMode)
                                 <div class="text-sm font-medium text-skin-base">{{ $start_date ? \Carbon\Carbon::parse($start_date)->format('d.m.Y') : '-' }}</div>
                             @else
-                                <input type="date" wire:model="start_date" class="input w-full">
+                                <div class="relative">
+                                    <input type="date" wire:model="start_date" class="input w-full" @if($auto_calculate_start_date) readonly @endif>
+                                    @if($auto_calculate_start_date)
+                                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                            <x-mary-icon name="o-lock-closed" class="w-4 h-4 text-slate-400" />
+                                        </div>
+                                    @endif
+                                </div>
+                                @if($auto_calculate_start_date)
+                                    <p class="text-[10px] text-slate-400 mt-1">Fazlardan otomatik hesaplanıyor</p>
+                                @endif
+                                @error('start_date') <span class="text-[var(--color-danger)] text-xs">{{ $message }}</span> @enderror
                             @endif
                         </div>
 
                         <div>
                             <div class="flex items-center justify-between mb-1">
-                                <label class="block text-xs font-medium opacity-60 text-skin-base">Hedef Bitiş Tarihi</label>
+                                <label class="block text-xs font-medium opacity-60 text-skin-base">Hedef Bitiş Tarihi *</label>
                                 @if(!$isViewMode)
                                     <div class="flex items-center gap-2">
                                         <span class="text-[10px] text-slate-400">Otomatik</span>
@@ -815,21 +965,11 @@ new
                                 @if($auto_calculate_end_date)
                                     <p class="text-[10px] text-slate-400 mt-1">Fazlardan otomatik hesaplanıyor</p>
                                 @endif
+                                @error('target_end_date') <span class="text-[var(--color-danger)] text-xs">{{ $message }}</span> @enderror
                             @endif
                         </div>
 
-                        {{-- Timezone (Hidden or single row if needed, but let's keep grid) --}}
-                        <div>
-                             <label class="block text-xs font-medium mb-1 opacity-60 text-skin-base">Zaman Dilimi</label>
-                             @if($isViewMode)
-                                <div class="text-sm font-medium text-skin-base">{{ $timezone }}</div>
-                             @else
-                                <select wire:model="timezone" class="select w-full">
-                                    <option value="Europe/Istanbul">İstanbul (UTC+3)</option>
-                                    <option value="UTC">UTC</option>
-                                </select>
-                             @endif
-                        </div>
+
 
                         {{-- Description --}}
                         <div class="col-span-2">
@@ -981,43 +1121,85 @@ new
                                             $pText = abs($pDiff) . ' Gün var (' . $pBusinessDays . ' İş Günü)';
                                         }
                                     @endphp
-                                    <div class="flex items-center justify-between text-xs py-1 border-t border-slate-50">
-                                        <span class="text-slate-500 font-medium">{{ $phase['name'] }}:</span>
-                                        <span class="{{ $pColorClass }}">{{ $pText }}</span>
+                                    <div class="flex items-center justify-between text-xs py-1.5 border-t border-slate-50">
+                                        <div class="flex items-center gap-2 overflow-hidden mr-2">
+                                            @php
+                                                $words = explode(' ', $phase['name']);
+                                                $initials = mb_substr($words[0] ?? '', 0, 1);
+                                                if (count($words) > 1) {
+                                                    $initials .= mb_substr($words[1] ?? '', 0, 1);
+                                                }
+                                                $initials = mb_strtoupper($initials);
+                                            @endphp
+                                            <div class="w-5 h-5 rounded flex items-center justify-center font-bold text-white text-[9px] flex-shrink-0"
+                                                 style="background-color: {{ $phase['color'] ?? 'var(--primary-color)' }};">
+                                                {{ $initials }}
+                                            </div>
+                                            <span class="text-slate-500 font-medium truncate">{{ $phase['name'] }}:</span>
+                                        </div>
+                                        <span class="{{ $pColorClass }} whitespace-nowrap">{{ $pText }}</span>
                                     </div>
                                 @endif
                             @endforeach
                         @endif
 
                         {{-- Project Deadline Logic --}}
+                        {{-- Project Deadline Logic --}}
                         @if($target_end_date)
                             @php
                                 $deadline = \Carbon\Carbon::parse($target_end_date)->startOfDay();
-                                $today = \Carbon\Carbon::now()->startOfDay();
-                                $diff = $today->diffInDays($deadline, false);
+                                $isFrozen = !empty($completed_at);
+                                $referenceDate = $isFrozen ? \Carbon\Carbon::parse($completed_at)->startOfDay() : \Carbon\Carbon::now()->startOfDay();
                                 
-                                $businessDays = $today->diffInDaysFiltered(function(\Carbon\Carbon $date) {
+                                $diff = $referenceDate->diffInDays($deadline, false);
+                                
+                                $businessDays = $referenceDate->diffInDaysFiltered(function(\Carbon\Carbon $date) {
                                     return !$date->isWeekend();
                                 }, $deadline);
 
+                                // Default: Active & Future
                                 $colorClass = 'text-green-600';
                                 $text = abs($diff) . ' Gün var (' . $businessDays . ' İş Günü)';
                                 
-                                if ($diff < 0) {
-                                    $colorClass = 'text-red-500';
-                                    $text = abs($diff) . ' Gün geçti (' . $businessDays . ' İş Günü)';
-                                } elseif ($diff <= 7) {
-                                    $colorClass = 'text-orange-500';
-                                    $text = abs($diff) . ' Gün var (' . $businessDays . ' İş Günü)';
+                                if ($isFrozen) {
+                                    if ($diff >= 0) {
+                                        $text = abs($diff) . ' Gün Erken Bitti (' . $businessDays . ' İş Günü)';
+                                        $colorClass = 'text-green-600';
+                                    } else {
+                                        $text = abs($diff) . ' Gün Gecikmeli Bitti (' . $businessDays . ' İş Günü)';
+                                        $colorClass = 'text-red-500';
+                                    }
+                                } else {
+                                    if ($diff < 0) {
+                                        $colorClass = 'text-red-500';
+                                        $text = abs($diff) . ' Gün geçti (' . $businessDays . ' İş Günü)';
+                                    } elseif ($diff <= 7) {
+                                        $colorClass = 'text-orange-500';
+                                        $text = abs($diff) . ' Gün var (' . $businessDays . ' İş Günü)';
+                                    }
                                 }
                             @endphp
                             <div class="flex items-center justify-between text-base font-bold py-2 border-t-2 border-slate-100 mt-2">
-                                <span class="text-slate-700">Proje Deadline:</span>
+                                <span class="text-slate-700">Proje Bitiş:</span>
                                 <span class="{{ $colorClass }}">{{ $text }}</span>
+                            </div>
+                            
+                            @php
+                                $totalAssignedHours = 0;
+                                foreach($phases as $p) {
+                                    foreach($p['modules'] ?? [] as $m) {
+                                        $totalAssignedHours += (int)($m['estimated_hours'] ?? 0);
+                                    }
+                                }
+                            @endphp
+                            
+                            <div class="flex items-center justify-between text-base font-bold py-2 border-t-2 border-slate-100 mt-2">
+                                <span class="text-slate-700">Atanan Saatler:</span>
+                                <span class="text-green-600">{{ $totalAssignedHours > 0 ? $totalAssignedHours . ' Saat' : '-' }}</span>
                             </div>
                         @else
                                 <div class="flex items-center justify-between text-base font-bold py-2 border-t-2 border-slate-100 mt-2">
-                                <span class="text-slate-700">Proje Deadline:</span>
+                                <span class="text-slate-700">Proje Bitiş:</span>
                                 <span class="text-slate-400">-</span>
                             </div>
                         @endif                    @else
@@ -1104,6 +1286,30 @@ new
                     endWireModel="moduleForm.end_date"
                     eventKey="module_modal"
                 />
+            </div>
+
+            {{-- Estimated Hours --}}
+            <div class="border-t border-slate-100 pt-3 mt-1">
+                <div class="flex items-center justify-between mb-2">
+                    <label class="block text-sm font-medium">Atanan Çalışma Saati</label>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs text-slate-500">Sınırsız</span>
+                        <input type="checkbox" wire:model.live="moduleForm.is_unlimited" class="toggle toggle-sm toggle-primary" />
+                    </div>
+                </div>
+
+                @if(!$moduleForm['is_unlimited'])
+                    <div class="flex items-center gap-2 animate-in slide-in-from-left duration-200">
+                        <div class="flex-1">
+                            <input type="number" wire:model="moduleForm.estimated_hours" 
+                                   placeholder="Örn: 20" 
+                                   min="0" max="200"
+                                   class="input w-full bg-white border-slate-300 select-sm h-10" />
+                        </div>
+                        <span class="text-sm font-medium text-slate-500">Saat</span>
+                    </div>
+                    @error('moduleForm.estimated_hours') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
+                @endif
             </div>
 
             {{-- ACL: Participants --}}

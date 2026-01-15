@@ -53,6 +53,7 @@ class ProjectModule extends Model
         'end_date',
         'order',
         'status_id',
+        'estimated_hours',
         'custom_fields',
     ];
 
@@ -62,6 +63,7 @@ class ProjectModule extends Model
             'start_date' => 'date',
             'end_date' => 'date',
             'order' => 'integer',
+            'estimated_hours' => 'integer',
             'custom_fields' => AsArrayObject::class,
         ];
     }

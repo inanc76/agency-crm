@@ -99,6 +99,15 @@ Volt::route('dashboard/projects/{project}', 'projects.create')
     ->middleware(['auth', 'verified'])
     ->name('projects.edit');
 
+// Görev Yönetimi
+Volt::route('dashboard/projects/tasks/create', 'projects.tasks.create')
+    ->middleware(['auth', 'verified'])
+    ->name('projects.tasks.create');
+
+Volt::route('dashboard/projects/tasks/{task}', 'projects.tasks.create')
+    ->middleware(['auth', 'verified'])
+    ->name('projects.tasks.edit');
+
 // Ayarlar
 // Ayarlar
 Volt::route('dashboard/settings', 'settings.index')

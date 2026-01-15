@@ -57,8 +57,10 @@ class Project extends Model
         'description',
         'timezone',
         'status_id',
+        'type_id',
         'start_date',
         'target_end_date',
+        'completed_at',
         'custom_fields',
     ];
 
@@ -68,6 +70,7 @@ class Project extends Model
             'custom_fields' => AsArrayObject::class,
             'start_date' => 'date',
             'target_end_date' => 'date',
+            'completed_at' => 'datetime',
         ];
     }
 
@@ -86,6 +89,25 @@ class Project extends Model
             // Varsayılan durum ata
             if (empty($project->status_id)) {
                 $project->status_id = self::getDefaultStatusId();
+            }
+        });
+
+        static::updating(function (Project $project) {
+            if ($project->isDirty('status_id')) {
+                // Status key'ini bul
+                $newStatus = ReferenceItem::find($project->status_id);
+
+                if ($newStatus) {
+                    if (in_array($newStatus->key, ['project_completed', 'project_cancelled'])) {
+                        // Eğer zaten dolu değilse doldur (ilk kez tamamlanıyor/iptal ediliyor)
+                        // Veya her statü değişiminde güncellensin istiyorsak direkt ata. Genelde ilk bitiş tarihi esastır ama
+                        // kullanıcı "tekrar aktif -> tekrar tamamlandı" yaparsa son tarih geçerli olmalı.
+                        $project->completed_at = now();
+                    } elseif ($newStatus->key === 'project_active') {
+                        // Aktife dönerse sayacı tekrar başlat (null yap)
+                        $project->completed_at = null;
+                    }
+                }
             }
         });
     }
@@ -138,6 +160,11 @@ class Project extends Model
     public function status(): BelongsTo
     {
         return $this->belongsTo(ReferenceItem::class, 'status_id');
+    }
+
+    public function type(): BelongsTo
+    {
+        return $this->belongsTo(ReferenceItem::class, 'type_id');
     }
 
     public function phases(): HasMany

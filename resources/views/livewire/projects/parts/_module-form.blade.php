@@ -58,9 +58,17 @@ Props: $phaseIndex, $moduleIndex, $module, $isViewMode
                 {{ \Carbon\Carbon::parse($module['end_date'])->locale('tr')->translatedFormat('d F') }}
             </span>
         @else
-            <span class="text-xs text-slate-300 italic flex items-center gap-1">
+            <span class="text-xs text-slate-300 italic flex items-center gap-1 px-2">
                 <x-mary-icon name="o-calendar" class="w-3 h-3" />
                 Tarih Yok
+            </span>
+        @endif
+
+        @if(!empty($module['estimated_hours']))
+            <span
+                class="text-xs text-blue-600 font-medium flex items-center gap-1 bg-blue-50 px-2 py-0.5 rounded border border-blue-100 shadow-sm whitespace-nowrap">
+                <x-mary-icon name="o-clock" class="w-3 h-3" />
+                {{ $module['estimated_hours'] }} Saat
             </span>
         @endif
     </div>

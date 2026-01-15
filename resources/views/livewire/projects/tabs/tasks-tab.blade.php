@@ -3,15 +3,16 @@
  * ✅ TASKS-TAB COMPONENT
  * ---------------------------------------------------------
  * MİMARİ: Volt Component (Functional API)
- * 
+ *
  * Tüm projelerdeki işlerin merkezi listesi.
  * ---------------------------------------------------------
  */
 
-use Livewire\Volt\Component;
-use function Livewire\Volt\{state, computed};
 use App\Models\ProjectTask;
-use App\Models\ProjectModule;
+use Livewire\Volt\Component;
+
+use function Livewire\Volt\computed;
+use function Livewire\Volt\state;
 
 state([
     'search' => '',
@@ -21,8 +22,8 @@ state([
 $tasks = computed(function () {
     return ProjectTask::query()
         ->with(['module.phase.project', 'users'])
-        ->when($this->search, fn($q) => $q->where('name', 'like', "%{$this->search}%"))
-        ->when($this->priorityFilter, fn($q) => $q->where('priority', $this->priorityFilter))
+        ->when($this->search, fn ($q) => $q->where('name', 'like', "%{$this->search}%"))
+        ->when($this->priorityFilter, fn ($q) => $q->where('priority', $this->priorityFilter))
         ->orderByDesc('created_at')
         ->limit(50)
         ->get();
@@ -64,6 +65,12 @@ $resetFilters = function () {
             <button wire:click="resetFilters" class="px-3 py-2 text-sm text-slate-600 hover:text-slate-800">
                 <x-mary-icon name="o-x-mark" class="w-5 h-5" />
             </button>
+
+            {{-- New Task Button --}}
+            <a href="{{ route('projects.tasks.create') }}" class="theme-btn-save px-4 py-2 flex items-center gap-2">
+                <x-mary-icon name="o-plus" class="w-5 h-5" />
+                <span>Yeni Görev</span>
+            </a>
         </div>
     </div>
 
