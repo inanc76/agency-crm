@@ -20,8 +20,8 @@ new class extends Component {
     @include('livewire.customers.offers.partials._tabs', ['isViewMode' => $isViewMode, 'activeTab' => $activeTab])
 
     <div class="grid grid-cols-12 gap-6">
-        {{-- Left Column (8/12) --}}
-        <div class="col-span-8">
+        {{-- Left Column (8/12 for info tab, 12/12 for notes tab) --}}
+        <div class="{{ $activeTab === 'notes' ? 'col-span-12' : 'col-span-8' }}">
             @if($activeTab === 'info')
                 <div class="space-y-6">
                     {{-- Validation Errors Summary --}}
@@ -79,10 +79,17 @@ new class extends Component {
             @endif
 
             @if($activeTab === 'notes')
-                <div class="theme-card p-6 shadow-sm text-center text-slate-500 py-12">
-                    <x-mary-icon name="o-document-text" class="w-12 h-12 mx-auto mb-3 opacity-20" />
-                    <div class="font-medium">Henüz not bulunmuyor</div>
-                </div>
+                @if($offerId)
+                    @livewire('shared.notes-tab', [
+                        'entityType' => 'OFFER',
+                        'entityId' => $offerId
+                    ], key('notes-tab-' . $offerId))
+                @else
+                    <div class="theme-card p-6 shadow-sm text-center text-slate-500 py-12">
+                        <x-mary-icon name="o-document-text" class="w-12 h-12 mx-auto mb-3 opacity-20" />
+                        <div class="font-medium">Teklifi kaydedin, ardından not ekleyebilirsiniz</div>
+                    </div>
+                @endif
             @endif
 
             @if($activeTab === 'downloads')
@@ -93,20 +100,21 @@ new class extends Component {
             @endif
         </div>
 
-        {{-- Right Column (4/12) - Summary --}}
-        <div class="col-span-4">
-            @include('livewire.customers.offers.partials._summary', [
-                'isViewMode' => $isViewMode,
-                'currency' => $currency,
-                'discount_type' => $discount_type,
-                'discount_value' => $discount_value,
-                'vat_rate' => $vat_rate,
-                'valid_until' => $valid_until,
-                'created_at' => $created_at,
-                'sections' => $sections
-            ])
-
-        </div>
+        {{-- Right Column (4/12) - Summary (hidden on notes tab) --}}
+        @if($activeTab !== 'notes')
+            <div class="col-span-4">
+                @include('livewire.customers.offers.partials._summary', [
+                    'isViewMode' => $isViewMode,
+                    'currency' => $currency,
+                    'discount_type' => $discount_type,
+                    'discount_value' => $discount_value,
+                    'vat_rate' => $vat_rate,
+                    'valid_until' => $valid_until,
+                    'created_at' => $created_at,
+                    'sections' => $sections
+                ])
+            </div>
+        @endif
     </div>
 
     @include('livewire.customers.offers.partials._modal-service-item', [

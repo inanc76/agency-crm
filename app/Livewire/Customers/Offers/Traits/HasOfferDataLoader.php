@@ -58,6 +58,11 @@ trait HasOfferDataLoader
     // State Management
     public $isViewMode = false;
 
+    // Download Settings
+    public $is_pdf_downloadable = true;
+    public $is_attachments_downloadable = true;
+    public $is_downloadable_after_expiry = false;
+
     public $offerId = null;
 
     public string $activeTab = 'info';
@@ -227,6 +232,11 @@ trait HasOfferDataLoader
         $this->currency = $offer->currency;
         $this->valid_until = Carbon::parse($offer->valid_until)->format('Y-m-d');
         $this->created_at = $offer->created_at;
+
+        // Load Download Settings
+        $this->is_pdf_downloadable = (bool) $offer->is_pdf_downloadable;
+        $this->is_attachments_downloadable = (bool) $offer->is_attachments_downloadable;
+        $this->is_downloadable_after_expiry = (bool) $offer->is_downloadable_after_expiry;
 
         // Calculate original valid_days
         if ($this->created_at && $this->valid_until) {

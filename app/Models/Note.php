@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Model;
  * ═══════════════════════════════════════════════════════════════════════════
  * 
  * @package App\Models
- * @version Constitution V10
+ * @version Constitution V11
  * 
  * 🔑 UUID: ✅ ACTIVE (HasUuids) | PK: string | Incrementing: false
  * 
@@ -24,9 +24,12 @@ use Illuminate\Database\Eloquent\Model;
  * @property \Carbon\Carbon $updated_at
  * 
  * @property-read User $author       BelongsTo: Notu yazan kullanıcı
+ * @property-read \Illuminate\Database\Eloquent\Collection<User> $visibleTo BelongsToMany: Notu görebilecek kullanıcılar
  * 
  * Note, POLYMORPHIC yapıdadır. Herhangi bir varlığa (Customer, Offer, vb.)
  * not eklenebilir. entity_type + entity_id ile ilişkilendirilir.
+ * 
+ * Görünürlük: note_user pivot tablosu ile hangi kullanıcıların görebileceği kontrol edilir.
  * 
  * ═══════════════════════════════════════════════════════════════════════════
  */
@@ -45,8 +48,33 @@ class Note extends Model
         'entity_id'
     ];
 
+    /**
+     * Notu yazan kullanıcı
+     */
     public function author()
     {
         return $this->belongsTo(User::class, 'author_id');
+    }
+
+    /**
+     * Bu notu görebilecek kullanıcılar (Many-to-Many)
+     */
+    public function visibleTo()
+    {
+        return $this->belongsToMany(User::class, 'note_user', 'note_id', 'user_id');
+    }
+
+    /**
+     * Kullanıcının bu notu görme yetkisi var mı?
+     */
+    public function canBeSeenBy(User $user): bool
+    {
+        // Yazar her zaman görebilir
+        if ($this->author_id === $user->id) {
+            return true;
+        }
+
+        // Görünürlük listesinde var mı?
+        return $this->visibleTo()->where('user_id', $user->id)->exists();
     }
 }

@@ -259,10 +259,10 @@ new
         @include('livewire.customers.parts._create-header')
 
 
-        {{-- Main Layout: 8/12 Left, 4/12 Right --}}
-        <div class="grid grid-cols-12 gap-6">
-            {{-- Left Column (8/12) --}}
-            <div class="col-span-8">
+        {{-- Main Layout: Full Width --}}
+        <div>
+            {{-- Content --}}
+            <div>
                 {{-- Info Tab --}}
                 @if($activeTab === 'info' || !$isViewMode)
                     <div class="space-y-6">
@@ -306,13 +306,11 @@ new
                 @endif
 
                 @if($activeTab === 'notes' && $isViewMode)
-                    @include('livewire.customers.parts._tab-notes')
+                    @livewire('shared.notes-tab', [
+                        'entityType' => 'CUSTOMER',
+                        'entityId' => $customerId
+                    ], key('notes-tab-customer-' . $customerId))
                 @endif
-            </div>
-
-            {{-- Right Column (4/12) --}}
-            <div class="col-span-4">
-                @include('livewire.customers.parts.logo-card')
             </div>
         </div>
     </div>

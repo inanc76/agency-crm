@@ -121,4 +121,14 @@ class Contact extends Model
     {
         return $this->belongsTo(Customer::class);
     }
+
+    /**
+     * Kişiye ait notlar (Polymorphic)
+     */
+    public function notes()
+    {
+        return $this->hasMany(Note::class, 'entity_id')
+            ->where('entity_type', 'CONTACT')
+            ->orderBy('created_at', 'desc');
+    }
 }

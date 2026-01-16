@@ -95,10 +95,10 @@ new class extends Component
             <div class="mb-8"></div>
         @endif
 
-        {{-- Main Layout: 8/12 Left, 4/12 Right --}}
-        <div class="grid grid-cols-12 gap-6">
-            {{-- Left Column (8/12) --}}
-            <div class="col-span-8">
+        {{-- Main Layout: Full Width --}}
+        <div>
+            {{-- Content --}}
+            <div>
                 @if($activeTab === 'info')
                     <div class="space-y-6">
                         {{-- Varlık Bilgileri Card --}}
@@ -183,30 +183,18 @@ new class extends Component
                 @endif
 
                 @if($activeTab === 'notes')
-                    <div class="theme-card p-6 shadow-sm text-center text-slate-500 py-12">
-                        <x-mary-icon name="o-document-text" class="w-12 h-12 mx-auto mb-3 opacity-20" />
-                        <div class="font-medium">Henüz not bulunmuyor</div>
-                    </div>
-                @endif
-            </div>
-
-            {{-- Right Column (4/12) --}}
-            <div class="col-span-4">
-                <div class="theme-card p-6 shadow-sm text-center">
-                    <h3 class="text-sm font-bold text-slate-900 mb-4">Varlık Görseli</h3>
-
-                    <div
-                        class="w-32 h-32 mx-auto border-2 border-dashed border-slate-200 rounded-lg flex items-center justify-center mb-4 bg-white/50 overflow-hidden">
-                        @php
-                            $initials = mb_substr($name ?? 'V', 0, 1) ?: 'V';
-                        @endphp
-                        <div
-                            class="w-full h-full flex items-center justify-center bg-slate-100 text-slate-400 font-bold text-5xl uppercase">
-                            {{ $initials }}
+                    @if($assetId)
+                        @livewire('shared.notes-tab', [
+                            'entityType' => 'ASSET',
+                            'entityId' => $assetId
+                        ], key('notes-tab-' . $assetId))
+                    @else
+                        <div class="theme-card p-6 shadow-sm text-center text-slate-500 py-12">
+                            <x-mary-icon name="o-document-text" class="w-12 h-12 mx-auto mb-3 opacity-20" />
+                            <div class="font-medium">Varlığı kaydedin, ardından not ekleyebilirsiniz</div>
                         </div>
-                    </div>
-                    <div class="text-[10px] text-slate-400">PNG, JPG, GIF (Max 5MB)</div>
-                </div>
+                    @endif
+                @endif
             </div>
         </div>
     </div>

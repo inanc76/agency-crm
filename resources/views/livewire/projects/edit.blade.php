@@ -1323,10 +1323,9 @@ new
 
             {{-- Tab 4: Notlar --}}
             <div x-show="$wire.activeTab === 'notes'" style="display: none;">
-                 <div class="p-8 text-center text-gray-400">
-                    <x-mary-icon name="o-pencil-square" class="w-12 h-12 mx-auto mb-2 opacity-20" />
-                    <p>Notlar sekmesi hazırlanıyor...</p>
-                </div>
+                @livewire('projects.tabs.notes-tab', [
+                    'project_id' => $projectId
+                ], key('notes-tab-project-' . $projectId))
             </div>
         </div>
     </div>

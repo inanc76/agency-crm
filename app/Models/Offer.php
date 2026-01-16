@@ -192,4 +192,14 @@ class Offer extends Model
             $offer->items()->delete();
         });
     }
+
+    /**
+     * Teklife ait notlar (Polymorphic)
+     */
+    public function notes()
+    {
+        return $this->hasMany(Note::class, 'entity_id')
+            ->where('entity_type', 'OFFER')
+            ->orderBy('created_at', 'desc');
+    }
 }

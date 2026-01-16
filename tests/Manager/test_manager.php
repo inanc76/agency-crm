@@ -37,6 +37,12 @@ class SmartTestManager
                 $scenarios = count($numericMatches[0]);
             }
 
+            if ($scenarios === 0) {
+                // Try "#### T01:" pattern
+                preg_match_all('/^#{3,4}\s+T\d+:/m', $content, $tMatches);
+                $scenarios = count($tMatches[0]);
+            }
+
             // Find corresponding PHP Test file
             // Heuristic: OffersCreate -> tests/Feature/Offers/CreateOfferTest.php
             // We search for *CreateOfferTest.php or similar
@@ -129,6 +135,16 @@ class SmartTestManager
             if (str_contains($base, $moduleId)) {
                 return $file;
             }
+        }
+
+        // Manual overrides
+        if ($moduleId === 'ProjectManagement') {
+            // Prefer ProjectCreateTest if available
+            return $this->basePath . '/tests/Feature/Livewire/ProjectCreateTest.php';
+        }
+
+        if ($moduleId === 'SystemSmokeTest') {
+            return $this->basePath . '/tests/Feature/System/SmokeTest.php';
         }
 
         return null;

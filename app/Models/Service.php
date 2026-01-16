@@ -110,4 +110,14 @@ class Service extends Model
     {
         return $this->belongsTo(ProjectPhase::class, 'project_phase_id');
     }
+
+    /**
+     * Hizmete ait notlar (Polymorphic)
+     */
+    public function notes()
+    {
+        return $this->hasMany(Note::class, 'entity_id')
+            ->where('entity_type', 'SERVICE')
+            ->orderBy('created_at', 'desc');
+    }
 }

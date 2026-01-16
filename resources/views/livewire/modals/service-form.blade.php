@@ -103,10 +103,10 @@ new class extends Component
             <div class="mb-8"></div>
         @endif
 
-        {{-- Main Layout: 8/12 Left, 4/12 Right --}}
-        <div class="grid grid-cols-12 gap-6">
-            {{-- Left Column (8/12) --}}
-            <div class="col-span-8">
+        {{-- Main Layout: Full Width --}}
+        <div>
+            {{-- Content --}}
+            <div>
                 @if($activeTab === 'info')
                     @include('livewire.modals.parts.service._service-core', [
                         'customer_id' => $customer_id,
@@ -134,55 +134,17 @@ new class extends Component
                 @endif
 
                 @if($activeTab === 'notes')
-                    <div class="theme-card p-6 shadow-sm text-center text-[var(--color-text-muted)] py-12">
-                        <x-mary-icon name="o-document-text" class="w-12 h-12 mx-auto mb-3 opacity-20" />
-                        <div class="font-medium">Henüz not bulunmuyor</div>
-                    </div>
-                @endif
-            </div>
-
-            {{-- Right Column (4/12) --}}
-            <div class="col-span-4">
-                <div class="theme-card p-6 shadow-sm text-center">
-                    <h3 class="text-sm font-bold text-skin-heading mb-4">Hizmet Görseli</h3>
-                    <div class="w-32 h-32 mx-auto border-2 border-dashed border-[var(--card-border)] rounded-lg flex items-center justify-center mb-4 bg-[var(--card-bg)] overflow-hidden">
-                        @php
-                            $svcName = $services[0]['service_name'] ?? 'H';
-                            $initials = mb_substr($svcName, 0, 1) ?: 'H';
-                        @endphp
-                        <div class="w-full h-full flex items-center justify-center bg-[var(--dropdown-hover-bg)] text-[var(--icon-muted)] font-bold text-5xl uppercase">
-                            {{ $initials }}
+                    @if($serviceId)
+                        @livewire('shared.notes-tab', [
+                            'entityType' => 'SERVICE',
+                            'entityId' => $serviceId
+                        ], key('notes-tab-' . $serviceId))
+                    @else
+                        <div class="theme-card p-6 shadow-sm text-center text-[var(--color-text-muted)] py-12">
+                            <x-mary-icon name="o-document-text" class="w-12 h-12 mx-auto mb-3 opacity-20" />
+                            <div class="font-medium">Hizmeti kaydedin, ardından not ekleyebilirsiniz</div>
                         </div>
-                    </div>
-                    <div class="text-[10px] text-[var(--color-text-muted)]">PNG, JPG, GIF (Max 5MB)</div>
-                </div>
-
-                {{-- Project Hours Summary --}}
-                @if(!empty($projectSummary))
-                    <div class="theme-card p-6 shadow-sm mt-6">
-                        <h3 class="text-sm font-bold text-skin-heading mb-4 text-center">Proje Özeti</h3>
-                        <div class="space-y-4">
-                            {{-- Assigned --}}
-                            <div class="flex justify-between items-center text-sm">
-                                <span class="opacity-70">Atanan Saatler:</span>
-                                <span class="font-medium font-mono">{{ $projectSummary['total_assigned_hours'] }} Saat</span>
-                            </div>
-
-                            {{-- Spent --}}
-                            <div class="flex justify-between items-center text-sm">
-                                <span class="opacity-70">Harcanan Saatler:</span>
-                                <span class="font-medium text-red-600 font-mono">{{ $projectSummary['spent_time'] }} Saat</span>
-                            </div>
-
-                            {{-- Remaining --}}
-                            <div class="flex justify-between items-center text-sm pt-2 border-t border-[var(--card-border)]/50">
-                                <span class="opacity-70">Kalan Saatler:</span>
-                                <span class="font-medium font-mono {{ $projectSummary['is_negative'] ? 'text-red-600' : 'text-green-600' }}">
-                                    {{ $projectSummary['remaining_time'] }} Saat
-                                </span>
-                            </div>
-                        </div>
-                    </div>
+                    @endif
                 @endif
             </div>
         </div>

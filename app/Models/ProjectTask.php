@@ -105,4 +105,14 @@ class ProjectTask extends Model
     {
         return $this->hasMany(ProjectReport::class, 'task_id');
     }
+
+    /**
+     * Göreve ait notlar (Polymorphic)
+     */
+    public function notes(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Note::class, 'entity_id')
+            ->where('entity_type', 'PROJECT_TASK')
+            ->orderBy('created_at', 'desc');
+    }
 }

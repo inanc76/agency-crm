@@ -178,4 +178,14 @@ class Project extends Model
             ->withPivot('role')
             ->withTimestamps();
     }
+
+    /**
+     * Projeye ait notlar (Polymorphic)
+     */
+    public function notes(): HasMany
+    {
+        return $this->hasMany(Note::class, 'entity_id')
+            ->where('entity_type', 'PROJECT')
+            ->orderBy('created_at', 'desc');
+    }
 }

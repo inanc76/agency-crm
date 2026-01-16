@@ -99,6 +99,9 @@ trait HasOfferActions
                 'vat_rate' => $this->vat_rate,
                 'vat_amount' => $totals['vat'],
                 'valid_until' => $this->valid_until,
+                'is_pdf_downloadable' => $this->is_pdf_downloadable,
+                'is_attachments_downloadable' => $this->is_attachments_downloadable,
+                'is_downloadable_after_expiry' => $this->is_downloadable_after_expiry,
             ];
 
             if ($this->offerId) {
@@ -181,19 +184,19 @@ trait HasOfferActions
     public function cancel(): void
     {
         // Clean up unsaved attachments from Minio
-        if (! empty($this->attachments)) {
+        if (!empty($this->attachments)) {
             $minioService = app(MinioService::class);
 
             foreach ($this->attachments as $attachment) {
                 // If the attachment doesn't have an ID, it means it hasn't been saved to the DB yet
                 // and was just uploaded in this session.
-                if (! isset($attachment['id'])) {
+                if (!isset($attachment['id'])) {
                     if (isset($attachment['file_path'])) {
                         try {
                             $minioService->deleteFile($attachment['file_path']);
-                            Log::info('Cancelled Offer Creation: Deleted temporary file: '.$attachment['file_path']);
+                            Log::info('Cancelled Offer Creation: Deleted temporary file: ' . $attachment['file_path']);
                         } catch (\Exception $e) {
-                            Log::error('Failed to delete file on cancel: '.$e->getMessage());
+                            Log::error('Failed to delete file on cancel: ' . $e->getMessage());
                         }
                     }
                 }
@@ -253,13 +256,13 @@ trait HasOfferActions
 
         // Validate status
         $validStatuses = ['DRAFT', 'SENT', 'APPROVED', 'REJECTED'];
-        if (! in_array($newStatus, $validStatuses)) {
+        if (!in_array($newStatus, $validStatuses)) {
             $this->error('Hata', 'Geçersiz durum değeri.');
 
             return;
         }
 
-        if (! $this->offerId) {
+        if (!$this->offerId) {
             $this->error('Hata', 'Teklif bulunamadı.');
 
             return;
