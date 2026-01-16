@@ -1,10 +1,3 @@
-{{-- Back Button --}}
-<a href="/dashboard/projects"
-    class="inline-flex items-center gap-2 text-skin-base hover:text-skin-heading mb-4 transition-colors">
-    <x-mary-icon name="o-arrow-left" class="w-4 h-4" />
-    <span class="text-sm font-medium">Proje Listesi</span>
-</a>
-
 {{-- Header with Action Buttons --}}
 <div class="flex items-start justify-between mb-6">
     <div>

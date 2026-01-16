@@ -50,6 +50,13 @@ new
     style="background-color: var(--page-bg);">
     <div class="max-w-7xl mx-auto">
 
+        {{-- Back Button --}}
+        <a href="{{ route('projects.index') }}"
+            class="inline-flex items-center gap-2 text-skin-base hover:text-skin-heading mb-4 transition-colors">
+            <x-mary-icon name="o-arrow-left" class="w-4 h-4" />
+            <span class="text-sm font-medium">Proje Listesi</span>
+        </a>
+
         {{-- Header --}}
         @include('livewire.projects.partials._header')
 
