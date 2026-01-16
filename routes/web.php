@@ -95,7 +95,7 @@ Volt::route('dashboard/projects/create', 'projects.create')
     ->middleware(['auth', 'verified'])
     ->name('projects.create');
 
-Volt::route('dashboard/projects/{project}', 'projects.create')
+Volt::route('dashboard/projects/{project}', 'projects.edit')
     ->middleware(['auth', 'verified'])
     ->name('projects.edit');
 
@@ -107,6 +107,15 @@ Volt::route('dashboard/projects/tasks/create', 'projects.tasks.create')
 Volt::route('dashboard/projects/tasks/{task}', 'projects.tasks.create')
     ->middleware(['auth', 'verified'])
     ->name('projects.tasks.edit');
+
+// Rapor Yönetimi
+Volt::route('dashboard/projects/reports/create', 'projects.reports.create')
+    ->middleware(['auth', 'verified'])
+    ->name('projects.reports.create');
+
+Volt::route('dashboard/projects/reports/{report}', 'projects.reports.create')
+    ->middleware(['auth', 'verified'])
+    ->name('projects.reports.edit');
 
 // Ayarlar
 // Ayarlar

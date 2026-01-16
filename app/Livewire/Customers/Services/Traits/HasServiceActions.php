@@ -29,7 +29,6 @@ namespace App\Livewire\Customers\Services\Traits;
 
 use App\Livewire\Traits\HasServiceCalculations;
 use App\Models\Customer;
-use App\Models\PriceDefinition;
 use App\Models\Service;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -41,23 +40,36 @@ trait HasServiceActions
 
     // State Fields
     public string $customer_id = '';
+
     public string $asset_id = '';
+
     public ?string $start_date = null;
+
     public array $services = [];
+
+    public array $projectSummary = [];
+
     public bool $isViewMode = false;
+
     public ?string $serviceId = null;
+
     public string $activeTab = 'info';
 
     // Reference Data
     public $customers = [];
+
     public $assets = [];
+
+    public $projects = [];
+
     public $categories = [];
 
     /**
      * @purpose Livewire bileşeninin başlatılması
-     * @param string|null $service Düzenlenecek hizmet ID'si
+     *
+     * @param  string|null  $service  Düzenlenecek hizmet ID'si
      * @return void
-     * 🔐 Security: Genel erişim
+     *              🔐 Security: Genel erişim
      */
     public function mount(?string $service = null): void
     {
@@ -67,10 +79,14 @@ trait HasServiceActions
             ->map(fn($c) => ['id' => $c->id, 'name' => $c->name])
             ->toArray();
 
-        // Load Categories from PriceDefinition
-        $this->categories = PriceDefinition::where('is_active', true)
-            ->distinct()
-            ->pluck('category')
+        // Load Categories from ReferenceItem (SERVICE_CATEGORY group)
+        $this->categories = \App\Models\ReferenceItem::where('category_key', 'SERVICE_CATEGORY')
+            ->orderBy('sort_order')
+            ->get(['key', 'display_label'])
+            ->map(fn($item) => [
+                'key' => $item->key,
+                'label' => $item->display_label,
+            ])
             ->toArray();
 
         // Default start date
@@ -85,6 +101,7 @@ trait HasServiceActions
             if ($customerId && collect($this->customers)->firstWhere('id', $customerId)) {
                 $this->customer_id = $customerId;
                 $this->loadAssets();
+                $this->loadProjects();
             }
             $this->addService();
         }
@@ -92,7 +109,6 @@ trait HasServiceActions
 
     /**
      * @purpose Yeni boş hizmet satırı ekleme (max 5)
-     * @return void
      */
     public function addService(): void
     {
@@ -107,14 +123,17 @@ trait HasServiceActions
                 'service_duration' => '',
                 'service_currency' => 'TRY',
                 'services_list' => [],
+                'project_id' => '',
+                'project_phase_id' => '',
+                'phases_list' => [],
             ];
         }
     }
 
     /**
      * @purpose Hizmet satırını kaldırma
-     * @param int $index Kaldırılacak satır indeksi
-     * @return void
+     *
+     * @param  int  $index  Kaldırılacak satır indeksi
      */
     public function removeService(int $index): void
     {
@@ -126,10 +145,11 @@ trait HasServiceActions
 
     /**
      * @purpose Hizmet kaydetme (yeni oluşturma veya güncelleme)
+     *
      * @return void
-     * 🔐 Security: services.create (new) or services.edit (existing)
-     * 📢 Events: Success toast, 'service-saved' dispatch
-     * 🔗 Side Effects: Bulk insert for new services, atomic transaction
+     *              🔐 Security: services.create (new) or services.edit (existing)
+     *              📢 Events: Success toast, 'service-saved' dispatch
+     *              🔗 Side Effects: Bulk insert for new services, atomic transaction
      */
     public function save(): void
     {
@@ -142,6 +162,8 @@ trait HasServiceActions
             'start_date' => 'required|date',
             'services' => 'required|array|min:1',
             'services.*.category' => 'required|string',
+            'services.*.project_id' => 'nullable|string',
+            'services.*.project_phase_id' => 'nullable|string',
             'services.*.service_name' => 'required|string|max:200',
             'services.*.service_price' => 'required|numeric|min:0',
             'services.*.service_currency' => 'required|string|size:3',
@@ -161,8 +183,8 @@ trait HasServiceActions
 
     /**
      * @purpose Tekli hizmet güncelleme
-     * @param Carbon $startDate Başlangıç tarihi
-     * @return void
+     *
+     * @param  Carbon  $startDate  Başlangıç tarihi
      */
     private function updateSingleService(Carbon $startDate): void
     {
@@ -172,6 +194,8 @@ trait HasServiceActions
         $service->update([
             'customer_id' => $this->customer_id,
             'asset_id' => $this->asset_id,
+            'project_id' => $this->services[0]['project_id'] ?: null,
+            'project_phase_id' => $this->services[0]['project_phase_id'] ?: null,
             'price_definition_id' => $this->services[0]['price_definition_id'],
             'service_name' => $this->services[0]['service_name'],
             'service_category' => $this->services[0]['category'],
@@ -192,9 +216,10 @@ trait HasServiceActions
 
     /**
      * @purpose Çoklu hizmet oluşturma (Bulk Insert)
-     * @param Carbon $startDate Başlangıç tarihi
+     *
+     * @param  Carbon  $startDate  Başlangıç tarihi
      * @return void
-     * 🔗 Side Effects: DB Transaction, redirect on success
+     *              🔗 Side Effects: DB Transaction, redirect on success
      */
     private function createMultipleServices(Carbon $startDate): void
     {
@@ -206,6 +231,8 @@ trait HasServiceActions
                     'id' => Str::uuid()->toString(),
                     'customer_id' => $this->customer_id,
                     'asset_id' => $this->asset_id,
+                    'project_id' => ($serviceData['project_id'] ?? '') ?: null,
+                    'project_phase_id' => ($serviceData['project_phase_id'] ?? '') ?: null,
                     'price_definition_id' => $serviceData['price_definition_id'],
                     'service_name' => $serviceData['service_name'],
                     'service_category' => $serviceData['category'],
@@ -229,8 +256,9 @@ trait HasServiceActions
 
     /**
      * @purpose Bitiş tarihi hesaplama
-     * @param Carbon $startDate Başlangıç tarihi
-     * @param string $duration Süre string'i
+     *
+     * @param  Carbon  $startDate  Başlangıç tarihi
+     * @param  string  $duration  Süre string'i
      * @return Carbon Bitiş tarihi
      */
     private function calculateEndDate(Carbon $startDate, string $duration): Carbon
@@ -242,7 +270,6 @@ trait HasServiceActions
 
     /**
      * @purpose İptal işlemi
-     * @return void
      */
     public function cancel(): void
     {
@@ -255,8 +282,9 @@ trait HasServiceActions
 
     /**
      * @purpose Düzenleme moduna geçiş
+     *
      * @return void
-     * 🔐 Security: services.edit
+     *              🔐 Security: services.edit
      */
     public function toggleEditMode(): void
     {
@@ -266,8 +294,9 @@ trait HasServiceActions
 
     /**
      * @purpose Hizmeti silme
+     *
      * @return void
-     * 🔐 Security: services.delete
+     *              🔐 Security: services.delete
      */
     public function delete(): void
     {
@@ -275,10 +304,9 @@ trait HasServiceActions
 
         if ($this->serviceId) {
             $service = Service::findOrFail($this->serviceId);
-            $customer_id = $service->customer_id;
             $service->delete();
             $this->success('Hizmet Arşivlendi', 'Hizmet kaydı başarıyla arşivlendi ve çöp kutusuna taşındı.');
-            $this->redirect('/dashboard/customers/' . $customer_id . '?tab=services');
+            $this->redirect('/dashboard/customers?tab=services');
         }
     }
 }

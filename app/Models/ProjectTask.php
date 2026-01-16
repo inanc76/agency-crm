@@ -44,6 +44,7 @@ class ProjectTask extends Model
     public $incrementing = false;
 
     protected $fillable = [
+        'project_id',
         'module_id',
         'name',
         'description',
@@ -73,6 +74,11 @@ class ProjectTask extends Model
     // RELATIONSHIPS
     // ─────────────────────────────────────────────────────────────────────────
 
+    public function project(): BelongsTo
+    {
+        return $this->belongsTo(Project::class, 'project_id');
+    }
+
     public function module(): BelongsTo
     {
         return $this->belongsTo(ProjectModule::class, 'module_id');
@@ -88,5 +94,15 @@ class ProjectTask extends Model
         return $this->belongsToMany(User::class, 'task_user', 'project_task_id')
             ->withPivot('assigned_at')
             ->withTimestamps();
+    }
+
+    public function items(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(ProjectTaskItem::class, 'project_task_id')->orderBy('sort_order')->orderBy('created_at');
+    }
+
+    public function reports(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(ProjectReport::class, 'task_id');
     }
 }

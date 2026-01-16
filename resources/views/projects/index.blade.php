@@ -23,6 +23,9 @@
                     @case('tasks')
                         <livewire:projects.tabs.tasks-tab />
                         @break
+                    @case('reports')
+                        <livewire:projects.tabs.reports-tab />
+                        @break
                     @default
                         <livewire:projects.tabs.projects-tab />
                 @endswitch

@@ -1,0 +1,30 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration {
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('project_reports', function (Blueprint $table) {
+            $table->uuid('customer_id')->nullable()->change();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('project_reports', function (Blueprint $table) {
+            // Reverting assuming it was not null before. 
+            // Warning: this will fail if there are null values.
+            // But for rollback purposes, we define it.
+            $table->uuid('customer_id')->nullable(false)->change();
+        });
+    }
+};

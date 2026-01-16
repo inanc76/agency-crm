@@ -65,6 +65,10 @@
             class="cursor-pointer px-5 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors {{ $activeTab === 'info' ? 'border-[var(--active-tab-color)] text-skin-heading' : 'border-transparent text-skin-base opacity-60' }}">
             Müşteri Bilgileri
         </button>
+        <button wire:click="$set('activeTab', 'projects')"
+            class="cursor-pointer px-5 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors {{ $activeTab === 'projects' ? 'border-[var(--active-tab-color)] text-skin-heading' : 'border-transparent text-skin-base opacity-60' }}">
+            Projeler ({{ $counts['projects'] }})
+        </button>
         <button wire:click="$set('activeTab', 'contacts')"
             class="cursor-pointer px-5 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors {{ $activeTab === 'contacts' ? 'border-[var(--active-tab-color)] text-skin-heading' : 'border-transparent text-skin-base opacity-60' }}">
             Kişiler ({{ $counts['contacts'] }})

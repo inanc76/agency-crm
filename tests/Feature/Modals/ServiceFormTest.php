@@ -31,6 +31,7 @@ test('Service Form Component can create a service', function () {
 
     $user->givePermissionTo('services.create');
 
+
     Volt::actingAs($user)
         ->test('modals.service-form')
         ->set('customer_id', $customer->id)

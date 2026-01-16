@@ -124,31 +124,31 @@ new
         </div>
 
         {{-- Settings Grid --}}
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             @forelse($this->cards() as $card)
                 <a href="{{ $card['link'] }}" class="group block">
                     <x-mary-card shadow
-                        class="theme-card shadow-sm hover:shadow-md transition-all duration-300 h-[120px] overflow-hidden">
-                        <div class="flex items-start gap-2 h-full relative p-1">
+                        class="theme-card shadow-sm hover:shadow-md transition-all duration-300 h-[140px] overflow-hidden">
+                        <div class="flex items-start gap-3 h-full relative p-2">
                             {{-- Icon Box --}}
                             <div
-                                class="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center {{ $card['color'] }} transition-transform duration-300 group-hover:scale-110">
-                                <x-mary-icon :name="$card['icon']" class="w-5 h-5" />
+                                class="flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center {{ $card['color'] }} transition-transform duration-300 group-hover:scale-110">
+                                <x-mary-icon :name="$card['icon']" class="w-6 h-6" />
                             </div>
 
                             {{-- Text Content --}}
                             <div class="flex-grow pt-0.5">
                                 <h3
-                                    class="font-bold text-[14px] group-hover:opacity-80 transition-opacity mb-1 text-skin-heading">
+                                    class="font-bold text-[15px] group-hover:opacity-80 transition-opacity mb-1.5 text-skin-heading">
                                     {{ $card['title'] }}
                                 </h3>
-                                <p class="text-[11px] leading-relaxed line-clamp-2 pr-4 opacity-70">
+                                <p class="text-[12px] leading-relaxed line-clamp-2 pr-4 opacity-70">
                                     {{ $card['subtitle'] }}
                                 </p>
                             </div>
 
                             {{-- Corner Arrow --}}
-                            <div class="absolute bottom-0 right-0 p-1">
+                            <div class="absolute bottom-0 right-0 p-2">
                                 <x-mary-icon name="o-arrow-right"
                                     class="w-4 h-4 opacity-20 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
                                     style="color: var(--primary-color);" />

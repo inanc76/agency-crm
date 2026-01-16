@@ -4,6 +4,7 @@
     $tabs = [
         'projects' => 'Projeler',
         'tasks' => 'Görevler',
+        'reports' => 'Raporlar',
     ];
 @endphp
 

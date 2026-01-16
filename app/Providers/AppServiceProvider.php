@@ -40,7 +40,7 @@ class AppServiceProvider extends ServiceProvider
                 $setting = \App\Models\StorageSetting::where('is_active', true)->first();
 
                 if ($setting) {
-                    $endpoint = ($setting->use_ssl ? 'https://' : 'http://').$setting->endpoint.':'.$setting->port;
+                    $endpoint = ($setting->use_ssl ? 'https://' : 'http://') . $setting->endpoint . ':' . $setting->port;
 
                     config([
                         'filesystems.disks.s3.driver' => 's3',

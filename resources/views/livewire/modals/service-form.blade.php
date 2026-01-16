@@ -156,6 +156,34 @@ new class extends Component
                     </div>
                     <div class="text-[10px] text-[var(--color-text-muted)]">PNG, JPG, GIF (Max 5MB)</div>
                 </div>
+
+                {{-- Project Hours Summary --}}
+                @if(!empty($projectSummary))
+                    <div class="theme-card p-6 shadow-sm mt-6">
+                        <h3 class="text-sm font-bold text-skin-heading mb-4 text-center">Proje Özeti</h3>
+                        <div class="space-y-4">
+                            {{-- Assigned --}}
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="opacity-70">Atanan Saatler:</span>
+                                <span class="font-medium font-mono">{{ $projectSummary['total_assigned_hours'] }} Saat</span>
+                            </div>
+
+                            {{-- Spent --}}
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="opacity-70">Harcanan Saatler:</span>
+                                <span class="font-medium text-red-600 font-mono">{{ $projectSummary['spent_time'] }} Saat</span>
+                            </div>
+
+                            {{-- Remaining --}}
+                            <div class="flex justify-between items-center text-sm pt-2 border-t border-[var(--card-border)]/50">
+                                <span class="opacity-70">Kalan Saatler:</span>
+                                <span class="font-medium font-mono {{ $projectSummary['is_negative'] ? 'text-red-600' : 'text-green-600' }}">
+                                    {{ $projectSummary['remaining_time'] }} Saat
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                @endif
             </div>
         </div>
     </div>

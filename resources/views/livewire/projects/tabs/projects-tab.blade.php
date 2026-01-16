@@ -19,7 +19,7 @@ use function Livewire\Volt\state;
 state([
     'search' => '',
     'statusFilter' => '',
-    'customerFilter' => '',
+    'typeFilter' => '',
 ]);
 
 $projects = computed(function () {
@@ -35,18 +35,21 @@ $projects = computed(function () {
                 $sub->where('name', 'ILIKE', "%{$searchTerm}%")
                     ->orWhere('project_id_code', 'ILIKE', "%{$searchTerm}%")
                     ->orWhereHas('customer', function ($c) use ($searchTerm) {
-                        $c->where('name', 'ILIKE', "%{$searchTerm}%");
-                    });
+                    $c->where('name', 'ILIKE', "%{$searchTerm}%");
+                });
             });
         })
-        ->when($this->statusFilter, fn ($q) => $q->where('status_id', $this->statusFilter))
-        ->when($this->customerFilter, fn ($q) => $q->where('customer_id', $this->customerFilter))
+        ->when($this->statusFilter, fn($q) => $q->where('status_id', $this->statusFilter))
+        ->when($this->typeFilter, fn($q) => $q->where('type_id', $this->typeFilter))
         ->orderByDesc('created_at')
         ->get();
 });
 
-$customers = computed(function () {
-    return Customer::orderBy('name')->get(['id', 'name']);
+$types = computed(function () {
+    return ReferenceItem::where('category_key', 'PROJECT_TYPE')
+        ->where('is_active', true)
+        ->orderBy('sort_order')
+        ->get(['id', 'display_label']);
 });
 
 $statuses = computed(function () {
@@ -59,7 +62,7 @@ $statuses = computed(function () {
 $resetFilters = function () {
     $this->search = '';
     $this->statusFilter = '';
-    $this->customerFilter = '';
+    $this->typeFilter = '';
 };
 
 ?>
@@ -69,13 +72,14 @@ $resetFilters = function () {
     <div class="theme-card p-4 mb-6 shadow-sm">
         <div class="flex flex-wrap items-center gap-4">
             {{-- Search --}}
-            <div class="flex-1 min-w-[200px]">
+            <div class="flex-grow max-w-[10rem] !bg-white rounded-lg">
                 <x-mary-input wire:model.live.debounce.300ms="search" placeholder="Proje ara..."
-                    icon="o-magnifying-glass" class="!bg-white !border-gray-200" />
+                    icon="o-magnifying-glass" class="input-sm !bg-white !border-gray-200"
+                    style="background-color: white !important;" />
             </div>
 
             {{-- Status Filter --}}
-            <div class="w-48">
+            <div class="w-40">
                 <select wire:model.live="statusFilter" class="select select-xs bg-white border-slate-200 w-full">
                     <option value="">Tüm Durumlar</option>
                     @foreach($this->statuses as $status)
@@ -84,12 +88,12 @@ $resetFilters = function () {
                 </select>
             </div>
 
-            {{-- Customer Filter --}}
-            <div class="w-56">
-                <select wire:model.live="customerFilter" class="select select-xs bg-white border-slate-200 w-full">
-                    <option value="">Tüm Müşteriler</option>
-                    @foreach($this->customers as $customer)
-                        <option value="{{ $customer->id }}">{{ $customer->name }}</option>
+            {{-- Type Filter --}}
+            <div class="w-48">
+                <select wire:model.live="typeFilter" class="select select-xs bg-white border-slate-200 w-full">
+                    <option value="">Tüm Tipler</option>
+                    @foreach($this->types as $type)
+                        <option value="{{ $type->id }}">{{ $type->display_label }}</option>
                     @endforeach
                 </select>
             </div>
@@ -97,7 +101,7 @@ $resetFilters = function () {
 
 
             {{-- New Project Button --}}
-            <a href="{{ route('projects.create') }}" class="theme-btn-save px-4 py-2 flex items-center gap-2">
+            <a href="{{ route('projects.create') }}" class="theme-btn-save px-4 py-2 flex items-center gap-2 ml-auto">
                 <x-mary-icon name="o-plus" class="w-5 h-5" />
                 <span>Yeni Proje</span>
             </a>
@@ -179,13 +183,13 @@ $resetFilters = function () {
                         @if($project->status)
                             <span
                                 class="px-2 py-0.5 rounded-full text-[10px] font-semibold whitespace-nowrap border
-                                                                                                                                                            @if($project->status->key === 'project_active') bg-blue-50 text-blue-600 border-blue-100
-                                                                                                                                                            @elseif($project->status->key === 'project_completed') bg-green-50 text-green-600 border-green-100
-                                                                                                                                                            @elseif($project->status->key === 'project_cancelled') bg-red-50 text-red-600 border-red-100
-                                                                                                                                                            @elseif($project->status->key === 'project_on_hold') bg-yellow-50 text-yellow-600 border-yellow-100
-                                                                                                                                                            @else bg-slate-50 text-slate-600 border-slate-100
-                                                                                                                                                            @endif
-                                                                                                                                                        ">
+                                                                                                                                                                                                                        @if($project->status->key === 'project_active') bg-blue-50 text-blue-600 border-blue-100
+                                                                                                                                                                                                                        @elseif($project->status->key === 'project_completed') bg-green-50 text-green-600 border-green-100
+                                                                                                                                                                                                                        @elseif($project->status->key === 'project_cancelled') bg-red-50 text-red-600 border-red-100
+                                                                                                                                                                                                                        @elseif($project->status->key === 'project_on_hold') bg-yellow-50 text-yellow-600 border-yellow-100
+                                                                                                                                                                                                                        @else bg-slate-50 text-slate-600 border-slate-100
+                                                                                                                                                                                                                        @endif
+                                                                                                                                                                                                                    ">
                                 {{ $project->status->display_label }}
                             </span>
                         @endif

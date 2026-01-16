@@ -39,13 +39,16 @@ VALIDASYON (V10):
                     <label class="block text-xs font-medium mb-1 opacity-60">Kategori *</label>
                     @if($isViewMode)
                         <div class="text-sm font-medium">
-                            {{ $service['category'] }}
+                            @php
+                                $catLabel = collect($categories)->firstWhere('key', $service['category'])['label'] ?? $service['category'];
+                            @endphp
+                            {{ $catLabel }}
                         </div>
                     @else
                         <select wire:model.live="services.{{ $index }}.category" class="select w-full">
                             <option value="">Kategori Seçin</option>
                             @foreach($categories as $cat)
-                                <option value="{{ $cat }}">{{ $cat }}</option>
+                                <option value="{{ $cat['key'] }}">{{ $cat['label'] }}</option>
                             @endforeach
                         </select>
                         @error("services.{$index}.category") <span
@@ -117,6 +120,49 @@ VALIDASYON (V10):
                     @else
                         <textarea wire:model="services.{{ $index }}.description" class="textarea w-full"
                             placeholder="Açıklama..."></textarea>
+                    @endif
+                </div>
+
+                {{-- Proje Seçimi --}}
+                <div>
+                    <label class="block text-xs font-medium mb-1 opacity-60">Proje Adı</label>
+                    @if($isViewMode)
+                        <div class="text-sm font-medium">
+                            @if(!empty($service['project_id']))
+                                <a href="/dashboard/projects/{{ $service['project_id'] }}"
+                                    class="text-skin-primary hover:text-skin-heading underline transition-colors" wire:navigate>
+                                    {{ collect($projects)->firstWhere('id', $service['project_id'])['name'] ?? '-' }}
+                                </a>
+                            @else
+                                {{ collect($projects)->firstWhere('id', $service['project_id'])['name'] ?? '-' }}
+                            @endif
+                        </div>
+                    @else
+                        <select wire:model.live="services.{{ $index }}.project_id" class="select w-full">
+                            <option value="">Proje Seçin (Opsiyonel)</option>
+                            @foreach($projects as $project)
+                                <option value="{{ $project['id'] }}">{{ $project['name'] }}</option>
+                            @endforeach
+                        </select>
+                    @endif
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium mb-1 opacity-60">Proje Fazı</label>
+                    @if($isViewMode)
+                        <div class="text-sm font-medium">
+                            {{ collect($service['phases_list'])->firstWhere('id', $service['project_phase_id'])['name'] ?? '-' }}
+                        </div>
+                    @else
+                        <select wire:model="services.{{ $index }}.project_phase_id" class="select w-full"
+                            @if(empty($service['project_id'])) disabled @endif>
+                            <option value="">
+                                {{ !empty($service['project_id']) ? 'Faz seçin (Opsiyonel)' : 'Önce proje seçin' }}
+                            </option>
+                            @foreach($service['phases_list'] ?? [] as $phase)
+                                <option value="{{ $phase['id'] }}">{{ $phase['name'] }}</option>
+                            @endforeach
+                        </select>
                     @endif
                 </div>
             </div>

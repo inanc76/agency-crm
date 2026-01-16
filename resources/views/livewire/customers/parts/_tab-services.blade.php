@@ -34,11 +34,20 @@
                         @php
                             $endDate = \Carbon\Carbon::parse($service['end_date']);
                             $daysLeft = now()->diffInDays($endDate, false);
+                            
+                            // Get Turkish category label
+                            $categoryLabel = $service['service_category'] ?? '-';
+                            if ($service['service_category']) {
+                                $refItem = \App\Models\ReferenceItem::where('category_key', 'SERVICE_CATEGORY')
+                                    ->where('key', $service['service_category'])
+                                    ->first();
+                                $categoryLabel = $refItem ? $refItem->display_label : $service['service_category'];
+                            }
                         @endphp
                         <tr class="border-b border-[var(--card-border)]/50 hover:bg-[var(--dropdown-hover-bg)] cursor-pointer transition-colors"
                             onclick="window.location.href='/dashboard/customers/services/{{ $service['id'] }}'">
                             <td class="py-3 px-2 font-medium">{{ $service['service_name'] }}</td>
-                            <td class="py-3 px-2 opacity-70">{{ $service['service_category'] ?? '-' }}</td>
+                            <td class="py-3 px-2 opacity-70">{{ $categoryLabel }}</td>
                             <td class="py-3 px-2 text-center">
                                 @if($daysLeft < 0)
                                     <span class="px-2 py-0.5 rounded text-xs font-medium bg-[var(--color-danger)]/10 text-[var(--color-danger)]">
