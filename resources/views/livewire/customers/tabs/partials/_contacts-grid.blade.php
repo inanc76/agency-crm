@@ -47,35 +47,24 @@ Mühür Koruması: Table styling, gender icons ve hover effects korunmalıdır.
                         </td>
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-3">
-                                <div class="flex-shrink-0 w-6 text-center">
-                                    @if(strtolower($contact->gender ?? '') === 'male')
-                                        {{-- Male Symbol (Mars) --}}
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-                                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                            stroke-linejoin="round" class="text-blue-500">
-                                            <path d="M16 3h5v5"></path>
-                                            <path d="M21 3l-7 7"></path>
-                                            <circle cx="10" cy="14" r="7"></circle>
-                                        </svg>
-                                    @elseif(strtolower($contact->gender ?? '') === 'female')
-                                        {{-- Female Symbol (Venus) --}}
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-                                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                            stroke-linejoin="round" class="text-pink-500">
-                                            <path d="M12 15v7"></path>
-                                            <path d="M9 19h6"></path>
-                                            <circle cx="12" cy="9" r="6"></circle>
-                                        </svg>
-                                    @else
-                                        {{-- Unknown (Question Mark) --}}
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-                                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                            stroke-linejoin="round" class="text-gray-400">
-                                            <circle cx="12" cy="12" r="10"></circle>
-                                            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-                                            <path d="M12 17h.01"></path>
-                                        </svg>
-                                    @endif
+                                <div class="flex-shrink-0">
+                                    @php
+                                        $gravatarUrl = $contact->getGravatarUrl(32);
+                                    @endphp
+                                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs shadow-sm font-semibold overflow-hidden"
+                                        style="background-color: var(--table-avatar-bg); color: var(--table-avatar-text); border: 1px solid var(--table-avatar-border);">
+                                        @if($gravatarUrl)
+                                            <img src="{{ $gravatarUrl }}" 
+                                                 alt="{{ $contact->name }}"
+                                                 class="w-full h-full object-cover rounded-full"
+                                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                            <div class="w-full h-full flex items-center justify-center" style="display: none;">
+                                                {{ $contact->initials() }}
+                                            </div>
+                                        @else
+                                            {{ $contact->initials() }}
+                                        @endif
+                                    </div>
                                 </div>
                                 <div class="text-[13px] group-hover:opacity-80 transition-opacity font-medium"
                                     style="color: var(--list-card-link-color);">

@@ -30,6 +30,7 @@ trait HasContactActions
     public $customers = [];
     public $contactStatuses = [];
     public $genders = [];
+
     public function mount(?string $contact = null): void
     {
         // Load Customers
@@ -92,7 +93,15 @@ trait HasContactActions
         $this->position = $contact->position ?? '';
         $this->birth_date = $contact->birth_date ? \Carbon\Carbon::parse($contact->birth_date)->format('Y-m-d') : null;
 
-        $this->emails = !empty($contact->emails) ? (array) $contact->emails : [''];
+        // Handle both email and emails fields
+        $emailList = [];
+        if ($contact->email) {
+            $emailList[] = $contact->email;
+        }
+        if (!empty($contact->emails)) {
+            $emailList = array_merge($emailList, (array) $contact->emails);
+        }
+        $this->emails = !empty($emailList) ? array_unique($emailList) : [''];
 
         // Parse phones to extract number and extension
         if (!empty($contact->phones)) {
@@ -156,6 +165,7 @@ trait HasContactActions
         $data = [
             'customer_id' => $this->customer_id,
             'name' => $this->name,
+            'email' => !empty($this->emails[0]) ? $this->emails[0] : null, // First email as primary
             'status' => $this->status,
             'gender' => $this->gender,
             'position' => $this->position,
@@ -221,6 +231,7 @@ trait HasContactActions
     {
         $this->emails[] = '';
     }
+    
     public function removeEmail($index)
     {
         unset($this->emails[$index]);
@@ -231,6 +242,7 @@ trait HasContactActions
     {
         $this->phones[] = ['number' => '', 'extension' => ''];
     }
+    
     public function removePhone($index)
     {
         unset($this->phones[$index]);
@@ -241,6 +253,7 @@ trait HasContactActions
     {
         $this->social_profiles[] = ['name' => '', 'url' => ''];
     }
+    
     public function removeSocialProfile($index)
     {
         unset($this->social_profiles[$index]);

@@ -147,9 +147,18 @@ new class extends Component {
                                 <td class="px-6 py-4">
                                     <div class="flex items-center gap-3">
                                         <div class="flex-shrink-0">
-                                            <div class="w-9 h-9 rounded-full flex items-center justify-center text-xs shadow-sm font-semibold"
+                                            @php
+                                                $gravatarUrl = $user->getGravatarUrl(36);
+                                            @endphp
+                                            <div class="w-9 h-9 rounded-full flex items-center justify-center text-xs shadow-sm font-semibold overflow-hidden"
                                                 style="background-color: var(--table-avatar-bg); color: var(--table-avatar-text); border: 1px solid var(--table-avatar-border);">
-                                                {{ $user->initials() }}
+                                                <img src="{{ $gravatarUrl }}" 
+                                                     alt="{{ $user->name }}"
+                                                     class="w-full h-full object-cover rounded-full"
+                                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                                <div class="w-full h-full flex items-center justify-center" style="display: none;">
+                                                    {{ $user->initials() }}
+                                                </div>
                                             </div>
                                         </div>
                                         <div>

@@ -76,6 +76,7 @@ class User extends Authenticatable
         'title',
         'status',
         'avatar',
+        'department_id',
     ];
 
     /**
@@ -164,8 +165,51 @@ class User extends Authenticatable
         return Str::of($this->name)
             ->explode(' ')
             ->take(2)
-            ->map(fn ($word) => Str::substr($word, 0, 1))
+            ->map(fn($word) => Str::substr($word, 0, 1))
             ->implode('');
+    }
+
+    /**
+     * Get the user's Gravatar URL
+     */
+    public function getGravatarUrl(int $size = 80): string
+    {
+        $hash = md5(strtolower(trim($this->email)));
+        return "https://www.gravatar.com/avatar/{$hash}?s={$size}&d=404";
+    }
+
+    /**
+     * Check if user has a Gravatar
+     */
+    public function hasGravatar(): bool
+    {
+        $gravatarUrl = $this->getGravatarUrl();
+        
+        // Use get_headers to check if Gravatar exists (returns 200) or not (returns 404)
+        $headers = @get_headers($gravatarUrl);
+        return $headers && strpos($headers[0], '200') !== false;
+    }
+
+    /**
+     * Get the user's department
+     */
+    public function department()
+    {
+        // Using loose relationship as department is a ReferenceItem
+        return $this->belongsTo(ReferenceItem::class, 'department_id');
+    }
+
+    /**
+     * Get the user's avatar URL (Uploaded or Gravatar)
+     */
+    public function getAvatarUrlAttribute(): string
+    {
+        if ($this->avatar) {
+            return asset('storage/' . $this->avatar);
+        }
+
+        $hash = md5(strtolower(trim($this->email)));
+        return "https://www.gravatar.com/avatar/{$hash}?s=200&d=mp"; // mp = mystery person
     }
 
     /**

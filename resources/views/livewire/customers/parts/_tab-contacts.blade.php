@@ -21,7 +21,33 @@
                     @foreach($relatedContacts as $contact)
                         <tr class="border-b border-[var(--card-border)]/50 hover:bg-[var(--dropdown-hover-bg)] cursor-pointer transition-colors"
                             onclick="window.location.href='/dashboard/customers/contacts/{{ $contact->id }}'">
-                            <td class="py-3 px-2 font-medium">{{ $contact->name }}</td>
+                    @foreach($relatedContacts as $contact)
+                        <tr class="border-b border-[var(--card-border)]/50 hover:bg-[var(--dropdown-hover-bg)] cursor-pointer transition-colors"
+                            onclick="window.location.href='/dashboard/customers/contacts/{{ $contact->id }}'">
+                            <td class="py-3 px-2">
+                                <div class="flex items-center gap-3">
+                                    <div class="flex-shrink-0">
+                                        @php
+                                            $gravatarUrl = $contact->getGravatarUrl(28);
+                                        @endphp
+                                        <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs shadow-sm font-semibold overflow-hidden"
+                                            style="background-color: var(--table-avatar-bg); color: var(--table-avatar-text); border: 1px solid var(--table-avatar-border);">
+                                            @if($gravatarUrl)
+                                                <img src="{{ $gravatarUrl }}" 
+                                                     alt="{{ $contact->name }}"
+                                                     class="w-full h-full object-cover rounded-full"
+                                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                                <div class="w-full h-full flex items-center justify-center" style="display: none;">
+                                                    {{ $contact->initials() }}
+                                                </div>
+                                            @else
+                                                {{ $contact->initials() }}
+                                            @endif
+                                        </div>
+                                    </div>
+                                    <div class="font-medium">{{ $contact->name }}</div>
+                                </div>
+                            </td>
                             <td class="py-3 px-2 opacity-70">{{ $contact->position ?? '-' }}</td>
                             <td class="py-3 px-2 opacity-70">{{ $contact->emails[0] ?? '-' }}</td>
                             <td class="py-3 px-2 opacity-70">{{ $contact->phones[0] ?? '-' }}</td>

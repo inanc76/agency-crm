@@ -31,20 +31,48 @@ class UserSetupController extends Controller
     /**
      * Send welcome email with setup link
      */
+    /**
+     * Send welcome email with setup link
+     */
     public function sendWelcomeEmail(User $user)
     {
         try {
             // Generate password reset token
             $token = Password::createToken($user);
-            
+
             // Send welcome email
-            Mail::to($user->email)->send(new WelcomeUserMail($user, $token));
-            
+            Mail::to($user->email)->send(new WelcomeUserMail($user, $token, false)); // false = Welcome
+
             return response()->json([
                 'success' => true,
                 'message' => 'Hoş geldin maili başarıyla gönderildi.'
             ]);
-            
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Mail gönderilirken hata oluştu: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Send password reset email
+     */
+    public function sendPasswordResetEmail(User $user)
+    {
+        try {
+            // Generate password reset token
+            $token = Password::createToken($user);
+
+            // Send reset email (Using WelcomeUserMail with isReset=true)
+            Mail::to($user->email)->send(new WelcomeUserMail($user, $token, true)); // true = Reset
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Şifre sıfırlama maili başarıyla gönderildi.'
+            ]);
+
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -60,13 +88,13 @@ class UserSetupController extends Controller
     {
         // Validate token
         $email = $request->query('email');
-        
+
         if (!$email) {
             abort(404, 'Geçersiz kurulum linki.');
         }
 
         $user = User::where('email', $email)->first();
-        
+
         if (!$user) {
             abort(404, 'Kullanıcı bulunamadı.');
         }

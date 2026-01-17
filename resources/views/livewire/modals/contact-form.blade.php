@@ -138,6 +138,40 @@ class extends Component
                             ])
                         </div>
                         <div class="col-span-4 space-y-6">
+                            {{-- Profile Photo Card --}}
+                            @if($contactId)
+                                @php
+                                    $contact = \App\Models\Contact::find($contactId);
+                                    $gravatarUrl = $contact && $contact->email ? $contact->getGravatarUrl(256) : '';
+                                @endphp
+                                <div class="theme-card p-6 shadow-sm sticky top-6">
+                                    <h2 class="text-base font-bold mb-4 text-center text-skin-heading">Profil Fotoğrafı</h2>
+                                    
+                                    <div class="flex flex-col items-center">
+                                        {{-- Avatar Preview --}}
+                                        <div class="w-32 h-32 rounded-full border-4 border-[var(--card-bg)] shadow-md flex items-center justify-center mb-4 overflow-hidden relative group"
+                                            style="background-color: var(--table-avatar-bg); color: var(--table-avatar-text);">
+                                            @if($contact && $contact->email && $gravatarUrl)
+                                                <img src="{{ $gravatarUrl }}" 
+                                                     alt="{{ $name }}"
+                                                     class="w-full h-full object-cover rounded-full"
+                                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                            @endif
+                                            <div class="w-full h-full flex items-center justify-center text-2xl font-semibold" 
+                                                 style="{{ $contact && $contact->email && $gravatarUrl ? 'display: none;' : 'display: flex;' }}">
+                                                {{ $contact ? $contact->initials() : '' }}
+                                            </div>
+                                        </div>
+                                        
+                                        @if($contact && $contact->email)
+                                            <p class="text-xs text-center opacity-60 text-skin-base">
+                                                Gravatar: {{ $contact->email }}
+                                            </p>
+                                        @endif
+                                    </div>
+                                </div>
+                            @endif
+
                             <div class="theme-card p-6 shadow-sm sticky top-6">
                                 <h2 class="text-base font-bold mb-4 text-center text-skin-heading">Kayıt Bilgileri</h2>
                                 <div class="space-y-4">

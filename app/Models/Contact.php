@@ -139,4 +139,45 @@ class Contact extends Model
             ->where('entity_type', 'CONTACT')
             ->orderBy('created_at', 'desc');
     }
+
+    /**
+     * Get the contact's initials
+     */
+    public function initials(): string
+    {
+        return \Illuminate\Support\Str::of($this->name)
+            ->explode(' ')
+            ->take(2)
+            ->map(fn($word) => \Illuminate\Support\Str::substr($word, 0, 1))
+            ->implode('');
+    }
+
+    /**
+     * Get the contact's Gravatar URL
+     */
+    public function getGravatarUrl(int $size = 80): string
+    {
+        if (!$this->email) {
+            return '';
+        }
+        
+        $hash = md5(strtolower(trim($this->email)));
+        return "https://www.gravatar.com/avatar/{$hash}?s={$size}&d=404";
+    }
+
+    /**
+     * Check if contact has a Gravatar
+     */
+    public function hasGravatar(): bool
+    {
+        if (!$this->email) {
+            return false;
+        }
+        
+        $gravatarUrl = $this->getGravatarUrl();
+        
+        // Use get_headers to check if Gravatar exists (returns 200) or not (returns 404)
+        $headers = @get_headers($gravatarUrl);
+        return $headers && strpos($headers[0], '200') !== false;
+    }
 }

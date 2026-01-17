@@ -17,14 +17,16 @@ class WelcomeUserMail extends Mailable
     public User $user;
     public string $token;
     public string $setupUrl;
+    public bool $isReset;
 
     /**
      * Create a new message instance.
      */
-    public function __construct(User $user, string $token)
+    public function __construct(User $user, string $token, bool $isReset = false)
     {
         $this->user = $user;
         $this->token = $token;
+        $this->isReset = $isReset;
         $this->setupUrl = url('/setup-password/' . $token . '?email=' . urlencode($user->email));
     }
 
@@ -34,7 +36,9 @@ class WelcomeUserMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Hoş Geldiniz - Şifrenizi Belirleyin',
+            subject: $this->isReset
+            ? 'Şifre Sıfırlama İsteği'
+            : 'Hoş Geldiniz - Şifrenizi Belirleyin',
         );
     }
 
@@ -48,6 +52,7 @@ class WelcomeUserMail extends Mailable
             with: [
                 'user' => $this->user,
                 'setupUrl' => $this->setupUrl,
+                'isReset' => $this->isReset,
             ]
         );
     }

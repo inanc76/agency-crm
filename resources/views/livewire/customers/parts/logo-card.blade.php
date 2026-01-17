@@ -6,8 +6,14 @@
         {{-- Logo Preview --}}
         <div
             class="w-32 h-32 border-2 border-dashed border-[var(--card-border)] rounded-lg flex items-center justify-center mb-4 bg-[var(--card-bg)]/50 overflow-hidden">
-            @if($logo)
+            @if($logo && method_exists($logo, 'isPreviewable') && $logo->isPreviewable())
                 <img src="{{ $logo->temporaryUrl() }}" alt="Logo Preview" class="w-full h-full object-contain">
+            @elseif($logo)
+                <div class="flex flex-col items-center justify-center p-4 text-center h-full w-full">
+                    <x-mary-icon name="o-document" class="w-8 h-8 opacity-40 mb-2" />
+                    <span
+                        class="text-xs text-skin-base opacity-60 block truncate max-w-full px-2">{{ $logo->getClientOriginalName() }}</span>
+                </div>
             @elseif($logo_url)
                 <img src="{{ str_contains($logo_url, '/storage/') ? $logo_url : asset('storage' . $logo_url) }}" alt="Logo"
                     class="w-full h-full object-contain">

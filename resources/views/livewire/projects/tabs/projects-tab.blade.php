@@ -115,33 +115,27 @@ $resetFilters = function () {
                 data-testid="project-card"
                 class="theme-card p-5 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer group">
                 {{-- Header --}}
-                <div class="flex items-start justify-between mb-3 min-w-0">
-                    <div class="flex items-center gap-3 overflow-hidden min-w-0 flex-1 mr-2">
-                        @if($project->customer?->logo_url)
-                            <img src="{{ $project->customer->logo_url }}" alt=""
-                                class="w-10 h-10 rounded-lg object-cover flex-shrink-0">
-                        @else
-                            <div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0">
-                                <x-mary-icon name="o-building-office" class="w-5 h-5 text-slate-400" />
-                            </div>
-                        @endif
-                        <div class="min-w-0 flex-1">
-                            <div class="text-xs text-slate-500 font-mono truncate">{{ $project->project_id_code }}</div>
-                            <div
-                                class="font-semibold text-[var(--color-text-heading)] group-hover:text-[var(--header-bg)] transition-colors truncate">
-                                {{ $project->name }}
-                            </div>
-                        </div>
-                    </div>
-                    {{-- Customer Name in Top-Right --}}
-                    @if($project->customer)
-                        <div class="flex-shrink-0 max-w-[120px] ml-2">
-                            <div class="text-[10px] text-slate-400 font-medium truncate bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100"
-                                title="{{ $project->customer->name }}">
-                                {{ $project->customer->name }}
-                            </div>
+                <div class="flex items-center gap-3 mb-3 min-w-0">
+                    @if($project->customer?->logo_url)
+                        <img src="{{ $project->customer->logo_url }}" alt=""
+                            class="w-10 h-10 rounded-lg object-cover flex-shrink-0">
+                    @else
+                        <div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0">
+                            <x-mary-icon name="o-building-office" class="w-5 h-5 text-slate-400" />
                         </div>
                     @endif
+
+                    <div class="min-w-0 flex-1">
+                        @if($project->customer)
+                            <div class="text-xs text-slate-500 font-medium truncate mb-0.5">
+                                {{ $project->customer->name }}
+                            </div>
+                        @endif
+                        <div
+                            class="font-semibold text-[var(--color-text-heading)] group-hover:text-[var(--header-bg)] transition-colors truncate">
+                            {{ $project->name }}
+                        </div>
+                    </div>
                 </div>
 
 
@@ -184,13 +178,13 @@ $resetFilters = function () {
                         @if($project->status)
                             <span
                                 class="px-2 py-0.5 rounded-full text-[10px] font-semibold whitespace-nowrap border
-                                                                                                                                                                                                                                                             {{ $project->status->color_class ?? 'bg-slate-50 text-slate-600 border-slate-100' }}
-                                                                                                                                                                                                                                                        ">
+                                                                                                                                                                                                                                                                         {{ $project->status->color_class ?? 'bg-slate-50 text-slate-600 border-slate-100' }}
+                                                                                                                                                                                                                                                                    ">
                                 {{ $project->status->display_label }}
                             </span>
                         @endif
 
-                        <div class="text-xs font-bold {{ $colorClass }} flex items-center">
+                        <div class="text-xs font-bold {{ $colorClass }} flex items-center ml-auto">
                             <x-mary-icon name="o-clock" class="w-4 h-4 mr-1" />
                             {{ $text }}
                         </div>
