@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\HasBlameable;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════
@@ -47,9 +48,15 @@ class Asset extends Model
         'url'
     ];
 
-    public function customer()
+    public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    public function type_item(): BelongsTo
+    {
+        return $this->belongsTo(ReferenceItem::class, 'type', 'key')
+            ->where('category_key', 'ASSET_TYPE');
     }
 
     /**

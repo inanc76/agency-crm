@@ -6,6 +6,7 @@ use App\Traits\HasBlameable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -162,6 +163,45 @@ class Offer extends Model
     public function attachments()
     {
         return $this->hasMany(OfferAttachment::class);
+    }
+
+    /**
+     * Get the reference item for the current status.
+     */
+    public function status_item(): BelongsTo
+    {
+        return $this->belongsTo(ReferenceItem::class, 'status', 'key')
+            ->where('category_key', 'OFFER_STATUS');
+    }
+
+    /**
+     * Get the reference item for the current currency.
+     */
+    public function currency_item(): BelongsTo
+    {
+        return $this->belongsTo(ReferenceItem::class, 'currency', 'key')
+            ->where('category_key', 'CURRENCY');
+    }
+
+    /**
+     * Get the reference item for the current VAT rate.
+     * Note: Since the DB stores a decimal, we find the matching reference item.
+     */
+    public function vat_item()
+    {
+        return ReferenceItem::where('category_key', 'VAT_RATES')
+            ->get()
+            ->first(function ($item) {
+                // Try from metadata if available
+                if (isset($item->metadata['rate'])) {
+                    return (float) $item->metadata['rate'] === (float) $this->vat_rate;
+                }
+                // Fallback to parsing display_label or key
+                if (preg_match('/(\d+)/', $item->display_label, $matches)) {
+                    return (float) $matches[1] === (float) $this->vat_rate;
+                }
+                return false;
+            });
     }
 
     protected static function booted(): void

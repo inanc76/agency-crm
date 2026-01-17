@@ -69,7 +69,7 @@ new class extends Component {
     private function getQuery(): Builder
     {
         return Service::query()
-            ->with(['customer', 'asset'])
+            ->with(['customer', 'asset', 'status_item', 'category_item'])
             ->when($this->search, function (Builder $query) {
                 $query->where('service_name', 'ilike', '%' . $this->search . '%')
                     ->orWhereHas('customer', function ($q) {
@@ -103,40 +103,20 @@ new class extends Component {
         $categoryOptions = ReferenceItem::where('category_key', 'SERVICE_CATEGORY')->where('is_active', true)->orderBy('sort_order')->get();
         $statusOptions = ReferenceItem::where('category_key', 'SERVICE_STATUS')->where('is_active', true)->orderBy('sort_order')->get();
 
-        // Prepare map with both label and color
-        $statusMap = [];
-        foreach ($statusOptions as $opt) {
-            $colorId = $opt->metadata['color'] ?? 'gray';
-            $statusMap[$opt->key] = [
-                'label' => $opt->display_label,
-                'class' => $service->getColorClasses($colorId)
-            ];
-        }
-
-        $categoryMap = [];
-        foreach ($categoryOptions as $opt) {
-            $colorId = $opt->metadata['color'] ?? 'gray';
-            $categoryMap[$opt->key] = [
-                'label' => $opt->display_label,
-                'class' => $service->getColorClasses($colorId)
-            ];
-        }
-
         return [
             'services' => $this->getQuery()->paginate($this->perPage),
             'categoryOptions' => $categoryOptions,
-            'categoryMap' => $categoryMap,
             'statusOptions' => $statusOptions,
-            'statusMap' => $statusMap,
         ];
     }
 }; ?>
 
-{{-- 
-    SECTION: Services Tab Main Container
-    Mimarın Notu: Bu ana sekme Service modeli ile konuşur ve HasCustomerActions trait'ini kullanır.
-    İş Mantığı Şerhi: ReferenceDataService ile kategori ve durum verilerini alır, WithPagination trait'i ile sayfalama yapar.
-    Mühür Koruması: Tüm değişkenler explicit olarak partials'a aktarılır.
+{{--
+SECTION: Services Tab Main Container
+Mimarın Notu: Bu ana sekme Service modeli ile konuşur ve HasCustomerActions trait'ini kullanır.
+İş Mantığı Şerhi: ReferenceDataService ile kategori ve durum verilerini alır, WithPagination trait'i ile sayfalama
+yapar.
+Mühür Koruması: Tüm değişkenler explicit olarak partials'a aktarılır.
 --}}
 <div>
     {{-- SECTION: Summary & Filters - Özet kartları ve filtreleme alanı --}}
@@ -156,8 +136,6 @@ new class extends Component {
         'services' => $services,
         'selected' => $selected,
         'selectAll' => $selectAll,
-        'statusMap' => $statusMap,
-        'categoryMap' => $categoryMap,
         'perPage' => $perPage
     ])
 </div>

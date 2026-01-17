@@ -14,15 +14,6 @@
         $filteredProjects = collect($relatedProjects)->when($projectsStatusFilter, function ($collection) {
             return $collection->where('status_id', $this->projectsStatusFilter);
         });
-
-        // Status Badge Colors Map
-        $statusColors = [
-            'project_active' => 'bg-blue-50 text-blue-600 border-blue-100',
-            'project_completed' => 'bg-green-50 text-green-600 border-green-100',
-            'project_cancelled' => 'bg-red-50 text-red-600 border-red-100',
-            'project_on_hold' => 'bg-yellow-50 text-yellow-600 border-yellow-100',
-            'project_draft' => 'bg-slate-50 text-slate-600 border-slate-100',
-        ];
     @endphp
 
     @if($filteredProjects->count() > 0)
@@ -40,19 +31,18 @@
                 <tbody>
                     @foreach($filteredProjects as $project)
                         @php
-                            $statusKey = $project['status']['key'] ?? 'project_draft';
-                            $statusLabel = $project['status']['display_label'] ?? 'Taslak';
-                            $badgeClass = $statusColors[$statusKey] ?? $statusColors['project_draft'];
+                            $statusLabel = $project->status->display_label ?? 'Taslak';
+                            $badgeClass = $project->status->color_class ?? 'bg-slate-50 text-slate-600 border-slate-100';
                         @endphp
                         <tr class="border-b border-[var(--card-border)]/50 hover:bg-[var(--dropdown-hover-bg)] cursor-pointer transition-colors"
-                            onclick="window.location.href='/dashboard/projects/{{ $project['id'] }}'">
-                            <td class="py-3 px-2 font-mono text-xs">{{ $project['project_id_code'] }}</td>
-                            <td class="py-3 px-2 font-medium">{{ $project['name'] }}</td>
+                            onclick="window.location.href='/dashboard/projects/{{ $project->id }}'">
+                            <td class="py-3 px-2 font-mono text-xs">{{ $project->project_id_code }}</td>
+                            <td class="py-3 px-2 font-medium">{{ $project->name }}</td>
                             <td class="py-3 px-2 text-center opacity-70">
-                                {{ $project['start_date'] ? \Carbon\Carbon::parse($project['start_date'])->format('d.m.Y') : '-' }}
+                                {{ $project->start_date ? $project->start_date->format('d.m.Y') : '-' }}
                             </td>
                             <td class="py-3 px-2 text-center opacity-70">
-                                {{ $project['target_end_date'] ? \Carbon\Carbon::parse($project['target_end_date'])->format('d.m.Y') : '-' }}
+                                {{ $project->target_end_date ? $project->target_end_date->format('d.m.Y') : '-' }}
                             </td>
                             <td class="py-3 px-2 text-center">
                                 <span class="px-2 py-0.5 rounded text-xs font-medium border {{ $badgeClass }}">

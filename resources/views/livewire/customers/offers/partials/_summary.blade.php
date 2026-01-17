@@ -35,7 +35,14 @@ $valid_until (string), $items (array)
         @endif
 
         <div class="flex justify-between">
-            <span class="opacity-60">KDV (%{{ (int) $vat_rate }}):</span>
+            @php 
+                                $vatLabel = isset($offerModel) ? ($offerModel->vat_item()->display_label ?? null) : null;
+                if (!$vatLabel) {
+                    $vatObj = collect($vatRates)->firstWhere('rate', $vat_rate);
+                    $vatLabel = $vatObj['label'] ?? '%' . (int) $vat_rate;
+                }
+            @endphp
+            <span class="opacity-60">KDV ({{ $vatLabel }}):</span>
             <span class="font-medium">{{ number_format($totals['vat'], 0, ',', '.') }}
                 {{ $currency }}</span>
         </div>
@@ -52,9 +59,9 @@ $valid_until (string), $items (array)
 
         <div class="flex justify-between pt-3 border-t-2 border-slate-300 text-base font-bold"
             class="text-skin-heading">
-            <span>Genel Toplam:</span>
-            <span>{{ number_format($totals['total'], 0, ',', '.') }} {{ $currency }}</span>
-        </div>
+        <span>Genel Toplam:</span>
+        <span>{{ number_format($totals['total'], 0, ',', '.') }} {{ $currency }}</span>
+    </div>
     </div>
 
     @if(!$isViewMode && count($sections) > 0)

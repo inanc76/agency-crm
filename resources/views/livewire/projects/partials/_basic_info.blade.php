@@ -36,8 +36,15 @@
         <div>
             <label class="block text-xs font-medium mb-1 opacity-60 text-skin-base">Durum *</label>
             @if($isViewMode)
-                @php $statusLabel = collect($statuses)->firstWhere('id', $status_id)['display_label'] ?? '-'; @endphp
-                <div class="text-sm font-medium text-skin-base">{{ $statusLabel }}</div>
+                @php $statusObj = collect($statuses)->firstWhere('id', $status_id); @endphp
+                @if($statusObj)
+                    <span
+                        class="px-2.5 py-1 rounded-md text-xs font-bold border {{ $statusObj['color_class'] ?? 'bg-slate-50 text-slate-600 border-slate-100' }}">
+                        {{ $statusObj['display_label'] }}
+                    </span>
+                @else
+                    <div class="text-sm font-medium text-skin-base">-</div>
+                @endif
             @else
                 <select wire:model="status_id" class="select w-full">
                     @foreach($statuses as $status)
@@ -65,8 +72,15 @@
         <div>
             <label class="block text-xs font-medium mb-1 opacity-60 text-skin-base">Proje Tipi *</label>
             @if($isViewMode)
-                @php $typeLabel = collect($projectTypes)->firstWhere('id', $type_id)['display_label'] ?? '-'; @endphp
-                <div class="text-sm font-medium text-skin-base">{{ $typeLabel }}</div>
+                @php $typeObj = collect($projectTypes)->firstWhere('id', $type_id); @endphp
+                @if($typeObj)
+                    <span
+                        class="px-2.5 py-1 rounded-md text-xs font-bold border {{ $typeObj['color_class'] ?? 'bg-slate-50 text-slate-600 border-slate-100' }}">
+                        {{ $typeObj['display_label'] }}
+                    </span>
+                @else
+                    <div class="text-sm font-medium text-skin-base">-</div>
+                @endif
             @else
                 <select wire:model="type_id" class="select w-full">
                     <option value="">Proje Tipi Seçin</option>
@@ -93,7 +107,8 @@
 
             @if($isViewMode)
                 <div class="text-sm font-medium text-skin-base">
-                    {{ $start_date ? \Carbon\Carbon::parse($start_date)->format('d.m.Y') : '-' }}</div>
+                    {{ $start_date ? \Carbon\Carbon::parse($start_date)->format('d.m.Y') : '-' }}
+                </div>
             @else
                 <div class="relative">
                     <input type="date" wire:model="start_date" class="input w-full" @if($auto_calculate_start_date) readonly
@@ -125,7 +140,8 @@
 
             @if($isViewMode)
                 <div class="text-sm font-medium text-skin-base">
-                    {{ $target_end_date ? \Carbon\Carbon::parse($target_end_date)->format('d.m.Y') : '-' }}</div>
+                    {{ $target_end_date ? \Carbon\Carbon::parse($target_end_date)->format('d.m.Y') : '-' }}
+                </div>
             @else
                 <div class="relative">
                     <input type="date" wire:model="target_end_date" class="input w-full" @if($auto_calculate_end_date)

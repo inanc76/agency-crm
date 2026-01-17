@@ -28,8 +28,8 @@ trait HasContactActions
 
     // Reference Data
     public $customers = [];
+    public $contactStatuses = [];
     public $genders = [];
-
     public function mount(?string $contact = null): void
     {
         // Load Customers
@@ -38,12 +38,29 @@ trait HasContactActions
             ->map(fn($c) => ['id' => $c->id, 'name' => $c->name])
             ->toArray();
 
-        // Load Genders (Static for now or from Reference)
-        $this->genders = [
-            ['id' => 'male', 'name' => 'Erkek'],
-            ['id' => 'female', 'name' => 'Kadın'],
-            ['id' => 'other', 'name' => 'Diğer'],
-        ];
+        // Load Contact Statuses
+        $this->contactStatuses = \App\Models\ReferenceItem::where('category_key', 'CONTACT_STATUS')
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->get(['id', 'display_label', 'key', 'metadata'])
+            ->map(fn($i) => ['id' => $i->id, 'display_label' => $i->display_label, 'key' => $i->key, 'color_class' => $i->color_class])
+            ->toArray();
+
+        // Load Genders from Reference Data if exists, fallback to static
+        $this->genders = \App\Models\ReferenceItem::where('category_key', 'GENDER')
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->get(['id', 'display_label', 'key'])
+            ->map(fn($i) => ['id' => $i->key, 'name' => $i->display_label])
+            ->toArray();
+
+        if (empty($this->genders)) {
+            $this->genders = [
+                ['id' => 'male', 'name' => 'Erkek'],
+                ['id' => 'female', 'name' => 'Kadın'],
+                ['id' => 'other', 'name' => 'Diğer'],
+            ];
+        }
 
         // If contact ID is provided, load data
         if ($contact) {
@@ -57,6 +74,9 @@ trait HasContactActions
             $customerId = request()->query('customer');
             if ($customerId && collect($this->customers)->firstWhere('id', $customerId)) {
                 $this->customer_id = $customerId;
+            }
+            if (!empty($this->contactStatuses)) {
+                $this->status = $this->contactStatuses[0]['key'];
             }
         }
     }
@@ -100,11 +120,14 @@ trait HasContactActions
             $this->authorize('contacts.create');
         }
 
+        $statusKeys = collect($this->contactStatuses)->pluck('key')->implode(',');
+        $genderKeys = collect($this->genders)->pluck('id')->implode(',');
+
         $this->validate([
             'customer_id' => 'required|exists:customers,id',
             'name' => 'required|string|min:2|max:150',
-            'status' => 'required|in:WORKING,LEFT',
-            'gender' => 'nullable|string|in:male,female,other',
+            'status' => "required|in:{$statusKeys}",
+            'gender' => "nullable|string|in:{$genderKeys}",
             'position' => 'nullable|string|max:100',
             'birth_date' => 'nullable|date|before:today',
             'emails' => 'array',

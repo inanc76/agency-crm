@@ -56,19 +56,20 @@
         <div>
             <label class="block text-xs font-medium mb-1 opacity-60">Teklif Durumu</label>
             @if($isViewMode)
-                <div class="text-sm font-medium">
-                    @if($status === 'DRAFT') Taslak
-                    @elseif($status === 'SENT') Gönderildi
-                    @elseif($status === 'ACCEPTED') Kabul Edildi
-                    @else Reddedildi
-                    @endif
-                </div>
+                @php $statusObj = collect($offerStatuses)->firstWhere('key', $status); @endphp
+                @if($statusObj)
+                    <span
+                        class="px-2 py-0.5 rounded text-[10px] font-bold border {{ $statusObj['color_class'] ?? 'bg-slate-50 text-slate-500' }}">
+                        {{ $statusObj['display_label'] }}
+                    </span>
+                @else
+                    <div class="text-sm font-medium">{{ $status }}</div>
+                @endif
             @else
                 <select wire:model="status" class="select w-full">
-                    <option value="DRAFT">Taslak</option>
-                    <option value="SENT">Gönderildi</option>
-                    <option value="ACCEPTED">Kabul Edildi</option>
-                    <option value="REJECTED">Reddedildi</option>
+                    @foreach($offerStatuses as $s)
+                        <option value="{{ $s['key'] }}">{{ $s['display_label'] }}</option>
+                    @endforeach
                 </select>
             @endif
         </div>
@@ -97,13 +98,16 @@
         <div>
             <label class="block text-xs font-medium mb-1 opacity-60">Para Birimi</label>
             @if($isViewMode)
-                <div class="text-sm font-medium">{{ $currency }}
-                </div>
+                @php $currencyRef = $offerModel->currency_item; @endphp
+                <span
+                    class="px-2 py-0.5 rounded text-[10px] font-bold border {{ $currencyRef->color_class ?? 'bg-gray-100 text-gray-800 border-gray-200' }}">
+                    {{ $currencyRef->display_label ?? $currency }}
+                </span>
             @else
                 <select wire:model.live="currency" class="select w-full bg-white">
-                    <option value="TRY">TRY</option>
-                    <option value="USD">USD</option>
-                    <option value="EUR">EUR</option>
+                    @foreach($currencies as $c)
+                        <option value="{{ $c['id'] }}">{{ $c['id'] }} ({{ $c['name'] }})</option>
+                    @endforeach
                 </select>
             @endif
         </div>
@@ -132,9 +136,11 @@
         <div>
             <label class="block text-xs font-medium mb-1 opacity-60">KDV Oranı</label>
             @if($isViewMode)
-                <div class="text-sm font-medium">
-                    %{{ $vat_rate }}
-                </div>
+                @php $vatRef = $offerModel->vat_item(); @endphp
+                <span
+                    class="px-2 py-0.5 rounded text-[10px] font-bold border {{ $vatRef->color_class ?? 'bg-gray-100 text-gray-800 border-gray-200' }}">
+                    {{ $vatRef->display_label ?? '%' . (int) $vat_rate }}
+                </span>
             @else
                 <select wire:model.live="vat_rate"
                     class="select select-sm w-full bg-white border-slate-200 group-hover:border-slate-300">

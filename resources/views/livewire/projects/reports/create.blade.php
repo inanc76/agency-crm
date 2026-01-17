@@ -168,7 +168,7 @@ new class extends Component {
         $this->assignedHours = null;
         $this->selectedProject = null;
         if ($this->project_id && \Illuminate\Support\Str::isUuid($this->project_id)) {
-            $this->selectedProject = Project::with('phases.modules')->find($this->project_id);
+            $this->selectedProject = Project::with(['phases.modules', 'type'])->find($this->project_id);
             if ($this->selectedProject) {
                 $total = 0;
                 foreach ($this->selectedProject->phases as $ph)

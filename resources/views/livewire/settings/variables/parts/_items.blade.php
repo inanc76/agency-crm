@@ -16,7 +16,7 @@
                             <div class="flex items-center gap-2 flex-wrap">
                                 @if(isset($item->metadata['color']))
                                     <span
-                                        class="px-3 py-1 rounded-full text-[10px] font-bold {{ $this->getTailwindColor($item->metadata['color']) }} border border-transparent uppercase tracking-wider">
+                                        class="px-3 py-1 rounded-full text-[10px] font-bold {{ $item->color_class }} border border-transparent uppercase tracking-wider">
                                         {{ $item->display_label }}
                                     </span>
                                 @else

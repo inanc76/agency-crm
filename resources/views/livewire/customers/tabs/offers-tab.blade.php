@@ -64,7 +64,7 @@ new class extends Component {
     private function getQuery(): Builder
     {
         return Offer::query()
-            ->with('customer')
+            ->with(['customer', 'status_item'])
             ->withCount('items')
             ->when($this->search, function (Builder $query) {
                 $query->where('title', 'ilike', '%' . $this->search . '%')
@@ -91,24 +91,16 @@ new class extends Component {
             ->orderBy('created_at', 'desc');
     }
 
-    public function with(ReferenceDataService $service): array
+    public function with(): array
     {
-        $statusOptions = ReferenceItem::where('category_key', 'OFFER_STATUS')->where('is_active', true)->orderBy('sort_order')->get();
-
-        // Prepare map with both label and color
-        $statusMap = [];
-        foreach ($statusOptions as $opt) {
-            $colorId = $opt->metadata['color'] ?? 'gray';
-            $statusMap[$opt->key] = [
-                'label' => $opt->display_label,
-                'class' => $service->getColorClasses($colorId)
-            ];
-        }
+        $statusOptions = ReferenceItem::where('category_key', 'OFFER_STATUS')
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->get(['id', 'display_label', 'key']);
 
         return [
             'offers' => $this->getQuery()->paginate($this->perPage),
             'statusOptions' => $statusOptions,
-            'statusMap' => $statusMap,
         ];
     }
 }; ?>
@@ -199,7 +191,7 @@ new class extends Component {
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                     @forelse($offers as $offer)
-                        @include('livewire.customers.tabs.partials._offers-row', ['offer' => $offer, 'statusMap' => $statusMap, 'selected' => $selected])
+                        @include('livewire.customers.tabs.partials._offers-row', ['offer' => $offer, 'selected' => $selected])
                     @empty
                         <tr>
                             <td colspan="8" class="px-6 py-12 text-center text-skin-muted">

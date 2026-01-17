@@ -67,7 +67,7 @@ new class extends Component {
     private function getQuery(): Builder
     {
         return Contact::query()
-            ->with('customer')
+            ->with(['customer', 'status_item'])
             ->when($this->customerId, fn($q) => $q->where('customer_id', $this->customerId))
             ->when($this->search, function (Builder $query) {
                 $query->where('name', 'like', '%' . $this->search . '%')
@@ -97,29 +97,18 @@ new class extends Component {
     public function with(ReferenceDataService $service): array
     {
         $statusOptions = ReferenceItem::where('category_key', 'CONTACT_STATUS')->where('is_active', true)->orderBy('sort_order')->get();
-        // Prepare map with both label and color
-        $statusMap = [];
-        foreach ($statusOptions as $opt) {
-            $colorId = $opt->metadata['color'] ?? 'gray';
-            $statusMap[$opt->key] = [
-                'label' => $opt->display_label,
-                'class' => $service->getColorClasses($colorId)
-            ];
-        }
-
         return [
             'contacts' => $this->getQuery()->paginate($this->perPage),
             'statusOptions' => $statusOptions,
-            'statusMap' => $statusMap,
         ];
     }
 }; ?>
 
-{{-- 
-    SECTION: Contacts Tab Main Container
-    Mimarın Notu: Bu ana sekme Contact modeli ile konuşur ve HasCustomerActions trait'ini kullanır.
-    İş Mantığı Şerhi: ReferenceDataService ile durum verilerini alır, WithPagination trait'i ile sayfalama yapar.
-    Mühür Koruması: Tüm değişkenler explicit olarak partials'a aktarılır.
+{{--
+SECTION: Contacts Tab Main Container
+Mimarın Notu: Bu ana sekme Contact modeli ile konuşur ve HasCustomerActions trait'ini kullanır.
+İş Mantığı Şerhi: ReferenceDataService ile durum verilerini alır, WithPagination trait'i ile sayfalama yapar.
+Mühür Koruması: Tüm değişkenler explicit olarak partials'a aktarılır.
 --}}
 <div>
     {{-- SECTION: Actions & Filters - Yeni kişi ekleme ve toplu işlem butonları --}}
@@ -137,7 +126,7 @@ new class extends Component {
         'contacts' => $contacts,
         'selected' => $selected,
         'selectAll' => $selectAll,
-        'statusMap' => $statusMap,
+        'statusOptions' => $statusOptions,
         'perPage' => $perPage
     ])
 </div>

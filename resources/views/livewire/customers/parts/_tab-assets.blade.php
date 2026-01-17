@@ -18,13 +18,21 @@
                 <tbody>
                     @foreach($relatedAssets as $asset)
                         <tr class="border-b border-[var(--card-border)]/50 hover:bg-[var(--dropdown-hover-bg)] cursor-pointer transition-colors"
-                            onclick="window.location.href='/dashboard/customers/assets/{{ $asset['id'] }}'">
-                            <td class="py-3 px-2 font-medium">{{ $asset['name'] }}</td>
-                            <td class="py-3 px-2 opacity-70">{{ $asset['type'] }}</td>
+                            onclick="window.location.href='/dashboard/customers/assets/{{ $asset->id }}'">
+                            <td class="py-3 px-2 font-medium">{{ $asset->name }}</td>
+                            <td class="py-3 px-2">
+                                @php
+                                    $typeLabel = $asset->type_item->label ?? $asset->type ?? 'Diğer';
+                                    $typeClass = $asset->type_item->color_class ?? 'bg-skin-hover text-skin-muted border border-skin-light';
+                                @endphp
+                                <span class="px-2 py-0.5 rounded text-xs font-medium border {{ $typeClass }}">
+                                    {{ $typeLabel }}
+                                </span>
+                            </td>
                             <td class="py-3 px-2 opacity-70">
-                                @if($asset['url'])
-                                    <a href="{{ $asset['url'] }}" target="_blank" class="text-skin-primary hover:underline"
-                                        onclick="event.stopPropagation();">{{ Str::limit($asset['url'], 40) }}</a>
+                                @if($asset->url)
+                                    <a href="{{ $asset->url }}" target="_blank" class="text-skin-primary hover:underline"
+                                        onclick="event.stopPropagation();">{{ Str::limit($asset->url, 40) }}</a>
                                 @else
                                     -
                                 @endif

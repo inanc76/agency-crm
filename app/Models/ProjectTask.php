@@ -89,6 +89,12 @@ class ProjectTask extends Model
         return $this->belongsTo(ReferenceItem::class, 'status_id');
     }
 
+    public function priority_item(): BelongsTo
+    {
+        return $this->belongsTo(ReferenceItem::class, 'priority', 'key')
+            ->where('category_key', 'TASK_PRIORITY');
+    }
+
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'task_user', 'project_task_id')

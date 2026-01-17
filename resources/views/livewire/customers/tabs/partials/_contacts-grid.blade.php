@@ -85,9 +85,8 @@ Mühür Koruması: Table styling, gender icons ve hover effects korunmalıdır.
                         </td>
                         <td class="px-6 py-4">
                             @php
-                                $statusData = $statusMap[$contact->status] ?? null;
-                                $statusLabel = $statusData['label'] ?? $contact->status;
-                                $statusClass = $statusData['class'] ?? 'bg-skin-hover text-skin-muted border border-skin-light';
+                                $statusLabel = $contact->status_item->label ?? $contact->status;
+                                $statusClass = $contact->status_item->color_class ?? 'bg-skin-hover text-skin-muted border border-skin-light';
                             @endphp
                             <span
                                 class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border {{ $statusClass }}">

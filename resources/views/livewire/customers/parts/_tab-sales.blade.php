@@ -14,12 +14,12 @@
                 <tbody>
                     @foreach($relatedSales as $sale)
                         <tr class="border-b border-[var(--card-border)]/50 hover:bg-[var(--dropdown-hover-bg)] transition-colors">
-                            <td class="py-3 px-2 font-medium">{{ $sale['number'] ?? $sale['id'] }}</td>
+                            <td class="py-3 px-2 font-medium">{{ $sale->number ?? $sale->id }}</td>
                             <td class="py-3 px-2 text-center opacity-70 text-xs font-mono">
-                                {{ \Carbon\Carbon::parse($sale['created_at'])->format('d.m.Y') }}</td>
+                                {{ $sale->created_at->format('d.m.Y') }}</td>
                             <td class="py-3 px-2 text-right font-medium">
-                                {{ number_format($sale['total_amount'] ?? 0, 2) }}
-                                {{ $sale['currency'] ?? 'TRY' }}</td>
+                                {{ number_format($sale->total_amount ?? 0, 2) }}
+                                {{ $sale->currency ?? 'TRY' }}</td>
                         </tr>
                     @endforeach
                 </tbody>

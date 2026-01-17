@@ -33,13 +33,20 @@ VALIDASYON ŞERHİ (V10):
         <div>
             <label class="block text-xs font-medium mb-1 opacity-60">Durum *</label>
             @if($isViewMode)
-                <div class="text-sm font-medium">
-                    {{ $status === 'WORKING' ? 'Çalışıyor' : 'Ayrıldı' }}
-                </div>
+                @php $statusObj = collect($contactStatuses)->firstWhere('key', $status); @endphp
+                @if($statusObj)
+                    <span
+                        class="px-2 py-0.5 rounded text-[10px] font-bold border {{ $statusObj['color_class'] ?? 'bg-slate-50 text-slate-500' }}">
+                        {{ $statusObj['display_label'] }}
+                    </span>
+                @else
+                    <div class="text-sm font-medium">{{ $status }}</div>
+                @endif
             @else
                 <select wire:model="status" class="select w-full">
-                    <option value="WORKING">Çalışıyor</option>
-                    <option value="LEFT">Ayrıldı</option>
+                    @foreach($contactStatuses as $s)
+                        <option value="{{ $s['key'] }}">{{ $s['display_label'] }}</option>
+                    @endforeach
                 </select>
                 @error('status') <span class="text-[var(--color-danger)] text-xs">{{ $message }}</span> @enderror
             @endif

@@ -20,15 +20,18 @@
                 <tbody>
                     @foreach($relatedContacts as $contact)
                         <tr class="border-b border-[var(--card-border)]/50 hover:bg-[var(--dropdown-hover-bg)] cursor-pointer transition-colors"
-                            onclick="window.location.href='/dashboard/customers/contacts/{{ $contact['id'] }}'">
-                            <td class="py-3 px-2 font-medium">{{ $contact['name'] }}</td>
-                            <td class="py-3 px-2 opacity-70">{{ $contact['position'] ?? '-' }}</td>
-                            <td class="py-3 px-2 opacity-70">{{ $contact['emails'][0] ?? '-' }}</td>
-                            <td class="py-3 px-2 opacity-70">{{ $contact['phones'][0] ?? '-' }}</td>
+                            onclick="window.location.href='/dashboard/customers/contacts/{{ $contact->id }}'">
+                            <td class="py-3 px-2 font-medium">{{ $contact->name }}</td>
+                            <td class="py-3 px-2 opacity-70">{{ $contact->position ?? '-' }}</td>
+                            <td class="py-3 px-2 opacity-70">{{ $contact->emails[0] ?? '-' }}</td>
+                            <td class="py-3 px-2 opacity-70">{{ $contact->phones[0] ?? '-' }}</td>
                             <td class="py-3 px-2 text-center">
-                                <span
-                                    class="px-2 py-0.5 rounded text-xs font-medium {{ $contact['status'] === 'WORKING' ? 'bg-[var(--color-success)]/10 text-[var(--color-success)]' : 'bg-[var(--dropdown-hover-bg)] text-[var(--color-text-muted)]' }}">
-                                    {{ $contact['status'] === 'WORKING' ? 'Çalışıyor' : 'Ayrıldı' }}
+                                @php
+                                    $statusLabel = $contact->status_item->label ?? $contact->status ?? 'Ayrıldı';
+                                    $statusClass = $contact->status_item->color_class ?? 'bg-[var(--dropdown-hover-bg)] text-[var(--color-text-muted)]';
+                                @endphp
+                                <span class="px-2 py-0.5 rounded text-xs font-medium {{ $statusClass }}">
+                                    {{ $statusLabel }}
                                 </span>
                             </td>
                         </tr>

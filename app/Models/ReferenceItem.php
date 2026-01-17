@@ -60,9 +60,28 @@ class ReferenceItem extends Model
         'metadata' => 'array',
     ];
 
+    protected $appends = ['color_class', 'label'];
+
     public function category(): BelongsTo
     {
         // Relationship links 'category_key' on this model to 'key' on ReferenceCategory
         return $this->belongsTo(ReferenceCategory::class, 'category_key', 'key');
+    }
+
+    /**
+     * Get the dynamic Tailwind color classes based on metadata.
+     */
+    public function getColorClassAttribute(): string
+    {
+        $color = $this->metadata['color'] ?? 'gray';
+        return app(\App\Services\ReferenceDataService::class)->getColorClasses($color);
+    }
+
+    /**
+     * Alias for display_label to maintain consistency in UI.
+     */
+    public function getLabelAttribute(): string
+    {
+        return (string) $this->display_label;
     }
 }

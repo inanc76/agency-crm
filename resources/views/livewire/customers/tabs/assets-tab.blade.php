@@ -64,7 +64,7 @@ new class extends Component {
     private function getQuery(): Builder
     {
         return Asset::query()
-            ->with('customer')
+            ->with(['customer', 'type_item'])
             ->when($this->search, function (Builder $query) {
                 $query->where('name', 'ilike', '%' . $this->search . '%')
                     ->orWhereHas('customer', function ($q) {
@@ -90,23 +90,16 @@ new class extends Component {
             ->orderBy('name');
     }
 
-    public function with(ReferenceDataService $service): array
+    public function with(): array
     {
-        $typeOptions = ReferenceItem::where('category_key', 'ASSET_TYPE')->where('is_active', true)->orderBy('sort_order')->get();
-        // Prepare map with both label and color
-        $typeMap = [];
-        foreach ($typeOptions as $opt) {
-            $colorId = $opt->metadata['color'] ?? 'gray';
-            $typeMap[$opt->key] = [
-                'label' => $opt->display_label,
-                'class' => $service->getColorClasses($colorId)
-            ];
-        }
+        $typeOptions = ReferenceItem::where('category_key', 'ASSET_TYPE')
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->get(['id', 'display_label', 'key']);
 
         return [
             'assets' => $this->getQuery()->paginate($this->perPage),
             'typeOptions' => $typeOptions,
-            'typeMap' => $typeMap,
         ];
     }
 }; ?>
@@ -172,7 +165,7 @@ new class extends Component {
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                     @forelse($assets as $asset)
-                        @include('livewire.customers.tabs.partials._assets-row', ['asset' => $asset, 'typeMap' => $typeMap, 'selected' => $selected])
+                        @include('livewire.customers.tabs.partials._assets-row', ['asset' => $asset, 'selected' => $selected])
                     @empty
                         <tr>
                             <td colspan="5" class="px-6 py-12 text-center text-skin-muted">

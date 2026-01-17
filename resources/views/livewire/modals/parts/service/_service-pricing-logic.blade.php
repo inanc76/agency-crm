@@ -82,13 +82,20 @@ VALIDASYON (V10):
                 <div>
                     <label class="block text-xs font-medium mb-1 opacity-60">Durum *</label>
                     @if($isViewMode)
-                        <div class="badge {{ $service['status'] === 'ACTIVE' ? 'badge-success' : 'badge-ghost' }} gap-2">
-                            {{ $service['status'] === 'ACTIVE' ? 'Aktif' : 'Pasif' }}
-                        </div>
+                        @php $statusObj = collect($serviceStatuses)->firstWhere('key', $service['status']); @endphp
+                        @if($statusObj)
+                            <span
+                                class="px-2 py-0.5 rounded text-[10px] font-bold border {{ $statusObj['color_class'] ?? 'bg-slate-50 text-slate-500' }}">
+                                {{ $statusObj['display_label'] }}
+                            </span>
+                        @else
+                            <div class="text-sm font-medium">{{ $service['status'] }}</div>
+                        @endif
                     @else
                         <select wire:model="services.{{ $index }}.status" class="select w-full">
-                            <option value="ACTIVE">Aktif</option>
-                            <option value="PASSIVE">Pasif</option>
+                            @foreach($serviceStatuses as $s)
+                                <option value="{{ $s['key'] }}">{{ $s['display_label'] }}</option>
+                            @endforeach
                         </select>
                     @endif
                 </div>

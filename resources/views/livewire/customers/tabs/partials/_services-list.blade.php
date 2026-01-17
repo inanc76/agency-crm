@@ -67,9 +67,8 @@ Mühür Koruması: Table styling, hover effects ve pagination bileşenleri korun
                         </td>
                         <td class="px-6 py-4">
                             @php
-                                $statusData = $statusMap[$service->status] ?? null;
-                                $statusLabel = $statusData['label'] ?? $service->status;
-                                $statusClass = $statusData['class'] ?? 'bg-skin-hover text-skin-muted border border-skin-light';
+                                $statusLabel = $service->status_item->label ?? $service->status;
+                                $statusClass = $service->status_item->color_class ?? 'bg-skin-hover text-skin-muted border border-skin-light';
                             @endphp
                             <span
                                 class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border {{ $statusClass }}">
@@ -78,9 +77,8 @@ Mühür Koruması: Table styling, hover effects ve pagination bileşenleri korun
                         </td>
                         <td class="px-6 py-4">
                             @php
-                                $catData = $categoryMap[$service->service_category] ?? null;
-                                $catLabel = $catData['label'] ?? $service->service_category;
-                                $catClass = $catData['class'] ?? 'bg-skin-hover text-skin-muted border border-skin-light';
+                                $catLabel = $service->category_item->label ?? $service->service_category;
+                                $catClass = $service->category_item->color_class ?? 'bg-skin-hover text-skin-muted border border-skin-light';
                             @endphp
                             <span
                                 class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border {{ $catClass }}">

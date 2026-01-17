@@ -4,8 +4,7 @@ use App\Livewire\Customers\Assets\Traits\HasAssetActions;
 use Livewire\Volt\Component;
 use Mary\Traits\Toast;
 
-new class extends Component
-{
+new class extends Component {
     use HasAssetActions;
     use Toast;
 }; ?>
@@ -140,7 +139,7 @@ new class extends Component
                                 <div>
                                     <label class="block text-xs font-medium mb-1 opacity-60">Varlık Türü *</label>
                                     @if($isViewMode)
-                                        @php $typeName = collect($assetTypes)->firstWhere('id', $type)['name'] ?? '-'; @endphp
+                                        @php $typeName = collect($assetTypes)->firstWhere('id', $type)['name'] ?? $type; @endphp
                                         <div class="text-sm font-medium">{{ $typeName }}
                                         </div>
                                     @else
@@ -190,9 +189,9 @@ new class extends Component
                         ], key('notes-tab-' . $assetId))
                     @else
                         <div class="theme-card p-6 shadow-sm text-center text-slate-500 py-12">
-                            <x-mary-icon name="o-document-text" class="w-12 h-12 mx-auto mb-3 opacity-20" />
-                            <div class="font-medium">Varlığı kaydedin, ardından not ekleyebilirsiniz</div>
-                        </div>
+                                <x-mary-icon name="o-document-text" class="w-12 h-12 mx-auto mb-3 opacity-20" />
+                                    <div class="font-medium">Varlığı kaydedin, ardından not ekleyebilirsiniz</div>
+                                </div>
                     @endif
                 @endif
             </div>

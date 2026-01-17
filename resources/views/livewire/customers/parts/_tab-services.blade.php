@@ -5,8 +5,9 @@
             <h2 class="text-base font-bold text-skin-heading">Hizmetler</h2>
             <select wire:model.live="servicesStatusFilter" class="select select-xs bg-[var(--card-bg)] border-[var(--card-border)]">
                 <option value="">Tüm Durumlar</option>
-                <option value="ACTIVE">Aktif</option>
-                <option value="PASSIVE">Pasif</option>
+                @foreach($serviceStatuses as $status)
+                    <option value="{{ $status['key'] }}">{{ $status['display_label'] }}</option>
+                @endforeach
             </select>
         </div>
         <x-customer-management.action-button label="Yeni Hizmet" href="/dashboard/customers/services/create?customer={{ $customerId }}" />
@@ -32,21 +33,16 @@
                 <tbody>
                     @foreach($filteredServices as $service)
                         @php
-                            $endDate = \Carbon\Carbon::parse($service['end_date']);
+                            $endDate = $service->end_date;
                             $daysLeft = now()->diffInDays($endDate, false);
                             
-                            // Get Turkish category label
-                            $categoryLabel = $service['service_category'] ?? '-';
-                            if ($service['service_category']) {
-                                $refItem = \App\Models\ReferenceItem::where('category_key', 'SERVICE_CATEGORY')
-                                    ->where('key', $service['service_category'])
-                                    ->first();
-                                $categoryLabel = $refItem ? $refItem->display_label : $service['service_category'];
-                            }
+                            $statusLabel = $service->status_item->label ?? $service->status ?? 'Pasif';
+                            $statusClass = $service->status_item->color_class ?? 'bg-[var(--dropdown-hover-bg)] text-[var(--color-text-muted)]';
+                            $categoryLabel = $service->category_item->label ?? $service->service_category ?? '-';
                         @endphp
                         <tr class="border-b border-[var(--card-border)]/50 hover:bg-[var(--dropdown-hover-bg)] cursor-pointer transition-colors"
-                            onclick="window.location.href='/dashboard/customers/services/{{ $service['id'] }}'">
-                            <td class="py-3 px-2 font-medium">{{ $service['service_name'] }}</td>
+                            onclick="window.location.href='/dashboard/customers/services/{{ $service->id }}'">
+                            <td class="py-3 px-2 font-medium">{{ $service->service_name }}</td>
                             <td class="py-3 px-2 opacity-70">{{ $categoryLabel }}</td>
                             <td class="py-3 px-2 text-center">
                                 @if($daysLeft < 0)
@@ -64,14 +60,13 @@
                                 @endif
                             </td>
                             <td class="py-3 px-2 text-center opacity-70 text-xs font-mono">
-                                {{ $endDate->format('d.m.Y') }}</td>
+                                {{ $endDate ? $endDate->format('d.m.Y') : '-' }}</td>
                             <td class="py-3 px-2 text-right font-medium">
-                                {{ number_format($service['service_price'], 2) }}
-                                {{ $service['service_currency'] }}</td>
+                                {{ number_format($service->service_price, 2) }}
+                                {{ $service->service_currency }}</td>
                             <td class="py-3 px-2 text-center">
-                                <span
-                                    class="px-2 py-0.5 rounded text-xs font-medium {{ $service['status'] === 'ACTIVE' ? 'bg-[var(--color-success)]/10 text-[var(--color-success)]' : 'bg-[var(--dropdown-hover-bg)] text-[var(--color-text-muted)]' }}">
-                                    {{ $service['status'] === 'ACTIVE' ? 'Aktif' : 'Pasif' }}
+                                <span class="px-2 py-0.5 rounded text-xs font-medium {{ $statusClass }}">
+                                    {{ $statusLabel }}
                                 </span>
                             </td>
                         </tr>

@@ -79,7 +79,7 @@ new class extends Component {
     public function getTasksProperty()
     {
         return ProjectTask::query()
-            ->with(['project', 'module', 'users', 'status'])
+            ->with(['project', 'module', 'users', 'status', 'priority_item'])
             ->when($this->project_id, fn($q) => $q->where('project_id', $this->project_id))
             ->when($this->search, fn($q) => $q->where('name', 'ILIKE', "%{$this->search}%")
                 ->orWhere('description', 'ILIKE', "%{$this->search}%"))
@@ -90,29 +90,6 @@ new class extends Component {
             ->get();
     }
 
-    public function getColorClasses(?string $colorId): string
-    {
-        return match ($colorId) {
-            'red' => 'bg-red-50 text-red-700 border-red-200',
-            'orange' => 'bg-orange-50 text-orange-700 border-orange-200',
-            'amber' => 'bg-amber-50 text-amber-700 border-amber-200',
-            'yellow' => 'bg-yellow-50 text-yellow-700 border-yellow-200',
-            'lime' => 'bg-lime-50 text-lime-700 border-lime-200',
-            'green' => 'bg-green-50 text-green-700 border-green-200',
-            'emerald' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
-            'teal' => 'bg-teal-50 text-teal-700 border-teal-200',
-            'cyan' => 'bg-cyan-50 text-cyan-700 border-cyan-200',
-            'sky' => 'bg-sky-50 text-sky-700 border-sky-200',
-            'blue' => 'bg-blue-50 text-blue-700 border-blue-200',
-            'indigo' => 'bg-indigo-50 text-indigo-700 border-indigo-200',
-            'violet' => 'bg-violet-50 text-violet-700 border-violet-200',
-            'purple' => 'bg-purple-50 text-purple-700 border-purple-200',
-            'fuchsia' => 'bg-fuchsia-50 text-fuchsia-700 border-fuchsia-200',
-            'pink' => 'bg-pink-50 text-pink-700 border-pink-200',
-            'rose' => 'bg-rose-50 text-rose-700 border-rose-200',
-            default => 'bg-slate-100 text-slate-700 border-slate-200',
-        };
-    }
 
     public function resetFilters()
     {
@@ -217,15 +194,9 @@ new class extends Component {
                             <td class="px-6 py-3 text-center cursor-pointer"
                                 onclick="window.location.href='{{ route('projects.tasks.edit', $task->id) }}'">
                                 @php
-                                    $p = collect($priorities)->firstWhere('key', $task->priority);
-                                    $label = $p['display_label'] ?? ucfirst($task->priority);
-                                    // Fallback colors if not customizable per priority yet
-                                    $colorClass = match ($task->priority) {
-                                        'urgent' => 'bg-red-100 text-red-700',
-                                        'high' => 'bg-orange-100 text-orange-700',
-                                        'medium' => 'bg-yellow-100 text-yellow-700',
-                                        default => 'bg-green-100 text-green-700'
-                                    };
+                                    $pItem = $task->priority_item;
+                                    $label = $pItem->label ?? ucfirst($task->priority);
+                                    $colorClass = $pItem->color_class ?? 'bg-slate-100 text-slate-700';
                                 @endphp
                                 <span class="px-2 py-1 rounded-full text-xs font-medium {{ $colorClass }}">
                                     {{ $label }}
@@ -235,8 +206,7 @@ new class extends Component {
                                 onclick="window.location.href='{{ route('projects.tasks.edit', $task->id) }}'">
                                 @if($task->status)
                                     @php
-                                        $sColorId = $task->status->metadata['color'] ?? 'gray';
-                                        $sClasses = $this->getColorClasses($sColorId);
+                                        $sClasses = $task->status->color_class ?? 'bg-slate-100 text-slate-500 border-slate-200';
                                     @endphp
                                     <span class="px-2 py-1 rounded-full text-xs font-medium border {{ $sClasses }}">
                                         {{ $task->status->display_label }}

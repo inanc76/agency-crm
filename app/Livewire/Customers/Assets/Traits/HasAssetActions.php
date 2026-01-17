@@ -21,14 +21,7 @@ trait HasAssetActions
 
     // Reference Data
     public $customers = [];
-    public $assetTypes = [
-        ['id' => 'WEBSITE', 'name' => 'Web Sitesi'],
-        ['id' => 'SOCIAL_MEDIA', 'name' => 'Sosyal Medya'],
-        ['id' => 'HOSTING', 'name' => 'Hosting'],
-        ['id' => 'DOMAIN', 'name' => 'Domain'],
-        ['id' => 'SERVER', 'name' => 'Sunucu'],
-        ['id' => 'OTHER', 'name' => 'Diğer'],
-    ];
+    public $assetTypes = [];
 
     public function mount(?string $asset = null): void
     {
@@ -36,6 +29,14 @@ trait HasAssetActions
         $this->customers = Customer::orderBy('name')
             ->get(['id', 'name'])
             ->map(fn($c) => ['id' => $c->id, 'name' => $c->name])
+            ->toArray();
+
+        // Load Asset Types
+        $this->assetTypes = \App\Models\ReferenceItem::where('category_key', 'ASSET_TYPE')
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->get(['id', 'display_label', 'key'])
+            ->map(fn($i) => ['id' => $i->key, 'name' => $i->display_label])
             ->toArray();
 
         // If asset ID is provided, load data
@@ -68,10 +69,12 @@ trait HasAssetActions
 
     public function save(): void
     {
+        $typeKeys = collect($this->assetTypes)->pluck('id')->implode(',');
+
         $this->validate([
             'customer_id' => 'required|exists:customers,id',
             'name' => 'required|string|min:2|max:150',
-            'type' => 'required|string',
+            'type' => "required|in:{$typeKeys}",
             'url' => 'nullable|url|max:255',
         ]);
 

@@ -5,10 +5,9 @@
             <h2 class="text-base font-bold text-skin-heading">Teklifler</h2>
             <select wire:model.live="offersStatusFilter" class="select select-xs bg-[var(--card-bg)] border-[var(--card-border)]">
                 <option value="">Tüm Durumlar</option>
-                <option value="DRAFT">Taslak</option>
-                <option value="SENT">Gönderildi</option>
-                <option value="ACCEPTED">Kabul Edildi</option>
-                <option value="REJECTED">Reddedildi</option>
+                @foreach($offerStatuses as $status)
+                    <option value="{{ $status['key'] }}">{{ $status['display_label'] }}</option>
+                @endforeach
             </select>
         </div>
         <x-customer-management.action-button label="Yeni Teklif" href="/dashboard/customers/offers/create?customer={{ $customerId }}" />
@@ -33,23 +32,21 @@
                 <tbody>
                     @foreach($filteredOffers as $offer)
                         @php
-                            $validUntil = \Carbon\Carbon::parse($offer['valid_until']);
-                            $daysLeft = now()->diffInDays($validUntil, false);
-                            $statusColors = [
-                                'DRAFT' => 'bg-[var(--dropdown-hover-bg)] text-[var(--color-text-muted)]',
-                                'SENT' => 'bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]',
-                                'ACCEPTED' => 'bg-[var(--color-success)]/10 text-[var(--color-success)]',
-                                'REJECTED' => 'bg-[var(--color-danger)]/10 text-[var(--color-danger)]',
-                            ];
-                            $statusLabels = ['DRAFT' => 'Taslak', 'SENT' => 'Gönderildi', 'ACCEPTED' => 'Kabul', 'REJECTED' => 'Ret'];
+                            $validUntil = $offer->valid_until;
+                            $daysLeft = $validUntil ? now()->diffInDays($validUntil, false) : null;
+                            
+                            $statusLabel = $offer->status_item->label ?? $offer->status ?? 'Taslak';
+                            $statusClass = $offer->status_item->color_class ?? 'bg-[var(--dropdown-hover-bg)] text-[var(--color-text-muted)]';
                         @endphp
                         <tr class="border-b border-[var(--card-border)]/50 hover:bg-[var(--dropdown-hover-bg)] cursor-pointer transition-colors"
-                            onclick="window.location.href='/dashboard/customers/offers/{{ $offer['id'] }}'">
-                            <td class="py-3 px-2 font-medium">{{ $offer['title'] }}</td>
+                            onclick="window.location.href='/dashboard/customers/offers/{{ $offer->id }}'">
+                            <td class="py-3 px-2 font-medium">{{ $offer->title }}</td>
                             <td class="py-3 px-2 text-center opacity-70 text-xs font-mono">
-                                {{ \Carbon\Carbon::parse($offer['created_at'])->format('d.m.Y') }}</td>
+                                {{ $offer->created_at->format('d.m.Y') }}</td>
                             <td class="py-3 px-2 text-center">
-                                @if($daysLeft < 0)
+                                @if($daysLeft === null)
+                                    -
+                                @elseif($daysLeft < 0)
                                     <span class="px-2 py-0.5 rounded text-xs font-medium bg-[var(--color-danger)]/10 text-[var(--color-danger)]">
                                         {{ abs((int)$daysLeft) }} gün geçti
                                     </span>
@@ -64,10 +61,10 @@
                                 @endif
                             </td>
                             <td class="py-3 px-2 text-right font-medium">
-                                {{ number_format($offer['total_amount'], 2) }} {{ $offer['currency'] }}</td>
+                                {{ number_format($offer->total_amount, 2) }} {{ $offer->currency }}</td>
                             <td class="py-3 px-2 text-center">
-                                <span class="px-2 py-0.5 rounded text-xs font-medium {{ $statusColors[$offer['status']] ?? 'bg-[var(--dropdown-hover-bg)] text-[var(--color-text-muted)]' }}">
-                                    {{ $statusLabels[$offer['status']] ?? $offer['status'] }}
+                                <span class="px-2 py-0.5 rounded text-xs font-medium {{ $statusClass }}">
+                                    {{ $statusLabel }}
                                 </span>
                             </td>
                         </tr>

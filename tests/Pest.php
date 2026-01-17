@@ -81,24 +81,57 @@ function seedReferenceData()
     }
 
     // Reference Categories
-    if (!\Illuminate\Support\Facades\DB::table('reference_categories')->where('key', 'CUSTOMER_TYPE')->exists()) {
-        \Illuminate\Support\Facades\DB::table('reference_categories')->insert([
-            'id' => \Illuminate\Support\Str::uuid()->toString(),
-            'key' => 'CUSTOMER_TYPE',
-            'name' => 'Müşteri Tipleri',
-            'is_active' => true,
-        ]);
+    $categories = [
+        'CUSTOMER_TYPE' => 'Müşteri Tipleri',
+        'CONTACT_STATUS' => 'Kişi Durumları',
+        'SERVICE_STATUS' => 'Hizmet Durumları',
+        'CURRENCY' => 'Para Birimleri',
+        'SERVICE_CATEGORY' => 'Hizmet Kategorileri',
+        'OFFER_STATUS' => 'Teklif Durumları',
+        'VAT_RATES' => 'KDV Oranları',
+        'ASSET_TYPE' => 'Varlık Tipleri'
+    ];
+
+    foreach ($categories as $key => $name) {
+        if (!\Illuminate\Support\Facades\DB::table('reference_categories')->where('key', $key)->exists()) {
+            \Illuminate\Support\Facades\DB::table('reference_categories')->insert([
+                'id' => \Illuminate\Support\Str::uuid()->toString(),
+                'key' => $key,
+                'name' => $name,
+                'is_active' => true,
+            ]);
+        }
     }
 
     // Reference Items
-    if (!\App\Models\ReferenceItem::where('key', 'CUSTOMER')->exists()) {
-        \App\Models\ReferenceItem::create([
-            'category_key' => 'CUSTOMER_TYPE',
-            'key' => 'CUSTOMER',
-            'display_label' => 'Müşteri',
-            'is_default' => true,
-            'is_active' => true,
-            'sort_order' => 1
-        ]);
+    $items = [
+        ['category' => 'CUSTOMER_TYPE', 'key' => 'CUSTOMER', 'label' => 'Müşteri'],
+        ['category' => 'CONTACT_STATUS', 'key' => 'WORKING', 'label' => 'Çalışıyor'],
+        ['category' => 'CONTACT_STATUS', 'key' => 'LEFT', 'label' => 'Ayrıldı'],
+        ['category' => 'SERVICE_STATUS', 'key' => 'ACTIVE', 'label' => 'Aktif'],
+        ['category' => 'SERVICE_STATUS', 'key' => 'PASSIVE', 'label' => 'Pasif'],
+        ['category' => 'CURRENCY', 'key' => 'TRY', 'label' => 'Türk Lirası'],
+        ['category' => 'CURRENCY', 'key' => 'USD', 'label' => 'Amerikan Doları'],
+        ['category' => 'OFFER_STATUS', 'key' => 'DRAFT', 'label' => 'Taslak'],
+        ['category' => 'OFFER_STATUS', 'key' => 'SENT', 'label' => 'Gönderildi'],
+        ['category' => 'OFFER_STATUS', 'key' => 'ACCEPTED', 'label' => 'Onaylandı'],
+        ['category' => 'OFFER_STATUS', 'key' => 'REJECTED', 'label' => 'Reddedildi'],
+        ['category' => 'VAT_RATES', 'key' => 'TR_20', 'label' => 'Türkiye (%20)'],
+        ['category' => 'ASSET_TYPE', 'key' => 'WEBSITE', 'label' => 'WEBSITE'],
+        ['category' => 'ASSET_TYPE', 'key' => 'DOMAIN', 'label' => 'DOMAIN'],
+        ['category' => 'ASSET_TYPE', 'key' => 'OTHER', 'label' => 'OTHER'],
+    ];
+
+    foreach ($items as $index => $item) {
+        if (!\App\Models\ReferenceItem::where('category_key', $item['category'])->where('key', $item['key'])->exists()) {
+            \App\Models\ReferenceItem::create([
+                'category_key' => $item['category'],
+                'key' => $item['key'],
+                'display_label' => $item['label'],
+                'is_default' => $index === 0,
+                'is_active' => true,
+                'sort_order' => $index + 1
+            ]);
+        }
     }
 }

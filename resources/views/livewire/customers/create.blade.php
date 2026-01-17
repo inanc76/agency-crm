@@ -108,6 +108,9 @@ new
     public string $offersStatusFilter = '';
 
     public string $projectsStatusFilter = '';
+    
+    public array $serviceStatuses = [];
+    public array $offerStatuses = [];
 
     // Reference Data
     public $customerTypes = [];
@@ -130,6 +133,19 @@ new
 
         $this->existingCustomers = Customer::orderBy('name')->get(['id', 'name'])
             ->map(fn($c) => ['id' => $c->id, 'name' => $c->name])->toArray();
+
+        // Load Statuses for Tabs
+        $this->serviceStatuses = ReferenceItem::where('category_key', 'SERVICE_STATUS')
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->get(['id', 'display_label', 'key', 'metadata'])
+            ->toArray();
+
+        $this->offerStatuses = ReferenceItem::where('category_key', 'OFFER_STATUS')
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->get(['id', 'display_label', 'key', 'metadata'])
+            ->toArray();
 
         if ($customer) {
             $this->authorize('customers.view');
@@ -177,21 +193,44 @@ new
                 'notes' => $customer->notes()->count(),
             ];
 
-            $this->relatedContacts = $customer->contacts()->orderBy('name')->get()->toArray();
-            $this->relatedAssets = $customer->assets()->orderBy('name')->get()->toArray();
-            $this->relatedServices = $customer->services()->orderBy('created_at', 'desc')->get()->toArray();
-            $this->relatedOffers = $customer->offers()->orderBy('created_at', 'desc')->get()->toArray();
-            $this->relatedSales = $customer->sales()->orderBy('created_at', 'desc')->get()->toArray();
-            $this->relatedMessages = $customer->messages()->orderBy('created_at', 'desc')->get()->toArray();
-            $this->relatedNotes = $customer->notes()->orderBy('created_at', 'desc')->get()->toArray();
+            $this->relatedContacts = $customer->contacts()
+                ->with('status_item')
+                ->orderBy('name')
+                ->get();
+
+            $this->relatedAssets = $customer->assets()
+                ->with('type_item')
+                ->orderBy('name')
+                ->get();
+
+            $this->relatedServices = $customer->services()
+                ->with(['status_item', 'category_item'])
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            $this->relatedOffers = $customer->offers()
+                ->with('status_item')
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            $this->relatedSales = $customer->sales()
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            $this->relatedMessages = $customer->messages()
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            $this->relatedNotes = $customer->notes()
+                ->orderBy('created_at', 'desc')
+                ->get();
 
             // Load Projects
             $this->counts['projects'] = $customer->projects()->count();
             $this->relatedProjects = $customer->projects()
                 ->with('status')
                 ->orderBy('created_at', 'desc')
-                ->get()
-                ->toArray();
+                ->get();
 
             // Load Project Statuses for Filter
             $this->projectStatuses = ReferenceItem::where('category_key', 'PROJECT_STATUS')

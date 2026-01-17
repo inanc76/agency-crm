@@ -6,10 +6,9 @@
             @foreach($relatedMessages as $message)
                 <div class="p-3 border border-[var(--card-border)]/60 rounded-lg bg-[var(--card-bg)]/50">
                     <div class="flex items-center justify-between mb-2">
-                        <span
-                            class="text-xs font-mono opacity-50">{{ \Carbon\Carbon::parse($message['created_at'])->format('d.m.Y H:i') }}</span>
+                        <span class="text-xs font-mono opacity-50">{{ $message->created_at->format('d.m.Y H:i') }}</span>
                     </div>
-                    <p class="text-sm">{{ $message['content'] ?? $message['message'] ?? '-' }}</p>
+                    <p class="text-sm">{{ $message->content ?? $message->message ?? '-' }}</p>
                 </div>
             @endforeach
         </div>

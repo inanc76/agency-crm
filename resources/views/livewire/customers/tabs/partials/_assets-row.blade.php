@@ -11,9 +11,8 @@
 
 @php
     $char = mb_substr($asset->name, 0, 1);
-    $typeData = $typeMap[$asset->type] ?? null;
-    $typeLabel = $typeData['label'] ?? $asset->type ?? 'Diğer';
-    $typeClass = $typeData['class'] ?? 'bg-skin-hover text-skin-muted border border-skin-light';
+    $typeLabel = $asset->type_item->label ?? $asset->type ?? 'Diğer';
+    $typeClass = $asset->type_item->color_class ?? 'bg-skin-hover text-skin-muted border border-skin-light';
 @endphp
 
 <tr class="group hover:bg-[var(--list-card-hover-bg)] transition-all duration-200 cursor-pointer"

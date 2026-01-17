@@ -11,9 +11,8 @@
 
 @php
     $char = mb_substr($offer->title, 0, 1);
-    $statusData = $statusMap[$offer->status] ?? null;
-    $statusLabel = $statusData['label'] ?? $offer->status;
-    $statusClass = $statusData['class'] ?? 'bg-skin-hover text-skin-muted border border-skin-light';
+    $statusLabel = $offer->status_item->label ?? $offer->status;
+    $statusClass = $offer->status_item->color_class ?? 'bg-skin-hover text-skin-muted border border-skin-light';
 @endphp
 
 <tr class="group hover:bg-[var(--list-card-hover-bg)] transition-all duration-200 cursor-pointer"

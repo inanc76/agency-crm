@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\HasBlameable;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * ═══════════════════════════════════════════════════════════════════════════
  * 👤 Contact Model - Müşteri İletişim Kişileri
@@ -86,7 +88,7 @@ use App\Traits\HasBlameable;
  */
 class Contact extends Model
 {
-    use HasFactory, SoftDeletes, HasBlameable;
+    use HasFactory, SoftDeletes, HasBlameable, HasUuids;
     protected $keyType = 'string';
     public $incrementing = false;
 
@@ -117,9 +119,15 @@ class Contact extends Model
         ];
     }
 
-    public function customer()
+    public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    public function status_item(): BelongsTo
+    {
+        return $this->belongsTo(ReferenceItem::class, 'status', 'key')
+            ->where('category_key', 'CONTACT_STATUS');
     }
 
     /**

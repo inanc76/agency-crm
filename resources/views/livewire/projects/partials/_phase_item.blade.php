@@ -88,26 +88,7 @@
                 }
             }
             
-            // Phase Color Map (Dynamic from Metadata)
-            $rawColor = $phaseStatus['metadata']['color'] ?? 'gray';
-            $colors = [
-                'blue' => 'bg-blue-100 text-blue-700 border-blue-200',
-                'green' => 'bg-emerald-100 text-emerald-700 border-emerald-200',
-                'red' => 'bg-red-100 text-red-700 border-red-200',
-                'rose' => 'bg-rose-100 text-rose-700 border-rose-200',
-                'amber' => 'bg-amber-100 text-amber-700 border-amber-200',
-                'orange' => 'bg-orange-100 text-orange-700 border-orange-200', 
-                'gray' => 'bg-slate-100 text-slate-500 border-slate-200',
-                'slate' => 'bg-slate-100 text-slate-500 border-slate-200',
-                'teal' => 'bg-teal-100 text-teal-700 border-teal-200',
-                'cyan' => 'bg-cyan-100 text-cyan-700 border-cyan-200',
-                'indigo' => 'bg-indigo-100 text-indigo-700 border-indigo-200',
-                'purple' => 'bg-purple-100 text-purple-700 border-purple-200',
-                'pink' => 'bg-pink-100 text-pink-700 border-pink-200',
-                'yellow' => 'bg-yellow-100 text-yellow-700 border-yellow-200',
-            ];
-            
-            $currentPhaseColor = $colors[$rawColor] ?? $colors['gray'];
+            $currentPhaseColor = $phaseStatus['color_class'] ?? 'bg-slate-100 text-slate-500 border-slate-200';
             $phaseLabel = $phaseStatus['display_label'] ?? 'Planlandı';
         @endphp
 

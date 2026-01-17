@@ -98,13 +98,15 @@ trait HasProjectData
         $this->statuses = ReferenceItem::where('category_key', 'PROJECT_STATUS')
             ->where('is_active', true)
             ->orderBy('sort_order')
-            ->get(['id', 'display_label', 'key'])
+            ->get(['id', 'display_label', 'key', 'metadata'])
+            ->map(fn($i) => ['id' => $i->id, 'display_label' => $i->display_label, 'key' => $i->key, 'color_class' => $i->color_class])
             ->toArray();
 
         $this->projectTypes = ReferenceItem::where('category_key', 'PROJECT_TYPE')
             ->where('is_active', true)
             ->orderBy('sort_order')
-            ->get(['id', 'display_label'])
+            ->get(['id', 'display_label', 'metadata'])
+            ->map(fn($i) => ['id' => $i->id, 'display_label' => $i->display_label, 'color_class' => $i->color_class])
             ->toArray();
     }
 

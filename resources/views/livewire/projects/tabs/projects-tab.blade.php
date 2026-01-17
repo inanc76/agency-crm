@@ -183,13 +183,8 @@ $resetFilters = function () {
                         @if($project->status)
                             <span
                                 class="px-2 py-0.5 rounded-full text-[10px] font-semibold whitespace-nowrap border
-                                                                                                                                                                                                                        @if($project->status->key === 'project_active') bg-blue-50 text-blue-600 border-blue-100
-                                                                                                                                                                                                                        @elseif($project->status->key === 'project_completed') bg-green-50 text-green-600 border-green-100
-                                                                                                                                                                                                                        @elseif($project->status->key === 'project_cancelled') bg-red-50 text-red-600 border-red-100
-                                                                                                                                                                                                                        @elseif($project->status->key === 'project_on_hold') bg-yellow-50 text-yellow-600 border-yellow-100
-                                                                                                                                                                                                                        @else bg-slate-50 text-slate-600 border-slate-100
-                                                                                                                                                                                                                        @endif
-                                                                                                                                                                                                                    ">
+                                                                                                                                                                                                                                     {{ $project->status->color_class ?? 'bg-slate-50 text-slate-600 border-slate-100' }}
+                                                                                                                                                                                                                                ">
                                 {{ $project->status->display_label }}
                             </span>
                         @endif
@@ -229,26 +224,7 @@ $resetFilters = function () {
                 @endphp
 
                 @if($activePhases->isNotEmpty())
-                    @php
-                        // Phase Color Map (Matching _phase-form.blade.php)
-                        $statusColors = [
-                            'blue' => 'bg-blue-100 text-blue-700 border-blue-200',
-                            'green' => 'bg-emerald-100 text-emerald-700 border-emerald-200',
-                            'red' => 'bg-red-100 text-red-700 border-red-200',
-                            'rose' => 'bg-rose-100 text-rose-700 border-rose-200',
-                            'amber' => 'bg-amber-100 text-amber-700 border-amber-200',
-                            'orange' => 'bg-orange-100 text-orange-700 border-orange-200',
-                            'gray' => 'bg-slate-100 text-slate-500 border-slate-200',
-                            'slate' => 'bg-slate-100 text-slate-500 border-slate-200',
-                            'teal' => 'bg-teal-100 text-teal-700 border-teal-200',
-                            'cyan' => 'bg-cyan-100 text-cyan-700 border-cyan-200',
-                            'indigo' => 'bg-indigo-100 text-indigo-700 border-indigo-200',
-                            'purple' => 'bg-purple-100 text-purple-700 border-purple-200',
-                            'pink' => 'bg-pink-100 text-pink-700 border-pink-200',
-                            'yellow' => 'bg-yellow-100 text-yellow-700 border-yellow-200',
-                        ];
-                    @endphp
-                    <div class="mt-3 pt-3 border-t border-slate-100 text-xs text-slate-600">
+                            <div class="mt-3 pt-3 border-t border-slate-100 text-xs text-slate-600">
                         @foreach($activePhases as $phase)
                             @php
                                 $words = explode(' ', $phase->name);
@@ -257,10 +233,6 @@ $resetFilters = function () {
                                     $initials .= mb_substr($words[1] ?? '', 0, 1);
                                 }
                                 $initials = mb_strtoupper($initials);
-
-                                // Get status color from metadata
-                                $rawColor = $phase->status->metadata['color'] ?? 'gray';
-                                $statusClass = $statusColors[$rawColor] ?? $statusColors['gray'];
                             @endphp
                             <div class="flex items-center gap-2 mb-1.5 last:mb-0">
                                 <div class="w-5 h-5 rounded flex items-center justify-center font-bold text-white text-[9px] flex-shrink-0"
@@ -268,7 +240,8 @@ $resetFilters = function () {
                                     {{ $initials }}
                                 </div>
                                 <span class="truncate font-medium">{{ $phase->name }}</span>
-                                <span class="px-1.5 py-0.5 rounded text-[10px] font-medium border ml-auto {{ $statusClass }}">
+                                <span
+                                    class="px-1.5 py-0.5 rounded text-[10px] font-medium border ml-auto {{ $phase->status->color_class ?? '' }}">
                                     {{ $phase->status->display_label }}
                                 </span>
                             </div>
@@ -285,7 +258,7 @@ $resetFilters = function () {
                     <x-mary-icon name="o-plus" class="w-5 h-5" />
                     Yeni Proje Oluştur
                 </a>
-            </div>
+                </div>
         @endforelse
     </div>
 </div>

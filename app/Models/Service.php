@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════
@@ -106,9 +107,21 @@ class Service extends Model
         return $this->belongsTo(Project::class);
     }
 
-    public function phase()
+    public function phase(): BelongsTo
     {
         return $this->belongsTo(ProjectPhase::class, 'project_phase_id');
+    }
+
+    public function status_item(): BelongsTo
+    {
+        return $this->belongsTo(ReferenceItem::class, 'status', 'key')
+            ->where('category_key', 'SERVICE_STATUS');
+    }
+
+    public function category_item(): BelongsTo
+    {
+        return $this->belongsTo(ReferenceItem::class, 'service_category', 'key')
+            ->where('category_key', 'SERVICE_CATEGORY');
     }
 
     /**

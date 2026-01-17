@@ -42,7 +42,13 @@
                         </div>
                         <div class="truncate">
                             <p class="font-bold text-slate-900 truncate" title="{{ $selectedProject->name }}">{{ $selectedProject->name }}</p>
-                            <p class="text-[10px] text-slate-500">{{ $report_type === 'PROJECT' ? 'Yapım Projesi' : ($report_type === 'SERVICE' ? 'Destek Hizmeti' : '-') }}</p>
+                            @if($selectedProject->type)
+                                <span class="px-1.5 py-0.5 rounded text-[10px] font-bold border {{ $selectedProject->type->color_class ?? 'bg-slate-50 text-slate-500' }}">
+                                    {{ $selectedProject->type->label }}
+                                </span>
+                            @else
+                                <p class="text-[10px] text-slate-500">{{ $report_type === 'PROJECT' ? 'Yapım Projesi' : ($report_type === 'SERVICE' ? 'Destek Hizmeti' : '-') }}</p>
+                            @endif
                         </div>
                     </div>
                 </div>
