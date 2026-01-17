@@ -18,9 +18,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($relatedContacts as $contact)
-                        <tr class="border-b border-[var(--card-border)]/50 hover:bg-[var(--dropdown-hover-bg)] cursor-pointer transition-colors"
-                            onclick="window.location.href='/dashboard/customers/contacts/{{ $contact->id }}'">
+
                     @foreach($relatedContacts as $contact)
                         <tr class="border-b border-[var(--card-border)]/50 hover:bg-[var(--dropdown-hover-bg)] cursor-pointer transition-colors"
                             onclick="window.location.href='/dashboard/customers/contacts/{{ $contact->id }}'">
@@ -33,10 +31,9 @@
                                         <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs shadow-sm font-semibold overflow-hidden"
                                             style="background-color: var(--table-avatar-bg); color: var(--table-avatar-text); border: 1px solid var(--table-avatar-border);">
                                             @if($gravatarUrl)
-                                                <img src="{{ $gravatarUrl }}" 
-                                                     alt="{{ $contact->name }}"
-                                                     class="w-full h-full object-cover rounded-full"
-                                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                                <img src="{{ $gravatarUrl }}" alt="{{ $contact->name }}"
+                                                    class="w-full h-full object-cover rounded-full"
+                                                    onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                                 <div class="w-full h-full flex items-center justify-center" style="display: none;">
                                                     {{ $contact->initials() }}
                                                 </div>

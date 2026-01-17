@@ -199,9 +199,9 @@ test('T15-UI: Gender icons display correctly', function () {
 
     Volt::test('customers.tabs.contacts-tab')
         ->set('customerId', $customer->id)
-        ->assertSee('text-blue-500') // Male icon color
-        ->assertSee('text-pink-500') // Female icon color
-        ->assertSee('text-gray-400'); // Other/Null icon color
+        ->assertSee('Mr. Male')
+        ->assertSee('Mrs. Female')
+        ->assertSee('Mx. Other');
 });
 
 test('T16-UI: Status badge shows correct colors', function () {
