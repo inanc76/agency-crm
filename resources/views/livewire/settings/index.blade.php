@@ -56,9 +56,9 @@ new
             [
                 'title' => 'Mail Şablonları',
                 'subtitle' => 'E-posta şablonlarını oluşturun ve yönetin',
-                'icon' => 'o-envelope',
-                'color' => 'bg-orange-50 text-orange-500',
-                'link' => '#'
+                'icon' => 'o-envelope-open',
+                'color' => 'bg-teal-50 text-teal-600',
+                'link' => route('settings.mail-templates.index')
             ],
             [
                 'title' => 'Tema Ayarları',

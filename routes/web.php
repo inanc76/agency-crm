@@ -30,8 +30,8 @@ Route::view('dashboard', 'dashboard')
 
 // Müşteri Yönetimi
 Route::get('dashboard/customers', function () {
-    if (! request()->has('tab')) {
-        return redirect()->to(url()->current().'?tab=customers');
+    if (!request()->has('tab')) {
+        return redirect()->to(url()->current() . '?tab=customers');
     }
 
     return view('customers.index');
@@ -90,8 +90,8 @@ Volt::route('dashboard/customers/offers/{offer}/pdf', 'customers.offers.pdf-prev
 // 🏗️ PROJE YÖNETİMİ
 // ═══════════════════════════════════════════════════════════════════════════
 Route::get('dashboard/projects', function () {
-    if (! request()->has('tab')) {
-        return redirect()->to(url()->current().'?tab=projects');
+    if (!request()->has('tab')) {
+        return redirect()->to(url()->current() . '?tab=projects');
     }
 
     return view('projects.index');
@@ -170,6 +170,19 @@ Volt::route('dashboard/settings/pdf-template', 'settings.pdf-template')
     ->middleware(['auth', 'verified', 'can:settings.edit'])
     ->name('settings.pdf-template');
 
+// Mail Şablonları
+Volt::route('dashboard/settings/mail-templates', 'settings.mail-templates.index')
+    ->middleware(['auth', 'verified', 'can:settings.edit'])
+    ->name('settings.mail-templates.index');
+
+Volt::route('dashboard/settings/mail-templates/create', 'settings.mail-templates.edit')
+    ->middleware(['auth', 'verified', 'can:settings.edit'])
+    ->name('settings.mail-templates.create');
+
+Volt::route('dashboard/settings/mail-templates/{template}', 'settings.mail-templates.edit')
+    ->middleware(['auth', 'verified', 'can:settings.edit'])
+    ->name('settings.mail-templates.edit');
+
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');
 
@@ -184,7 +197,7 @@ Volt::route('dashboard/settings/two-factor', 'settings.two-factor')
 
 // Debug route for testing
 Route::get('debug/2fa', function () {
-    if (! auth()->check()) {
+    if (!auth()->check()) {
         return 'User not authenticated';
     }
 
