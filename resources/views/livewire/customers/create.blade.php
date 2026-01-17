@@ -108,7 +108,7 @@ new
     public string $offersStatusFilter = '';
 
     public string $projectsStatusFilter = '';
-    
+
     public array $serviceStatuses = [];
     public array $offerStatuses = [];
 
@@ -304,12 +304,19 @@ new
             <div>
                 {{-- Info Tab --}}
                 @if($activeTab === 'info' || !$isViewMode)
-                    <div class="space-y-6">
-                        @include('livewire.customers.parts.basic-info-card')
-                        @include('livewire.customers.parts.address-card')
-                        @include('livewire.customers.parts.financial-card')
-                        @include('livewire.customers.parts.related-companies-card')
+                    <div class="grid grid-cols-12 gap-6">
+                        {{-- Left Column (8/12) --}}
+                        <div class="col-span-8 space-y-6">
+                            @include('livewire.customers.parts.basic-info-card')
+                            @include('livewire.customers.parts.address-card')
+                            @include('livewire.customers.parts.financial-card')
+                            @include('livewire.customers.parts.related-companies-card')
+                        </div>
 
+                        {{-- Right Column (4/12) --}}
+                        <div class="col-span-4 space-y-6">
+                            @include('livewire.customers.parts.logo-card')
+                        </div>
                     </div>
                 @endif
 

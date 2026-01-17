@@ -8,6 +8,12 @@ Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
+// User Setup Routes
+Route::get('/setup-password/{token}', [App\Http\Controllers\UserSetupController::class, 'showSetupForm'])
+    ->name('setup-password.show');
+Route::post('/setup-password', [App\Http\Controllers\UserSetupController::class, 'setupPassword'])
+    ->name('setup-password.store');
+
 // Minio Proxy Route - serves files from Minio through Laravel
 Route::get('storage/minio/{path}', [MinioProxyController::class, 'serve'])
     ->where('path', '.*')
@@ -122,6 +128,19 @@ Volt::route('dashboard/projects/reports/{report}', 'projects.reports.create')
 Volt::route('dashboard/settings', 'settings.index')
     ->middleware(['auth', 'verified', 'can:settings.view'])
     ->name('settings.index');
+
+// Kullanıcı Yönetimi
+Volt::route('dashboard/settings/users', 'users.index')
+    ->middleware(['auth', 'verified', 'can:users.view'])
+    ->name('users.index');
+
+Volt::route('dashboard/settings/users/create', 'users.create')
+    ->middleware(['auth', 'verified', 'can:users.create'])
+    ->name('users.create');
+
+Volt::route('dashboard/settings/users/{user}', 'users.create')
+    ->middleware(['auth', 'verified', 'can:users.view'])
+    ->name('users.edit');
 
 Volt::route('dashboard/settings/storage', 'settings.storage')
     ->middleware(['auth', 'verified', 'can:settings.edit'])

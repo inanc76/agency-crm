@@ -72,6 +72,10 @@ class User extends Authenticatable
         'password',
         'custom_fields',
         'role_id',
+        'phone',
+        'title',
+        'status',
+        'avatar',
     ];
 
     /**
@@ -106,6 +110,42 @@ class User extends Authenticatable
     public function isExternal(): bool
     {
         return ($this->custom_fields['is_external'] ?? false) === true;
+    }
+
+    /**
+     * Reset user's two-factor authentication
+     */
+    public function resetTwoFactor(): void
+    {
+        $this->update([
+            'two_factor_secret' => null,
+            'two_factor_recovery_codes' => null,
+            'two_factor_confirmed_at' => null,
+        ]);
+    }
+
+    /**
+     * Deactivate user (soft disable)
+     */
+    public function deactivate(): void
+    {
+        $this->update(['status' => 'inactive']);
+    }
+
+    /**
+     * Activate user
+     */
+    public function activate(): void
+    {
+        $this->update(['status' => 'active']);
+    }
+
+    /**
+     * Scope to only active users
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'active');
     }
 
     /**

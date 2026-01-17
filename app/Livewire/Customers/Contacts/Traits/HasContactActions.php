@@ -134,7 +134,7 @@ trait HasContactActions
             'emails.*' => 'nullable|email|max:150',
             'phones' => 'array',
             'phones.*.number' => 'nullable|string|max:20',
-            'phones.*.extension' => 'nullable|string|max:10',
+            'phones.*.extension' => 'nullable|numeric|digits_between:1,10',
             'social_profiles' => 'array',
             'social_profiles.*.url' => 'nullable|url|max:255',
         ]);

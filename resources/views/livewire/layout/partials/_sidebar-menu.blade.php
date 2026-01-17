@@ -24,7 +24,6 @@
                         'href' => '/dashboard/settings/definitions',
                         'permission' => 'DEFINITIONS',
                         'children' => [
-                            ['id' => 'users', 'label' => 'Kullanıcılar', 'icon' => '👥', 'href' => '/dashboard/settings/users', 'permission' => 'USERS'],
                             ['id' => 'price-definitions', 'label' => 'Fiyat Tanımları', 'icon' => '💲', 'href' => '/dashboard/settings/price-definitions', 'permission' => 'SERVICES'],
                             ['id' => 'reference-data', 'label' => 'Reference Data', 'icon' => '🗂️', 'href' => '/dashboard/settings/reference-data', 'permission' => 'DEFINITIONS'],
                             ['id' => 'mail-templates', 'label' => 'Mail Şablonları', 'icon' => '📧', 'href' => '/dashboard/settings/mail-templates', 'permission' => 'MAIL_TEMPLATES'],

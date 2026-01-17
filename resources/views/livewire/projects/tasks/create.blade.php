@@ -72,7 +72,12 @@ new class extends Component {
         }
 
         $this->customers = Customer::query()->orderBy('name')->get(['id', 'name'])->toArray();
-        $this->users = User::query()->orderBy('name')->get(['id', 'name'])->toArray();
+        $this->users = User::active()->orderBy('name')->get(['id', 'name', 'title'])
+            ->map(fn($u) => [
+                'id' => $u->id, 
+                'name' => $u->name . ($u->title ? ' (' . $u->title . ')' : ''),
+                'title' => $u->title
+            ])->toArray();
 
         // Pre-select via Query String (e.g. from Project Detail)
         if (!$this->task->id && request()->has('project')) {

@@ -10,7 +10,10 @@
         <div>
             <label class="block text-xs font-medium mb-1 opacity-60 text-skin-base">Proje Lideri <span class="text-red-500">*</span></label>
             @if($isViewMode)
-                @php $leaderName = collect($leaders)->firstWhere('id', $leader_id)['name'] ?? '-'; @endphp
+                @php 
+                    $leader = collect($leaders)->firstWhere('id', $leader_id);
+                    $leaderName = $leader ? $leader['name'] : '-';
+                @endphp
                 <div class="text-sm font-medium text-skin-base">{{ $leaderName }}</div>
             @else
                 <select name="leader_id" wire:model="leader_id" class="select w-full">
@@ -23,7 +26,7 @@
             @endif
         </div>
 
-            {{-- Team Members --}}
+        {{-- Team Members --}}
         <div>
             <label class="block text-xs font-medium mb-1 opacity-60 text-skin-base">Proje Üyeleri</label>
             @if($isViewMode)
@@ -42,8 +45,12 @@
                     option-value="id"
                     searchable
                     class="w-full"
-                    no-result-text="Sonuç bulunamadı"
+                    no-result-text="Aktif kullanıcı bulunamadı"
+                    placeholder="Proje üyelerini seçin"
                 />
+                <div class="text-xs text-gray-500 mt-1">
+                    Sadece aktif kullanıcılar listelenmektedir
+                </div>
             @endif
         </div>
     </div>

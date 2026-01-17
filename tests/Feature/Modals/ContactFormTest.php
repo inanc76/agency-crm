@@ -67,7 +67,7 @@ test('CRUD: Can delete a contact', function () {
 
     Volt::test('modals.contact-form', ['contact' => $contact->id])
         ->call('delete')
-        ->assertRedirect('/dashboard/customers/'.$contact->customer_id.'?tab=contacts');
+        ->assertRedirect('/dashboard/customers/' . $contact->customer_id . '?tab=contacts');
 
     expect(Contact::find($contact->id))->toBeNull();
 });
@@ -193,17 +193,15 @@ test('T14-UI: Empty state shows when no contacts', function () {
 test('T15-UI: Gender icons display correctly', function () {
     $customer = Customer::factory()->create();
 
-    $male = Contact::factory()->create(['customer_id' => $customer->id, 'gender' => 'male']);
-    $female = Contact::factory()->create(['customer_id' => $customer->id, 'gender' => 'female']);
-    $other = Contact::factory()->create(['customer_id' => $customer->id, 'gender' => null]);
+    $male = Contact::factory()->create(['customer_id' => $customer->id, 'gender' => 'male', 'name' => 'Mr. Male']);
+    $female = Contact::factory()->create(['customer_id' => $customer->id, 'gender' => 'female', 'name' => 'Mrs. Female']);
+    $other = Contact::factory()->create(['customer_id' => $customer->id, 'gender' => 'other', 'name' => 'Mx. Other']);
 
-    $response = $this->get("/dashboard/customers/{$customer->id}?tab=contacts");
-
-    $response->assertStatus(200);
-    // Icons are rendered in Blade, just verify contacts are listed
-    $response->assertSee($male->name);
-    $response->assertSee($female->name);
-    $response->assertSee($other->name);
+    Volt::test('customers.tabs.contacts-tab')
+        ->set('customerId', $customer->id)
+        ->assertSee('text-blue-500') // Male icon color
+        ->assertSee('text-pink-500') // Female icon color
+        ->assertSee('text-gray-400'); // Other/Null icon color
 });
 
 test('T16-UI: Status badge shows correct colors', function () {
@@ -324,7 +322,6 @@ test('T27-Validation: Phones array structure', function () {
 });
 
 test('T28-Validation: Phone extension must be numeric', function () {
-    // This is typically handled by frontend JS, but we can test the data structure
     $customer = Customer::factory()->create();
 
     Volt::test('modals.contact-form')
@@ -332,11 +329,8 @@ test('T28-Validation: Phone extension must be numeric', function () {
         ->set('name', 'Test User')
         ->set('status', 'WORKING')
         ->set('phones', [['number' => '1234567890', 'extension' => 'ABC']])
-        ->call('save');
-
-    // If validation exists, it should error. If not, it passes through.
-    // Adjust based on actual implementation
-    expect(true)->toBeTrue();
+        ->call('save')
+        ->assertHasErrors(['phones.0.extension' => 'numeric']);
 });
 
 test('T29-Validation: Social profile URL must be valid', function () {
@@ -405,5 +399,5 @@ test('T35-UI: New Contact button has correct href on customer contacts tab', fun
     $response->assertStatus(200);
     $response->assertSee('Yeni Kişi');
     $response->assertSee('/dashboard/customers/contacts/create');
-    $response->assertSee('customer='.$customer->id);
+    $response->assertSee('customer=' . $customer->id);
 });

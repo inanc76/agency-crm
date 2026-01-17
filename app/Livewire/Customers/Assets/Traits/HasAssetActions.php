@@ -73,7 +73,15 @@ trait HasAssetActions
 
         $this->validate([
             'customer_id' => 'required|exists:customers,id',
-            'name' => 'required|string|min:2|max:150',
+            'name' => [
+                'required',
+                'string',
+                'min:2',
+                'max:150',
+                \Illuminate\Validation\Rule::unique('assets', 'name')
+                    ->where('customer_id', $this->customer_id)
+                    ->ignore($this->assetId)
+            ],
             'type' => "required|in:{$typeKeys}",
             'url' => 'nullable|url|max:255',
         ]);

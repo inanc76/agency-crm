@@ -10,9 +10,12 @@
  */
 use App\Livewire\Customers\Contacts\Traits\HasContactActions;
 use Livewire\Volt\Component;
+use Livewire\Attributes\Layout;
 use Mary\Traits\Toast;
 
-new class extends Component
+new 
+#[Layout('components.layouts.app')]
+class extends Component
 {
     use HasContactActions;
     use Toast;
@@ -105,35 +108,63 @@ new class extends Component
             {{-- Content --}}
             <div>
                 @if($activeTab === 'info')
-                    <div class="space-y-6">
-                        @include('livewire.modals.parts.contact._personal-info', [
-                            'name' => $name,
-                            'customer_id' => $customer_id,
-                            'status' => $status,
-                            'gender' => $gender,
-                            'position' => $position,
-                            'isViewMode' => $isViewMode,
-                            'customers' => $customers,
-                            'genders' => $genders
-                        ])
+                    <div class="grid grid-cols-12 gap-6">
+                        <div class="col-span-8 space-y-6">
+                            @include('livewire.modals.parts.contact._personal-info', [
+                                'name' => $name,
+                                'customer_id' => $customer_id,
+                                'status' => $status,
+                                'gender' => $gender,
+                                'position' => $position,
+                                'isViewMode' => $isViewMode,
+                                'customers' => $customers,
+                                'genders' => $genders
+                            ])
 
-                        @include('livewire.modals.parts.contact._communication', [
-                            'emails' => $emails,
-                            'phones' => $phones,
-                            'isViewMode' => $isViewMode
-                        ])
+                            @include('livewire.modals.parts.contact._communication', [
+                                'emails' => $emails,
+                                'phones' => $phones,
+                                'isViewMode' => $isViewMode
+                            ])
 
-                        @include('livewire.modals.parts.contact._social-profiles', [
-                            'social_profiles' => $social_profiles,
-                            'isViewMode' => $isViewMode
-                        ])
+                            @include('livewire.modals.parts.contact._social-profiles', [
+                                'social_profiles' => $social_profiles,
+                                'isViewMode' => $isViewMode
+                            ])
 
-                        @include('livewire.modals.parts.contact._other-details', [
-                            'birth_date' => $birth_date,
-                            'isViewMode' => $isViewMode
-                        ])
+                            @include('livewire.modals.parts.contact._other-details', [
+                                'birth_date' => $birth_date,
+                                'isViewMode' => $isViewMode
+                            ])
+                        </div>
+                        <div class="col-span-4 space-y-6">
+                            <div class="theme-card p-6 shadow-sm sticky top-6">
+                                <h2 class="text-base font-bold mb-4 text-center text-skin-heading">Kayıt Bilgileri</h2>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-xs font-medium mb-1 opacity-60 text-skin-base text-center">Kişi ID</label>
+                                        <div class="flex items-center justify-center gap-2">
+                                            <code class="text-[10px] font-mono bg-[var(--dropdown-hover-bg)] px-2 py-1 rounded text-skin-base">{{ $contactId ?? 'YENİ' }}</code>
+                                        </div>
+                                    </div>
+                                    @if($customer_id && $isViewMode)
+                                         @php $customerName = collect($customers)->firstWhere('id', $customer_id)['name'] ?? '-'; @endphp
+                                         <div>
+                                            <label class="block text-xs font-medium mb-1 opacity-60 text-skin-base text-center">Bağlı Müşteri</label>
+                                            <div class="text-sm font-medium text-center">
+                                                <a href="/dashboard/customers/{{ $customer_id }}" class="text-skin-primary hover:underline">{{ $customerName }}</a>
+                                            </div>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 @endif
+            </div>
+        </div>
+    </div>
+</div>
 
                 @if($activeTab === 'messages')
                     <div class="theme-card p-6 shadow-sm text-center text-[var(--color-text-muted)] py-12">

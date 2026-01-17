@@ -2,9 +2,12 @@
 
 use App\Livewire\Customers\Assets\Traits\HasAssetActions;
 use Livewire\Volt\Component;
+use Livewire\Attributes\Layout; // Import Layout attribute
 use Mary\Traits\Toast;
 
-new class extends Component {
+new 
+#[Layout('components.layouts.app')] // Explicitly use app layout
+class extends Component {
     use HasAssetActions;
     use Toast;
 }; ?>
@@ -99,74 +102,98 @@ new class extends Component {
             {{-- Content --}}
             <div>
                 @if($activeTab === 'info')
-                    <div class="space-y-6">
-                        {{-- Varlık Bilgileri Card --}}
-                        <div class="theme-card p-6 shadow-sm">
-                            <h2 class="text-base font-bold mb-4 text-skin-heading">Varlık Bilgileri
-                            </h2>
-                            <div class="grid grid-cols-2 gap-6">
-                                <div>
-                                    <label class="block text-xs font-medium mb-1 opacity-60">Müşteri *</label>
-                                    @if($isViewMode)
-                                        @php $customerName = collect($customers)->firstWhere('id', $customer_id)['name'] ?? '-'; @endphp
-                                        <div class="text-sm font-medium">
-                                            {{ $customerName }}
-                                        </div>
-                                    @else
-                                        <select wire:model="customer_id" class="select w-full">
-                                            <option value="">Müşteri Seçin</option>
-                                            @foreach($customers as $c)
-                                                <option value="{{ $c['id'] }}">{{ $c['name'] }}</option>
-                                            @endforeach
-                                        </select>
-                                        @error('customer_id') <span class="text-skin-danger text-xs">{{ $message }}</span>
-                                        @enderror
-                                    @endif
-                                </div>
+                    <div class="grid grid-cols-12 gap-6">
+                        <div class="col-span-8 space-y-6">
+                            {{-- Varlık Bilgileri Card --}}
+                            <div class="theme-card p-6 shadow-sm">
+                                <h2 class="text-base font-bold mb-4 text-skin-heading">Varlık Bilgileri
+                                </h2>
+                                <div class="grid grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="block text-xs font-medium mb-1 opacity-60">Müşteri *</label>
+                                        @if($isViewMode)
+                                            @php $customerName = collect($customers)->firstWhere('id', $customer_id)['name'] ?? '-'; @endphp
+                                            <div class="text-sm font-medium">
+                                                {{ $customerName }}
+                                            </div>
+                                        @else
+                                            <select wire:model="customer_id" class="select w-full">
+                                                <option value="">Müşteri Seçin</option>
+                                                @foreach($customers as $c)
+                                                    <option value="{{ $c['id'] }}">{{ $c['name'] }}</option>
+                                                @endforeach
+                                            </select>
+                                            @error('customer_id') <span class="text-skin-danger text-xs">{{ $message }}</span>
+                                            @enderror
+                                        @endif
+                                    </div>
 
-                                <div>
-                                    <label class="block text-xs font-medium mb-1 opacity-60">Varlık Adı *</label>
-                                    @if($isViewMode)
-                                        <div class="text-sm font-medium">{{ $name }}
-                                        </div>
-                                    @else
-                                        <input type="text" wire:model="name" placeholder="Varlık adını girin (Örn: Web Sitesi)"
-                                            class="input w-full">
-                                        @error('name') <span class="text-skin-danger text-xs">{{ $message }}</span> @enderror
-                                    @endif
-                                </div>
+                                    <div>
+                                        <label class="block text-xs font-medium mb-1 opacity-60">Varlık Adı *</label>
+                                        @if($isViewMode)
+                                            <div class="text-sm font-medium">{{ $name }}
+                                            </div>
+                                        @else
+                                            <input type="text" wire:model="name" placeholder="Varlık adını girin (Örn: Web Sitesi)"
+                                                class="input w-full">
+                                            @error('name') <span class="text-skin-danger text-xs">{{ $message }}</span> @enderror
+                                        @endif
+                                    </div>
 
-                                <div>
-                                    <label class="block text-xs font-medium mb-1 opacity-60">Varlık Türü *</label>
-                                    @if($isViewMode)
-                                        @php $typeName = collect($assetTypes)->firstWhere('id', $type)['name'] ?? $type; @endphp
-                                        <div class="text-sm font-medium">{{ $typeName }}
-                                        </div>
-                                    @else
-                                        <select wire:model="type" class="select w-full">
-                                            <option value="">Varlık türü seçin</option>
-                                            @foreach($assetTypes as $t)
-                                                <option value="{{ $t['id'] }}">{{ $t['name'] }}</option>
-                                            @endforeach
-                                        </select>
-                                        @error('type') <span class="text-skin-danger text-xs">{{ $message }}</span> @enderror
-                                    @endif
-                                </div>
+                                    <div>
+                                        <label class="block text-xs font-medium mb-1 opacity-60">Varlık Türü *</label>
+                                        @if($isViewMode)
+                                            @php $typeName = collect($assetTypes)->firstWhere('id', $type)['name'] ?? $type; @endphp
+                                            <div class="text-sm font-medium">{{ $typeName }}
+                                            </div>
+                                        @else
+                                            <select wire:model="type" class="select w-full">
+                                                <option value="">Varlık türü seçin</option>
+                                                @foreach($assetTypes as $t)
+                                                    <option value="{{ $t['id'] }}">{{ $t['name'] }}</option>
+                                                @endforeach
+                                            </select>
+                                            @error('type') <span class="text-skin-danger text-xs">{{ $message }}</span> @enderror
+                                        @endif
+                                    </div>
 
-                                <div class="col-span-2">
-                                    <label class="block text-xs font-medium mb-1 opacity-60">URL</label>
-                                    @if($isViewMode)
-                                        <div class="text-sm font-medium">
-                                            @if($url)
-                                                <a href="{{ $url }}" target="_blank"
-                                                    class="text-blue-500 hover:underline">{{ $url }}</a>
-                                            @else
-                                                -
-                                            @endif
+                                    <div class="col-span-2">
+                                        <label class="block text-xs font-medium mb-1 opacity-60">URL</label>
+                                        @if($isViewMode)
+                                            <div class="text-sm font-medium">
+                                                @if($url)
+                                                    <a href="{{ $url }}" target="_blank"
+                                                        class="text-blue-500 hover:underline">{{ $url }}</a>
+                                                @else
+                                                    -
+                                                @endif
+                                            </div>
+                                        @else
+                                            <input type="text" wire:model.blur="url" placeholder="https://www.example.com"
+                                                class="input w-full">
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-span-4 space-y-6">
+                            <div class="theme-card p-6 shadow-sm sticky top-6">
+                                <h2 class="text-base font-bold mb-4 text-center text-skin-heading">Kayıt Bilgileri</h2>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-xs font-medium mb-1 opacity-60 text-skin-base text-center">Varlık ID</label>
+                                        <div class="flex items-center justify-center gap-2">
+                                            <code class="text-[10px] font-mono bg-[var(--dropdown-hover-bg)] px-2 py-1 rounded text-skin-base">{{ $assetId ?? 'YENİ' }}</code>
                                         </div>
-                                    @else
-                                        <input type="text" wire:model.blur="url" placeholder="https://www.example.com"
-                                            class="input w-full">
+                                    </div>
+                                    @if($customer_id && $isViewMode)
+                                         @php $customerName = collect($customers)->firstWhere('id', $customer_id)['name'] ?? '-'; @endphp
+                                         <div>
+                                            <label class="block text-xs font-medium mb-1 opacity-60 text-skin-base text-center">Bağlı Müşteri</label>
+                                            <div class="text-sm font-medium text-center">
+                                                <a href="/dashboard/customers/{{ $customer_id }}" class="text-skin-primary hover:underline">{{ $customerName }}</a>
+                                            </div>
+                                        </div>
                                     @endif
                                 </div>
                             </div>

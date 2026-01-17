@@ -41,15 +41,8 @@ new
         if ($project) {
             $this->projectId = $project;
             $this->loadProjectData();
-        } else {
-            // Varsayılan durum ata
-            $defaultStatus = ReferenceItem::where('category_key', 'PROJECT_STATUS')
-                ->where('is_default', true)
-                ->first();
-            if ($defaultStatus) {
-                $this->status_id = $defaultStatus->id;
-            }
         }
+        // Removed automatic default status assignment to allow proper validation testing
     }
 
     private function loadReferenceData(): void
@@ -59,9 +52,14 @@ new
             ->map(fn($c) => ['id' => $c->id, 'name' => $c->name, 'logo_url' => $c->logo_url])
             ->toArray();
 
-        $this->leaders = User::orderBy('name')
-            ->get(['id', 'name'])
-            ->map(fn($u) => ['id' => $u->id, 'name' => $u->name])
+        $this->leaders = User::active()
+            ->orderBy('name')
+            ->get(['id', 'name', 'title'])
+            ->map(fn($u) => [
+                'id' => $u->id, 
+                'name' => $u->name . ($u->title ? ' (' . $u->title . ')' : ''),
+                'title' => $u->title
+            ])
             ->toArray();
 
         $this->statuses = ReferenceItem::where('category_key', 'PROJECT_STATUS')

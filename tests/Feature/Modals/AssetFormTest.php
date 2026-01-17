@@ -61,7 +61,7 @@ test('CRUD: Can delete an asset', function () {
 
     Volt::test('modals.asset-form', ['asset' => $asset->id])
         ->call('delete')
-        ->assertRedirect('/dashboard/customers/'.$asset->customer_id.'?tab=assets');
+        ->assertRedirect('/dashboard/customers/' . $asset->customer_id . '?tab=assets');
 
     expect(Asset::find($asset->id))->toBeNull();
 });
@@ -104,6 +104,25 @@ test('Edge Case: URL max length', function () {
         ->set('url', str_repeat('a', 256))
         ->call('save')
         ->assertHasErrors(['url' => 'max']);
+});
+
+test('Validation: Asset name must be unique for the same customer', function () {
+    $customer = Customer::factory()->create();
+    Asset::factory()->create(['customer_id' => $customer->id, 'name' => 'Existing Asset']);
+
+    Volt::test('modals.asset-form')
+        ->set('customer_id', $customer->id)
+        ->set('name', 'Existing Asset')
+        ->set('type', 'WEBSITE')
+        ->call('save')
+        ->assertHasErrors(['name' => 'unique']);
+});
+
+test('Validation: Customer ID must be a valid UUID', function () {
+    Volt::test('modals.asset-form')
+        ->set('customer_id', 'not-a-uuid')
+        ->call('save')
+        ->assertHasErrors(['customer_id']);
 });
 
 // Future: Start Date / End Date Validation
@@ -217,7 +236,7 @@ test('T27-UI: New Asset button has correct href on customer assets tab', functio
     $response->assertStatus(200);
     $response->assertSee('Yeni Varlık');
     $response->assertSee('/dashboard/customers/assets/create');
-    $response->assertSee('customer='.$customer->id);
+    $response->assertSee('customer=' . $customer->id);
 });
 
 test('T28-UI: New Asset button has correct href on global assets tab', function () {

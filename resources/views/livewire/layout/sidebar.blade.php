@@ -141,13 +141,6 @@ $menuItems = fn() => [
                 'permission' => 'DEFINITIONS',
                 'children' => [
                     [
-                        'id' => 'users',
-                        'label' => 'Kullanıcılar',
-                        'icon' => '👥',
-                        'href' => '/dashboard/settings/users',
-                        'permission' => 'USERS',
-                    ],
-                    [
                         'id' => 'price-definitions',
                         'label' => 'Fiyat Tanımları',
                         'icon' => '💲',

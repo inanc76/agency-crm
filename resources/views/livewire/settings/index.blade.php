@@ -44,7 +44,7 @@ new
                 'subtitle' => 'Sistem kullanıcılarını ve rollerini yönetin',
                 'icon' => 'o-users',
                 'color' => 'bg-orange-50 text-orange-500',
-                'link' => '#'
+                'link' => route('users.index')
             ],
             [
                 'title' => 'Mail Ayarları',
