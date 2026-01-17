@@ -4,7 +4,6 @@ namespace App\Mail;
 
 use App\Models\User;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
@@ -15,8 +14,11 @@ class WelcomeUserMail extends Mailable
     use Queueable, SerializesModels;
 
     public User $user;
+
     public string $token;
+
     public string $setupUrl;
+
     public bool $isReset;
 
     /**
@@ -27,7 +29,7 @@ class WelcomeUserMail extends Mailable
         $this->user = $user;
         $this->token = $token;
         $this->isReset = $isReset;
-        $this->setupUrl = url('/setup-password/' . $token . '?email=' . urlencode($user->email));
+        $this->setupUrl = url('/setup-password/'.$token.'?email='.urlencode($user->email));
     }
 
     /**
@@ -35,10 +37,17 @@ class WelcomeUserMail extends Mailable
      */
     public function envelope(): Envelope
     {
+        $service = app(\App\Services\MailTemplateService::class);
+        $key = $this->isReset ? 'password_reset' : 'welcome_email';
+
+        $data = $service->render($key, [
+            '{{user.name}}' => $this->user->name,
+            '{{user.email}}' => $this->user->email,
+            '{{setup_url}}' => $this->setupUrl,
+        ]);
+
         return new Envelope(
-            subject: $this->isReset
-            ? 'Şifre Sıfırlama İsteği'
-            : 'Hoş Geldiniz - Şifrenizi Belirleyin',
+            subject: $data['subject'] ?: ($this->isReset ? 'Şifre Sıfırlama İsteği' : 'Hoş Geldiniz - Şifrenizi Belirleyin'),
         );
     }
 
@@ -47,13 +56,24 @@ class WelcomeUserMail extends Mailable
      */
     public function content(): Content
     {
+        $service = app(\App\Services\MailTemplateService::class);
+        $key = $this->isReset ? 'password_reset' : 'welcome_email';
+
+        $data = $service->render($key, [
+            '{{user.name}}' => $this->user->name,
+            '{{user.email}}' => $this->user->email,
+            '{{setup_url}}' => $this->setupUrl,
+        ]);
+
+        if ($data['content']) {
+            return new Content(
+                htmlString: $data['content'],
+            );
+        }
+
+        // Emergency fallback if DB is empty
         return new Content(
-            view: 'emails.welcome',
-            with: [
-                'user' => $this->user,
-                'setupUrl' => $this->setupUrl,
-                'isReset' => $this->isReset,
-            ]
+            htmlString: '<h1>Sistem Mesajı</h1><p>Şablon bulunamadı. Lütfen yönetici ile iletişime geçin.</p>',
         );
     }
 

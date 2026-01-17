@@ -49,91 +49,73 @@ Bu partial, sistemin TÜM BUTON VARYASYONLARını sergiler:
         <div class="flex items-center justify-between w-full pr-4">
             <div class="flex items-center gap-3">
                 <x-mary-icon name="o-cursor-arrow-rays" class="w-5 h-5 text-indigo-500" />
-                <span class="font-semibold text-slate-700">Buton & Aksiyon Parametreleri
-                    Önizleme</span>
+                <span class="font-semibold text-slate-700">Buton & Aksiyon Parametreleri Önizleme</span>
             </div>
-            <span class="text-[10px] font-mono bg-slate-100 text-slate-500 px-2 py-1 rounded">Isolated
-                Design System</span>
+            <span class="text-[10px] bg-slate-100 text-slate-400 px-2 py-1 rounded">.theme-btn-*,
+                --action-link...</span>
         </div>
     </x-slot:heading>
     <x-slot:content>
-        {{--
-        ┌─────────────────────────────────────────────────────────────────┐
-        │ 📝 KULLANIM NOTU │
-        └─────────────────────────────────────────────────────────────────┘
-
-        Buton Sınıfları ve Kullanım Alanları:
-
-        1. .theme-btn-save
-        - Kullanım: Form kaydetme butonları
-        - Örnek: <button class="theme-btn-save">Kaydet</button>
-        - Modüller: Offer Create, Customer Edit, Settings
-
-        2. .theme-btn-action
-        - Kullanım: Yeni kayıt ekleme (primary action)
-        - Örnek: <button class="theme-btn-action">Yeni Ekle</button>
-        - Modüller: Customer List, Offer List, Service List
-
-        3. .theme-btn-edit
-        - Kullanım: Düzenleme butonları
-        - Örnek: <button class="theme-btn-edit">Düzenle</button>
-        - Modüller: Tablo satırları, detail sayfalar
-
-        4. .theme-btn-delete
-        - Kullanım: Silme butonları
-        - Örnek: <button class="theme-btn-delete">Sil</button>
-        - Modüller: Tablo satırları, modal onayları
-
-        5. .theme-btn-cancel
-        - Kullanım: İptal butonları
-        - Örnek: <button class="theme-btn-cancel">İptal</button>
-        - Modüller: Modal close, form reset
-
-        6. --action-link-color
-        - Kullanım: Detay linkleri
-        - Örnek: <a href="#" style="color: var(--action-link-color)">Detaylar</a>
-        - Modüller: Tablo satırları, card footers
-
-        ⚠️ UYARI: Butonlarda inline style KULLANMAYIN!
-        --}}
-        <div class="p-6 bg-white rounded-xl border border-slate-100 grid grid-cols-2 md:grid-cols-3 gap-6">
+        <div class="p-6 bg-white rounded-xl border border-slate-100 grid grid-cols-2 md:grid-cols-3 gap-6 mb-4">
             <div class="flex flex-col items-center gap-2">
                 <button class="theme-btn-save w-full justify-center"
                     style="color: {{ $btn_save_text_color }} !important;">
                     <x-mary-icon name="o-check" class="w-4 h-4" /> <span>Kaydet</span>
                 </button>
-                <span class="text-[9px] font-mono text-slate-400">.theme-btn-save</span>
+                <x-copy-badge text=".theme-btn-save" class="text-[9px] text-slate-400" />
             </div>
             <div class="flex flex-col items-center gap-2">
                 <button class="theme-btn-action w-full justify-center">
                     <x-mary-icon name="o-plus" class="w-4 h-4" /> <span>Yeni Ekle</span>
                 </button>
-                <span class="text-[9px] font-mono text-slate-400">.theme-btn-action</span>
+                <x-copy-badge text=".theme-btn-action" class="text-[9px] text-slate-400" />
             </div>
             <div class="flex flex-col items-center gap-2">
                 <button class="theme-btn-edit w-full justify-center">
                     <x-mary-icon name="o-pencil-square" class="w-4 h-4" /> <span>Düzenle</span>
                 </button>
-                <span class="text-[9px] font-mono text-slate-400">.theme-btn-edit</span>
+                <x-copy-badge text=".theme-btn-edit" class="text-[9px] text-slate-400" />
             </div>
             <div class="flex flex-col items-center gap-2 text-center">
                 <button class="theme-btn-delete w-full justify-center">
                     <x-mary-icon name="o-trash" class="w-4 h-4" /> <span>Sil</span>
                 </button>
-                <span class="text-[9px] font-mono text-slate-400">.theme-btn-delete</span>
+                <x-copy-badge text=".theme-btn-delete" class="text-[9px] text-slate-400" />
             </div>
             <div class="flex flex-col items-center gap-2">
                 <button class="theme-btn-cancel w-full justify-center">
                     <span>İptal</span>
                 </button>
-                <span class="text-[9px] font-mono text-slate-400">.theme-btn-cancel</span>
+                <x-copy-badge text=".theme-btn-cancel" class="text-[9px] text-slate-400" />
             </div>
-            <div class="flex flex-col items-center gap-2">
-                <div class="h-10 flex items-center">
+            <div class="flex flex-col items-center gap-2 text-center">
+                <div class="h-10 flex items-center justify-center">
                     <a href="#" class="text-sm font-semibold underline"
                         style="color: {{ $action_link_color }}">Detayları Gör</a>
                 </div>
-                <span class="text-[9px] font-mono text-slate-400">--action-link-color</span>
+                <x-copy-badge text="--action-link-color" class="text-[9px] text-slate-400" />
+            </div>
+        </div>
+
+        {{-- Token List Section --}}
+        <div class="p-4 bg-slate-50 rounded-lg border border-dashed border-slate-200">
+            <h5 class="text-xs font-bold text-slate-700 mb-3 flex items-center gap-2 uppercase tracking-wider">
+                <x-mary-icon name="o-code-bracket" class="w-4 h-4" />
+                CSS & Tasarım Tokenleri
+            </h5>
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                <x-copy-badge text=".theme-btn-save"
+                    class="bg-white px-2 py-1.5 rounded border border-slate-200 text-xs flex justify-between" />
+                <x-copy-badge text=".theme-btn-action"
+                    class="bg-white px-2 py-1.5 rounded border border-slate-200 text-xs flex justify-between" />
+                <x-copy-badge text=".theme-btn-edit"
+                    class="bg-white px-2 py-1.5 rounded border border-slate-200 text-xs flex justify-between" />
+                <x-copy-badge text=".theme-btn-delete"
+                    class="bg-white px-2 py-1.5 rounded border border-slate-200 text-xs flex justify-between" />
+                <x-copy-badge text=".theme-btn-cancel"
+                    class="bg-white px-2 py-1.5 rounded border border-slate-200 text-xs flex justify-between" />
+                <x-copy-badge text="--action-link-color"
+                    class="bg-white px-2 py-1.5 rounded border border-slate-200 text-xs flex justify-between" />
             </div>
         </div>
     </x-slot:content>

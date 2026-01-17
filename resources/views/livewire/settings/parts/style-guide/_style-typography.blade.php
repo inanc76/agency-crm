@@ -45,8 +45,8 @@ Bu partial, sistemin TİPOGRAFİ VE RENK PALETİNİ sergiler:
                 <x-mary-icon name="o-language" class="w-5 h-5 text-indigo-500" />
                 <span class="font-semibold text-slate-700">Global Tipografi Önizleme</span>
             </div>
-            <span class="text-[10px] font-mono bg-slate-100 text-slate-500 px-2 py-1 rounded">font-family:
-                {{ $font_family }}</span>
+            <span class="text-[10px] bg-slate-100 text-slate-400 px-2 py-1 rounded">--font-family,
+                --color-text...</span>
         </div>
     </x-slot:heading>
     <x-slot:content>
@@ -63,24 +63,45 @@ Bu partial, sistemin TİPOGRAFİ VE RENK PALETİNİ sergiler:
         Tüm headingler style="color: {{ $heading_color }}" kullanır.
         Paragraflar style="color: {{ $base_text_color }}" kullanır.
         --}}
-        <div class="p-6 rounded-xl border border-slate-100 bg-white" style="font-family: {{ $font_family }}">
+        <div class="p-6 rounded-xl border border-slate-100 bg-white mb-4" style="font-family: {{ $font_family }}">
             <div class="flex items-baseline gap-4 mb-2">
-                <h1 class="text-3xl font-bold" style="color: {{ $heading_color }}">H1: Başlık Seviye
-                    1</h1>
-                <span class="text-[10px] font-mono text-slate-400">--color-text-heading</span>
+                <h1 class="text-3xl font-bold" style="color: {{ $heading_color }}">H1: Başlık Seviye 1</h1>
             </div>
             <h2 class="text-2xl font-semibold mb-2" style="color: {{ $heading_color }}">H2: Başlık
                 Seviye 2</h2>
             <h3 class="text-xl font-medium mb-4" style="color: {{ $heading_color }}">H3: Başlık
                 Seviye 3</h3>
             <div class="relative pt-4 border-t border-slate-50">
-                <span
-                    class="absolute -top-2.5 left-4 bg-white px-2 text-[10px] font-mono text-slate-400">--color-text-base</span>
                 <p class="leading-relaxed" style="color: {{ $base_text_color }}">
                     Bu paragraf metni, ayarlar sayfasından seçilen ana metin (base text) rengini ve
                     seçilen font ailesini kullanmaktadır.
                     Sistemdeki tüm uzun metinler ve açıklamalar bu biçimde görünecektir.
                 </p>
+            </div>
+        </div>
+
+        {{-- Token List Section --}}
+        <div class="p-4 bg-slate-50 rounded-lg border border-dashed border-slate-200">
+            <h5 class="text-xs font-bold text-slate-700 mb-3 flex items-center gap-2 uppercase tracking-wider">
+                <x-mary-icon name="o-code-bracket" class="w-4 h-4" />
+                CSS & Tasarım Tokenleri
+            </h5>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                <div class="space-y-1">
+                    <span class="text-[10px] text-slate-400 block ml-1 lowercase">Font Ailesi</span>
+                    <x-copy-badge :text="$font_family"
+                        class="bg-white px-2 py-1.5 rounded border border-slate-200 text-xs w-full flex justify-between" />
+                </div>
+                <div class="space-y-1">
+                    <span class="text-[10px] text-slate-400 block ml-1 lowercase">Başlık Rengi</span>
+                    <x-copy-badge text="--color-text-heading"
+                        class="bg-white px-2 py-1.5 rounded border border-slate-200 text-xs w-full flex justify-between" />
+                </div>
+                <div class="space-y-1">
+                    <span class="text-[10px] text-slate-400 block ml-1 lowercase">Ana Metin Rengi</span>
+                    <x-copy-badge text="--color-text-base"
+                        class="bg-white px-2 py-1.5 rounded border border-slate-200 text-xs w-full flex justify-between" />
+                </div>
             </div>
         </div>
     </x-slot:content>

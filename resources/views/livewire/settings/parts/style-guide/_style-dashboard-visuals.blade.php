@@ -20,8 +20,8 @@ fonksiyonu statik renkler üzerinde varyasyon oluşturur.
                 <span class="font-semibold text-slate-700">Tablo Avatar Stili</span>
             </div>
             <div class="flex gap-2">
-                <span
-                    class="text-[10px] font-mono bg-slate-100 text-slate-500 px-2 py-1 rounded">--table-avatar-bg</span>
+                <x-copy-badge text="--table-avatar-bg"
+                    class="text-[10px] bg-slate-100 text-slate-500 px-2 py-1 rounded" />
             </div>
         </div>
     </x-slot:heading>
@@ -59,8 +59,8 @@ fonksiyonu statik renkler üzerinde varyasyon oluşturur.
                 <span class="font-semibold text-slate-700">Dashboard Elemanları Önizleme</span>
             </div>
             <div class="flex gap-2">
-                <span
-                    class="text-[10px] font-mono bg-slate-100 text-slate-500 px-2 py-1 rounded">--dashboard-stats-*</span>
+                <x-copy-badge text="--dashboard-stats-*"
+                    class="text-[10px] bg-slate-100 text-slate-500 px-2 py-1 rounded" />
             </div>
         </div>
     </x-slot:heading>
@@ -73,8 +73,8 @@ fonksiyonu statik renkler üzerinde varyasyon oluşturur.
                         style="background-color: color-mix(in srgb, {{ $dashboard_stats_1_color }}, white 90%); color: {{ $dashboard_stats_1_color }};">
                         <x-mary-icon name="o-users" class="w-4 h-4" />
                     </div>
-                    <span class="text-xs px-2 py-0.5 rounded-full"
-                        style="background-color: color-mix(in srgb, {{ $dashboard_stats_1_color }}, white 90%); color: {{ $dashboard_stats_1_color }};">Aktif</span>
+                    <x-copy-badge text="Aktif" class="text-xs px-2 py-0.5 rounded-full"
+                        style="background-color: color-mix(in srgb, {{ $dashboard_stats_1_color }}, white 90%); color: {{ $dashboard_stats_1_color }};" />
                 </div>
                 <h4 class="text-lg font-bold" style="color: {{ $dashboard_card_text_color }}">7</h4>
             </div>

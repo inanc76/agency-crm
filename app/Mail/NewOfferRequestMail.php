@@ -3,7 +3,6 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
@@ -14,6 +13,7 @@ class NewOfferRequestMail extends Mailable
     use Queueable, SerializesModels;
 
     public \App\Models\Offer $offer;
+
     public array $data;
 
     /**
@@ -24,7 +24,7 @@ class NewOfferRequestMail extends Mailable
         $this->offer = $offer;
         $this->data = $data;
         // Ensure note key exists
-        if (!isset($this->data['note'])) {
+        if (! isset($this->data['note'])) {
             $this->data['note'] = null;
         }
     }
@@ -34,8 +34,19 @@ class NewOfferRequestMail extends Mailable
      */
     public function envelope(): Envelope
     {
+        $service = app(\App\Services\MailTemplateService::class);
+        $data = $service->render('new_offer_request', [
+            '{{offer.number}}' => $this->offer->number,
+            '{{company_name}}' => $this->data['company_name'],
+            '{{name}}' => $this->data['name'],
+            '{{phone}}' => $this->data['phone'] ?: '-',
+            '{{email}}' => $this->data['email'],
+            '{{note}}' => $this->data['note'] ?? '-',
+            '{{offer.view_url}}' => route('customers.offers.edit', $this->offer->id),
+        ]);
+
         return new Envelope(
-            subject: 'Yeni Teklif Talebi [' . $this->offer->number . '] - ' . $this->data['company_name'],
+            subject: $data['subject'] ?: ('Yeni Teklif Talebi ['.$this->offer->number.'] - '.$this->data['company_name']),
         );
     }
 
@@ -44,8 +55,25 @@ class NewOfferRequestMail extends Mailable
      */
     public function content(): Content
     {
+        $service = app(\App\Services\MailTemplateService::class);
+        $data = $service->render('new_offer_request', [
+            '{{offer.number}}' => $this->offer->number,
+            '{{company_name}}' => $this->data['company_name'],
+            '{{name}}' => $this->data['name'],
+            '{{phone}}' => $this->data['phone'] ?: '-',
+            '{{email}}' => $this->data['email'],
+            '{{note}}' => $this->data['note'] ?? '-',
+            '{{offer.view_url}}' => route('customers.offers.edit', $this->offer->id),
+        ]);
+
+        if ($data['content']) {
+            return new Content(
+                htmlString: $data['content'],
+            );
+        }
+
         return new Content(
-            view: 'emails.offers.new_request_notification',
+            htmlString: '<h1>Sistem Mesajı</h1><p>Şablon bulunamadı.</p>',
         );
     }
 

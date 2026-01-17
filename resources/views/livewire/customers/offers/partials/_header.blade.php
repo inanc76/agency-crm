@@ -43,9 +43,9 @@
                 $pdfOfferId = is_object($offerId) ? $offerId->id : (is_array($offerId) ? ($offerId['id'] ?? $offerId) : $offerId);
             @endphp
             <a href="/dashboard/customers/offers/{{ $pdfOfferId }}/pdf" wire:key="btn-pdf-{{ $pdfOfferId }}" target="_blank"
-                class="theme-btn-save flex items-center gap-2 px-4 py-2 text-sm" title="PDF Görüntüle">
-                <x-mary-icon name="o-document-text" class="w-4 h-4" />
-                PDF
+                class="theme-btn-save flex items-center gap-2 px-4 py-2 text-sm" title="Teklifi Gör ve Gönder">
+                <x-mary-icon name="o-paper-airplane" class="w-4 h-4" />
+                Gönder
             </a>
 
             <button type="button" wire:click="delete" wire:confirm="Bu teklifi silmek istediğinize emin misiniz?"

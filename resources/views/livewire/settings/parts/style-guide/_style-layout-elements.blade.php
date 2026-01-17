@@ -18,14 +18,11 @@ Ana layout (app.blade.php) üzerinde global olarak kullanılır.
                 <x-mary-icon name="o-bars-3" class="w-5 h-5 text-indigo-500" />
                 <span class="font-semibold text-slate-700">Layout Önizleme (Sidebar & Header)</span>
             </div>
-            <div class="flex gap-2">
-                <span class="text-[10px] font-mono bg-slate-100 text-slate-500 px-2 py-1 rounded">--sidebar-bg</span>
-                <span class="text-[10px] font-mono bg-slate-100 text-slate-500 px-2 py-1 rounded">--header-bg</span>
-            </div>
+            <span class="text-[10px] bg-slate-100 text-slate-400 px-2 py-1 rounded">--sidebar-*, --header-*</span>
         </div>
     </x-slot:heading>
     <x-slot:content>
-        <div class="flex h-32 border border-slate-200 rounded-xl overflow-hidden">
+        <div class="flex h-32 border border-slate-200 rounded-xl overflow-hidden mb-4">
             {{-- Sidebar Preview --}}
             <div class="w-1/4 h-full flex flex-col p-3 gap-2"
                 style="background-color: {{ $sidebar_bg_color }}; color: {{ $sidebar_text_color }}">
@@ -53,6 +50,22 @@ Ana layout (app.blade.php) üzerinde global olarak kullanılır.
                 </div>
             </div>
         </div>
+
+        {{-- Token List Section --}}
+        <div class="p-4 bg-slate-50 rounded-lg border border-dashed border-slate-200">
+            <h5 class="text-xs font-bold text-slate-700 mb-3 flex items-center gap-2 uppercase tracking-wider">
+                <x-mary-icon name="o-code-bracket" class="w-4 h-4" />
+                CSS & Tasarım Tokenleri
+            </h5>
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                <x-copy-badge text="--sidebar-bg"
+                    class="bg-white px-2 py-1.5 rounded border border-slate-200 text-xs flex justify-between" />
+                <x-copy-badge text="--header-bg"
+                    class="bg-white px-2 py-1.5 rounded border border-slate-200 text-xs flex justify-between" />
+                <x-copy-badge text="--header-icon-color"
+                    class="bg-white px-2 py-1.5 rounded border border-slate-200 text-xs flex justify-between" />
+            </div>
+        </div>
     </x-slot:content>
 </x-mary-collapse>
 
@@ -65,16 +78,15 @@ Ana layout (app.blade.php) üzerinde global olarak kullanılır.
                 <x-mary-icon name="o-swatch" class="w-5 h-5 text-indigo-500" />
                 <span class="font-semibold text-slate-700">Kenarlık ve Yazı Rengi Önizleme</span>
             </div>
-            <span class="text-[10px] font-mono bg-slate-100 text-slate-500 px-2 py-1 rounded">--header-icon-color</span>
+            <span class="text-[10px] bg-slate-100 text-slate-400 px-2 py-1 rounded">--header-icon-color...</span>
         </div>
     </x-slot:heading>
     <x-slot:content>
-        <div class="p-6 rounded-xl border-t-0"
+        <div class="p-6 rounded-xl border-t-0 mb-4"
             style="background-color: {{ $header_bg_color }}; border-bottom: {{ $header_border_width }}px solid {{ $header_border_color }}">
             <div class="flex items-center justify-end gap-6" style="color: {{ $header_icon_color }}">
                 <div class="flex flex-col items-center gap-1">
                     <x-mary-icon name="o-bell" class="w-6 h-6" />
-                    <span class="text-[8px] font-mono opacity-50">--header-icon-color</span>
                 </div>
                 <div class="flex items-center gap-2">
                     <span class="font-bold">John Doe</span>
@@ -82,11 +94,19 @@ Ana layout (app.blade.php) üzerinde global olarak kullanılır.
                 </div>
             </div>
         </div>
-        <div class="mt-2 flex justify-between items-center">
-            <p class="text-xs text-slate-500 italic">* Alt Kenarlık: {{ $header_border_width }}px
-            </p>
-            <span class="text-[9px] font-mono text-slate-400">border-bottom:
-                var(--header-border-width) solid var(--header-border-color)</span>
+
+        {{-- Token List Section --}}
+        <div class="p-4 bg-slate-50 rounded-lg border border-dashed border-slate-200">
+            <h5 class="text-xs font-bold text-slate-700 mb-3 flex items-center gap-2 uppercase tracking-wider">
+                <x-mary-icon name="o-code-bracket" class="w-4 h-4" />
+                CSS & Tasarım Tokenleri
+            </h5>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <x-copy-badge text="--header-icon-color"
+                    class="bg-white px-2 py-1.5 rounded border border-slate-200 text-xs flex justify-between" />
+                <x-copy-badge text="border-bottom: var(--header-border-width) solid var(--header-border-color)"
+                    class="bg-white px-2 py-1.5 rounded border border-slate-200 text-xs flex justify-between" />
+            </div>
         </div>
     </x-slot:content>
 </x-mary-collapse>

@@ -14,12 +14,12 @@ class MinioService
     {
         $setting = StorageSetting::where('is_active', true)->first();
 
-        if (!$setting) {
+        if (! $setting) {
             throw new \Exception('Minio ayarları bulunamadı. Lütfen önce depolama ayarlarını yapılandırın.');
         }
 
         $protocol = $setting->use_ssl ? 'https://' : 'http://';
-        $endpoint = $protocol . $setting->endpoint . ($setting->port == 443 || $setting->port == 80 ? '' : ':' . $setting->port);
+        $endpoint = $protocol.$setting->endpoint.($setting->port == 443 || $setting->port == 80 ? '' : ':'.$setting->port);
 
         $config = [
             'driver' => 's3',
@@ -41,12 +41,12 @@ class MinioService
     private function getS3Client()
     {
         $setting = StorageSetting::where('is_active', true)->first();
-        if (!$setting) {
+        if (! $setting) {
             throw new \Exception('Minio ayarları bulunamadı.');
         }
 
         $protocol = $setting->use_ssl ? 'https://' : 'http://';
-        $endpoint = $protocol . $setting->endpoint . ($setting->port == 443 || $setting->port == 80 ? '' : ':' . $setting->port);
+        $endpoint = $protocol.$setting->endpoint.($setting->port == 443 || $setting->port == 80 ? '' : ':'.$setting->port);
 
         return new S3Client([
             'version' => 'latest',
@@ -73,8 +73,8 @@ class MinioService
             $path = $filename; // Store directly in bucket root or prefix if needed: $directory . '/' . $filename;
 
             // User requested 'offers' directory, so let's honor $directory
-            if (!empty($directory)) {
-                $path = rtrim($directory, '/') . '/' . $filename;
+            if (! empty($directory)) {
+                $path = rtrim($directory, '/').'/'.$filename;
             }
 
             // Attempt Deductive Upload Strategy
@@ -115,7 +115,7 @@ class MinioService
 
         } catch (\Exception $e) {
             $fullPath = isset($file) ? $file->getRealPath() : 'unknown';
-            Log::error("Minio upload HATASI (Path: {$fullPath}): " . $e->getMessage());
+            Log::error("Minio upload HATASI (Path: {$fullPath}): ".$e->getMessage());
             throw $e;
         }
     }
@@ -157,8 +157,8 @@ class MinioService
                 }
             }
 
-            if (!empty($toDelete)) {
-                Log::info('Minio: ' . count($toDelete) . ' adet sürüm temizleniyor.');
+            if (! empty($toDelete)) {
+                Log::info('Minio: '.count($toDelete).' adet sürüm temizleniyor.');
                 $client->deleteObjects([
                     'Bucket' => $bucket,
                     'Delete' => [
@@ -177,17 +177,19 @@ class MinioService
             Log::info("Minio silme işlemi tamamlandı: {$path}");
 
             return true;
+
             return true;
         } catch (\Exception $e) {
-            Log::error("Minio silme HATASI - Yol: {$path} - Hata: " . $e->getMessage());
+            Log::error("Minio silme HATASI - Yol: {$path} - Hata: ".$e->getMessage());
 
             // Fallback: Try simple delete via Storage facade just in case S3Client fails
             try {
                 $this->getDisk()->delete($path);
                 Log::info("Minio fallback silme başarılı: {$path}");
+
                 return true;
             } catch (\Exception $ex) {
-                Log::error("Minio fallback silme de başarısız: " . $ex->getMessage());
+                Log::error('Minio fallback silme de başarısız: '.$ex->getMessage());
             }
 
             return false;
@@ -206,12 +208,10 @@ class MinioService
     public function getFileUrl(string $path): ?string
     {
         try {
-            $disk = $this->getDisk();
-            if ($disk->exists($path)) {
-                // Return Laravel proxy URL instead of direct Minio URL
-                // This bypasses CORS and SSL issues
-                return route('minio.proxy', ['path' => $path]);
-            }
+            // Return Laravel proxy URL instead of direct Minio URL
+            // This bypasses CORS and SSL issues
+            // Removing exists() check to prevent timeouts on page load
+            return route('minio.proxy', ['path' => $path]);
         } catch (\Exception $e) {
             // URL generation error
         }
@@ -223,27 +223,29 @@ class MinioService
     {
         $disk = $this->getDisk();
 
-        if (!$disk->exists($path)) {
+        if (! $disk->exists($path)) {
             throw new \Exception("Dosya bulunamadı: {$path}");
         }
 
         return $disk->download($path, $fileName);
     }
+
     public function getFileAsBase64(string $path): ?string
     {
         try {
             $disk = $this->getDisk();
 
-            if (!$disk->exists($path)) {
+            if (! $disk->exists($path)) {
                 return null;
             }
 
             $content = $disk->get($path);
             $mimeType = $disk->mimeType($path) ?? 'application/octet-stream';
 
-            return 'data:' . $mimeType . ';base64,' . base64_encode($content);
+            return 'data:'.$mimeType.';base64,'.base64_encode($content);
         } catch (\Exception $e) {
-            Log::error("Minio Base64 Hatası: " . $e->getMessage());
+            Log::error('Minio Base64 Hatası: '.$e->getMessage());
+
             return null;
         }
     }

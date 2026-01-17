@@ -11,6 +11,7 @@ class MailTemplate extends Model
     use HasUuids, SoftDeletes;
 
     protected $fillable = [
+        'system_key',
         'name',
         'subject',
         'content',

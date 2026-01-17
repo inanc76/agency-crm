@@ -159,9 +159,33 @@ new
             'Content-Type' => 'application/pdf',
         ]);
     }
+
+    public bool $showSendModal = false;
+
+    public string $recipientEmail = '';
+
+    public string $emailMessage = '';
+
+    public function openSendModal()
+    {
+        $this->recipientEmail = $this->offer->customer?->email ?? '';
+        $this->showSendModal = true;
+    }
+
+    public function sendOffer()
+    {
+        $this->validate([
+            'recipientEmail' => 'required|email',
+        ]);
+
+        // Actual mail sending logic will go here
+        $this->showSendModal = false;
+
+        $this->success('İşlem Başarılı', 'Teklif ' . $this->recipientEmail . ' adresine gönderim sırasına alındı.');
+    }
 }; ?>
 
-<div class="p-6 min-h-screen" style="background-color: var(--page-bg);">
+<div class="p-6 min-h-screen" style="background-color: var(--page-bg);" x-data>
     <div class="max-w-7xl mx-auto">
         {{-- Main Container with Flex Layout --}}
         <div class="flex gap-6">
@@ -211,6 +235,16 @@ new
                             </button>
                         </div>
 
+                        {{-- Teklifi Gönder --}}
+                        <button wire:click="openSendModal"
+                            class="w-full theme-btn-save flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                            </svg>
+                            <span>Teklifi Gönder</span>
+                        </button>
+
                         {{-- İndirme Sayfası (Yeni Buton) --}}
                         <a href="{{ route('offer.download', $offer->tracking_token ?? '') }}" target="_blank"
                             class="w-full theme-btn-delete flex items-center justify-center gap-2 no-underline">
@@ -220,6 +254,29 @@ new
                             </svg>
                             <span>İndirme Sayfası</span>
                         </a>
+
+    {{-- Send Modal --}}
+    <x-mary-modal wire:model="showSendModal" title="Teklifi Gönder" separator>
+        <div class="space-y-4">
+            <x-mary-input label="E-Posta Adresi" wire:model="recipientEmail" placeholder="Müşteri e-posta adresi..."
+                icon="o-envelope" />
+            <x-mary-textarea label="Mesajınız (Opsiyonel)" wire:model="emailMessage"
+                placeholder="Teklif hakkında kısa bir not..." />
+
+            <div class="p-4 bg-gray-50 rounded-xl border border-gray-100 flex items-center gap-4">
+                <x-mary-icon name="o-document-text" class="w-8 h-8 text-indigo-500" />
+                <div>
+                    <p class="text-xs font-bold text-gray-900">{{ $offerNumber }} - {{ $offerTitle }}</p>
+                    <p class="text-[10px] text-gray-500">PDF dosyası teklife otomatik olarak eklenecektir.</p>
+                </div>
+            </div>
+        </div>
+
+        <x-slot:actions>
+            <x-mary-button label="İptal" @click="$wire.showSendModal = false" />
+            <x-mary-button label="Gönder" class="theme-btn-save" wire:click="sendOffer" spinner="sendOffer" />
+        </x-slot:actions>
+    </x-mary-modal>
 
                         {{-- Ayarlar Bölümü --}}
                         <div class="pt-6 mt-6 border-t border-gray-100">

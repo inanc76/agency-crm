@@ -50,8 +50,10 @@ Bu partial, sistemin FORM VE INPUT ELEMENTLERİNİ sergiler:
                 <x-mary-icon name="o-pencil-square" class="w-5 h-5 text-indigo-500" />
                 <span class="font-semibold text-slate-700">Input & Validation Önizleme</span>
             </div>
-            <span class="text-[10px] font-mono bg-slate-100 text-slate-500 px-2 py-1 rounded">--input-radius:
-                {{ $input_border_radius }}</span>
+            <x-copy-badge :text="$input_border_radius"
+                class="text-[10px] bg-slate-100 text-slate-500 px-2 py-1 rounded">
+                --input-radius: {{ $input_border_radius }}
+            </x-copy-badge>
         </div>
     </x-slot:heading>
     <x-slot:content>
@@ -84,7 +86,7 @@ Bu partial, sistemin FORM VE INPUT ELEMENTLERİNİ sergiler:
                 <div class="flex justify-between items-center mb-2">
                     <label class="block text-sm font-medium text-slate-700">Normal & Focus
                         State</label>
-                    <span class="text-[9px] font-mono text-slate-400">--input-border</span>
+                    <x-copy-badge text="--input-border" class="text-[9px] text-slate-400" />
                 </div>
                 <input type="text" placeholder="Focus durumunu test edin..."
                     class="w-full px-4 py-2 border transition-all duration-200 outline-none" style="border-color: {{ $input_border_color }}; 
@@ -92,15 +94,16 @@ Bu partial, sistemin FORM VE INPUT ELEMENTLERİNİ sergiler:
                                 padding-top: {{ $input_vertical_padding }}; 
                                 padding-bottom: {{ $input_vertical_padding }};">
                 <p class="text-[10px] font-mono text-slate-500 mt-2">Focus ring: <span
-                        class="inline-block w-3 h-3 rounded-full align-middle"
-                        style="background-color: {{ $input_focus_ring_color }}"></span> <span
-                        class="text-slate-400">--input-focus-ring</span></p>
+                        class="inline-block w-3 h-3 rounded-full align-middle outline outline-1 outline-slate-200"
+                        style="background-color: {{ $input_focus_ring_color }}"></span>
+                    <x-copy-badge text="--input-focus-ring" class="text-slate-400 ml-1" />
+                </p>
             </div>
             <div>
                 <div class="flex justify-between items-center mb-2">
                     <label class="block text-sm font-medium" style="color: {{ $input_error_text_color }}">Error
                         State</label>
-                    <span class="text-[9px] font-mono text-slate-400">--error-color</span>
+                    <x-copy-badge text="--error-color" class="text-[9px] text-slate-400" />
                 </div>
                 <input type="text" value="Hatalı veri girişi"
                     class="w-full px-4 py-2 border transition-all duration-200 outline-none" style="border-color: {{ $input_error_border_color }}; 
@@ -109,7 +112,8 @@ Bu partial, sistemin FORM VE INPUT ELEMENTLERİNİ sergiler:
                                 padding-bottom: {{ $input_vertical_padding }};
                                 box-shadow: 0 0 0 2px {{ $input_error_ring_color }}40;">
                 <p class="text-[10px] font-mono mt-1" style="color: {{ $input_error_text_color }}">
-                    --input-error-text</p>
+                    <x-copy-badge text="--input-error-text" />
+                </p>
             </div>
         </div>
     </x-slot:content>
@@ -125,8 +129,8 @@ Bu partial, sistemin FORM VE INPUT ELEMENTLERİNİ sergiler:
                 <span class="font-semibold text-slate-700">Combo Box Önizleme</span>
             </div>
             <div class="flex gap-2">
-                <span class="text-[10px] font-mono bg-slate-100 text-slate-500 px-2 py-1 rounded">.select</span>
-                <span class="text-[10px] font-mono bg-slate-100 text-slate-500 px-2 py-1 rounded">.select-sm</span>
+                <x-copy-badge text=".select" class="text-[10px] bg-slate-100 text-slate-500 px-2 py-1 rounded" />
+                <x-copy-badge text=".select-sm" class="text-[10px] bg-slate-100 text-slate-500 px-2 py-1 rounded" />
             </div>
         </div>
     </x-slot:heading>
@@ -175,8 +179,8 @@ Bu partial, sistemin FORM VE INPUT ELEMENTLERİNİ sergiler:
                         </select>
                     </div>
                     <p class="mt-3 text-[10px] text-slate-400">
-                        Kullanım: <code
-                            class="bg-white px-1 rounded border border-slate-200">select select-sm bg-white border-slate-200 text-xs</code>
+                        Kullanım: <x-copy-badge text="select select-sm bg-white border-slate-200 text-xs"
+                            class="bg-white px-1 rounded border border-slate-200" />
                     </p>
                 </div>
             </div>
@@ -198,8 +202,8 @@ Bu partial, sistemin FORM VE INPUT ELEMENTLERİNİ sergiler:
                         </select>
                     </div>
                     <p class="mt-3 text-[10px] text-slate-400">
-                        Kullanım: <code
-                            class="bg-white px-1 rounded border border-slate-200">select select-xs bg-white border-slate-200</code>
+                        Kullanım: <x-copy-badge text="select select-xs bg-white border-slate-200"
+                            class="bg-white px-1 rounded border border-slate-200" />
                     </p>
                 </div>
             </div>
@@ -234,8 +238,8 @@ Bu partial, sistemin FORM VE INPUT ELEMENTLERİNİ sergiler:
                         </select>
                     </div>
                     <p class="text-[10px] text-slate-400">
-                        Kullanım: <code
-                            class="bg-white px-1 rounded border border-slate-200">select w-full bg-white</code>
+                        Kullanım: <x-copy-badge text="select w-full bg-white"
+                            class="bg-white px-1 rounded border border-slate-200" />
                     </p>
                 </div>
             </div>
@@ -249,32 +253,32 @@ Bu partial, sistemin FORM VE INPUT ELEMENTLERİNİ sergiler:
             </h5>
             <div class="grid grid-cols-2 md:grid-cols-3 gap-3 text-xs">
                 <div class="flex items-center gap-2">
-                    <code class="bg-white px-2 py-1 rounded border border-slate-200">select</code>
+                    <x-copy-badge text="select" class="bg-white px-2 py-1 rounded border border-slate-200" />
                     <span class="text-slate-500">Temel stil</span>
                 </div>
                 <div class="flex items-center gap-2">
-                    <code class="bg-white px-2 py-1 rounded border border-slate-200">select-sm</code>
+                    <x-copy-badge text="select-sm" class="bg-white px-2 py-1 rounded border border-slate-200" />
                     <span class="text-slate-500">Küçük boyut</span>
                 </div>
                 <div class="flex items-center gap-2">
-                    <code
-                        class="bg-emerald-50 text-emerald-700 px-2 py-1 rounded border border-emerald-200">select-xs</code>
-                    <span class="text-slate-500 font-bold">Ekstra Küçük</span>
+                    <x-copy-badge text="select-xs"
+                        class="bg-emerald-50 text-emerald-700 px-2 py-1 rounded border border-emerald-200 font-bold" />
+                    <span class="text-slate-500">Ekstra Küçük</span>
                 </div>
                 <div class="flex items-center gap-2">
-                    <code class="bg-white px-2 py-1 rounded border border-slate-200">w-full</code>
+                    <x-copy-badge text="w-full" class="bg-white px-2 py-1 rounded border border-slate-200" />
                     <span class="text-slate-500">Tam genişlik</span>
                 </div>
                 <div class="flex items-center gap-2">
-                    <code class="bg-white px-2 py-1 rounded border border-slate-200">bg-white</code>
+                    <x-copy-badge text="bg-white" class="bg-white px-2 py-1 rounded border border-slate-200" />
                     <span class="text-slate-500">Beyaz arka plan</span>
                 </div>
                 <div class="flex items-center gap-2">
-                    <code class="bg-white px-2 py-1 rounded border border-slate-200">border-slate-200</code>
+                    <x-copy-badge text="border-slate-200" class="bg-white px-2 py-1 rounded border border-slate-200" />
                     <span class="text-slate-500">Kenarlık</span>
                 </div>
                 <div class="flex items-center gap-2">
-                    <code class="bg-white px-2 py-1 rounded border border-slate-200">text-xs</code>
+                    <x-copy-badge text="text-xs" class="bg-white px-2 py-1 rounded border border-slate-200" />
                     <span class="text-slate-500">Küçük font</span>
                 </div>
             </div>

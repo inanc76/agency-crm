@@ -55,14 +55,14 @@ new #[Layout('components.layouts.app')]
         ]
     ];
 
-    public function mount($id = null)
+    public function mount(?MailTemplate $template = null)
     {
-        if ($id) {
-            $this->template = MailTemplate::findOrFail($id);
-            $this->name = $this->template->name;
-            $this->subject = $this->template->subject;
-            $this->content = $this->template->content;
-            $this->is_system = $this->template->is_system;
+        if ($template && $template->exists) {
+            $this->template = $template;
+            $this->name = $template->name;
+            $this->subject = $template->subject;
+            $this->content = $template->content;
+            $this->is_system = $template->is_system;
         }
         
         // Set default sender provider to active one
@@ -70,6 +70,27 @@ new #[Layout('components.layouts.app')]
         if ($activeMail) {
             $this->sender_provider = $activeMail->provider;
         }
+    }
+
+    public function showSystemDeleteWarning()
+    {
+        $this->error('Hata', 'Sistem şablonları silinemez.');
+    }
+
+    public function delete()
+    {
+        if (!$this->template) {
+            return;
+        }
+
+        if ($this->template->is_system || $this->template->system_key) {
+            $this->error('Hata', 'Sistem şablonları silinemez.');
+            return;
+        }
+
+        $this->template->delete();
+        $this->success('Başarılı', 'Şablon silindi.');
+        return $this->redirect(route('settings.mail-templates.index'), navigate: true);
     }
 
     public function save()
@@ -183,12 +204,33 @@ new #[Layout('components.layouts.app')]
         <div class="flex items-center justify-between mb-6">
             <div>
                 <h1 class="text-2xl font-bold tracking-tight text-[var(--color-text-heading)]">
-                    {{ $template ? 'Şablon Düzenle' : 'Yeni Mail Şablonu' }}
+                    {{ $template ? 'Düzenle: ' . $this->name : 'Yeni Mail Şablonu' }}
                 </h1>
                 <p class="text-sm opacity-60 mt-1">Müşterilere gönderilecek e-postalar için şablon oluşturun</p>
             </div>
             <div class="flex items-center gap-2">
                 <button wire:click="cancel" class="theme-btn-cancel">İptal</button>
+                
+                @if($template)
+                    @if($template->is_system || $template->system_key)
+                        <button type="button" 
+                            wire:click="showSystemDeleteWarning"
+                            class="px-4 py-2 text-sm font-bold bg-gray-100 text-gray-400 border border-gray-200 rounded-lg cursor-not-allowed flex items-center gap-2"
+                            title="Sistem şablonları silinemez">
+                            <x-mary-icon name="o-trash" class="w-4 h-4" />
+                            <span>Sil</span>
+                        </button>
+                    @else
+                        <button type="button" 
+                            wire:confirm="Bu şablonu silmek istediğinizden emin misiniz?"
+                            wire:click="delete" 
+                            class="px-4 py-2 text-sm font-bold bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 rounded-lg transition-colors flex items-center gap-2">
+                            <x-mary-icon name="o-trash" class="w-4 h-4" />
+                            <span>Sil</span>
+                        </button>
+                    @endif
+                @endif
+
                 <button wire:click="save" class="theme-btn-save flex items-center gap-2">
                     <x-mary-icon name="o-check" class="w-4 h-4" />
                     <span>{{ $template ? 'Güncelle' : 'Kaydet ve Oluştur' }}</span>
@@ -270,7 +312,54 @@ new #[Layout('components.layouts.app')]
                                 </button>
                             </div>
                             
-                            <div class="theme-card shadow-sm overflow-hidden border border-[var(--input-border)] rounded-lg bg-white" wire:ignore>
+                            <div 
+                                class="theme-card shadow-sm overflow-hidden border border-[var(--input-border)] rounded-lg bg-white" 
+                                wire:ignore
+                                x-data="{ 
+                                    content: @entangle('content'),
+                                    quill: null,
+                                    init() {
+                                        this.$nextTick(() => {
+                                            // Cleanup any previous Quill toolbars/containers that might linger
+                                            const existingToolbars = this.$el.querySelectorAll('.ql-toolbar');
+                                            existingToolbars.forEach(el => el.remove());
+                                            
+                                            const editorContainer = document.getElementById('quill-editor');
+                                            if (editorContainer) {
+                                                editorContainer.innerHTML = '';
+                                            }
+
+                                            this.quill = new Quill('#quill-editor', {
+                                                theme: 'snow',
+                                                modules: {
+                                                    toolbar: [
+                                                        [{ 'header': [1, 2, 3, false] }],
+                                                        ['bold', 'italic', 'underline', 'strike'],
+                                                        ['link', 'blockquote', 'code-block', 'image'],
+                                                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                                                        [{ 'color': [] }, { 'background': [] }],
+                                                        ['clean']
+                                                    ]
+                                                }
+                                            });
+
+                                            if (this.content) {
+                                                this.quill.clipboard.dangerouslyPasteHTML(this.content);
+                                            }
+
+                                            this.quill.on('text-change', () => {
+                                                this.content = this.quill.root.innerHTML;
+                                            });
+
+                                            Livewire.on('content-updated', (event) => {
+                                                if (this.quill.root.innerHTML !== event.content) {
+                                                    this.quill.clipboard.dangerouslyPasteHTML(event.content);
+                                                }
+                                            });
+                                        });
+                                    }
+                                }"
+                            >
                                 {{-- Quill Reader implementation - Open Source & Free --}}
                                 <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
                                 <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
@@ -291,43 +380,11 @@ new #[Layout('components.layouts.app')]
                                         line-height: 1.6;
                                         color: #1e293b;
                                         background-color: white !important;
+                                        min-height: 700px;
                                     }
                                 </style>
                                 
-                                <div id="quill-editor" style="height: 700px;"></div>
-                                
-                                <script>
-                                    document.addEventListener('livewire:init', () => {
-                                        const quill = new Quill('#quill-editor', {
-                                            theme: 'snow',
-                                            modules: {
-                                                toolbar: [
-                                                    [{ 'header': [1, 2, 3, false] }],
-                                                    ['bold', 'italic', 'underline', 'strike'],
-                                                    ['link', 'blockquote', 'code-block', 'image'],
-                                                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                                                    [{ 'color': [] }, { 'background': [] }],
-                                                    ['clean']
-                                                ]
-                                            }
-                                        });
-
-                                        // Set initial content
-                                        quill.root.innerHTML = @js($content);
-
-                                        // Update Livewire on change
-                                        quill.on('text-change', function() {
-                                            @this.set('content', quill.root.innerHTML);
-                                        });
-
-                                        // Listen for external updates (from HTML Modal)
-                                        Livewire.on('content-updated', (event) => {
-                                            if (quill.root.innerHTML !== event.content) {
-                                                quill.root.innerHTML = event.content;
-                                            }
-                                        });
-                                    });
-                                </script>
+                                <div id="quill-editor" style="height: 700px;" wire:key="quill-editor-{{ $template?->id ?? 'new' }}"></div>
                             </div>
                             <p class="text-xs text-[var(--color-text-muted)] mt-2 italic">
                                 * Değişken Rehberi'ndeki kodları içeriğe ekleyebilirsiniz.

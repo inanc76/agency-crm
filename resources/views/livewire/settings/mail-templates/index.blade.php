@@ -10,15 +10,26 @@ new #[Layout('components.layouts.app')]
     use WithPagination;
 
     public $search = '';
+    public int $perPage = 25;
+
+    public function updatedSearch()
+    {
+        $this->resetPage();
+    }
+    public function updatedPerPage()
+    {
+        $this->resetPage();
+    }
 
     public function with(): array
     {
         return [
             'templates' => MailTemplate::query()
+                ->with('creator')
                 ->when($this->search, fn($q) => $q->where('name', 'like', "%{$this->search}%")->orWhere('subject', 'like', "%{$this->search}%"))
-                ->orderBy('is_system', 'desc') // System templates first? Or just created_at
+                ->orderBy('is_system', 'desc')
                 ->orderBy('created_at', 'desc')
-                ->paginate(10)
+                ->paginate($this->perPage)
         ];
     }
 
@@ -58,58 +69,65 @@ new #[Layout('components.layouts.app')]
             </a>
         </div>
 
-        <div class="theme-card shadow-sm overflow-hidden">
-            <div class="p-4 border-b border-[var(--card-border)] bg-[var(--card-bg)]">
+        <div class="bg-white rounded-xl border border-skin-light shadow-sm overflow-hidden">
+            <div class="p-4 border-b border-skin-light">
                 <x-mary-input wire:model.live.debounce.300ms="search" placeholder="Şablon ara..."
                     icon="o-magnifying-glass" class="max-w-xs" />
             </div>
 
+            <style>
+                .mail-template-row:hover * {
+                    color: var(--table-hover-text) !important;
+                }
+            </style>
+
             <div class="overflow-x-auto">
                 <table class="w-full text-sm text-left">
-                    <thead class="text-xs uppercase bg-[var(--table-header-bg)] text-[var(--table-header-text)]">
+                    <thead class="bg-slate-50 border-b border-skin-light">
                         <tr>
-                            <th class="px-6 py-3">Şablon Adı</th>
-                            <th class="px-6 py-3">Konu</th>
-                            <th class="px-6 py-3">Oluşturulma</th>
-                            <th class="px-6 py-3 text-right">İşlemler</th>
+                            <th class="px-6 py-3 font-semibold text-skin-base">Şablon Adı</th>
+                            <th class="px-6 py-3 font-semibold text-skin-base">Konu</th>
+                            <th class="px-6 py-3 font-semibold text-skin-base">Tarih</th>
+                            <th class="px-6 py-4 text-right font-semibold text-skin-base">Oluşturan</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-[var(--table-border)]">
+                    <tbody class="divide-y divide-slate-100">
                         @forelse($templates as $template)
-                            <tr class="bg-[var(--card-bg)] hover:bg-[var(--table-row-hover-bg)] transition-colors cursor-pointer"
+                            <tr class="mail-template-row hover:bg-[var(--table-hover-bg)] transition-all duration-200 cursor-pointer group"
                                 onclick="window.location.href='{{ route('settings.mail-templates.edit', $template->id) }}'">
-                                <td class="px-6 py-4 font-medium text-[var(--color-text-heading)]">
+                                <td class="px-6 py-4">
                                     <div class="flex items-center gap-2">
-                                        {{ $template->name }}
-                                        @if($template->is_system)
+                                        <span
+                                            class="font-medium text-[var(--color-text-heading)] transition-colors">{{ $template->name }}</span>
+                                        @if($template->system_key)
                                             <span
-                                                class="px-2 py-0.5 rounded text-[10px] bg-blue-100 text-blue-700 font-bold border border-blue-200">SİSTEM</span>
+                                                class="px-2 py-0.5 text-[10px] font-bold bg-blue-50 text-blue-600 rounded border border-blue-100 uppercase group-hover:bg-white/20 group-hover:text-inherit group-hover:border-transparent transition-colors">
+                                                {{ $template->system_key }}
+                                            </span>
                                         @endif
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 text-[var(--color-text-base)]">{{ $template->subject }}</td>
-                                <td class="px-6 py-4 text-[var(--color-text-muted)]">
+                                <td class="px-6 py-4 text-[var(--color-text-base)] transition-colors">
+                                    {{ $template->subject }}
+                                </td>
+                                <td
+                                    class="px-6 py-4 text-[var(--color-text-muted)] transition-colors uppercase text-[10px] font-mono">
                                     {{ $template->created_at->format('d.m.Y H:i') }}
-                                    @if($template->creator)
-                                        <div class="text-xs opacity-70">{{ $template->creator->name }}</div>
-                                    @endif
                                 </td>
                                 <td class="px-6 py-4 text-right">
-                                    <div class="flex items-center justify-end gap-2">
-                                        @if(!$template->is_system)
-                                            <button wire:click="delete('{{ $template->id }}')" onclick="event.stopPropagation()"
-                                                wire:confirm="Bu şablonu silmek istediğinize emin misiniz?"
-                                                class="p-2 text-[var(--action-delete-text)] hover:bg-[var(--action-delete-bg)] rounded-lg transition-colors"
-                                                title="Sil">
-                                                <x-mary-icon name="o-trash" class="w-4 h-4" />
-                                            </button>
-                                        @endif
-                                    </div>
+                                    @if($template->is_system || $template->system_key)
+                                        <span
+                                            class="px-2 py-1 text-[10px] font-bold bg-gray-100 text-gray-500 rounded border border-gray-200 group-hover:bg-white/20 group-hover:text-inherit group-hover:border-transparent transition-colors uppercase">SYSTEM</span>
+                                    @else
+                                        <span class="text-sm font-medium text-[var(--color-text-heading)] transition-colors">
+                                            {{ $template->creator?->name ?? 'Bilinmiyor' }}
+                                        </span>
+                                    @endif
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4" class="px-6 py-12 text-center text-[var(--color-text-muted)]">
+                                <td colspan="4" class="px-6 py-12 text-center text-skin-muted">
                                     <x-mary-icon name="o-document-text" class="w-12 h-12 mx-auto mb-3 opacity-20" />
                                     <p>Henüz mail şablonu bulunmuyor.</p>
                                 </td>
@@ -119,11 +137,22 @@ new #[Layout('components.layouts.app')]
                 </table>
             </div>
 
-            @if($templates->hasPages())
-                <div class="p-4 border-t border-[var(--card-border)]">
-                    {{ $templates->links() }}
+            <div class="px-6 py-4 border-t border-skin-light flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="text-xs text-skin-muted">Göster:</span>
+                    <select wire:model.live="perPage"
+                        class="select select-xs bg-white border-skin-light text-xs w-18 h-8 min-h-0 focus:outline-none focus:border-slate-400">
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                        <option value="500">500</option>
+                    </select>
                 </div>
-            @endif
+                <div>{{ $templates->links() }}</div>
+                <div class="text-[10px] text-skin-muted font-mono">
+                    {{ number_format(microtime(true) - (defined('LARAVEL_START') ? LARAVEL_START : request()->server('REQUEST_TIME_FLOAT')), 3) }}s
+                </div>
+            </div>
         </div>
     </div>
 </div>

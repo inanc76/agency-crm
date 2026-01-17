@@ -30,8 +30,8 @@ Route::view('dashboard', 'dashboard')
 
 // Müşteri Yönetimi
 Route::get('dashboard/customers', function () {
-    if (!request()->has('tab')) {
-        return redirect()->to(url()->current() . '?tab=customers');
+    if (! request()->has('tab')) {
+        return redirect()->to(url()->current().'?tab=customers');
     }
 
     return view('customers.index');
@@ -90,8 +90,8 @@ Volt::route('dashboard/customers/offers/{offer}/pdf', 'customers.offers.pdf-prev
 // 🏗️ PROJE YÖNETİMİ
 // ═══════════════════════════════════════════════════════════════════════════
 Route::get('dashboard/projects', function () {
-    if (!request()->has('tab')) {
-        return redirect()->to(url()->current() . '?tab=projects');
+    if (! request()->has('tab')) {
+        return redirect()->to(url()->current().'?tab=projects');
     }
 
     return view('projects.index');
@@ -150,8 +150,7 @@ Volt::route('dashboard/settings/panel', 'settings.panel')
     ->middleware(['auth', 'verified', 'can:settings.edit'])
     ->name('settings.panel');
 
-Volt::route('dashboard/settings/profile', 'settings.profile')
-    ->middleware(['auth', 'verified'])
+Route::get('dashboard/settings/profile', fn () => redirect()->route('users.edit', auth()->user()))
     ->name('settings.profile');
 
 Volt::route('dashboard/settings/variables', 'variables.index')
@@ -171,22 +170,17 @@ Volt::route('dashboard/settings/pdf-template', 'settings.pdf-template')
     ->name('settings.pdf-template');
 
 // Mail Şablonları
-Volt::route('dashboard/settings/mail-templates', 'settings.mail-templates.index')
-    ->middleware(['auth', 'verified', 'can:settings.edit'])
-    ->name('settings.mail-templates.index');
-
-Volt::route('dashboard/settings/mail-templates/create', 'settings.mail-templates.edit')
-    ->middleware(['auth', 'verified', 'can:settings.edit'])
-    ->name('settings.mail-templates.create');
-
-Volt::route('dashboard/settings/mail-templates/{template}', 'settings.mail-templates.edit')
-    ->middleware(['auth', 'verified', 'can:settings.edit'])
-    ->name('settings.mail-templates.edit');
+Route::prefix('dashboard/settings')->middleware(['auth', 'verified', 'can:settings.edit'])->group(function () {
+    Volt::route('/mail-templates', 'settings.mail-templates.index')->name('settings.mail-templates.index');
+    Volt::route('/mail-templates/create', 'settings.mail-templates.edit')->name('settings.mail-templates.create');
+    Volt::route('/mail-templates/{template}', 'settings.mail-templates.edit')->name('settings.mail-templates.edit');
+});
 
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');
 
-    Volt::route('settings/profile', 'settings.profile')->name('profile.edit');
+    Route::get('settings/profile', fn () => redirect()->route('users.edit', auth()->user()))
+        ->name('profile.edit');
     Volt::route('settings/password', 'settings.password')->name('user-password.edit');
     Volt::route('settings/appearance', 'settings.appearance')->name('appearance.edit');
 });
@@ -197,7 +191,7 @@ Volt::route('dashboard/settings/two-factor', 'settings.two-factor')
 
 // Debug route for testing
 Route::get('debug/2fa', function () {
-    if (!auth()->check()) {
+    if (! auth()->check()) {
         return 'User not authenticated';
     }
 
