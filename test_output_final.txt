@@ -1,0 +1,585 @@
+
+   PASS  Tests\Unit\ExampleTest
+  ✓ that true is true                                                    0.26s  
+
+   PASS  Tests\Unit\Models\CustomerTest
+  ✓ REL-01: Customer has many Contacts                                   0.04s  
+  ✓ REL-02: Customer has many Services, Assets and Offers                0.02s  
+  ✓ REL-03: Customer can have Related Customers (Self-Referencing)       0.02s  
+  ✓ INT-01: Soft-deleting Customer marks it as deleted (SoftDeletes)     0.02s  
+  ✓ INT-02: Force-deleting Customer should be prevented or cascade (DB…  0.02s  
+  ✓ LOG-01: JSON Fields (emails, phones) are cast correctly              0.02s  
+  ✓ VAL-01: Tax Number should be unique (if enforced)                    0.02s  
+  ✓ VAL-02: Customer Type cannot be null (Not Null Constraint)           0.02s  
+
+   PASS  Tests\Feature\Auth\AuthenticationTest
+  ✓ login screen can be rendered                                         0.04s  
+  ✓ users can authenticate using the login screen                        0.03s  
+  ✓ users can not authenticate with invalid password                     0.02s  
+  ✓ users with two factor enabled are redirected to two factor challeng… 0.02s  
+  ✓ users can logout                                                     0.02s  
+
+   PASS  Tests\Feature\Auth\EmailVerificationTest
+  ✓ email verification screen can be rendered                            0.02s  
+  ✓ email can be verified                                                0.02s  
+  ✓ email is not verified with invalid hash                              0.02s  
+  ✓ already verified user visiting verification link is redirected with… 0.02s  
+
+   PASS  Tests\Feature\Auth\PasswordConfirmationTest
+  ✓ confirm password screen can be rendered                              0.02s  
+
+   PASS  Tests\Feature\Auth\PasswordResetTest
+  ✓ reset password link screen can be rendered                           0.02s  
+  ✓ reset password link can be requested                                 0.22s  
+  ✓ reset password screen can be rendered                                0.23s  
+  ✓ password can be reset with valid token                               0.24s  
+
+   PASS  Tests\Feature\Auth\TwoFactorChallengeTest
+  ✓ two factor challenge redirects to login when not authenticated       0.03s  
+  ✓ two factor challenge can be rendered                                 0.02s  
+
+   PASS  Tests\Feature\Customers\CustomerCreateTest
+  ✓ T01: Yetkisiz kullanıcı sayfaya erişemez                             0.02s  
+  ✓ T02: Yetkili kullanıcı sayfaya erişebilir                            0.04s  
+  ✓ T04: Yetkisiz kullanıcı düzenleme moduna geçemez (Authorization Che… 0.84s  
+  ✓ T26: Zorunlu alanlar boş bırakılamaz                                 0.03s  
+  ✓ T29: Email formatı doğrulanır                                        0.03s  
+  ✓ T39: Varsayılan ülke Türkiye gelir                                   0.02s  
+  ✓ T41-UI: New Customer button has correct href on customers tab        0.04s  
+
+   PASS  Tests\Feature\Customers\ServiceCreateTest
+  ✓ T01: Yetkisiz kullanıcı hizmet sayfasına erişemez                    0.02s  
+  ✓ T04: Yetkisiz kullanıcı hizmet düzenleyemez                          0.02s  
+  ✓ T15: Bulk Insert Check (5 hizmet tek sorguda eklenmeli)              0.03s  
+  ✓ T26: Müşteri ve Varlık seçimi zorunludur                             0.03s  
+  ✓ T32: Maksimum 5 hizmet eklenebilir                                   0.04s  
+  ✓ T36: Bitiş tarihi otomatik hesaplanır                                0.03s  
+  ✓ T41-UI: New Service button has correct href on services tab          0.03s  
+  ✓ T42-UI: New Service button has correct href on customer services ta… 0.03s  
+
+   PASS  Tests\Feature\Customers\Tabs\SalesTabTest
+  ✓ Sales Tab: Listing & Formatting                                      0.03s  
+
+   PASS  Tests\Feature\Customers\Tabs\ServicesTabTest
+  ✓ T01: Load Isolation & Pagination                                     0.05s  
+  ✓ T06: N+1 Check - Asset ilişkisi eager load edilmeli                  0.03s  
+  ✓ T05: Date Calculation (Kalan Gün)                                    0.03s  
+
+   PASS  Tests\Feature\DashboardTest
+  ✓ guests are redirected to the login page                              0.02s  
+  ✓ authenticated users can visit the dashboard                          0.02s  
+
+   PASS  Tests\Feature\ExampleTest
+  ✓ returns a successful response                                        0.02s  
+
+   PASS  Tests\Feature\Livewire\ProjectCreateTest
+  ✓ Project Create Form → it updates customer logo reactively when cust… 0.04s  
+  ✓ Project Create Form → it validates date range with start date befor… 0.06s  
+  ✓ Project Create Form → it creates external user with is_external fla… 0.06s  
+  ✓ Project Create Form → it can add phases and modules to the hierarch… 0.06s  
+
+   PASS  Tests\Feature\Modals\AssetFormTest
+  ✓ UI: Asset Form renders with correct title for new asset              0.02s  
+  ✓ CRUD: Can create a valid asset                                       0.03s  
+  ✓ CRUD: Can edit an existing asset                                     0.02s  
+  ✓ CRUD: Can delete an asset                                            0.02s  
+  ✓ Validation: Name is required and string max 150                      0.03s  
+  ✓ Validation: Customer ID is required and must exist                   0.03s  
+  ✓ Validation: Type (Category) is required                              0.02s  
+  ✓ Edge Case: URL max length                                            0.02s  
+  ✓ T09-UI: Asset table loads for customer                               0.02s  
+  ✓ T10-UI: Asset category (type) displays correctly                     0.02s  
+  ✓ T12-UI: Empty state shows when no assets                             0.03s  
+  ✓ T13-CRUD: Create modal can pre-fill customer_id                      0.02s  
+  ✓ T14-CRUD: Edit modal loads with data                                 0.02s  
+  ✓ T15-CRUD: Edit mode can be toggled                                   0.02s  
+  ✓ T16-CRUD: Delete redirect works                                      0.02s  
+  ✓ T24-Edge: Invalid UUID returns 404 or redirect                       0.02s  
+  ✓ T26-Edge: XSS protection on asset name                               0.03s  
+  ✓ T27-UI: New Asset button has correct href on customer assets tab     0.04s  
+  ✓ T28-UI: New Asset button has correct href on global assets tab       0.04s  
+
+   PASS  Tests\Feature\Modals\ContactFormTest
+  ✓ UI: Contact Form renders with correct title for new contact          0.03s  
+  ✓ CRUD: Can create a valid contact                                     0.05s  
+  ✓ CRUD: Can edit an existing contact                                   0.04s  
+  ✓ CRUD: Can delete a contact                                           0.03s  
+  ✓ Validation: Name is required and string max 150                      0.04s  
+  ✓ Validation: Customer ID is required and must exist                   0.03s  
+  ✓ Validation: Status is required and must be in enum                   0.04s  
+  ✓ Validation: Email array validation works                             0.03s  
+  ✓ Validation: Social profiles url validation works                     0.03s  
+  ✓ Validation: Birth date must be a valid date before today             0.03s  
+  ✓ Edge Case: XSS protection on name field                              0.04s  
+  ✓ T13-UI: Contact table loads for customer                             0.04s  
+  ✓ T14-UI: Empty state shows when no contacts                           0.04s  
+  ✓ T15-UI: Gender icons display correctly                               0.03s  
+  ✓ T16-UI: Status badge shows correct colors                            0.03s  
+  ✓ T17-CRUD: Create modal opens empty                                   0.02s  
+  ✓ T18-CRUD: Create modal can pre-fill customer_id                      0.03s  
+  ✓ T19-CRUD: Edit modal loads with data                                 0.02s  
+  ✓ T20-CRUD: Edit mode can be toggled                                   0.02s  
+  ✓ T21-CRUD: Delete shows confirmation                                  0.02s  
+  ✓ T22-CRUD: Table refreshes after delete                               0.03s  
+  ✓ T23-Validation: Name min length 2 characters                         0.02s  
+  ✓ T24-Validation: Customer ID must be valid UUID                       0.02s  
+  ✓ T25-Validation: Status must be WORKING or LEFT                       0.02s  
+  ✓ T26-Validation: Emails must be valid email format                    0.03s  
+  ✓ T27-Validation: Phones array structure                               0.03s  
+  ✓ T28-Validation: Phone extension must be numeric                      0.03s  
+  ✓ T29-Validation: Social profile URL must be valid                     0.03s  
+  ✓ T30-Validation: Birth date must be before today                      0.02s  
+  ✓ T31-Edge: Invalid UUID returns 404 or empty                          0.02s  
+  ✓ T33-Edge: Array limits - 20 emails                                   0.03s  
+  ✓ T34-UI: New Contact button has correct href on contacts tab          0.03s  
+  ✓ T35-UI: New Contact button has correct href on customer contacts ta… 0.03s  
+
+   PASS  Tests\Feature\Modals\ServiceFormTest
+  ✓ Service Form Component renders correctly                             0.02s  
+  ✓ Service Form Component can create a service                          0.03s  
+
+   PASS  Tests\Feature\Models\DominoEffectTest
+  ✓ Domino Effect - Status Propagation → it sets phase to IN_PROGRESS w… 0.02s  
+  ✓ Domino Effect - Status Propagation → it sets phase to COMPLETED whe… 0.02s  
+  ✓ Domino Effect - Status Propagation → it does not complete phase if…  0.02s  
+  ✓ Date Synchronization → it syncs phase dates from module dates        0.02s  
+  ✓ Validation Limits → it throws exception when creating more than 20…  0.02s  
+  ✓ Validation Limits → it throws exception when creating more than 50…  0.09s  
+  ✓ ReferenceData Integration → it assigns default status on project cr… 0.02s  
+  ✓ ReferenceData Integration → it assigns default status on phase crea… 0.02s  
+  ✓ ReferenceData Integration → it assigns default status on module cre… 0.02s  
+  ✓ ReferenceData Integration → it reference categories exist for proje… 0.02s  
+
+   PASS  Tests\Feature\Models\ProjectTest
+  ✓ Project Model → it can create a project with UUID primary key        0.02s  
+  ✓ Project Model → it auto-generates project_id_code on creation        0.02s  
+  ✓ Project Model → it generates sequential project codes                0.03s  
+  ✓ Project Model → it belongs to a customer                             0.02s  
+  ✓ Project Model → it belongs to a leader (user)                        0.02s  
+  ✓ Project Model → it has status relationship to ReferenceItem          0.02s  
+  ✓ Project Model → it has many phases                                   0.02s  
+  ✓ Project Model → it can attach users with roles                       0.02s  
+  ✓ Project Model → it casts custom_fields as ArrayObject                0.02s  
+  ✓ ProjectPhase Model → it belongs to a project                         0.02s  
+  ✓ ProjectPhase Model → it has status relationship to ReferenceItem     0.02s  
+  ✓ ProjectPhase Model → it has status_key accessor                      0.02s  
+  ✓ ProjectPhase Model → it has many modules                             0.02s  
+  ✓ ProjectModule Model → it belongs to a phase                          0.02s  
+  ✓ ProjectModule Model → it has status relationship to ReferenceItem    0.02s  
+  ✓ ProjectModule Model → it has isTerminal method                       0.02s  
+  ✓ ProjectModule Model → it has many tasks                              0.02s  
+  ✓ ProjectModule Model → it can attach users for module access          0.02s  
+  ✓ ProjectTask Model → it belongs to a module                           0.02s  
+  ✓ ProjectTask Model → it can assign users with timestamp               0.02s  
+  ✓ ProjectTask Model → it tracks time with estimated and actual hours   0.02s  
+  ✓ Full Hierarchy → it creates complete project hierarchy               0.02s  
+  ✓ Full Hierarchy → it cascades delete through hierarchy                0.02s  
+
+   PASS  Tests\Feature\NoteModuleTest
+  ✓ it can create a note for customer                                    0.02s  
+  ✓ it can attach visible users to note                                  0.02s  
+  ✓ author can always see their note                                     0.02s  
+  ✓ visible user can see note                                            0.02s  
+  ✓ customer has notes relationship                                      0.02s  
+
+   WARN  Tests\Feature\Offers\CreateOfferTest
+  ✓ T01-Ara Toplam (Subtotal): Kalemlerin birim_fiyat * adet çarpımları… 0.04s  
+  ✓ T02-İndirim (Yüzdesel): %10 gibi yüzdesel indirim seçildiğinde hesa… 0.05s  
+  ✓ T03-İndirim (Sabit Tutar): Sabit tutar indirimi ve sınır kontrolünü… 0.05s  
+  ✓ T04-KDV Hesaplaması: (Ara Toplam - İndirim) * KDV Oranı doğruluğunu… 0.05s  
+  ✓ T05-Genel Toplam (Grand Total): İndirimli Ara Toplam + KDV sonucunu… 0.05s  
+  ✓ T13-Zorunlu Alan Kontrolü: Başlık, Müşteri ve Tarih boşsa kaydedile… 0.05s  
+  ✓ T14-Boş Sepet Kontrolü: Hiçbir hizmet kalemi yoksa kaydedilemez      0.06s  
+  ✓ T06-Geçerlilik Tarihi: Gün sayısı değiştiğinde tarih güncellenmeli   0.04s  
+  ✓ T07-Döviz Tutarlılığı: Farklı döviz birimi eklenmeye çalışıldığında… 0.06s  
+  ✓ T09-Referans Hizmet Aktarımı: Seçilen hizmetin fiyata dahil edilmes… 0.06s  
+  ✓ T10-Manuel Kalem Girişi: Veritabanında olmayan kalem ekleme          0.05s  
+  ✓ T11-Kalem Açıklama Düzenleme: Kalem açıklaması güncellenebilmeli     0.05s  
+  ✓ T15-Dosya Güvenliği: Geçersiz dosya tipleri ve boyut reddedilmeli    0.07s  
+  ✓ T18-Tab Navigasyonu: Sekmeler arası geçiş yapılabilmeli              0.04s  
+  ✓ T23-Edit Modu: Var olan teklif yüklenebilmeli                        0.03s  
+  ✓ T24-Cascade Delete: Teklif silindiğinde DB temizlenmeli              0.04s  
+  ✓ T08-Hizmet Seçimi: Müşteriye ait hizmetlerin listelendiğini doğrula  0.04s  
+  ✓ T12-Ek Dosya Yönetimi: Dosya bilgilerinin state üzerinde tutulduğun… 0.04s  
+  ✓ T16-XSS/Input Sanitization: Script etiketlerinin temizlendiğini/zar… 0.04s  
+  ✓ T17-Explicit Scope: Partial verilerinin eksiksiz olduğunu doğrula    0.03s  
+  - T19-Feedback Mekanizması: İşlem sonrası bildirimleri doğrula → UI T… 0.03s  
+  - T20-Loading States: Yükleme durumlarının tanımlı olduğunu doğrula →… 0.02s  
+  - T21-Atomic Transaction: Veritabanı tutarlılığını doğrula → Transact… 0.02s  
+  ✓ T22-Minio Upload: Dosyaların servise gönderildiğini doğrula          0.06s  
+  ✓ T25-İndirim %101 Kontrolü: 100 üzeri indirim 100e eşitlenmeli        0.04s  
+  ✓ T26-Negatif İndirim Kontrolü: Negatif indirim 0a eşitlenmeli         0.04s  
+  ✓ T27-İndirim Türü Değişimi: Tür değişince değer sıfırlanmalı          0.05s  
+  ✓ T28-Farklı KDV Oranları: Çeşitli KDV oranlarında hesaplama doğruluğ… 0.05s  
+  ✓ T29-Tek Satır Silme Koruması: Manuel modalda tek satır silinememeli  0.04s  
+  ✓ T30-Hizmet Yıl Filtresi: Yıl değişince servis listesi güncellenmeli  0.04s  
+  - T31-Kategori-Hizmet Bağlantısı: Kategori değişince filtreleme → Cat… 0.02s  
+  ✓ T32-Modal Vazgeç Davranışı: Vazgeçince veri eklenmemeli              0.05s  
+  ✓ T33-Maksimum Tutar: Büyük sayılar işlenebilmeli                      0.04s  
+  ✓ T34-Minimum Tutar: 0.01 kabul edilmeli, negatif rededilmeli          0.05s  
+  ✓ T35-Adet Ondalık Kontrolü: 1.5 adet kabul edilmeli                   0.03s  
+  ✓ T36-Karakter Limiti: Hizmet adı uzunluk kontrolü                     0.05s  
+  - T37-Responsive Kontrolü: Mobil yatay scroll → Manual UI Test         0.02s  
+  ✓ T38-Dinamik Toplam Güncelleme: Blur olmadan hesaplama                0.03s  
+  ✓ T39-Müşteri Değişiminde Hizmet Yenileme                              0.04s  
+  - T40-Uzun İçerik Scroll → Manual UI Test                              0.02s  
+  - T41-Eş Zamanlılık → Concurrency testing requires advanced Dusk/Sele… 0.02s  
+  - T42-Yetim Veri Bütünlüğü: Müşteri silinse bile teklif açılabilmeli…  0.02s  
+  ✓ T43-Boş Dosya (0 Byte) Engelleme                                     0.05s  
+  ✓ T44-Çoklu Dosya Yükleme: Sıralı hatasız                              0.09s  
+  ✓ T45-1000 Kalem Performansı                                           0.06s  
+  - T46-Loading Göstergeleri → UI Loading State Test                     0.02s  
+  ✓ T47-Dosya Düzenleme Gösterimi                                        0.04s  
+  ✓ T48-Dosya Listesi Refresh                                            0.02s  
+  ✓ T49-Kayıp Dosya Hatası: Minio da yoksa                               0.05s  
+  ✓ T50-Başlık Emoji ve Özel Karakter Desteği                            0.05s  
+  ✓ T51-Section Add: Yeni bölüm eklenebilmeli                            0.04s  
+  ✓ T52-Section Delete: Bölüm silinebilmeli                              0.04s  
+  ✓ T53-Section Edit: Bölüm başlığı güncellenebilmeli                    0.04s  
+  ✓ T54-Section Order: Bölüm sırası değiştirilebilmeli                   0.04s  
+  ✓ T55-Section Protection: Tek bölüm varken silinemez                   0.05s  
+  ✓ T56-Section Empty: Boş bölüm kaydedilemez                            0.06s  
+  ✓ T57-Offer Number: Her teklif unique numara almalı                    0.06s  
+  ✓ T58-Offer Number Format: PREFIX-YEAR-SEQUENCE formatı                0.06s  
+  ✓ T59-Offer Number Race: Eş zamanlı oluşturmada unique kalmalı         0.13s  
+  ✓ T60-Offer Number Update: Güncelleme numarayı korumalı                0.06s  
+  ✓ T61-Offer Number Prefix: Müşteri adından prefix üretilmeli           0.07s  
+  ✓ T62-Attachment Upload: Dosya yüklenebilmeli                          0.07s  
+  ✓ T63-Attachment Delete: Dosya silinebilmeli                           0.05s  
+  ✓ T64-Attachment Edit: Dosya bilgileri güncellenebilmeli               0.06s  
+  ✓ T65-Attachment Multiple: Birden fazla dosya eklenebilmeli            0.02s  
+  ✓ T66-Attachment Size: 10MB üzeri dosya reddedilmeli                   0.02s  
+  ✓ T67-Attachment Type: Sadece izinli uzantılar kabul edilmeli          0.02s  
+  ✓ T68-Multi Section Calc: Çoklu bölüm toplamı doğru hesaplanmalı       0.04s  
+  ✓ T69-Item Move: Kalem bölümler arası taşınabilmeli                    0.04s  
+  ✓ T70-Section Discount: Bölüm bazlı indirim uygulanabilmeli            0.05s  
+  ✓ T71-PDF Generate: Teklif kaydedilince PDF oluşturulabilmeli          0.93s  
+  ✓ T72-PDF Sections: PDF tüm bölümleri içermeli                         0.51s  
+  ✓ T73-PDF Attachments: PDF ek dosyaları listelemeli                    0.03s  
+  ✓ T74-PDF Preview: PDF önizleme çalışmalı                              0.03s  
+  ✓ T45-UI: New Offer button has correct href on offers tab              0.03s  
+  ✓ T46-UI: New Offer button has correct href on customer offers tab     0.03s  
+
+   PASS  Tests\Feature\Offers\ExpandedOfferScenariosTest
+  ✓ it saves download settings correctly                                 0.10s  
+  ✓ it can add and remove sections                                       0.05s  
+  ✓ it prevents removing the last section                                0.03s  
+  ✓ integration: full offer creation with sections and settings          0.08s  
+  ✓ it handles attachment logic correctly                                0.05s  
+
+   PASS  Tests\Feature\Offers\GenerateOfferPdfTest
+  ✓ it renders executive summary for multi section offers                0.02s  
+  ✓ it does not render executive summary for single section offer        0.01s  
+  ✓ it uses custom header colors from settings                           0.02s  
+
+   PASS  Tests\Feature\Offers\PdfPreviewTest
+  ✓ pdf preview page renders correctly                                   0.02s  
+  ✓ calculations are correct in mount state                              0.02s  
+  ✓ partial components do not break on missing data                      0.02s  
+
+   PASS  Tests\Feature\Public\OfferDownloadTest
+  ✓ public offer page can be viewed with valid token                     0.02s  
+  ✓ public offer page returns 404 with invalid token                     0.02s  
+  ✓ it shows expiry message when offer is expired and blocking is enabl… 0.02s  
+  ✓ it allows download when expired if blocking is disabled              0.02s  
+  ✓ it sends new offer request email                                     0.03s  
+  ✓ it allows downloading attachments                                    0.02s  
+  ✓ it triggers pdf generation action on download                        0.02s  
+
+   PASS  Tests\Feature\Settings\PasswordUpdateTest
+  ✓ password can be updated                                              0.04s  
+  ✓ correct password must be provided to update password                 0.03s  
+
+   PASS  Tests\Feature\Settings\PdfTemplateSettingsTest
+  ✓ pdf template settings page is accessible                             0.04s  
+  ✓ can save pdf settings                                                0.05s  
+  ✓ can upload and remove pdf logo via MinioService                      0.06s  
+
+   PASS  Tests\Feature\Settings\PdfTemplateTest
+  ✓ pdf template page can be rendered                                    0.03s  
+  ✓ can update pdf colors and fonts                                      0.05s  
+  ✓ partial variables are initialized correctly                          0.03s  
+
+   PASS  Tests\Feature\Settings\ProfileUpdateTest
+  ✓ profile page is displayed                                            0.03s  
+  ✓ profile information can be updated                                   0.03s  
+  ✓ email verification status is unchanged when email address is unchan… 0.06s  
+  ✓ user can delete their account                                        0.05s  
+  ✓ correct password must be provided to delete account                  0.03s  
+
+   PASS  Tests\Feature\Settings\SettingsMailTest
+  ✓ 1. mail settings page is accessible                                  0.03s  
+  ✓ 2. provider defaults to smtp                                         0.04s  
+  ✓ 3. switching provider updates state                                  0.04s  
+  ✓ 4. smtp host is required when provider is smtp                       0.05s  
+  ✓ 5. provider must be in allowed list                                  0.04s  
+  ✓ 6. smtp port must be a valid integer - zero is accepted              0.06s  
+  ✓ 7. from email is always required                                     0.04s  
+  ✓ 8. from name is always required                                      0.04s  
+  ✓ 9. from email must be valid                                          0.04s  
+  ✓ 10. smtp secure toggle works                                         0.03s  
+  ✓ 11. mailgun api key is required when provider is mailgun             0.04s  
+  ✓ 12. mailgun domain is required when provider is mailgun              0.04s  
+  ✓ 13. mailgun from email validation                                    0.04s  
+  ✓ 14. mailgun region can be set                                        0.03s  
+  ✓ 15. is_active toggle handles boolean value                           0.04s  
+  ✓ 16. mail settings can be saved and persisted                         0.07s  
+  ✓ 17. saving triggers success logic                                    0.05s  
+  ✓ 18. test modal can be opened                                         0.03s  
+  ✓ 19. test email field defaults to current user email                  0.03s  
+  ✓ 20. test email requires valid email address                          0.04s  
+  ✓ 21. clicking send test triggers sendTestMail logic and closes modal… 0.07s  
+  ✓ 22. test email subject is required                                   0.04s  
+  ✓ 23. test email body is required                                      0.04s  
+  ✓ 24. switching from mailgun back to smtp preserves smtp values if al… 0.04s  
+  ✓ 25. unauthorized user cannot access settings if they lack permissio… 0.02s  
+
+   PASS  Tests\Feature\Settings\SettingsPanelTest
+  ✓ 1. theme settings panel page is accessible                           0.03s  
+  ✓ 2. activeTab switches correctly                                      0.02s  
+  ✓ 3. header settings persistence and validation                        0.05s  
+  ✓ 4. header color validation (HEX regex)                               0.04s  
+  ✓ 5. header border width range validation                              0.04s  
+  ✓ 6. button settings persistence                                       0.05s  
+  ✓ 7. typography settings persistence                                   0.03s  
+  ✓ 8. typography font size range validation                             0.03s  
+  ✓ 9. reset to defaults works across components                         0.03s  
+  ✓ 10. cache is cleared on save                                         0.03s  
+  ✓ 11. theme update event is dispatched on save                         0.03s  
+  ✓ 12. dashboard stats colors persistence                               0.03s  
+  ✓ 13. dashboard card colors persistence                                0.03s  
+
+   PASS  Tests\Feature\Settings\SettingsPricesTest
+  ✓ 1. price settings page is accessible                                 0.04s  
+  ✓ 2. price list shows added items                                      0.03s  
+  ✓ 3. list is ordered by newest first                                   0.03s  
+  ✓ 4. categories are loaded from reference data                         0.03s  
+  ✓ 5. durations are loaded from reference data                          0.03s  
+  ✓ 6. name is required                                                  0.04s  
+  ✓ 7. category is required                                              0.04s  
+  ✓ 8. duration is required                                              0.04s  
+  ✓ 9. price must be numeric and positive                                0.04s  
+  ✓ 10. new price definition can be created successfully                 0.06s  
+  ✓ 11. search filter works by name                                      0.03s  
+  ✓ 12. category filter works                                            0.04s  
+  ✓ 13. duration filter works                                            0.04s  
+  ✓ 14. clear filters resets search and dropdowns                        0.04s  
+  ✓ 15. empty search shows all prices                                    0.04s  
+  ✓ 16. edit mode loads existing data into form                          0.04s  
+  ✓ 17. saving while editing updates the record instead of creating new  0.04s  
+  ✓ 18. toggling status changes is_active value                          0.04s  
+  ✓ 19. delete action removes record from DB                             0.04s  
+  ✓ 20. currencies list includes TRY as default                          0.03s  
+  ✓ 21. description field is optional                                    0.06s  
+  ✓ 22. status defaults to active on new price                           0.04s  
+  ✓ 23. success on save                                                  0.06s  
+  ✓ 24. success on toggle status                                         0.04s  
+  ✓ 25. count of listed items is returned in view                        0.03s  
+
+   FAIL  Tests\Feature\Settings\SettingsStorageTest
+  ✓ 1. storage settings page is accessible                               0.03s  
+  ✓ 2. storage endpoint strips https:// automatically                    0.04s  
+  ✓ 3. storage endpoint strips http:// automatically                     0.04s  
+  ✓ 4. storage endpoint strips trailing slash                            0.04s  
+  ✓ 5. endpoint is required                                              0.03s  
+  ✓ 6. port is a typed int - empty string becomes null and fails requir… 0.04s  
+  ✓ 7. port must be an integer                                           0.02s  
+  ✓ 8. use_ssl toggle defaults to true                                   0.02s  
+  ✓ 9. use_ssl can be toggled                                            0.03s  
+  ✓ 10. default port is 443                                              0.02s  
+  ✓ 11. access_key is required                                           0.03s  
+  ✓ 12. secret_key is required                                           0.03s  
+  ✓ 13. bucket_name is required                                          0.04s  
+  ✓ 14. saving storage settings persists to DB                           0.04s  
+  ✓ 15. persistence uses MINIO provider string                           0.04s  
+  ✓ 16. connection test fail sets lastError                             30.48s  
+  ✓ 17. lastError includes message for common failures                  30.50s  
+  ⨯ 18. SSL fallback logic works when SSL fails but HTTP might work      0.05s  
+  ✓ 19. testConnection clears previous errors                            0.03s  
+  ✓ 20. save works without errors                                        0.04s  
+  ✓ 21. settings are loaded from DB on mount                             0.02s  
+  ✓ 22. endpoint stripping also handles port at the end of string        0.04s  
+  ✓ 23. port remains as integer after mount                              0.03s  
+  ✓ 24. SSL certificate error message is custom                          0.02s  
+  ✓ 25. Bucket not found error message is custom                         0.02s  
+
+   PASS  Tests\Feature\Settings\SettingsVariablesTest
+  ✓ 1. variable settings page is accessible                              0.04s  
+  ✓ 2. can create a new reference category                               0.05s  
+  ✓ 3. category name is required                                         0.04s  
+  ✓ 4. category key is required                                          0.04s  
+  ✓ 5. search categories by name works                                   0.03s  
+  ✓ 6. search categories by key works                                    0.03s  
+  ✓ 7. editing a category loads its data                                 0.03s  
+  ✓ 8. deleting a category removes it from DB                            0.03s  
+  ✓ 9. selecting a category sets selectedCategoryKey                     0.04s  
+  ✓ 10. can create a reference item in category                          0.06s  
+  ✓ 11. item key is required                                             0.04s  
+  ✓ 12. item display_label is required                                   0.04s  
+  ✓ 13. item color metadata can be saved                                 0.06s  
+  ✓ 14. editing item loads its data                                      0.04s  
+  ✓ 15. deleting item removes it from DB                                 0.04s  
+  ✓ 16. marking item as default works                                    0.07s  
+  ✓ 17. category counts are displayed in sidebar                         0.03s  
+  ✓ 18. move item up changes sort order                                  0.04s  
+  ✓ 19. move item down changes sort order                                0.04s  
+  ✓ 20. saving category works                                            0.05s  
+  ✓ 21. saving item works                                                0.06s  
+  ✓ 22. category key must be uppercase (automatically converted)         0.04s  
+  ✓ 23. item key must be unique within category                          0.06s  
+  ✓ 24. searching with no results shows empty message                    0.03s  
+  ✓ 25. available colors list is populated from service                  0.02s  
+
+   PASS  Tests\Feature\Settings\ThemeAtomicTest
+  ✓ typography component renders and defaults set                        0.03s  
+  ✓ typography component saves correctly                                 0.03s  
+  ✓ inputs component renders and defaults set                            0.05s  
+  ✓ inputs component saves correctly                                     0.04s  
+  ✓ buttons component renders and defaults set                           0.03s  
+  ✓ buttons component saves correctly                                    0.04s  
+  ✓ cards component renders and defaults set                             0.02s  
+  ✓ cards component saves correctly                                      0.03s  
+  ✓ header component renders and defaults set                            0.03s  
+  ✓ header component saves correctly                                     0.04s  
+  ✓ saving dispatches theme-updated event                                0.02s  
+
+   PASS  Tests\Feature\Settings\TwoFactorAuthenticationTest
+  ✓ two factor settings page can be rendered                             0.03s  
+  ✓ two factor settings page is accessible without password confirmatio… 0.02s  
+  ✓ two factor settings page returns forbidden response when two factor… 0.02s  
+  ✓ user can enable two factor authentication (generates secrets)        0.05s  
+  ✓ ui displays qr code and manual key when enabled                      0.03s  
+  ✓ recovery codes are generated on enable                               0.04s  
+  ✓ confirmation fails with invalid code                                 0.04s  
+  ✓ user can disable two factor authentication                           0.03s  
+  ✓ confirmation succeeds with mocked action                             0.04s  
+
+   FAIL  Tests\Feature\System\SmokeTest
+  ✓ T01: Login page is accessible                                        0.03s  
+  ✓ T02: Forgot password page is accessible                              0.02s  
+  ✓ T03: Public offer download page invalid token                        0.02s  
+  ✓ T05: Root page loads                                                 0.02s  
+  ✓ T06: Dashboard main page loads                                       0.02s  
+  ✓ T07: Settings Panel loads                                            0.02s  
+  ✓ T08: Settings Mail loads                                             0.03s  
+  ✓ T09: Settings Storage loads                                          0.03s  
+  ✓ T10: Settings PDF Template loads                                     0.03s  
+  ✓ T11: Settings Profile loads                                          0.03s  
+  ✓ T12: Settings Appearance loads                                       0.02s  
+  ✓ T13: Settings Variables loads                                        0.03s  
+  ✓ T14: Settings Prices loads                                           0.04s  
+  ✓ T15: Settings 2FA loads                                              0.03s  
+  ✓ T16: Customers list loads                                            0.03s  
+  ✓ T17: Projects list loads                                             0.03s  
+  ✓ T18: Tasks list loads                                                0.02s  
+  ✓ T19: Reports list loads                                              0.02s  
+  ✓ T21: Create Customer page loads                                      0.02s  
+  ✓ T22: Edit Customer page loads                                        0.02s  
+  ✓ T23: Create Project page loads                                       0.04s  
+  ✓ T24: Edit Project page loads                                         0.04s  
+  ✓ T25: Create Task page loads                                          0.03s  
+  ✓ T26: Create Report page loads                                        0.03s  
+  ✓ T27: Create Asset page loads                                         0.02s  
+  ✓ T29: Create Service page loads                                       0.02s  
+  ✓ T31: Customer detail page loads                                      0.02s  
+  ✓ T34: Offer form modal renders (create)                               0.04s  
+  ✓ T35: Offer form modal renders (edit)                                 0.03s  
+  ✓ T36: Service form modal renders                                      0.02s  
+  ✓ T37: Service form modal renders (edit)                               0.02s  
+  ✓ T38: Asset form modal renders                                        0.03s  
+  ✓ T39: Asset form modal renders (edit)                                 0.02s  
+  ✓ T40: Contact form modal renders                                      0.02s  
+  ✓ T41: Contact form modal renders (edit)                               0.02s  
+  ✓ T42: Task create component renders                                   0.03s  
+  ⨯ T43: Report create component renders                                 0.02s  
+  ✓ T50: Notes tab renders for customer                                  0.03s  
+  ✓ T54: Project tasks tab renders                                       0.02s  
+  ✓ T55: Project reports tab renders                                     0.02s  
+  ✓ T56: Project notes tab renders                                       0.04s  
+  ✓ T64: Settings panel component renders                                0.03s  
+  ✓ T65: Settings mail component renders                                 0.03s  
+  ✓ T66: Settings prices component renders                               0.03s  
+  ✓ T67: Settings pdf-template component renders                         0.03s  
+  ✓ T68: Settings storage component renders                              0.03s  
+  ✓ T69: Settings variables component renders                            0.03s  
+  ✓ T70: Settings appearance component renders                           0.02s  
+  ✓ T71: Settings profile component renders                              0.02s  
+  ✓ T72: Settings password component renders                             0.02s  
+  ✓ T73: Settings two-factor component renders                           0.02s  
+  ✓ T20: Offers list loads                                               0.04s  
+  ✓ T28: Edit Asset page loads                                           0.02s  
+  ✓ T30: Edit Service page loads                                         0.02s  
+  ✓ T90: Edit Contact page loads                                         0.02s  
+  ✓ T91: Edit Offer page loads                                           0.03s  
+  ✓ T33: Project detail page loads                                       0.04s  
+  ✓ T81: Public Offer Download component renders                         0.02s  
+  ✓ T51-T53: Customer Parts render integration                           0.02s  
+  ✓ T60-T63: Project/Task Parts render integration                       0.03s  
+  ✓ T74-T78: Settings Parts render integration                           0.04s  
+  ✓ T79-T80: Global Layout Parts render                                  0.02s  
+
+   PASS  Tests\TestCases\BlameableBehaviorTest
+  ✓ it records who deleted the model on soft delete                      0.03s  
+  ✓ it leaves deleted_by null if not authenticated                       0.02s  
+  ✓ it works on other models too (Service example)                       0.02s  
+
+   PASS  Tests\TestCases\DatabaseIntegrityTest
+  ✓ Foreign Key Integrity: Cannot create Offer with non-existent Custom… 0.02s  
+  ✓ Not Null Constraint: Offer Title cannot be null                      0.02s  
+  ✓ Soft Delete Cascade Logic Check (Application Level)                  0.02s  
+
+   PASS  Tests\TestCases\DestructionRecoveryTest
+  ✓ User Destruction & Recovery Cycle                                    0.03s  
+  ✓ Customer Destruction & Recovery Cycle                                0.02s  
+  ✓ Service Destruction & Recovery Cycle                                 0.02s  
+  ✓ Offer Destruction & Recovery Cycle                                   0.05s  
+  ✓ Blameable works without authenticated user (System Delete)           0.02s  
+
+   PASS  Tests\e2e\OfferToDownloadFlowTest
+  ✓ End-to-End Flow: Project -> Offer -> Preview -> Public Download      1.38s  
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\Settings\SettingsStorageTest > 18. SSL fallback log…   
+  Component has errors: "endpoint", "access_key", "secret_key", "bucket_name"
+Failed asserting that false is true.
+
+  at vendor/livewire/livewire/src/Features/SupportValidation/TestsValidation.php:109
+    105▕     {
+    106▕         $errors = $this->errors();
+    107▕ 
+    108▕         if (empty($keys)) {
+  ➜ 109▕             PHPUnit::assertTrue($errors->isEmpty(), 'Component has errors: "'.implode('", "', $errors->keys()).'"');
+    110▕ 
+    111▕             return $this;
+    112▕         }
+    113▕
+
+      [2m+1 vendor frames [22m
+  2   tests/Feature/Settings/SettingsStorageTest.php:109
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\System\SmokeTest > T43: Report create component ren…   
+  Expected: <div wire:snapshot="" wire:effects="" wire:id="UMaL1IojcawR2jYriSvI" class="p-6 min-h-screen" style="background-color: var(--page-bg);">\n
+      <div class="max-w-7xl mx-auto">\n
+          <a href="http://localhost/dashboard/projects?tab=reports"\n
+  ... (271 more lines)
+
+  To contain: Rapor Oluştur
+
+  at vendor/livewire/livewire/src/Features/SupportTesting/MakesAssertions.php:14
+     10▕ {
+     11▕     function assertSee($values, $escape = true, $stripInitialData = true)
+     12▕     {
+     13▕         foreach (Arr::wrap($values) as $value) {
+  ➜  14▕             PHPUnit::assertStringContainsString(
+     15▕                 $escape ? e($value): $value,
+     16▕                 $this->html($stripInitialData)
+     17▕             );
+     18▕         }
+
+      [2m+1 vendor frames [22m
+  2   tests/Feature/System/SmokeTest.php:227
+
+
+  Tests:    2 failed, 9 skipped, 446 passed (897 assertions)
+  Duration: 80.47s
+

@@ -619,9 +619,9 @@ test('T29-Tek Satır Silme Koruması: Manuel modalda tek satır silinememeli', f
 
     // Expectation: If logic exists, it shouldn't remove it or should re-add empty?
     // Let's assume protection logic: if count == 1, do not remove.
-    // If not implemented, skipping for now until required.
-    // For now simply skip or assume it's UI disabled button only.
-    $this->markTestSkipped('Manual Item delete protection logic mostly UI based or needs backend check');
+    // Logic implemented in HasOfferItems.
+
+    expect($component->get('manualItems'))->toHaveCount(1);
 });
 
 test('T30-Hizmet Yıl Filtresi: Yıl değişince servis listesi güncellenmeli', function () {
@@ -896,7 +896,7 @@ test('T49-Kayıp Dosya Hatası: Minio da yoksa', function () {
         $component->call('downloadAttachment', 0);
         expect(true)->toBeTrue(); // Survived
     } catch (Exception $e) {
-        $this->fail('Should handle exception gracefully: '.$e->getMessage());
+        $this->fail('Should handle exception gracefully: ' . $e->getMessage());
     }
 });
 
@@ -1492,5 +1492,5 @@ test('T46-UI: New Offer button has correct href on customer offers tab', functio
     $response->assertStatus(200);
     $response->assertSee('Yeni Teklif');
     $response->assertSee('/dashboard/customers/offers/create');
-    $response->assertSee('customer='.$customer->id);
+    $response->assertSee('customer=' . $customer->id);
 });

@@ -122,3 +122,29 @@ test('it allows downloading attachments', function () {
         ->call('downloadAttachment', $attachment->id)
         ->assertHasNoErrors();
 });
+
+test('it triggers pdf generation action on download', function () {
+    $offer = Offer::factory()->create([
+        'tracking_token' => Str::uuid(),
+        'valid_until' => now()->addDays(10),
+        'is_pdf_downloadable' => true
+    ]);
+
+    // Mock Action
+    $actionMock = Mockery::mock(\App\Actions\Offers\GenerateOfferPdfAction::class);
+    $actionMock->shouldReceive('execute')
+        ->once()
+        ->with(Mockery::on(function ($arg) use ($offer) {
+            return $arg->id === $offer->id;
+        }))
+        ->andReturn(sys_get_temp_dir() . '/test.pdf'); // Return a fake path
+
+    // Create a dummy file to avoid error in response()->download
+    touch(sys_get_temp_dir() . '/test.pdf');
+
+    $this->app->instance(\App\Actions\Offers\GenerateOfferPdfAction::class, $actionMock);
+
+    Volt::test('public.offer-download', ['token' => $offer->tracking_token])
+        ->call('downloadPdf')
+        ->assertHasNoErrors();
+});

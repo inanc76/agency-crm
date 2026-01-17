@@ -1,3 +1,24 @@
+{{--
+🛡️ ZIRHLI BELGELEME KARTI (V12.2)
+-------------------------------------------------------------------------
+MODÜL : Customers / Offers / PDF Preview
+SORUMLULUK : Tekliflerin PDF'e dönüştürülmeden önceki son "canlı" önizleme hali.
+MİMARİ : Monolitik -> Partial Tabanlı (Mission Zeta).
+
+YAPI HİYERARŞİSİ:
+1. _styles.blade.php : PDF ve Print'e özel CSS kuralları (DomPDF uyumlu).
+2. _executive-summary.blade.php: Yönetici özeti, kapak sayfası ve genel toplam kartı.
+3. _items-detail.blade.php : Sayfalandırılmış teklif detay tablosu (Items Loop).
+
+VERİ KAYNAĞI:
+- Veriler `Offer` modeli ve `PanelSetting` üzerinden beslenir.
+- Hesaplamalar (KDV, Ara Toplam) `mount()` metodunda yapılarak `$sections` dizisine atanır.
+
+⚠️ MİMARIN NOTU:
+Bu sayfa hem tarayıcıda (HTML) hem de PDF motorunda (DomPDF/Browsershot) render edilir.
+CSS değişikliklerinde "Print" modunu (media print) mutlaka test ediniz.
+-------------------------------------------------------------------------
+--}}
 <?php
 
 use App\Models\Offer;
@@ -12,134 +33,133 @@ use Livewire\Volt\Component;
  */
 new
     #[Layout('components.layouts.app', ['title' => 'Teklif PDF'])]
-    class extends Component
+    class extends Component {
+    public ?Offer $offer = null;
+
+    public ?PanelSetting $settings = null;
+
+    public string $offerNumber = '';
+
+    public string $offerDate = '';
+
+    public string $offerTitle = '';
+
+    public string $validUntil = '';
+
+    public string $currency = 'USD';
+
+    public int $vatRate = 20;
+
+    public string $description = '';
+
+    public array $sections = [];
+
+    public ?string $logoUrl = null;
+
+    public string $preparedBy = '';
+
+    public bool $isPdfDownloadable = true;
+
+    public bool $isAttachmentsDownloadable = true;
+
+    public bool $blockAfterExpiry = true;
+
+    public array $availableIntroductionFiles = [];
+    public array $selectedIntroductionFiles = [];
+
+
+
+    public function mount($offer): void
     {
-        public ?Offer $offer = null;
-
-        public ?PanelSetting $settings = null;
-
-        public string $offerNumber = '';
-
-        public string $offerDate = '';
-
-        public string $offerTitle = '';
-
-        public string $validUntil = '';
-
-        public string $currency = 'USD';
-
-        public int $vatRate = 20;
-
-        public string $description = '';
-
-        public array $sections = [];
-
-        public ?string $logoUrl = null;
-
-        public string $preparedBy = '';
-
-        public bool $isPdfDownloadable = true;
-
-        public bool $isAttachmentsDownloadable = true;
-
-        public bool $blockAfterExpiry = true;
-
-        public array $availableIntroductionFiles = [];
-        public array $selectedIntroductionFiles = [];
-
-
-
-        public function mount($offer): void
-        {
-            if ($offer instanceof Offer) {
-                $this->offer = $offer->load(['customer', 'sections.items']);
-            } else {
-                $offerId = $offer;
-                if (is_array($offer)) {
-                    $offerId = $offer['id'] ?? null;
-                } elseif (is_string($offer) && str_starts_with($offer, '{')) {
-                    $decoded = json_decode($offer, true);
-                    $offerId = $decoded['id'] ?? $offer;
-                }
-                $this->offer = Offer::with(['customer', 'sections.items'])->findOrFail($offerId);
+        if ($offer instanceof Offer) {
+            $this->offer = $offer->load(['customer', 'sections.items']);
+        } else {
+            $offerId = $offer;
+            if (is_array($offer)) {
+                $offerId = $offer['id'] ?? null;
+            } elseif (is_string($offer) && str_starts_with($offer, '{')) {
+                $decoded = json_decode($offer, true);
+                $offerId = $decoded['id'] ?? $offer;
             }
+            $this->offer = Offer::with(['customer', 'sections.items'])->findOrFail($offerId);
+        }
 
-            $this->settings = PanelSetting::where('is_active', true)->first() ?? new PanelSetting;
+        $this->settings = PanelSetting::where('is_active', true)->first() ?? new PanelSetting;
 
-            if ($this->settings->pdf_logo_path) {
-                try {
-                    $this->logoUrl = app(MinioService::class)->getFileUrl($this->settings->pdf_logo_path);
-                } catch (\Exception $e) {
-                    // Fail silently
-                }
+        if ($this->settings->pdf_logo_path) {
+            try {
+                $this->logoUrl = app(MinioService::class)->getFileUrl($this->settings->pdf_logo_path);
+            } catch (\Exception $e) {
+                // Fail silently
             }
-
-            $this->offerNumber = $this->offer->number ?? 'TKL-0001';
-            $this->offerDate = $this->offer->created_at->format('d.m.Y');
-            $this->offerTitle = $this->offer->title ?? 'Teklif';
-            $this->validUntil = $this->offer->valid_until?->format('d.m.Y') ?? 'Belirtilmemiş';
-            $this->currency = $this->offer->currency ?? 'USD';
-            $this->description = $offer->description ?? '';
-            $this->vatRate = $offer->vat_rate ?? 20;
-            $this->preparedBy = auth()->user()?->name ?? 'Belirtilmemiş';
-
-            $this->sections = $this->offer->sections->map(function ($section) {
-                $subtotal = $section->items->sum(fn ($item) => ($item->quantity ?? 1) * ($item->price ?? 0));
-                $vatAmount = $subtotal * ($this->vatRate / 100);
-                $totalWithVat = $subtotal + $vatAmount;
-
-                return [
-                    'id' => $section->id,
-                    'title' => $section->title,
-                    'description' => $section->description,
-                    'subtotal' => $subtotal,
-                    'vat_amount' => $vatAmount,
-                    'total_with_vat' => $totalWithVat,
-                    'items' => $section->items->map(fn ($item) => [
-                        'name' => $item->service_name ?? $item->name ?? 'Hizmet',
-                        'description' => $item->description ?? '',
-                        'quantity' => $item->quantity ?? 1,
-                        'duration' => $item->duration ? $item->duration.' Yıl' : '-',
-                        'price' => $item->price ?? 0,
-                        'total' => ($item->quantity ?? 1) * ($item->price ?? 0),
-                    ])->toArray(),
-                ];
-            })->toArray();
-
-            $this->isPdfDownloadable = $this->offer->is_pdf_downloadable ?? true;
-            $this->isAttachmentsDownloadable = $this->offer->is_attachments_downloadable ?? true;
-            $this->isAttachmentsDownloadable = $this->offer->is_attachments_downloadable ?? true;
-            $this->blockAfterExpiry = !($this->offer->is_downloadable_after_expiry ?? false);
-
-            $this->availableIntroductionFiles = $this->settings->introduction_files ?? [];
-            $this->selectedIntroductionFiles = $this->offer->selected_introduction_files ?? [];
         }
 
-        public function saveSettings()
-        {
-            $this->offer->update([
-                'is_pdf_downloadable' => $this->isPdfDownloadable,
-                'is_attachments_downloadable' => $this->isAttachmentsDownloadable,
-                'is_attachments_downloadable' => $this->isAttachmentsDownloadable,
-                'is_downloadable_after_expiry' => !$this->blockAfterExpiry,
-                'selected_introduction_files' => $this->selectedIntroductionFiles,
-            ]);
+        $this->offerNumber = $this->offer->number ?? 'TKL-0001';
+        $this->offerDate = $this->offer->created_at->format('d.m.Y');
+        $this->offerTitle = $this->offer->title ?? 'Teklif';
+        $this->validUntil = $this->offer->valid_until?->format('d.m.Y') ?? 'Belirtilmemiş';
+        $this->currency = $this->offer->currency ?? 'USD';
+        $this->description = $offer->description ?? '';
+        $this->vatRate = $offer->vat_rate ?? 20;
+        $this->preparedBy = auth()->user()?->name ?? 'Belirtilmemiş';
 
-            session()->flash('success', 'Ayarlar kaydedildi.');
-        }
+        $this->sections = $this->offer->sections->map(function ($section) {
+            $subtotal = $section->items->sum(fn($item) => ($item->quantity ?? 1) * ($item->price ?? 0));
+            $vatAmount = $subtotal * ($this->vatRate / 100);
+            $totalWithVat = $subtotal + $vatAmount;
 
-        public function downloadPdf()
-        {
-            $action = new \App\Actions\Offers\GenerateOfferPdfAction;
-            $pdfPath = $action->execute($this->offer);
+            return [
+                'id' => $section->id,
+                'title' => $section->title,
+                'description' => $section->description,
+                'subtotal' => $subtotal,
+                'vat_amount' => $vatAmount,
+                'total_with_vat' => $totalWithVat,
+                'items' => $section->items->map(fn($item) => [
+                    'name' => $item->service_name ?? $item->name ?? 'Hizmet',
+                    'description' => $item->description ?? '',
+                    'quantity' => $item->quantity ?? 1,
+                    'duration' => $item->duration ? $item->duration . ' Yıl' : '-',
+                    'price' => $item->price ?? 0,
+                    'total' => ($item->quantity ?? 1) * ($item->price ?? 0),
+                ])->toArray(),
+            ];
+        })->toArray();
 
-            $fileName = 'Teklif-'.$this->offerNumber.'.pdf';
+        $this->isPdfDownloadable = $this->offer->is_pdf_downloadable ?? true;
+        $this->isAttachmentsDownloadable = $this->offer->is_attachments_downloadable ?? true;
+        $this->isAttachmentsDownloadable = $this->offer->is_attachments_downloadable ?? true;
+        $this->blockAfterExpiry = !($this->offer->is_downloadable_after_expiry ?? false);
 
-            return response()->download($pdfPath, $fileName, [
-                'Content-Type' => 'application/pdf',
-            ]);
-        }
-    }; ?>
+        $this->availableIntroductionFiles = $this->settings->introduction_files ?? [];
+        $this->selectedIntroductionFiles = $this->offer->selected_introduction_files ?? [];
+    }
+
+    public function saveSettings()
+    {
+        $this->offer->update([
+            'is_pdf_downloadable' => $this->isPdfDownloadable,
+            'is_attachments_downloadable' => $this->isAttachmentsDownloadable,
+            'is_attachments_downloadable' => $this->isAttachmentsDownloadable,
+            'is_downloadable_after_expiry' => !$this->blockAfterExpiry,
+            'selected_introduction_files' => $this->selectedIntroductionFiles,
+        ]);
+
+        session()->flash('success', 'Ayarlar kaydedildi.');
+    }
+
+    public function downloadPdf()
+    {
+        $action = new \App\Actions\Offers\GenerateOfferPdfAction;
+        $pdfPath = $action->execute($this->offer);
+
+        $fileName = 'Teklif-' . $this->offerNumber . '.pdf';
+
+        return response()->download($pdfPath, $fileName, [
+            'Content-Type' => 'application/pdf',
+        ]);
+    }
+}; ?>
 
 <div class="p-6 min-h-screen" style="background-color: var(--page-bg);">
     <div class="max-w-7xl mx-auto">
@@ -147,258 +167,18 @@ new
         <div class="flex gap-6">
             {{-- Sol Kolon - Teklif İçeriği (Geniş) --}}
             <div class="w-9/12 min-w-0">
-                <div class="theme-card overflow-hidden" 
-                     style="font-family: '{{ $settings->pdf_font_family ?? 'Segoe UI' }}', sans-serif; background-color: #f8fafc;">
-                    
+                <div class="theme-card overflow-hidden"
+                    style="font-family: '{{ $settings->pdf_font_family ?? 'Segoe UI' }}', sans-serif; background-color: #f8fafc;">
+
                     {{-- İçerik (Sayfa Yapıları) --}}
                     <div class="p-8 space-y-12">
                         {{-- YÖNETİCİ ÖZETİ SAYFASI --}}
-                        <div class="bg-white rounded-[24px] shadow-2xl overflow-hidden relative border border-gray-100 p-12 transition-all hover:shadow-indigo-100">
-                                <div class="absolute top-0 right-0 px-6 py-2 bg-gray-100 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 rounded-bl-xl">YÖNETİCİ ÖZETİ</div>
-                                
-                                {{-- Header --}}
-                                <div class="flex justify-between items-center mb-10 p-6 rounded-xl" 
-                                     style="background-color: {{ $settings->pdf_header_bg_color ?? '#4f46e5' }};">
-                                    <div>
-                                        @if($logoUrl)
-                                            <img src="{{ $logoUrl }}" class="object-contain" style="height: {{ $settings->pdf_logo_height ?? 40 }}px" alt="Logo">
-                                        @else
-                                            <span class="text-2xl font-black tracking-tighter" style="color: {{ $settings->pdf_header_text_color ?? '#ffffff' }}">
-                                                {{ config('app.name') }}
-                                            </span>
-                                        @endif
-                                    </div>
-                                    <div class="flex gap-6 items-center">
-                                        <div class="text-left border-r pr-6" style="border-color: {{ $settings->pdf_header_text_color ?? '#ffffff' }}40;">
-                                            <p class="text-[9px] font-extrabold uppercase tracking-widest mb-1" style="color: {{ $settings->pdf_header_text_color ?? '#ffffff' }}; opacity: 0.8;">Teklif No</p>
-                                            <p class="text-sm font-black leading-none" style="color: {{ $settings->pdf_header_text_color ?? '#ffffff' }}">{{ $offerNumber }}</p>
-                                        </div>
-                                        <div class="text-left">
-                                            <p class="text-[9px] font-extrabold uppercase tracking-widest mb-1" style="color: {{ $settings->pdf_header_text_color ?? '#ffffff' }}; opacity: 0.8;">Tarih</p>
-                                            <p class="text-sm font-black leading-none" style="color: {{ $settings->pdf_header_text_color ?? '#ffffff' }}">{{ $offerDate }}</p>
-                                        </div>
-                                    </div>
-                                </div>
+                        {{-- YÖNETİCİ ÖZETİ SAYFASI --}}
+                        @include('livewire.customers.offers.partials.pdf-preview._executive-summary')
 
-                                {{-- Teklif Bilgileri Card --}}
-                                <div class="mb-10 p-8 bg-gray-50/50 rounded-2xl border border-gray-100 shadow-sm relative group overflow-hidden">
-                                    <div class="absolute top-0 left-0 w-1 h-full" style="background-color: {{ $settings->pdf_primary_color ?? '#4F46E5' }}"></div>
-                                    <h2 class="text-[10px] uppercase tracking-[0.2em] font-black mb-6 text-gray-400">Teklif Bilgileri</h2>
-                                    <div class="grid grid-cols-2 gap-x-12 gap-y-6">
-                                        <div>
-                                            <p class="text-[9px] text-gray-400 uppercase font-bold tracking-widest mb-1">Müşteri Adı</p>
-                                            <p class="text-sm font-bold text-gray-800">{{ $offer->customer?->name ?? 'Belirtilmemiş' }}</p>
-                                        </div>
-                                        <div>
-                                            <p class="text-[9px] text-gray-400 uppercase font-bold tracking-widest mb-1">Teklifi Hazırlayan</p>
-                                            <p class="text-sm font-bold text-gray-800">{{ $preparedBy }}</p>
-                                        </div>
-                                        <div>
-                                            <p class="text-[9px] text-gray-400 uppercase font-bold tracking-widest mb-1">Hazırlanma Tarihi</p>
-                                            <p class="text-sm font-bold text-gray-800">{{ $offerDate }}</p>
-                                        </div>
-                                        <div>
-                                            <p class="text-[9px] text-gray-400 uppercase font-bold tracking-widest mb-1">Geçerlilik Tarihi</p>
-                                            <p class="text-sm font-bold text-gray-800">{{ $validUntil }}</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="mb-8">
-                                    <h2 class="text-xl font-black mb-6 pb-2 border-b-4 inline-block" 
-                                        style="color: {{ $settings->pdf_primary_color ?? '#111827' }}; border-color: {{ $settings->pdf_primary_color ?? '#4F46E5' }}">
-                                        Yönetici Özeti
-                                    </h2>
-
-                                    {{-- Basit Tablo - Yönetici Özeti --}}
-                                    <div class="mb-10 overflow-hidden rounded-lg border border-gray-200">
-                                        <table class="w-full">
-                                            <thead>
-                                                <tr style="background-color: {{ $settings->pdf_header_bg_color ?? '#4f46e5' }};">
-                                                    <th class="py-3 px-4 text-left text-xs font-bold uppercase" style="color: {{ $settings->pdf_header_text_color ?? '#ffffff' }}">Bölüm Başlığı</th>
-                                                    <th class="py-3 px-4 text-right text-xs font-bold uppercase" style="color: {{ $settings->pdf_header_text_color ?? '#ffffff' }}">Tutar</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody class="divide-y divide-gray-100 bg-white">
-                                                @foreach($sections as $section)
-                                                    <tr>
-                                                        <td class="py-4 px-4 text-sm font-medium text-gray-700">{{ $section['title'] }}</td>
-                                                        <td class="py-4 px-4 text-right text-sm font-bold text-gray-900">{{ number_format($section['total_with_vat'], 0, ',', '.') }} {{ $currency }}</td>
-                                                    </tr>
-                                                @endforeach
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-
-                                <div class="grid grid-cols-12 gap-10 mt-12 items-start">
-                                    <div class="col-span-7">
-                                        @if($description)
-                                            <div class="p-6 bg-white rounded-xl border-l-4 border-gray-200 shadow-sm italic">
-                                                <h3 class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-3">Teklif Açıklaması</h3>
-                                                <p class="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{{ $description }}</p>
-                                            </div>
-                                        @endif
-                                    </div>
-                                    <div class="col-span-5">
-                                        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 relative">
-                                            <h3 class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-6 pb-3 border-b border-gray-100">Teklif Özeti</h3>
-                                            
-                                            @if(($offer->discounted_amount ?? 0) > 0)
-                                                <div class="flex justify-between text-rose-500 font-bold mb-4">
-                                                    <span class="text-xs uppercase tracking-wide">İndirim (@if($offer->discount_percentage > 0) %{{ (int)$offer->discount_percentage }} @else Tutar @endif):</span>
-                                                    @php $discountWithVat = $offer->discounted_amount * (1 + ($vatRate / 100)); @endphp
-                                                    <span class="text-sm font-black">-{{ number_format($discountWithVat, 0, ',', '.') }} {{ $currency }}</span>
-                                                </div>
-                                                <div class="pt-4 border-t border-gray-100 mt-4">
-                                                    <div class="flex justify-between items-center">
-                                                        <span class="text-[10px] font-black text-gray-500 uppercase tracking-widest">İndirimli Toplam</span>
-                                                        <span class="text-2xl font-black italic" style="color: {{ $settings->pdf_total_color ?? '#4F46E5' }}">
-                                                            {{ number_format($offer->total_amount, 0, ',', '.') }} {{ $currency }}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            @else
-                                                <div class="flex justify-between items-center">
-                                                    <span class="text-[10px] font-black text-gray-500 uppercase tracking-widest">Genel Toplam</span>
-                                                    <span class="text-2xl font-black italic" style="color: {{ $settings->pdf_total_color ?? '#4F46E5' }}">
-                                                        {{ number_format($offer->total_amount, 0, ',', '.') }} {{ $currency }}
-                                                    </span>
-                                                </div>
-                                            @endif
-                                            <p class="text-[9px] text-gray-400 text-right italic mt-4">Fiyatlara KDV dahildir.</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="py-12 flex items-center justify-center gap-4">
-                                <div class="h-px flex-1 bg-gray-200"></div>
-                                <span class="bg-gray-200 text-gray-500 px-4 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.3em]">SAYFA SONU</span>
-                                <div class="h-px flex-1 bg-gray-200"></div>
-                            </div>
-                        
                         {{-- Detay Bölümleri --}}
-                        @foreach($sections as $index => $section)
-                            <div class="bg-white rounded-[24px] shadow-2xl overflow-hidden relative border border-gray-100 p-12 transition-all hover:shadow-indigo-100">
-                                <div class="absolute top-0 right-0 px-6 py-2 bg-gray-100 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 rounded-bl-xl">SAYFA {{ $index + 2 }}</div>
-                                
-                                {{-- Header --}}
-                                <div class="flex justify-between items-center mb-10 p-6 rounded-xl" 
-                                     style="background-color: {{ $settings->pdf_header_bg_color ?? '#4f46e5' }};">
-                                    <div>
-                                        @if($logoUrl)
-                                            <img src="{{ $logoUrl }}" class="object-contain" style="height: {{ $settings->pdf_logo_height ?? 40 }}px" alt="Logo">
-                                        @else
-                                            <span class="text-2xl font-black tracking-tighter" style="color: {{ $settings->pdf_header_text_color ?? '#ffffff' }}">
-                                                {{ config('app.name') }}
-                                            </span>
-                                        @endif
-                                    </div>
-                                    <div class="flex gap-6 items-center">
-                                        <div class="text-left border-r pr-6" style="border-color: {{ $settings->pdf_header_text_color ?? '#ffffff' }}40;">
-                                            <p class="text-[9px] font-extrabold uppercase tracking-widest mb-1" style="color: {{ $settings->pdf_header_text_color ?? '#ffffff' }}; opacity: 0.8;">Teklif No</p>
-                                            <p class="text-sm font-black leading-none" style="color: {{ $settings->pdf_header_text_color ?? '#ffffff' }}">{{ $offerNumber }}</p>
-                                        </div>
-                                        <div class="text-left">
-                                            <p class="text-[9px] font-extrabold uppercase tracking-widest mb-1" style="color: {{ $settings->pdf_header_text_color ?? '#ffffff' }}; opacity: 0.8;">Tarih</p>
-                                            <p class="text-sm font-black leading-none" style="color: {{ $settings->pdf_header_text_color ?? '#ffffff' }}">{{ $offerDate }}</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="mb-8">
-                                    <h2 class="text-xl font-black mb-6 pb-2 border-b-4 inline-block italic" 
-                                        style="color: {{ $settings->pdf_primary_color ?? '#111827' }}; border-color: {{ $settings->pdf_primary_color ?? '#4F46E5' }}">
-                                        {{ $section['title'] }}
-                                    </h2>
-                                    
-                                    @if(!empty($section['description']))
-                                        <div class="mb-8 p-4 bg-gray-50 rounded-xl border-l-4 border-gray-200 italic text-gray-600 text-sm">
-                                            {{ $section['description'] }}
-                                        </div>
-                                    @endif
-
-                                    <div class="overflow-hidden rounded-2xl border border-gray-100 mb-10 shadow-sm bg-white">
-                                        <table class="w-full text-sm">
-                                            <thead style="background-color: {{ $settings->pdf_table_header_bg_color ?? '#f8fafc' }}">
-                                                <tr class="divide-x divide-gray-200/30">
-                                                    <th class="text-left py-5 px-6 font-black text-[9px] uppercase tracking-[0.2em]" 
-                                                        style="color: {{ $settings->pdf_table_header_text_color ?? '#374151' }}">Hizmet</th>
-                                                    <th class="text-left py-5 px-6 font-black text-[9px] uppercase tracking-[0.2em]"
-                                                        style="color: {{ $settings->pdf_table_header_text_color ?? '#374151' }}">Açıklama</th>
-                                                    <th class="text-center py-5 px-6 font-black text-[9px] uppercase tracking-[0.2em]"
-                                                        style="color: {{ $settings->pdf_table_header_text_color ?? '#374151' }}">Adet</th>
-                                                    <th class="text-center py-5 px-6 font-black text-[9px] uppercase tracking-[0.2em]"
-                                                        style="color: {{ $settings->pdf_table_header_text_color ?? '#374151' }}">Süre</th>
-                                                    <th class="text-right py-5 px-6 font-black text-[9px] uppercase tracking-[0.2em]"
-                                                        style="color: {{ $settings->pdf_table_header_text_color ?? '#374151' }}">Birim Fiyat</th>
-                                                    <th class="text-right py-5 px-6 font-black text-[9px] uppercase tracking-[0.2em]"
-                                                        style="color: {{ $settings->pdf_table_header_text_color ?? '#374151' }}">Toplam</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody class="divide-y divide-gray-100">
-                                                @foreach($section['items'] as $item)
-                                                <tr class="divide-x divide-gray-50 hover:bg-gray-50/50 transition-all bg-white">
-                                                    <td class="py-5 px-6 font-bold text-gray-900">{{ $item['name'] }}</td>
-                                                    <td class="py-5 px-6 text-gray-500 text-xs leading-relaxed italic">{{ $item['description'] }}</td>
-                                                    <td class="py-5 px-6 text-center text-gray-700 font-bold">{{ $item['quantity'] }}</td>
-                                                    <td class="py-5 px-6 text-center text-gray-700 font-bold uppercase text-[10px]">{{ $item['duration'] }}</td>
-                                                    <td class="py-5 px-6 text-right text-gray-600 font-bold whitespace-nowrap">{{ number_format($item['price'], 0, ',', '.') }} {{ $currency }}</td>
-                                                    <td class="py-5 px-6 text-right font-black text-gray-900 whitespace-nowrap bg-gray-50/50">{{ number_format($item['total'], 0, ',', '.') }} {{ $currency }}</td>
-                                                </tr>
-                                                @endforeach
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-
-                                <div class="grid grid-cols-12 gap-10 items-start mt-8">
-                                    <div class="col-span-7">
-                                    </div>
-                                    <div class="col-span-5">
-                                        <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm relative">
-                                            <h3 class="font-black text-[10px] uppercase tracking-[0.2em] text-gray-400 mb-6 pb-3 border-b border-gray-100">Teklif Özeti</h3>
-                                            <div class="space-y-3">
-                                                <div class="flex justify-between text-gray-600 font-semibold">
-                                                    <span class="text-xs uppercase tracking-wide">Ara Toplam:</span>
-                                                    <span class="text-sm font-bold">{{ number_format($section['subtotal'], 0, ',', '.') }} {{ $currency }}</span>
-                                                </div>
-                                                
-                                                <div class="flex justify-between text-gray-600 font-semibold">
-                                                    <span class="text-xs uppercase tracking-wide">KDV (%{{ (int)$vatRate }}):</span>
-                                                    <span class="text-sm font-bold">{{ number_format($section['vat_amount'], 0, ',', '.') }} {{ $currency }}</span>
-                                                </div>
-                                                
-                                                <div class="flex justify-between pt-4 mt-4 border-t border-gray-100 items-center">
-                                                    <span class="font-black text-gray-600 uppercase text-[10px] tracking-widest">Genel Toplam</span>
-                                                    <span class="text-2xl font-black" style="color: {{ $settings->pdf_total_color ?? '#4F46E5' }}">
-                                                        {{ number_format($section['total_with_vat'], 0, ',', '.') }} {{ $currency }}
-                                                    </span>
-                                                </div>
-                                                <p class="text-[9px] text-gray-400 text-right italic mt-2">Fiyatlara KDV dahildir.</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                {{-- Footer Note --}}
-                                @if(!empty($settings->pdf_footer_text))
-                                <div class="mt-16 pt-8 border-t border-gray-50 text-[10px] text-gray-300 text-center font-black uppercase tracking-[0.3em]">
-                                    {{ $settings->pdf_footer_text }}
-                                </div>
-                                @endif
-                            </div>
-                            
-                            {{-- Sayfa Sonu Ayırıcı (Sadece aralara ekle) --}}
-                            @if($index < count($sections) - 1)
-                                <div class="py-12 flex items-center justify-center gap-4">
-                                    <div class="h-px flex-1 bg-gray-200"></div>
-                                    <span class="bg-gray-200 text-gray-500 px-4 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.3em]">SAYFA SONU</span>
-                                    <div class="h-px flex-1 bg-gray-200"></div>
-                                </div>
-                            @endif
-                        @endforeach
+                        {{-- Detay Bölümleri --}}
+                        @include('livewire.customers.offers.partials.pdf-preview._items-detail')
                     </div>
                 </div>
             </div>
@@ -444,28 +224,31 @@ new
                         {{-- Ayarlar Bölümü --}}
                         <div class="pt-6 mt-6 border-t border-gray-100">
                             <h3 class="text-xs font-bold text-gray-900 mb-4">İndirme Sayfası Ayarları</h3>
-                            
+
                             <div class="space-y-3 mb-6">
                                 <label class="flex items-start gap-3 cursor-pointer group">
-                                    <input type="checkbox" wire:model="isPdfDownloadable" 
+                                    <input type="checkbox" wire:model="isPdfDownloadable"
                                         class="checkbox checkbox-xs checkbox-primary mt-0.5 rounded-sm">
-                                    <span class="text-[11px] font-medium text-gray-600 group-hover:text-gray-900 transition-colors">
+                                    <span
+                                        class="text-[11px] font-medium text-gray-600 group-hover:text-gray-900 transition-colors">
                                         PDF teklif (yandaki) indirilebilir.
                                     </span>
                                 </label>
 
                                 <label class="flex items-start gap-3 cursor-pointer group">
-                                    <input type="checkbox" wire:model="isAttachmentsDownloadable" 
+                                    <input type="checkbox" wire:model="isAttachmentsDownloadable"
                                         class="checkbox checkbox-xs checkbox-primary mt-0.5 rounded-sm">
-                                    <span class="text-[11px] font-medium text-gray-600 group-hover:text-gray-900 transition-colors">
+                                    <span
+                                        class="text-[11px] font-medium text-gray-600 group-hover:text-gray-900 transition-colors">
                                         Teklif ekleri (varsa) indirilebilir.
                                     </span>
                                 </label>
 
                                 <label class="flex items-start gap-3 cursor-pointer group">
-                                    <input type="checkbox" wire:model="blockAfterExpiry" 
+                                    <input type="checkbox" wire:model="blockAfterExpiry"
                                         class="checkbox checkbox-xs checkbox-primary mt-0.5 rounded-sm">
-                                    <span class="text-[11px] font-medium text-gray-600 group-hover:text-gray-900 transition-colors">
+                                    <span
+                                        class="text-[11px] font-medium text-gray-600 group-hover:text-gray-900 transition-colors">
                                         Geçerlilik tarihinden sonra indirilemez.
                                     </span>
                                 </label>
@@ -477,11 +260,14 @@ new
                                     <h3 class="text-xs font-bold text-gray-900 mb-3">Tanıtım Dosyaları</h3>
                                     <div class="space-y-2">
                                         @foreach($availableIntroductionFiles as $index => $file)
-                                            <label class="flex items-center gap-3 cursor-pointer group p-2 rounded-lg border border-transparent hover:bg-gray-50 hover:border-gray-100 transition-all">
-                                                <input type="checkbox" value="{{ $index }}" wire:model="selectedIntroductionFiles" 
+                                            <label
+                                                class="flex items-center gap-3 cursor-pointer group p-2 rounded-lg border border-transparent hover:bg-gray-50 hover:border-gray-100 transition-all">
+                                                <input type="checkbox" value="{{ $index }}"
+                                                    wire:model="selectedIntroductionFiles"
                                                     class="checkbox checkbox-xs checkbox-primary rounded-sm">
                                                 <div class="flex-1 min-w-0">
-                                                    <div class="text-[11px] font-medium text-gray-600 group-hover:text-gray-900 truncate" title="{{ $file['name'] }}">
+                                                    <div class="text-[11px] font-medium text-gray-600 group-hover:text-gray-900 truncate"
+                                                        title="{{ $file['name'] }}">
                                                         {{ $file['name'] }}
                                                     </div>
                                                 </div>
@@ -491,18 +277,17 @@ new
                                 </div>
                             @endif
 
-                            <button wire:click="saveSettings" 
-                                    class="w-full theme-btn-save flex items-center justify-center gap-2 py-2 text-xs relative">
+                            <button wire:click="saveSettings"
+                                class="w-full theme-btn-save flex items-center justify-center gap-2 py-2 text-xs relative">
                                 <span wire:loading.remove wire:target="saveSettings">KAYDET</span>
-                                <span wire:loading wire:target="saveSettings" class="loading loading-spinner loading-xs"></span>
+                                <span wire:loading wire:target="saveSettings"
+                                    class="loading loading-spinner loading-xs"></span>
                             </button>
 
                             <div class="h-6 mt-2 text-center">
                                 @if (session()->has('success'))
                                     <div class="text-[10px] font-bold text-emerald-600 animate-pulse transition-all"
-                                         x-data="{ show: true }" 
-                                         x-show="show" 
-                                         x-init="setTimeout(() => show = false, 3000)">
+                                        x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)">
                                         {{ session('success') }}
                                     </div>
                                 @endif
@@ -514,16 +299,7 @@ new
         </div>
 
         {{-- Print Style --}}
-        <style>
-            @media print {
-                .w-3/12 {
-                    display: none !important;
-                }
-
-                .w-9/12 {
-                    width: 100% !important;
-                }
-            }
-        </style>
+        {{-- Print Style --}}
+        @include('livewire.customers.offers.partials.pdf-preview._styles')
     </div>
 </div>

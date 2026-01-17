@@ -71,6 +71,9 @@ trait HasOfferItems
 
     public function removeManualItemRow(int $index): void
     {
+        if (count($this->manualItems) <= 1) {
+            return;
+        }
         unset($this->manualItems[$index]);
         $this->manualItems = array_values($this->manualItems);
     }
@@ -104,12 +107,12 @@ trait HasOfferItems
 
         $this->showManualEntryModal = false;
         $this->manualItems = [];
-        $this->success('Başarılı', $count.' kalem eklendi.');
+        $this->success('Başarılı', $count . ' kalem eklendi.');
     }
 
     public function openServiceModal(int $sectionIndex): void
     {
-        if (! $this->customer_id) {
+        if (!$this->customer_id) {
             $this->error('Uyarı', 'Lütfen önce bir müşteri seçin.');
 
             return;
@@ -154,7 +157,7 @@ trait HasOfferItems
             $this->sections[$this->activeSectionIndex]['items'][] = [
                 'service_id' => $service['id'],
                 'service_name' => $service['service_name'],
-                'description' => ($service['description'] ?? '').' (Uzatma)',
+                'description' => ($service['description'] ?? '') . ' (Uzatma)',
                 'price' => $service['service_price'],
                 'currency' => $service['service_currency'],
                 'duration' => $service['service_duration'] ?? 1,
@@ -168,7 +171,7 @@ trait HasOfferItems
 
     public function addServiceFromPriceDefinition(): void
     {
-        if (! $this->modalServiceName) {
+        if (!$this->modalServiceName) {
             $this->error('Uyarı', 'Lütfen bir hizmet seçin.');
 
             return;

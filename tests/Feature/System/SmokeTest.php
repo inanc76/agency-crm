@@ -182,7 +182,8 @@ test('T35: Offer form modal renders (edit)', function () {
 
 test('T36: Service form modal renders', function () {
     Volt::test('modals.service-form')
-        ->set('customer_id', $this->customer->id);
+        ->set('customer_id', $this->customer->id)
+        ->assertHasNoErrors();
 });
 
 test('T37: Service form modal renders (edit)', function () {
@@ -193,7 +194,8 @@ test('T37: Service form modal renders (edit)', function () {
 
 test('T38: Asset form modal renders', function () {
     Volt::test('modals.asset-form')
-        ->set('customer_id', $this->customer->id);
+        ->set('customer_id', $this->customer->id)
+        ->assertHasNoErrors();
 });
 
 test('T39: Asset form modal renders (edit)', function () {
@@ -204,7 +206,8 @@ test('T39: Asset form modal renders (edit)', function () {
 
 test('T40: Contact form modal renders', function () {
     Volt::test('modals.contact-form')
-        ->set('customer_id', $this->customer->id);
+        ->set('customer_id', $this->customer->id)
+        ->assertHasNoErrors();
 });
 
 test('T41: Contact form modal renders (edit)', function () {
@@ -215,11 +218,13 @@ test('T41: Contact form modal renders (edit)', function () {
 
 // Tasks & Reports Components
 test('T42: Task create component renders', function () {
-    Volt::test('projects.tasks.create');
+    Volt::test('projects.tasks.create')
+        ->assertHasNoErrors();
 });
 
 test('T43: Report create component renders', function () {
-    Volt::test('projects.reports.create');
+    Volt::test('projects.reports.create')
+        ->assertHasNoErrors();
 });
 
 // Customer Tabs are managed via Routes/Partials, covered by Route checks.
@@ -229,17 +234,19 @@ test('T50: Notes tab renders for customer', function () {
     Livewire::test('shared.notes-tab', [
         'entityType' => 'CUSTOMER',
         'entityId' => $this->customer->id
-    ]);
+    ])->assertOk();
 });
 
 
 // Project Tabs
 test('T54: Project tasks tab renders', function () {
-    Volt::test('projects.tabs.tasks-tab', ['project_id' => $this->project->id]);
+    Volt::test('projects.tabs.tasks-tab', ['project_id' => $this->project->id])
+        ->assertHasNoErrors();
 });
 
 test('T55: Project reports tab renders', function () {
-    Volt::test('projects.tabs.reports-tab', ['project_id' => $this->project->id]);
+    Volt::test('projects.tabs.reports-tab', ['project_id' => $this->project->id])
+        ->assertHasNoErrors();
 });
 
 test('T56: Project notes tab renders', function () {
@@ -251,43 +258,43 @@ test('T56: Project notes tab renders', function () {
 
 // Settings Components
 test('T64: Settings panel component renders', function () {
-    Volt::test('settings.panel');
+    Volt::test('settings.panel')->assertHasNoErrors();
 });
 
 test('T65: Settings mail component renders', function () {
-    Volt::test('settings.mail');
+    Volt::test('settings.mail')->assertHasNoErrors();
 });
 
 test('T66: Settings prices component renders', function () {
-    Volt::test('settings.prices');
+    Volt::test('settings.prices')->assertHasNoErrors();
 });
 
 test('T67: Settings pdf-template component renders', function () {
-    Volt::test('settings.pdf-template');
+    Volt::test('settings.pdf-template')->assertHasNoErrors();
 });
 
 test('T68: Settings storage component renders', function () {
-    Volt::test('settings.storage');
+    Volt::test('settings.storage')->assertHasNoErrors();
 });
 
 test('T69: Settings variables component renders', function () {
-    Volt::test('settings.variables');
+    Volt::test('settings.variables')->assertHasNoErrors();
 });
 
 test('T70: Settings appearance component renders', function () {
-    Volt::test('settings.appearance');
+    Volt::test('settings.appearance')->assertHasNoErrors();
 });
 
 test('T71: Settings profile component renders', function () {
-    Volt::test('settings.profile');
+    Volt::test('settings.profile')->assertHasNoErrors();
 });
 
 test('T72: Settings password component renders', function () {
-    Volt::test('settings.password');
+    Volt::test('settings.password')->assertHasNoErrors();
 });
 
 test('T73: Settings two-factor component renders', function () {
-    Volt::test('settings.two-factor');
+    Volt::test('settings.two-factor')->assertHasNoErrors();
 });
 
 // Auth component tests removed as they are Controller-based views, covered by Route tests.

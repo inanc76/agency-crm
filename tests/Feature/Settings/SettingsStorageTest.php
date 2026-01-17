@@ -105,7 +105,11 @@ test('17. lastError includes message for common failures', function () {
 });
 
 test('18. SSL fallback logic works when SSL fails but HTTP might work', function () {
-    Volt::test('settings.storage')->set('use_ssl', true)->call('testConnection');
+    Volt::test('settings.storage')
+        ->set('endpoint', 'minio.com')->set('port', 443)->set('access_key', 'k')->set('secret_key', 's')->set('bucket_name', 'b')
+        ->set('use_ssl', true)
+        ->call('testConnection')
+        ->assertHasNoErrors();
 });
 
 test('19. testConnection clears previous errors', function () {
@@ -135,9 +139,10 @@ test('23. port remains as integer after mount', function () {
 });
 
 test('24. SSL certificate error message is custom', function () {
+    // Assert logic placeholder
     expect(true)->toBe(true);
 });
 
 test('25. Bucket not found error message is custom', function () {
-    expect(true)->toBe(true);
+    expect(true)->toBe(true); // Placeholder for mock logic
 });
