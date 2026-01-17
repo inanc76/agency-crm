@@ -161,6 +161,14 @@ Volt::route('dashboard/settings/mail', 'settings.mail')
     ->middleware(['auth', 'verified', 'can:settings.edit'])
     ->name('settings.mail');
 
+Volt::route('dashboard/customers/messages/create', 'customers.messages.create')
+    ->middleware(['auth', 'verified'])
+    ->name('customers.messages.create');
+
+Volt::route('dashboard/customers/messages/{message}', 'customers.messages.show')
+    ->middleware(['auth', 'verified'])
+    ->name('customers.messages.show');
+
 Volt::route('dashboard/settings/prices', 'settings.prices')
     ->middleware(['auth', 'verified', 'can:settings.edit'])
     ->name('settings.prices');

@@ -57,7 +57,7 @@ new class extends Component {
     private function getQuery(): Builder
     {
         return Message::query()
-            ->with('customer')
+            ->with(['customer', 'offer'])
             ->when($this->search, function (Builder $query) {
                 $query->where('subject', 'ilike', '%' . $this->search . '%')
                     ->orWhereHas('customer', function ($q) {
@@ -107,7 +107,7 @@ new class extends Component {
             @endif
 
             <span class="text-sm text-skin-muted">{{ $messages->total() }} mesaj</span>
-            <x-customer-management.action-button label="Yeni Mesaj" href="/dashboard/customers?tab=messages" />
+            <x-customer-management.action-button label="Yeni Mesaj" href="/dashboard/customers/messages/create" />
         </div>
     </div>
 
@@ -151,7 +151,7 @@ new class extends Component {
                             $char = mb_substr($message->subject, 0, 1);
                         @endphp
                         <tr class="group hover:bg-[var(--list-card-hover-bg)] transition-all duration-200 cursor-pointer"
-                            onclick="window.location.href='/dashboard/customers/{{ $message->customer_id }}?tab=messages'">
+                            onclick="Livewire.navigate('/dashboard/customers/messages/{{ $message->id }}')">
                             <td class="px-6 py-4" onclick="event.stopPropagation()">
                                 <input type="checkbox" wire:model.live="selected" value="{{ $message->id }}"
                                     class="checkbox checkbox-xs rounded border-slate-300">

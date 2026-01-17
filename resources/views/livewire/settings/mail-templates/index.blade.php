@@ -26,8 +26,8 @@ new #[Layout('components.layouts.app')]
         return [
             'templates' => MailTemplate::query()
                 ->with('creator')
+                ->where('is_system', false)
                 ->when($this->search, fn($q) => $q->where('name', 'like', "%{$this->search}%")->orWhere('subject', 'like', "%{$this->search}%"))
-                ->orderBy('is_system', 'desc')
                 ->orderBy('created_at', 'desc')
                 ->paginate($this->perPage)
         ];

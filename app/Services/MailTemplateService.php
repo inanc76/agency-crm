@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\MailTemplate;
-use Illuminate\Support\Facades\Log;
 
 class MailTemplateService
 {
@@ -18,10 +17,29 @@ class MailTemplateService
     {
         $template = MailTemplate::where('system_key', $key)->first();
 
-        if (! $template) {
-            Log::warning("Mail template not found for key: {$key}");
+        return $this->renderModel($template, $data);
+    }
 
-            return ['', ''];
+    /**
+     * Render a mail template by its ID.
+     */
+    public function renderById(string $id, array $data = []): array
+    {
+        $template = MailTemplate::find($id);
+
+        return $this->renderModel($template, $data);
+    }
+
+    /**
+     * Shared render logic for model
+     */
+    protected function renderModel(?MailTemplate $template, array $data = []): array
+    {
+        if (! $template) {
+            return [
+                'subject' => '',
+                'content' => '',
+            ];
         }
 
         $subject = $this->parseTemplate($template->subject, $data);
