@@ -12,7 +12,8 @@
             @if($isViewMode)
                 <div class="text-sm font-medium text-skin-base">{{ $name ?: '-' }}</div>
             @else
-                <input type="text" wire:model.blur="name" placeholder="Proje adını girin..." class="input w-full">
+                <input type="text" name="project_name" wire:model.blur="name" placeholder="Proje adını girin..."
+                    class="input w-full">
                 @error('name') <span class="text-[var(--color-danger)] text-xs">{{ $message }}</span> @enderror
             @endif
         </div>
@@ -29,7 +30,7 @@
                 @php $statusLabel = collect($statuses)->firstWhere('id', $status_id)['display_label'] ?? '-'; @endphp
                 <div class="text-sm font-medium text-skin-base">{{ $statusLabel }}</div>
             @else
-                <select wire:model="status_id" class="select w-full">
+                <select name="status" wire:model="status_id" class="select w-full">
                     @foreach($statuses as $status)
                         <option value="{{ $status['id'] }}">{{ $status['display_label'] }}</option>
                     @endforeach
@@ -43,7 +44,7 @@
             @if($isViewMode)
                 <div class="text-sm font-medium text-skin-base">{{ $timezone }}</div>
             @else
-                <select wire:model="timezone" class="select w-full">
+                <select name="timezone" wire:model="timezone" class="select w-full">
                     <option value="Europe/Istanbul">İstanbul (UTC+3)</option>
                     <option value="UTC">UTC</option>
                 </select>
@@ -58,7 +59,7 @@
                 @php $typeLabel = collect($projectTypes)->firstWhere('id', $type_id)['display_label'] ?? '-'; @endphp
                 <div class="text-sm font-medium text-skin-base">{{ $typeLabel }}</div>
             @else
-                <select wire:model="type_id" class="select w-full">
+                <select name="type_id" wire:model="type_id" class="select w-full">
                     <option value="">Proje Tipi Seçin</option>
                     @foreach($projectTypes as $type)
                         <option value="{{ $type['id'] }}">{{ $type['display_label'] }}</option>
@@ -83,11 +84,12 @@
 
             @if($isViewMode)
                 <div class="text-sm font-medium text-skin-base">
-                    {{ $start_date ? \Carbon\Carbon::parse($start_date)->format('d.m.Y') : '-' }}</div>
+                    {{ $start_date ? \Carbon\Carbon::parse($start_date)->format('d.m.Y') : '-' }}
+                </div>
             @else
                 <div class="relative">
-                    <input type="date" wire:model="start_date" class="input w-full" @if($auto_calculate_start_date) readonly
-                    @endif>
+                    <input type="date" name="start_date" wire:model="start_date" class="input w-full"
+                        @if($auto_calculate_start_date) readonly @endif>
                     @if($auto_calculate_start_date)
                         <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                             <x-mary-icon name="o-lock-closed" class="w-4 h-4 text-slate-400" />
@@ -115,11 +117,12 @@
 
             @if($isViewMode)
                 <div class="text-sm font-medium text-skin-base">
-                    {{ $target_end_date ? \Carbon\Carbon::parse($target_end_date)->format('d.m.Y') : '-' }}</div>
+                    {{ $target_end_date ? \Carbon\Carbon::parse($target_end_date)->format('d.m.Y') : '-' }}
+                </div>
             @else
                 <div class="relative">
-                    <input type="date" wire:model="target_end_date" class="input w-full" @if($auto_calculate_end_date)
-                    readonly @endif>
+                    <input type="date" name="end_date" wire:model="target_end_date" class="input w-full"
+                        @if($auto_calculate_end_date) readonly @endif>
                     @if($auto_calculate_end_date)
                         <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                             <x-mary-icon name="o-lock-closed" class="w-4 h-4 text-slate-400" />
@@ -141,7 +144,7 @@
             @if($isViewMode)
                 <div class="text-sm text-skin-base whitespace-pre-wrap">{{ $description ?: '-' }}</div>
             @else
-                <textarea wire:model="description" rows="3" class="textarea w-full"
+                <textarea name="description" wire:model="description" rows="3" class="textarea w-full"
                     placeholder="Proje açıklaması..."></textarea>
             @endif
         </div>

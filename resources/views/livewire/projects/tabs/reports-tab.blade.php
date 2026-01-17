@@ -51,7 +51,7 @@ new class extends Component {
             ->with(['customer', 'project', 'service', 'creator', 'task'])
             ->when($this->project_id, fn($q) => $q->where('project_id', $this->project_id))
             ->when($this->task_id, fn($q) => $q->where('task_id', $this->task_id))
-            ->when($this->search, fn($q) => $q->where('content', 'ILIKE', "%{$this->search}%"))
+            ->when($this->search, fn($q) => $q->where('content', 'LIKE', "%{$this->search}%"))
             ->orderByDesc('created_at')
             ->limit(50)
             ->get();

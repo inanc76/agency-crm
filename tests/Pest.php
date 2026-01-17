@@ -89,7 +89,13 @@ function seedReferenceData()
         'SERVICE_CATEGORY' => 'Hizmet Kategorileri',
         'OFFER_STATUS' => 'Teklif Durumları',
         'VAT_RATES' => 'KDV Oranları',
-        'ASSET_TYPE' => 'Varlık Tipleri'
+        'ASSET_TYPE' => 'Varlık Tipleri',
+        'PROJECT_STATUS' => 'Proje Durumları',
+        'PROJECT_TYPE' => 'Proje Tipleri',
+        'TASK_STATUS' => 'Görev Durumları',
+        'TASK_PRIORITY' => 'Görev Öncelikleri',
+        'PHASE_STATUS' => 'Faz Durumları',
+        'MODULE_STATUS' => 'Modül Durumları'
     ];
 
     foreach ($categories as $key => $name) {
@@ -120,6 +126,12 @@ function seedReferenceData()
         ['category' => 'ASSET_TYPE', 'key' => 'WEBSITE', 'label' => 'WEBSITE'],
         ['category' => 'ASSET_TYPE', 'key' => 'DOMAIN', 'label' => 'DOMAIN'],
         ['category' => 'ASSET_TYPE', 'key' => 'OTHER', 'label' => 'OTHER'],
+        ['category' => 'PROJECT_STATUS', 'key' => 'project_active', 'label' => 'Aktif'],
+        ['category' => 'PROJECT_STATUS', 'key' => 'project_completed', 'label' => 'Tamamlandı'],
+        ['category' => 'TASK_PRIORITY', 'key' => 'high', 'label' => 'Yüksek'],
+        ['category' => 'TASK_PRIORITY', 'key' => 'normal', 'label' => 'Normal'],
+        ['category' => 'TASK_STATUS', 'key' => 'open', 'label' => 'Açık'],
+        ['category' => 'TASK_STATUS', 'key' => 'done', 'label' => 'Bitti'],
     ];
 
     foreach ($items as $index => $item) {

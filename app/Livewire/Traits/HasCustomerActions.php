@@ -32,6 +32,16 @@ trait HasCustomerActions
             $this->authorize('customers.create');
         }
 
+        // Filter and Normalize before validation
+        $emails = array_filter($this->emails, fn($e) => !empty($e));
+        $phones = array_map(fn($p) => $this->normalizePhone($p), array_filter($this->phones, fn($p) => !empty($p)));
+        $websites = array_map(fn($url) => $this->normalizeUrl($url), array_filter($this->websites, fn($w) => !empty($w)));
+
+        // Update public properties with normalized values for validation and DB
+        $this->emails = !empty($emails) ? array_values($emails) : [''];
+        $this->phones = !empty($phones) ? array_values($phones) : [''];
+        $this->websites = !empty($websites) ? array_values($websites) : [''];
+
         $this->validate([
             'customer_type' => 'required|string',
             'name' => 'required|string|max:255',
@@ -47,11 +57,6 @@ trait HasCustomerActions
             'current_code' => 'nullable|string|max:50',
             'logo' => 'nullable|image|max:5120',
         ]);
-
-        // Filter and Normalize
-        $emails = array_filter($this->emails, fn ($e) => ! empty($e));
-        $phones = array_map(fn ($p) => $this->normalizePhone($p), array_filter($this->phones, fn ($p) => ! empty($p)));
-        $websites = array_map(fn ($url) => $this->normalizeUrl($url), array_filter($this->websites, fn ($w) => ! empty($w)));
 
         $data = [
             'name' => $this->formatTitleCase($this->name),
@@ -97,7 +102,7 @@ trait HasCustomerActions
             }
 
             $uploadResult = $minioService->uploadFile($this->logo, 'logos');
-            $customer->update(['logo_url' => '/storage/minio/'.$uploadResult['path']]);
+            $customer->update(['logo_url' => '/storage/minio/' . $uploadResult['path']]);
             $this->logo = null; // Reset upload input
         }
 
@@ -107,7 +112,7 @@ trait HasCustomerActions
         $this->success('İşlem Başarılı', $message);
 
         if ($wasCreating) {
-            $this->redirect('/dashboard/customers/'.$this->customerId, navigate: true);
+            $this->redirect('/dashboard/customers/' . $this->customerId, navigate: true);
         } else {
             $this->isViewMode = true;
         }
@@ -195,7 +200,7 @@ trait HasCustomerActions
      */
     public function addRelatedCustomer(string $customerId): void
     {
-        if (! in_array($customerId, $this->related_customers) && count($this->related_customers) < 10) {
+        if (!in_array($customerId, $this->related_customers) && count($this->related_customers) < 10) {
             $this->related_customers[] = $customerId;
         }
     }
@@ -206,7 +211,7 @@ trait HasCustomerActions
     public function removeRelatedCustomer(string $customerId): void
     {
         $this->related_customers = array_values(
-            array_filter($this->related_customers, fn ($id) => $id !== $customerId)
+            array_filter($this->related_customers, fn($id) => $id !== $customerId)
         );
     }
 
@@ -220,8 +225,8 @@ trait HasCustomerActions
         }
 
         $url = trim($url);
-        if (! preg_match('#^https?://#i', $url)) {
-            return 'https://'.$url;
+        if (!preg_match('#^https?://#i', $url)) {
+            return 'https://' . $url;
         }
 
         return $url;

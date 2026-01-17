@@ -97,10 +97,12 @@ trait HasServiceActions
     private function createMultipleServices(Carbon $startDate): void
     {
         DB::transaction(function () use ($startDate) {
+            $servicesToInsert = [];
+
             foreach ($this->services as $serviceData) {
                 $endDate = $this->calculateEndDate($startDate, $serviceData['service_duration']);
 
-                Service::create([
+                $servicesToInsert[] = [
                     'id' => Str::uuid()->toString(),
                     'customer_id' => $this->customer_id,
                     'asset_id' => $this->asset_id,
@@ -117,8 +119,12 @@ trait HasServiceActions
                     'description' => $serviceData['description'],
                     'status' => $serviceData['status'],
                     'is_active' => $serviceData['status'] === 'ACTIVE',
-                ]);
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
             }
+
+            Service::insert($servicesToInsert);
         });
 
         $this->success('Başarılı', count($this->services) . ' hizmet oluşturuldu.');

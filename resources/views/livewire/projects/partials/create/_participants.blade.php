@@ -13,7 +13,7 @@
                 @php $leaderName = collect($leaders)->firstWhere('id', $leader_id)['name'] ?? '-'; @endphp
                 <div class="text-sm font-medium text-skin-base">{{ $leaderName }}</div>
             @else
-                <select wire:model="leader_id" class="select w-full">
+                <select name="leader_id" wire:model="leader_id" class="select w-full">
                     <option value="">Proje Lideri Seçin</option>
                     @foreach($leaders as $leader)
                         <option value="{{ $leader['id'] }}">{{ $leader['name'] }}</option>

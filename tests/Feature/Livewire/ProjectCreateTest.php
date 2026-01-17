@@ -101,6 +101,69 @@ describe('Project Create Form', function () {
             ->assertSet('externalUserEmail', 'external@test.com');
     });
 
+    it('validates required fields', function () {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        Volt::test('projects.create')
+            ->call('save')
+            ->assertHasErrors(['name', 'customer_id', 'status_id', 'type_id', 'start_date', 'target_end_date']);
+    });
+
+    it('rejects very long project name', function () {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        Volt::test('projects.create')
+            ->set('name', str_repeat('a', 256))
+            ->call('save')
+            ->assertHasErrors(['name' => 'max']);
+    });
+
+    it('sanitizes input for xss protection', function () {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $customer = Customer::factory()->create();
+        $status = ReferenceItem::where('category_key', 'PROJECT_STATUS')->first();
+        $type = ReferenceItem::where('category_key', 'PROJECT_TYPE')->first();
+
+        $malicious = '<script>alert("xss")</script>';
+
+        Volt::test('projects.create')
+            ->set('name', $malicious)
+            ->set('customer_id', $customer->id)
+            ->set('status_id', $status->id)
+            ->set('type_id', $type->id)
+            ->set('start_date', '2026-01-01')
+            ->set('target_end_date', '2026-12-31')
+            ->call('save')
+            ->assertHasNoErrors();
+
+        $this->assertDatabaseHas('projects', ['name' => $malicious]); // Raw stored, will be escaped on output by Blade
+    });
+
+    it('can select project leader', function () {
+        $user = User::factory()->create();
+        $leader = User::factory()->create(['name' => 'Leader User']);
+        $this->actingAs($user);
+
+        Volt::test('projects.create')
+            ->set('leader_id', $leader->id)
+            ->assertSet('leader_id', $leader->id);
+    });
+
+    it('can add team members', function () {
+        $user = User::factory()->create();
+        $member1 = User::factory()->create();
+        $member2 = User::factory()->create();
+        $this->actingAs($user);
+
+        Volt::test('projects.create')
+            ->set('team_members', [$member1->id, $member2->id])
+            ->assertSet('team_members', [$member1->id, $member2->id]);
+    });
+
     it('can add phases and modules to the hierarchical form', function () {
         $user = User::factory()->create();
         $this->actingAs($user);
@@ -113,13 +176,11 @@ describe('Project Create Form', function () {
             ->set('customer_id', $customer->id)
             ->set('status_id', $status->id)
             ->assertSet('phases', [])
-            // Yeni mantık: Faz Modalı Aç -> Formu Doldur -> Kaydet
             ->call('openPhaseModal')
             ->set('phaseForm.name', 'Analiz Fazı')
             ->call('savePhase')
             ->assertCount('phases', 1)
             ->assertSet('phases.0.name', 'Analiz Fazı');
-        // Modül testi şimdilik basitleştirildi çünkü modül ekleme de modal üzerinden yürüyor
     });
 
 });

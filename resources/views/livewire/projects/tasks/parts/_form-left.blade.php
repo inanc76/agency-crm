@@ -14,7 +14,7 @@
                     @php $selectedCustomer = collect($customers)->firstWhere('id', $customer_id); @endphp
                     <div class="text-sm font-medium text-skin-base">{{ $selectedCustomer['name'] ?? '-' }}</div>
                 @else
-                    <select wire:model.live="customer_id" class="select w-full">
+                    <select name="customer_id" wire:model.live="customer_id" class="select w-full">
                         <option value="">Müşteri seçin...</option>
                         @foreach($customers as $customer)
                             <option value="{{ $customer['id'] }}">{{ $customer['name'] }}</option>
@@ -30,7 +30,7 @@
                     @php $selectedProject = collect($projects)->firstWhere('id', $project_id); @endphp
                     <div class="text-sm font-medium text-skin-base">{{ $selectedProject['name'] ?? '-' }}</div>
                 @else
-                    <select wire:model="project_id" class="select w-full" @if(!$customer_id) disabled @endif>
+                    <select name="project_id" wire:model="project_id" class="select w-full" @if(!$customer_id) disabled @endif>
                         <option value="">{{ $customer_id ? 'Proje seçin...' : 'Önce müşteri seçin' }}</option>
                         @foreach($projects as $project)
                             <option value="{{ $project['id'] }}">{{ $project['name'] }}</option>
@@ -49,7 +49,7 @@
                 @if($isViewMode)
                     <div class="text-sm font-medium text-skin-base">{{ $assignedByUser['name'] ?? '-' }}</div>
                 @elseif($isAdmin)
-                    <select wire:model="assigned_by" class="select w-full">
+                    <select name="assigned_by" wire:model="assigned_by" class="select w-full">
                         @foreach($users as $user)
                             <option value="{{ $user['id'] }}">{{ $user['name'] }}</option>
                         @endforeach
@@ -79,6 +79,7 @@
                     <div class="text-sm font-medium text-skin-base">{{ $assignedNames ?: '-' }}</div>
                 @else
                     <x-mary-choices 
+                        name="assigned_to"
                         wire:model="assigned_to" 
                         :options="$users" 
                         option-label="name" 
@@ -110,7 +111,7 @@
                     @else
                         <div class="relative flex items-center">
                             <div class="absolute left-2 w-3 h-3 rounded-full {{ $this->getColorClasses($priorityColorId) }}"></div>
-                            <select wire:model.live="priority_id" class="select w-full pl-8">
+                            <select name="priority_id" wire:model.live="priority_id" class="select w-full pl-8">
                                 <option value="">Seçiniz...</option>
                                 @foreach($priorities as $priority)
                                     <option value="{{ $priority['id'] }}">
@@ -139,7 +140,7 @@
                     @else
                         <div class="relative flex items-center">
                             <div class="absolute left-2 w-3 h-3 rounded-full {{ $this->getColorClasses($statusColorId) }}"></div>
-                            <select wire:model.live="status_id" class="select w-full pl-8">
+                            <select name="status_id" wire:model.live="status_id" class="select w-full pl-8">
                                 <option value="">Seçiniz...</option>
                                 @foreach($statuses as $status)
                                     <option value="{{ $status['id'] }}">
@@ -166,7 +167,7 @@
             @if($isViewMode)
                 <div class="text-base text-slate-800 font-medium">{{ $name }}</div>
             @else
-                <x-mary-input wire:model.live="name" placeholder="Görev konusunu girin..." class="input-sm" />
+                <x-mary-input name="title" wire:model.live="name" placeholder="Görev konusunu girin..." class="input-sm" />
             @endif
         </div>
 
@@ -176,7 +177,7 @@
                 {!! $description ?: '<span class="text-slate-400 italic">Henüz detay eklenmedi.</span>' !!}
             </div>
         @else
-            <textarea wire:model="description" rows="6" 
+            <textarea name="description" wire:model="description" rows="6" 
                 class="textarea w-full border-slate-200"
                 placeholder="Görev detaylarını buraya yazın..."></textarea>
         @endif

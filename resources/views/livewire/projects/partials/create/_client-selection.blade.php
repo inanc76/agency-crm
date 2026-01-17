@@ -4,7 +4,7 @@
     @if($isViewMode)
         <div class="text-sm font-medium text-skin-base">{{ $selectedCustomer['name'] ?? '-' }}</div>
     @else
-        <select wire:model.live="customer_id" class="select w-full">
+        <select name="customer_id" wire:model.live="customer_id" class="select w-full">
             <option value="">Müşteri Seçin</option>
             @foreach($customers as $customer)
                 <option value="{{ $customer['id'] }}">{{ $customer['name'] }}</option>

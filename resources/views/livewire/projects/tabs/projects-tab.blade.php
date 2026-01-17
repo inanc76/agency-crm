@@ -32,10 +32,10 @@ $projects = computed(function () {
                 // ILIKE handles most case-insensitivity, but ILIKE with Turkish characters
                 // can be tricky. Using a combined approach or ensuring the searchTerm
                 // is used as-is with ILIKE is common in Laravel/PGSQL.
-                $sub->where('name', 'ILIKE', "%{$searchTerm}%")
-                    ->orWhere('project_id_code', 'ILIKE', "%{$searchTerm}%")
+                $sub->where('name', 'LIKE', "%{$searchTerm}%")
+                    ->orWhere('project_id_code', 'LIKE', "%{$searchTerm}%")
                     ->orWhereHas('customer', function ($c) use ($searchTerm) {
-                    $c->where('name', 'ILIKE', "%{$searchTerm}%");
+                    $c->where('name', 'LIKE', "%{$searchTerm}%");
                 });
             });
         })
@@ -112,6 +112,7 @@ $resetFilters = function () {
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         @forelse($this->projects as $project)
             <a href="{{ route('projects.edit', $project->id) }}" wire:key="project-{{ $project->id }}"
+                data-testid="project-card"
                 class="theme-card p-5 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer group">
                 {{-- Header --}}
                 <div class="flex items-start justify-between mb-3 min-w-0">
@@ -183,8 +184,8 @@ $resetFilters = function () {
                         @if($project->status)
                             <span
                                 class="px-2 py-0.5 rounded-full text-[10px] font-semibold whitespace-nowrap border
-                                                                                                                                                                                                                                     {{ $project->status->color_class ?? 'bg-slate-50 text-slate-600 border-slate-100' }}
-                                                                                                                                                                                                                                ">
+                                                                                                                                                                                                                                                             {{ $project->status->color_class ?? 'bg-slate-50 text-slate-600 border-slate-100' }}
+                                                                                                                                                                                                                                                        ">
                                 {{ $project->status->display_label }}
                             </span>
                         @endif
@@ -224,7 +225,7 @@ $resetFilters = function () {
                 @endphp
 
                 @if($activePhases->isNotEmpty())
-                            <div class="mt-3 pt-3 border-t border-slate-100 text-xs text-slate-600">
+                    <div class="mt-3 pt-3 border-t border-slate-100 text-xs text-slate-600">
                         @foreach($activePhases as $phase)
                             @php
                                 $words = explode(' ', $phase->name);
@@ -258,7 +259,7 @@ $resetFilters = function () {
                     <x-mary-icon name="o-plus" class="w-5 h-5" />
                     Yeni Proje Oluştur
                 </a>
-                </div>
+            </div>
         @endforelse
     </div>
 </div>
