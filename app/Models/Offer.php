@@ -119,6 +119,7 @@ class Offer extends Model
         'valid_until',
         'pdf_url',
         'tracking_token',
+        'download_page_id',
         'vat_rate',
         'vat_amount',
         'is_pdf_downloadable',
@@ -200,6 +201,7 @@ class Offer extends Model
                 if (preg_match('/(\d+)/', $item->display_label, $matches)) {
                     return (float) $matches[1] === (float) $this->vat_rate;
                 }
+
                 return false;
             });
     }
@@ -211,10 +213,12 @@ class Offer extends Model
                 $offer->tracking_token = \Illuminate\Support\Str::uuid();
             }
             // Defaults
-            if (is_null($offer->is_pdf_downloadable))
+            if (is_null($offer->is_pdf_downloadable)) {
                 $offer->is_pdf_downloadable = true;
-            if (is_null($offer->is_attachments_downloadable))
+            }
+            if (is_null($offer->is_attachments_downloadable)) {
                 $offer->is_attachments_downloadable = true;
+            }
         });
 
         static::deleting(function (Offer $offer) {

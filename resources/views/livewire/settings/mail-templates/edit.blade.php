@@ -39,7 +39,7 @@ new #[Layout('components.layouts.app')]
         ],
         'TEKLİF BİLGİLERİ' => [
             ['code' => '{{offer.number}}', 'desc' => 'Teklif No'],
-            ['code' => '{{offer.link}}', 'desc' => 'Teklif Linki'],
+            ['code' => '{{offer.download_link}}', 'desc' => 'İndirme Linki'],
             ['code' => '{{offer.valid_until}}', 'desc' => 'Geçerlilik Tarihi'],
             ['code' => '{{offer.total_amount}}', 'desc' => 'Toplam Tutar'],
             ['code' => '{{offer.status}}', 'desc' => 'Teklif Durumu'],
@@ -161,7 +161,7 @@ new #[Layout('components.layouts.app')]
                 '{{customer.phone}}' => '0555 123 45 67',
                 '{{contact.name}}' => 'Mehmet Demir',
                 '{{offer.number}}' => 'TK-2024-001',
-                '{{offer.link}}' => url('/test-offer'),
+                '{{offer.download_link}}' => url('/offer/e87844eb-b44f-4835-9aaa-729addc6e2b1'),
                 '{{offer.total_amount}}' => '1.500,00 ₺',
                 '{{company.name}}' => config('app.name'),
                 '{{system.current_date}}' => now()->format('d.m.Y'),

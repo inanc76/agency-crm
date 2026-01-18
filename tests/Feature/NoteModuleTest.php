@@ -15,14 +15,35 @@ class NoteModuleTest extends TestCase
 
     protected User $author;
     protected User $viewer;
+    protected User $otherDeptUser;
     protected Customer $customer;
+    protected $department;
+    protected $otherDepartment;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->author = User::factory()->create(['name' => 'Note Author']);
-        $this->viewer = User::factory()->create(['name' => 'Note Viewer']);
+        // 1. Create Reference Category for DEPARTMENT
+        \App\Models\ReferenceCategory::firstOrCreate(
+            ['key' => 'DEPARTMENT'],
+            ['name' => 'Departmanlar', 'display_label' => 'Departmanlar', 'is_active' => true]
+        );
+
+        // 2. Create Departments
+        $this->department = \App\Models\ReferenceItem::firstOrCreate(
+            ['category_key' => 'DEPARTMENT', 'key' => 'SOFTWARE'],
+            ['display_label' => 'Yazılım', 'is_active' => true, 'sort_order' => 1]
+        );
+
+        $this->otherDepartment = \App\Models\ReferenceItem::firstOrCreate(
+            ['category_key' => 'DEPARTMENT', 'key' => 'DESIGN'],
+            ['display_label' => 'Tasarım', 'is_active' => true, 'sort_order' => 2]
+        );
+
+        $this->author = User::factory()->create(['name' => 'Note Author', 'department_id' => $this->department->id]);
+        $this->viewer = User::factory()->create(['name' => 'Note Viewer', 'department_id' => $this->department->id]);
+        $this->otherDeptUser = User::factory()->create(['name' => 'Other Dept User', 'department_id' => $this->otherDepartment->id]);
         $this->customer = Customer::factory()->create();
     }
 
@@ -42,7 +63,7 @@ class NoteModuleTest extends TestCase
         ]);
     }
 
-    public function test_it_can_attach_visible_users_to_note(): void
+    public function test_it_can_attach_visible_departments_to_note(): void
     {
         $note = Note::create([
             'content' => 'Test note with visibility',
@@ -51,11 +72,11 @@ class NoteModuleTest extends TestCase
             'entity_id' => $this->customer->id,
         ]);
 
-        $note->visibleTo()->attach([$this->viewer->id]);
+        $note->visibleToDepartments()->attach([$this->department->id]);
 
-        $this->assertDatabaseHas('note_user', [
+        $this->assertDatabaseHas('note_department', [
             'note_id' => $note->id,
-            'user_id' => $this->viewer->id,
+            'department_id' => $this->department->id,
         ]);
     }
 
@@ -71,18 +92,32 @@ class NoteModuleTest extends TestCase
         $this->assertTrue($note->canBeSeenBy($this->author));
     }
 
-    public function test_visible_user_can_see_note(): void
+    public function test_user_in_visible_department_can_see_note(): void
     {
         $note = Note::create([
-            'content' => 'Shared note',
+            'content' => 'Shared note with department',
             'author_id' => $this->author->id,
             'entity_type' => 'CUSTOMER',
             'entity_id' => $this->customer->id,
         ]);
 
-        $note->visibleTo()->attach($this->viewer->id);
+        $note->visibleToDepartments()->attach($this->department->id);
 
         $this->assertTrue($note->canBeSeenBy($this->viewer));
+    }
+
+    public function test_user_in_other_department_cannot_see_note(): void
+    {
+        $note = Note::create([
+            'content' => 'Secret note',
+            'author_id' => $this->author->id,
+            'entity_type' => 'CUSTOMER',
+            'entity_id' => $this->customer->id,
+        ]);
+
+        $note->visibleToDepartments()->attach($this->department->id);
+
+        $this->assertFalse($note->canBeSeenBy($this->otherDeptUser));
     }
 
     public function test_customer_has_notes_relationship(): void

@@ -10,45 +10,6 @@ fonksiyonu statik renkler üzerinde varyasyon oluşturur.
 
 --}}
 
-{{-- 10. Table Avatar Styling --}}
-<x-mary-collapse name="preview10" group="previews" separator
-    class="bg-white border border-slate-200 shadow-sm rounded-lg">
-    <x-slot:heading>
-        <div class="flex items-center justify-between w-full pr-4">
-            <div class="flex items-center gap-3">
-                <x-mary-icon name="o-user-circle" class="w-5 h-5 text-indigo-500" />
-                <span class="font-semibold text-slate-700">Tablo Avatar Stili</span>
-            </div>
-            <div class="flex gap-2">
-                <x-copy-badge text="--table-avatar-bg"
-                    class="text-[10px] bg-slate-100 text-slate-500 px-2 py-1 rounded" />
-            </div>
-        </div>
-    </x-slot:heading>
-    <x-slot:content>
-        <div class="p-6 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-center">
-            <div class="flex items-center gap-12">
-                {{-- Generic Avatar --}}
-                <div class="flex flex-col items-center gap-2">
-                    <span class="text-xs text-slate-500">Varsayılan</span>
-                    <div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shadow-sm"
-                        style="background-color: {{ $table_avatar_bg_color }}; color: {{ $table_avatar_text_color }}; border: 1px solid {{ $table_avatar_border_color }};">
-                        JD
-                    </div>
-                </div>
-                {{-- With Gradient --}}
-                <div class="flex flex-col items-center gap-2">
-                    <span class="text-xs text-slate-500">Gradient (User)</span>
-                    <div class="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-sm"
-                        style="background: linear-gradient(135deg, {{ $avatar_gradient_start_color }}, {{ $avatar_gradient_end_color }})">
-                        AK
-                    </div>
-                </div>
-            </div>
-        </div>
-    </x-slot:content>
-</x-mary-collapse>
-
 {{-- 11. Dashboard Elemanları Önizleme --}}
 <x-mary-collapse name="preview11" group="previews" separator
     class="bg-white border border-slate-200 shadow-sm rounded-lg">

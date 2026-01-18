@@ -19,15 +19,14 @@
     @endphp
     @if($filteredServices->count() > 0)
         <div class="overflow-x-auto">
-            <table class="w-full text-sm">
+            <table class="agency-table">
                 <thead>
-                    <tr class="border-b border-[var(--card-border)]">
-                        <th class="text-left py-2 px-2 font-medium opacity-60">Hizmet Adı</th>
-                        <th class="text-left py-2 px-2 font-medium opacity-60">Kategori</th>
-                        <th class="text-center py-2 px-2 font-medium opacity-60">Kalan Gün</th>
-                        <th class="text-center py-2 px-2 font-medium opacity-60">Bitiş</th>
-                        <th class="text-right py-2 px-2 font-medium opacity-60">Fiyat</th>
-                        <th class="text-center py-2 px-2 font-medium opacity-60">Durum</th>
+                    <tr>
+                        <th>Hizmet Adı</th>
+                        <th>Kategori</th>
+                        <th class="text-center">Durum / Kalan Gün</th>
+                        <th class="text-center">Bitiş</th>
+                        <th class="text-right">Fiyat</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -37,38 +36,33 @@
                             $daysLeft = now()->diffInDays($endDate, false);
                             
                             $statusLabel = $service->status_item->label ?? $service->status ?? 'Pasif';
-                            $statusClass = $service->status_item->color_class ?? 'bg-[var(--dropdown-hover-bg)] text-[var(--color-text-muted)]';
+                            $statusClass = $service->status_item->color_class ?? 'bg-slate-100 text-slate-500';
                             $categoryLabel = $service->category_item->label ?? $service->service_category ?? '-';
                         @endphp
-                        <tr class="border-b border-[var(--card-border)]/50 hover:bg-[var(--dropdown-hover-bg)] cursor-pointer transition-colors"
-                            onclick="window.location.href='/dashboard/customers/services/{{ $service->id }}'">
-                            <td class="py-3 px-2 font-medium">{{ $service->service_name }}</td>
-                            <td class="py-3 px-2 opacity-70">{{ $categoryLabel }}</td>
-                            <td class="py-3 px-2 text-center">
-                                @if($daysLeft < 0)
-                                    <span class="px-2 py-0.5 rounded text-xs font-medium bg-[var(--color-danger)]/10 text-[var(--color-danger)]">
-                                        {{ abs((int)$daysLeft) }} gün geçti
+                        <tr onclick="window.location.href='/dashboard/customers/services/{{ $service->id }}'">
+                            <td class="item-name">{{ $service->service_name }}</td>
+                            <td class="opacity-70">{{ $categoryLabel }}</td>
+                            <td class="text-center">
+                                <div class="flex flex-col items-center gap-1">
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold border {{ $statusClass }}">
+                                        {{ $statusLabel }}
                                     </span>
-                                @elseif($daysLeft <= 30)
-                                    <span class="px-2 py-0.5 rounded text-xs font-medium bg-[var(--color-warning)]/10 text-[var(--color-warning)]">
-                                        {{ (int)$daysLeft }} gün
-                                    </span>
-                                @else
-                                    <span class="px-2 py-0.5 rounded text-xs font-medium bg-[var(--color-success)]/10 text-[var(--color-success)]">
-                                        {{ (int)$daysLeft }} gün
-                                    </span>
-                                @endif
+                                    @if($daysLeft < 0)
+                                        <span class="text-[9px] font-bold text-red-500">
+                                            {{ abs((int)$daysLeft) }} gün geçti
+                                        </span>
+                                    @elseif($daysLeft <= 30)
+                                        <span class="text-[9px] font-bold text-amber-500">
+                                            {{ (int)$daysLeft }} gün kaldı
+                                        </span>
+                                    @endif
+                                </div>
                             </td>
-                            <td class="py-3 px-2 text-center opacity-70 text-xs font-mono">
+                            <td class="text-center opacity-70 text-xs font-mono">
                                 {{ $endDate ? $endDate->format('d.m.Y') : '-' }}</td>
-                            <td class="py-3 px-2 text-right font-medium">
+                            <td class="text-right font-bold text-slate-700">
                                 {{ number_format($service->service_price, 2) }}
                                 {{ $service->service_currency }}</td>
-                            <td class="py-3 px-2 text-center">
-                                <span class="px-2 py-0.5 rounded text-xs font-medium {{ $statusClass }}">
-                                    {{ $statusLabel }}
-                                </span>
-                            </td>
                         </tr>
                     @endforeach
                 </tbody>

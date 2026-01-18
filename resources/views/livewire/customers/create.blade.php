@@ -218,7 +218,7 @@ new
                 ->get();
 
             $this->relatedMessages = $customer->messages()
-                ->with(['customer', 'offer'])
+                ->with(['customer', 'offer', 'contact'])
                 ->orderBy('created_at', 'desc')
                 ->get();
 

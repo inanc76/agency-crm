@@ -57,27 +57,31 @@ new class extends Component {
     private function getQuery(): Builder
     {
         return Message::query()
-            ->with(['customer', 'offer'])
+            ->with(['customer', 'offer', 'contact', 'status_item', 'type_item'])
             ->when($this->search, function (Builder $query) {
                 $query->where('subject', 'ilike', '%' . $this->search . '%')
                     ->orWhereHas('customer', function ($q) {
                         $q->where('name', 'ilike', '%' . $this->search . '%');
-                    });
+                    })
+                    ->orWhere('recipient_name', 'ilike', '%' . $this->search . '%')
+                    ->orWhere('recipient_email', 'ilike', '%' . $this->search . '%');
             })
             ->when($this->letter, function (Builder $query) {
                 if ($this->letter === '0-9') {
                     $query->whereRaw("subject ~ '^[0-9]'")
                         ->orWhereHas('customer', function ($q) {
                             $q->whereRaw("name ~ '^[0-9]'");
-                        });
+                        })
+                        ->orWhereRaw("recipient_name ~ '^[0-9]'");
                 } else {
                     $query->where('subject', 'ilike', $this->letter . '%')
                         ->orWhereHas('customer', function ($q) {
                             $q->where('name', 'ilike', $this->letter . '%');
-                        });
+                        })
+                        ->orWhere('recipient_name', 'ilike', $this->letter . '%');
                 }
             })
-            ->orderBy('sent_at', 'desc');
+            ->orderBy('created_at', 'desc');
     }
 
     public function with(): array
@@ -122,64 +126,82 @@ new class extends Component {
         $headers = [
             ['label' => '', 'sortable' => false, 'width' => '40px'],
             ['label' => 'Konu', 'sortable' => true],
-            ['label' => 'Müşteri', 'sortable' => true],
+            ['label' => 'Gönderilecek Kişi', 'sortable' => true],
             ['label' => 'Tür', 'sortable' => false],
             ['label' => 'Durum', 'sortable' => false],
-            ['label' => 'Gönderilme Tarihi', 'sortable' => false],
+            ['label' => 'Gönderilme Tarihi', 'sortable' => false, 'class' => 'text-right'],
         ];
     @endphp
 
     <div class="bg-white rounded-xl border border-skin-light shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-sm">
-                <thead class="bg-slate-50 border-b border-skin-light">
+            <table class="agency-table">
+                <thead>
                     <tr>
-                        <th class="px-6 py-3 w-10">
+                        <th class="w-10">
                             <input type="checkbox" wire:model.live="selectAll"
                                 class="checkbox checkbox-xs rounded border-slate-300">
                         </th>
                         @foreach(array_slice($headers, 1) as $header)
-                            <th class="px-6 py-3 font-semibold text-skin-base">
+                            <th class="{{ $header['class'] ?? '' }}">
                                 {{ $header['label'] }}
                             </th>
                         @endforeach
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100">
+                <tbody>
                     @forelse($messages as $message)
                         @php
                             $char = mb_substr($message->subject, 0, 1);
                         @endphp
-                        <tr class="group hover:bg-[var(--list-card-hover-bg)] transition-all duration-200 cursor-pointer"
-                            onclick="Livewire.navigate('/dashboard/customers/messages/{{ $message->id }}')">
-                            <td class="px-6 py-4" onclick="event.stopPropagation()">
+                        <tr onclick="Livewire.navigate('/dashboard/customers/messages/{{ $message->id }}')">
+                            <td onclick="event.stopPropagation()">
                                 <input type="checkbox" wire:model.live="selected" value="{{ $message->id }}"
                                     class="checkbox checkbox-xs rounded border-slate-300">
                             </td>
-                            <td class="px-6 py-4">
+                            <td>
                                 <div class="flex items-center gap-3">
                                     <div class="flex-shrink-0">
-                                        <div class="w-9 h-9 rounded-full flex items-center justify-center text-xs shadow-sm font-semibold"
-                                            style="background-color: var(--table-avatar-bg); color: var(--table-avatar-text); border: 1px solid var(--table-avatar-border);">
+                                        <div class="avatar-circle">
                                             {{ $char }}
                                         </div>
                                     </div>
-                                    <div class="text-[13px] group-hover:opacity-80 transition-opacity font-medium"
-                                        style="color: var(--list-card-link-color);">
+                                    <div class="item-name">
                                         {{ $message->subject }}
                                     </div>
                                 </div>
                             </td>
-                            <td class="px-6 py-4 text-[13px] text-skin-base font-medium">
-                                {{ $message->customer->name ?? '-' }}
+                            <td class="text-xs opacity-80 font-medium">
+                                @if($message->recipient_name && $message->recipient_email)
+                                    <div class="flex flex-col">
+                                        <span class="font-medium text-skin-heading">{{ $message->recipient_name }}</span>
+                                        <span class="text-xs text-skin-muted">{{ $message->recipient_email }}</span>
+                                    </div>
+                                @else
+                                    <span class="text-skin-muted">{{ $message->customer->name ?? '-' }}</span>
+                                @endif
                             </td>
-                            <td class="px-6 py-4 text-[13px] text-skin-muted">
-                                {{ $message->type }}
+                            <td>
+                                @php
+                                    $typeLabel = $message->type_item->display_label ?? $message->type ?? 'Bilinmiyor';
+                                    $typeClass = $message->type_item->metadata['color_class'] ?? 'bg-slate-50 text-slate-500 border-slate-200';
+                                @endphp
+                                <span
+                                    class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border {{ $typeClass }}">
+                                    {{ $typeLabel }}
+                                </span>
                             </td>
-                            <td class="px-6 py-4">
-                                <x-customer-management.status-badge :status="$message->status ?? 'sent'" />
+                            <td>
+                                @php
+                                    $statusLabel = $message->status_item->display_label ?? $message->status ?? 'Bilinmiyor';
+                                    $statusClass = $message->status_item->metadata['color_class'] ?? 'bg-slate-50 text-slate-500 border-slate-200';
+                                @endphp
+                                <span
+                                    class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border {{ $statusClass }}">
+                                    {{ $statusLabel }}
+                                </span>
                             </td>
-                            <td class="px-6 py-4 text-[12px] text-skin-muted font-mono text-center">
+                            <td class="text-[11px] opacity-60 font-mono text-right">
                                 {{ $message->sent_at?->format('d.m.Y H:i') ?? '-' }}
                             </td>
                         </tr>

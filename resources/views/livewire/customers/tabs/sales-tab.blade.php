@@ -129,56 +129,53 @@ new class extends Component {
 
     <div class="bg-white rounded-xl border border-skin-light shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-sm">
-                <thead class="bg-slate-50 border-b border-skin-light">
+            <table class="agency-table">
+                <thead>
                     <tr>
-                        <th class="px-6 py-3 w-10">
+                        <th class="w-10">
                             <input type="checkbox" wire:model.live="selectAll"
                                 class="checkbox checkbox-xs rounded border-slate-300">
                         </th>
                         @foreach(array_slice($headers, 1) as $header)
                             <th
-                                class="px-6 py-3 font-semibold text-skin-base {{ isset($header['align']) && $header['align'] == 'center' ? 'text-center' : (isset($header['align']) && $header['align'] == 'right' ? 'text-right' : '') }}">
+                                class="{{ isset($header['align']) && $header['align'] == 'center' ? 'text-center' : (isset($header['align']) && $header['align'] == 'right' ? 'text-right' : '') }}">
                                 {{ $header['label'] }}
                             </th>
                         @endforeach
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100">
+                <tbody>
                     @forelse($sales as $sale)
                         @php
                             $char = mb_substr($sale->customer->name ?? '?', 0, 1);
                         @endphp
-                        <tr class="group hover:bg-[var(--list-card-hover-bg)] transition-all duration-200 cursor-pointer"
-                            onclick="window.location.href='/dashboard/customers/{{ $sale->customer_id }}?tab=sales'">
-                            <td class="px-6 py-4" onclick="event.stopPropagation()">
+                        <tr onclick="window.location.href='/dashboard/customers/{{ $sale->customer_id }}?tab=sales'">
+                            <td onclick="event.stopPropagation()">
                                 <input type="checkbox" wire:model.live="selected" value="{{ $sale->id }}"
                                     class="checkbox checkbox-xs rounded border-slate-300">
                             </td>
-                            <td class="px-6 py-4">
+                            <td>
                                 <div class="flex items-center gap-3">
                                     <div class="flex-shrink-0">
-                                        <div class="w-9 h-9 rounded-full flex items-center justify-center text-xs shadow-sm font-semibold"
-                                            style="background-color: var(--table-avatar-bg); color: var(--table-avatar-text); border: 1px solid var(--table-avatar-border);">
+                                        <div class="avatar-circle">
                                             {{ $char }}
                                         </div>
                                     </div>
-                                    <div class="text-[13px] group-hover:opacity-80 transition-opacity font-medium"
-                                        style="color: var(--list-card-link-color);">
+                                    <div class="item-name">
                                         {{ $sale->customer->name ?? '-' }}
                                     </div>
                                 </div>
                             </td>
-                            <td class="px-6 py-4 text-[13px] text-skin-muted font-mono">
+                            <td class="text-xs opacity-60 font-mono">
                                 {{ $sale->offer->number ?? '-' }}
                             </td>
-                            <td class="px-6 py-4 text-right text-skin-base text-[13px]">
+                            <td class="text-right text-xs font-bold text-slate-700">
                                 {{ number_format($sale->amount, 2) }} {{ $sale->currency }}
                             </td>
-                            <td class="px-6 py-4 text-[12px] text-skin-muted font-mono text-center">
+                            <td class="text-[11px] opacity-60 font-mono text-center">
                                 {{ $sale->sale_date?->format('d.m.Y') ?? '-' }}
                             </td>
-                            <td class="px-6 py-4 italic text-skin-muted text-[11px] text-center">
+                            <td class="italic opacity-30 text-[10px] text-center">
                                 {{ $sale->created_at?->format('d.m.Y H:i') ?? '-' }}
                             </td>
                         </tr>

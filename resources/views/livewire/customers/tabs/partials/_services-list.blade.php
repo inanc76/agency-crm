@@ -22,91 +22,88 @@ Mühür Koruması: Table styling, hover effects ve pagination bileşenleri korun
 
 <div class="bg-white rounded-xl border border-skin-light shadow-sm overflow-hidden">
     <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm">
-            <thead class="bg-slate-50 border-b border-skin-light">
+        <table class="agency-table">
+            <thead>
                 <tr>
-                    <th class="px-6 py-3 w-10">
+                    <th class="w-10">
                         <input type="checkbox" wire:model.live="selectAll"
                             class="checkbox checkbox-xs rounded border-slate-300">
                     </th>
                     @foreach(array_slice($headers, 1) as $header)
-                        <th class="px-6 py-3 font-semibold text-skin-base">
+                        <th class="{{ isset($header['align']) && $header['align'] == 'center' ? 'text-center' : '' }}">
                             {{ $header['label'] }}
                         </th>
                     @endforeach
                 </tr>
             </thead>
-            <tbody class="divide-y divide-slate-100">
+            <tbody>
                 @forelse($services as $service)
                     @php
                         $char = mb_substr($service->service_category, 0, 1);
                     @endphp
-                    <tr class="group hover:bg-[var(--list-card-hover-bg)] transition-all duration-200 cursor-pointer"
-                        onclick="window.location.href='/dashboard/customers/services/{{ $service->id }}'">
-                        <td class="px-6 py-4" onclick="event.stopPropagation()">
+                    <tr onclick="window.location.href='/dashboard/customers/services/{{ $service->id }}'">
+                        <td onclick="event.stopPropagation()">
                             <input type="checkbox" wire:model.live="selected" value="{{ $service->id }}"
                                 class="checkbox checkbox-xs rounded border-slate-300">
                         </td>
-                        <td class="px-6 py-4">
+                        <td>
                             <div class="flex items-center gap-3">
                                 <div class="flex-shrink-0">
-                                    <div class="w-9 h-9 rounded-full flex items-center justify-center text-xs shadow-sm"
-                                        style="background-color: var(--table-avatar-bg); color: var(--table-avatar-text); border: 1px solid var(--table-avatar-border);">
+                                    <div class="avatar-circle">
                                         {{ $char }}
                                     </div>
                                 </div>
                                 <div>
-                                    <div class="text-[13px] group-hover:opacity-80 transition-opacity font-medium"
-                                        style="color: var(--list-card-link-color);">
+                                    <div class="item-name">
                                         {{ $service->asset->name ?? 'Varlık Yok' }}
                                     </div>
-                                    <div class="text-[11px] text-skin-muted font-medium">{{ $service->service_name }}
+                                    <div class="text-[11px] opacity-50">{{ $service->service_name }}
                                     </div>
                                 </div>
                             </div>
                         </td>
-                        <td class="px-6 py-4">
+                        <td>
                             @php
                                 $statusLabel = $service->status_item->label ?? $service->status;
-                                $statusClass = $service->status_item->color_class ?? 'bg-skin-hover text-skin-muted border border-skin-light';
+                                $statusClass = $service->status_item->color_class ?? 'bg-slate-50 text-slate-500 border border-slate-200';
                             @endphp
                             <span
-                                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border {{ $statusClass }}">
+                                class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border {{ $statusClass }}">
                                 {{ $statusLabel }}
                             </span>
                         </td>
-                        <td class="px-6 py-4">
+                        <td>
                             @php
                                 $catLabel = $service->category_item->label ?? $service->service_category;
-                                $catClass = $service->category_item->color_class ?? 'bg-skin-hover text-skin-muted border border-skin-light';
+                                $catClass = $service->category_item->color_class ?? 'bg-slate-50 text-slate-500 border border-slate-200';
                             @endphp
                             <span
-                                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border {{ $catClass }}">
+                                class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border {{ $catClass }}">
                                 {{ $catLabel }}
                             </span>
                         </td>
-                        <td class="px-6 py-4 text-[13px] text-skin-muted">
+                        <td class="text-xs opacity-60">
                             {{ $service->service_duration }} Yıl
                         </td>
-                        <td class="px-6 py-4 text-center text-skin-muted">
+                        <td class="text-center font-bold">
                             @if($service->end_date)
                                 @php
                                     $days = now()->diffInDays($service->end_date, false);
                                 @endphp
-                                <span class="{{ $days < 0 ? 'text-error' : 'text-skin-muted' }}">
+                                <span class="{{ $days < 0 ? 'text-red-500' : 'text-slate-600' }} text-xs">
                                     {{ (int) $days }} Gün
                                 </span>
                             @else
-                                -
+                                <span class="opacity-30">-</span>
                             @endif
                         </td>
-                        <td class="px-6 py-4 text-[13px] text-skin-base font-medium">
+                        <td class="text-xs opacity-70">
                             {{ $service->customer->name ?? '-' }}
                         </td>
-                        <td class="px-6 py-4 text-[12px] text-skin-muted font-mono text-center">
+                        <td class="text-[10px] opacity-60 font-mono text-center">
                             {{ $service->start_date?->format('d.m.Y') ?? '-' }}
                         </td>
-                        <td class="px-6 py-4 text-[12px] text-skin-muted font-mono text-center">
+                        <td class="text-[10px] opacity-60 font-mono text-center">
                             {{ $service->end_date?->format('d.m.Y') ?? '-' }}
                         </td>
                     </tr>

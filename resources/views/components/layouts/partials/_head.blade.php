@@ -204,6 +204,23 @@
                 {{ $theme?->list_card_hover_color ?? '#f8fafc' }}
             ;
 
+            /* Standard Table Settings */
+            --table-header-bg:
+                {{ $theme?->table_header_bg_color ?? '#f8fafc' }}
+            ;
+            --table-header-text:
+                {{ $theme?->table_header_text_color ?? '#1e293b' }}
+            ;
+            --table-divide:
+                {{ $theme?->table_divide_color ?? '#f1f5f9' }}
+            ;
+            --table-item-name-size:
+                {{ $theme?->table_item_name_size ?? '13px' }}
+            ;
+            --table-item-name-weight:
+                {{ $theme?->table_item_name_weight ?? '500' }}
+            ;
+
             /* Sidebar Settings */
             --sidebar-bg:
                 {{ $theme?->sidebar_bg_color ?? '#3D3373' }}

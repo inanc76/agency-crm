@@ -8,12 +8,14 @@ use Illuminate\Support\Facades\Auth;
 
 /**
  * @trait HasNoteActions
+ *
  * @purpose Polymorphic notlar için CRUD işlemleri ve görünürlük yönetimi
+ *
  * @methods createNote(), updateNote(), deleteNote(), loadNotes(), canUserSeeNote()
- * 
+ *
  * Bu trait, herhangi bir entity'ye (Customer, Project, Task, etc.) not ekleme,
  * düzenleme, silme ve görüntüleme işlemlerini yönetir.
- * 
+ *
  * Kullanım:
  * - Component'te use HasNoteActions;
  * - $entityType ve $entityId property'lerini tanımla
@@ -23,9 +25,12 @@ trait HasNoteActions
 {
     // Note Modal State
     public bool $showNoteModal = false;
+
     public ?string $editingNoteId = null;
+
     public string $noteContent = '';
-    public array $noteVisibleTo = [];
+
+    public array $noteVisibleToDepartments = [];
 
     // Notes Data
     public $notes = [];
@@ -38,20 +43,24 @@ trait HasNoteActions
         $this->editingNoteId = $noteId;
 
         if ($noteId) {
-            $note = Note::with('visibleTo')->findOrFail($noteId);
-            
+            $note = Note::with('visibleToDepartments')->findOrFail($noteId);
+
             // Yetki kontrolü
-            if (!$note->canBeSeenBy(Auth::user())) {
+            if (! $note->canBeSeenBy(Auth::user())) {
                 $this->error('Bu notu görüntüleme yetkiniz yok.');
+
                 return;
             }
 
             $this->noteContent = $note->content;
-            $this->noteVisibleTo = $note->visibleTo->pluck('id')->map(fn($id) => (string) $id)->toArray();
+            $this->noteVisibleToDepartments = $note->visibleToDepartments->pluck('id')->map(fn ($id) => (string) $id)->toArray();
         } else {
             $this->resetNoteForm();
-            // Varsayılan olarak tüm kullanıcıları seç
-            $this->noteVisibleTo = User::pluck('id')->map(fn($id) => (string) $id)->toArray();
+            // Varsayılan olarak tüm departmanları seç
+            $this->noteVisibleToDepartments = \App\Models\ReferenceItem::where('category_key', 'DEPARTMENT')
+                ->pluck('id')
+                ->map(fn ($id) => (string) $id)
+                ->toArray();
         }
 
         $this->showNoteModal = true;
@@ -73,8 +82,8 @@ trait HasNoteActions
     {
         $this->editingNoteId = null;
         $this->noteContent = '';
-        $this->noteVisibleTo = [];
-        $this->resetValidation(['noteContent', 'noteVisibleTo']);
+        $this->noteVisibleToDepartments = [];
+        $this->resetValidation(['noteContent', 'noteVisibleToDepartments']);
     }
 
     /**
@@ -84,14 +93,14 @@ trait HasNoteActions
     {
         $this->validate([
             'noteContent' => 'required|string|max:10000',
-            'noteVisibleTo' => 'required|array|min:1',
-            'noteVisibleTo.*' => 'exists:users,id',
+            'noteVisibleToDepartments' => 'required|array|min:1',
+            'noteVisibleToDepartments.*' => 'exists:reference_items,id',
         ], [
             'noteContent.required' => 'Not içeriği zorunludur.',
             'noteContent.max' => 'Not içeriği en fazla 10.000 karakter olabilir.',
-            'noteVisibleTo.required' => 'En az bir kullanıcı seçmelisiniz.',
-            'noteVisibleTo.min' => 'En az bir kullanıcı seçmelisiniz.',
-            'noteVisibleTo.*.exists' => 'Seçilen kullanıcı geçersiz.',
+            'noteVisibleToDepartments.required' => 'En az bir departman seçmelisiniz.',
+            'noteVisibleToDepartments.min' => 'En az bir departman seçmelisiniz.',
+            'noteVisibleToDepartments.*.exists' => 'Seçilen departman geçersiz.',
         ]);
 
         if ($this->editingNoteId) {
@@ -113,8 +122,8 @@ trait HasNoteActions
             'entity_id' => $this->entityId,
         ]);
 
-        // Görünürlük ayarla
-        $note->visibleTo()->sync($this->noteVisibleTo);
+        // Departman bazlı görünürlük ayarla
+        $note->visibleToDepartments()->sync($this->noteVisibleToDepartments);
 
         $this->success('Not başarıyla eklendi.');
         $this->closeNoteModal();
@@ -131,6 +140,7 @@ trait HasNoteActions
         // Yetki kontrolü - Sadece yazar düzenleyebilir
         if ($note->author_id !== Auth::id()) {
             $this->error('Bu notu düzenleme yetkiniz yok.');
+
             return;
         }
 
@@ -138,8 +148,8 @@ trait HasNoteActions
             'content' => $this->noteContent,
         ]);
 
-        // Görünürlük güncelle
-        $note->visibleTo()->sync($this->noteVisibleTo);
+        // Departman bazlı görünürlük güncelle
+        $note->visibleToDepartments()->sync($this->noteVisibleToDepartments);
 
         $this->success('Not başarıyla güncellendi.');
         $this->closeNoteModal();
@@ -156,6 +166,7 @@ trait HasNoteActions
         // Yetki kontrolü - Sadece yazar silebilir
         if ($note->author_id !== Auth::id()) {
             $this->error('Bu notu silme yetkiniz yok.');
+
             return;
         }
 
@@ -170,16 +181,26 @@ trait HasNoteActions
      */
     public function loadNotes(): void
     {
-        $userId = Auth::id();
+        $user = Auth::user();
+        $userId = $user->id;
+        $departmentId = $user->department_id;
 
-        $this->notes = Note::with(['author', 'visibleTo'])
+        $this->notes = Note::with(['author', 'visibleToDepartments'])
             ->where('entity_type', $this->entityType)
             ->where('entity_id', $this->entityId)
-            ->where(function ($query) use ($userId) {
-                // Yazarı olan veya görünürlük listesinde olan notlar
+            ->where(function ($query) use ($userId, $departmentId) {
+                // Yazarı olan, kişisel görünürlüğü olan veya departman görünürlüğü olan notlar
                 $query->where('author_id', $userId)
                     ->orWhereHas('visibleTo', function ($q) use ($userId) {
                         $q->where('user_id', $userId);
+                    })
+                    ->orWhereHas('visibleToDepartments', function ($q) use ($departmentId) {
+                        if ($departmentId) {
+                            $q->where('department_id', $departmentId);
+                        } else {
+                            // If user has no department, they can't see department-protected notes
+                            $q->whereRaw('1 = 0');
+                        }
                     });
             })
             ->orderBy('created_at', 'desc')

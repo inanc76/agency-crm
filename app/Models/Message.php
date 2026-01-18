@@ -19,12 +19,16 @@ use Illuminate\Database\Eloquent\Model;
  * @property string|null $mail_template_id Şablon UUID (FK: mail_templates)
  * @property string|null $subject Mesaj konusu
  * @property string|null $body Mesaj içeriği
+ * @property string|null $recipient_name Alıcının adı
+ * @property string|null $recipient_email Alıcının e-posta adresi
+ * @property string|null $contact_id İletişim kişisi UUID (FK: contacts)
  * @property string|null $type Mesaj tipi (ReferenceData: EMAIL, SMS, etc.)
  * @property string|null $status Mesaj durumu (SENT, FAILED, PENDING)
  * @property \Carbon\Carbon|null $sent_at Gönderim zamanı
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
  * @property-read Customer $customer BelongsTo: Mesajın gönderildiği müşteri
+ * @property-read Contact|null $contact BelongsTo: Mesajın gönderildiği kişi
  * @property-read Offer|null $offer BelongsTo: İlişkili teklif
  * @property-read MailTemplate|null $mailTemplate BelongsTo: Kullanılan şablon
  *
@@ -46,6 +50,9 @@ class Message extends Model
         'mail_template_id',
         'subject',
         'body',
+        'recipient_name',
+        'recipient_email',
+        'contact_id',
         'type',
         'status',
         'sent_at',
@@ -68,8 +75,25 @@ class Message extends Model
         return $this->belongsTo(Offer::class);
     }
 
+    public function contact()
+    {
+        return $this->belongsTo(Contact::class);
+    }
+
     public function mailTemplate()
     {
         return $this->belongsTo(MailTemplate::class);
+    }
+
+    public function status_item()
+    {
+        return $this->hasOne(ReferenceItem::class, 'key', 'status')
+            ->where('category_key', 'MAIL_STATUS');
+    }
+
+    public function type_item()
+    {
+        return $this->hasOne(ReferenceItem::class, 'key', 'type')
+            ->where('category_key', 'MAIL_TYPE');
     }
 }

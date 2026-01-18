@@ -44,6 +44,16 @@ new class extends Component {
     public string $table_hover_bg_color = '#f8fafc';
     public string $table_hover_text_color = '#0f172a';
 
+    public string $table_header_bg_color = '#f8fafc';
+    public string $table_header_text_color = '#1e293b';
+    public string $table_divide_color = '#f1f5f9';
+    public string $table_item_name_size = '13px';
+    public string $table_item_name_weight = '500';
+
+    public string $table_avatar_bg_color = '#f1f5f9';
+    public string $table_avatar_border_color = '#e2e8f0';
+    public string $table_avatar_text_color = '#475569';
+
     // Header & Sidebar
     public string $site_name = 'MEDIACLICK';
     public float $logo_scale = 1.0;
@@ -125,6 +135,16 @@ new class extends Component {
             $this->table_hover_bg_color = $setting->table_hover_bg_color ?? '#f8fafc';
             $this->table_hover_text_color = $setting->table_hover_text_color ?? '#0f172a';
 
+            $this->table_header_bg_color = $setting->table_header_bg_color ?? '#f8fafc';
+            $this->table_header_text_color = $setting->table_header_text_color ?? '#1e293b';
+            $this->table_divide_color = $setting->table_divide_color ?? '#f1f5f9';
+            $this->table_item_name_size = $setting->table_item_name_size ?? '13px';
+            $this->table_item_name_weight = $setting->table_item_name_weight ?? '500';
+
+            $this->table_avatar_bg_color = $setting->table_avatar_bg_color ?? '#f1f5f9';
+            $this->table_avatar_border_color = $setting->table_avatar_border_color ?? '#e2e8f0';
+            $this->table_avatar_text_color = $setting->table_avatar_text_color ?? '#475569';
+
             $this->site_name = $setting->site_name;
             $this->logo_scale = $setting->logo_scale ?? 1.0;
             $this->current_logo_path = $setting->logo_path;
@@ -160,23 +180,23 @@ new class extends Component {
 
 
 <div class="mt-6 flex flex-col gap-2">
-    {{-- 
+    {{--
     ═══════════════════════════════════════════════════════════════════════════
     🎨 STYLE GUIDE - CLEAN ORCHESTRATOR (Constitution V10)
     ═══════════════════════════════════════════════════════════════════════════
-    
+
     Bu dosya, 862 satırlık monolitten 4 dengeli parçaya refactor edilmiştir.
     Her partial ~200 satır ve maksimum dokümantasyon ile mühürlenmiştir.
-    
+
     📦 PARÇALAR:
-    1. _style-typography.blade.php      (~90 satır)  - Renk paleti, tipografi
+    1. _style-typography.blade.php (~90 satır) - Renk paleti, tipografi
     2. _style-buttons-actions.blade.php (~100 satır) - Butonlar, aksiyon linkleri
-    3. _style-forms-inputs.blade.php    (~200 satır) - Inputlar, validation, combo boxlar
+    3. _style-forms-inputs.blade.php (~200 satır) - Inputlar, validation, combo boxlar
     4. _style-components-extra.blade.php (~550 satır) - Logo, layout, kartlar, tablolar, dashboard
-    
+
     🔒 EXPLICIT SCOPE PROTOCOL:
     Tüm değişkenler açıkça aktarılır (Zero Implicit Scope).
-    
+
     ═══════════════════════════════════════════════════════════════════════════
     --}}
 
@@ -202,9 +222,14 @@ new class extends Component {
         'card_border_radius' => $card_border_radius,
         'table_hover_bg_color' => $table_hover_bg_color,
         'table_hover_text_color' => $table_hover_text_color,
-        'table_avatar_bg_color' => $table_avatar_bg_color ?? '#e0e7ff',
-        'table_avatar_text_color' => $table_avatar_text_color ?? '#4f46e5',
-        'table_avatar_border_color' => $table_avatar_border_color ?? '#c7d2fe',
+        'table_header_bg_color' => $table_header_bg_color,
+        'table_header_text_color' => $table_header_text_color,
+        'table_divide_color' => $table_divide_color,
+        'table_item_name_size' => $table_item_name_size,
+        'table_item_name_weight' => $table_item_name_weight,
+        'table_avatar_bg_color' => $table_avatar_bg_color,
+        'table_avatar_text_color' => $table_avatar_text_color,
+        'table_avatar_border_color' => $table_avatar_border_color,
         'dashboard_card_bg_color' => $dashboard_card_bg_color,
         'dashboard_card_text_color' => $dashboard_card_text_color,
         'dashboard_stats_1_color' => $dashboard_stats_1_color,

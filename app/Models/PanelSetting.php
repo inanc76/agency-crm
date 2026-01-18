@@ -114,6 +114,12 @@ class PanelSetting extends Model
         'table_avatar_bg_color',
         'table_avatar_border_color',
         'table_avatar_text_color',
+        // New Table Settings
+        'table_header_bg_color',
+        'table_header_text_color',
+        'table_divide_color',
+        'table_item_name_size',
+        'table_item_name_weight',
         // New Sidebar Settings
         'sidebar_bg_color',
         'sidebar_text_color',

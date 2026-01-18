@@ -22,26 +22,26 @@ new class extends Component {
     }
 
     /**
-     * Tüm kullanıcıları getir (x-mary-choices için)
+     * Tüm departmanları getir (x-mary-choices için)
      */
-    public function getAllUsersProperty()
+    public function getAllDepartmentsProperty()
     {
-        return User::select('id', 'name', 'email')
-            ->orderBy('name')
+        return \App\Models\ReferenceItem::where('category_key', 'DEPARTMENT')
+            ->orderBy('sort_order')
             ->get()
-            ->map(fn($user) => [
-                'id' => (string) $user->id,
-                'name' => $user->name,
+            ->map(fn($item) => [
+                'id' => (string) $item->id,
+                'name' => $item->display_label,
             ])
             ->toArray();
     }
 }; ?>
 
-{{-- 
-    SECTION: Notes Tab Main Container
-    Mimarın Notu: Bu sekme polymorphic Note modeli ile konuşur ve HasNoteActions trait'ini kullanır.
-    İş Mantığı Şerhi: Entity'ye bağlı notları listeler, ekleme/düzenleme/silme işlemlerini yönetir.
-    Mühür Koruması: Tüm değişkenler explicit olarak partials'a aktarılır.
+{{--
+SECTION: Notes Tab Main Container
+Mimarın Notu: Bu sekme polymorphic Note modeli ile konuşur ve HasNoteActions trait'ini kullanır.
+İş Mantığı Şerhi: Entity'ye bağlı notları listeler, ekleme/düzenleme/silme işlemlerini yönetir.
+Mühür Koruması: Tüm değişkenler explicit olarak partials'a aktarılır.
 --}}
 <div>
     {{-- SECTION: Actions Bar - Not ekleme butonu --}}
@@ -53,13 +53,12 @@ new class extends Component {
     @include('livewire.shared.notes.partials._notes-list', [
         'notes' => $notes,
     ])
-
     {{-- SECTION: Note Modal - Not ekleme/düzenleme modalı --}}
     @include('livewire.shared.notes.partials._modal-note', [
         'showNoteModal' => $showNoteModal,
         'editingNoteId' => $editingNoteId,
         'noteContent' => $noteContent,
-        'noteVisibleTo' => $noteVisibleTo,
-        'allUsers' => $this->allUsers,
+        'noteVisibleToDepartments' => $this->noteVisibleToDepartments,
+        'allDepartments' => $this->allDepartments,
     ])
 </div>

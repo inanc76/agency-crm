@@ -20,6 +20,7 @@ new #[Layout('components.layouts.app', ['title' => 'Yeni Mesaj Oluştur'])]
     public ?string $customer_id = null;
     public ?string $offer_id = null;
     public ?string $template_id = null;
+    public string $message_type = 'EMAIL';
     public array $selected_contacts = [];
 
     public function mount(): void
@@ -64,7 +65,17 @@ new #[Layout('components.layouts.app', ['title' => 'Yeni Mesaj Oluştur'])]
         return Offer::where('customer_id', $this->customer_id)
             ->orderBy('created_at', 'desc')
             ->get()
-            ->map(fn($o) => ['id' => $o->id, 'name' => ($o->number ?? $o->title)])
+            ->map(fn($o) => ['id' => $o->id, 'name' => $o->title])
+            ->toArray();
+    }
+
+    public function mailTypes()
+    {
+        return \App\Models\ReferenceItem::where('category_key', 'MAIL_TYPE')
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->get(['id', 'key', 'display_label'])
+            ->map(fn($item) => ['id' => $item->key, 'name' => $item->display_label])
             ->toArray();
     }
 
@@ -90,7 +101,7 @@ new #[Layout('components.layouts.app', ['title' => 'Yeni Mesaj Oluştur'])]
         $this->redirect('/dashboard/customers?tab=messages', navigate: true);
     }
 
-    public function send(MailTemplateService $mailService): void
+    public function createDraft(MailTemplateService $mailService): void
     {
         $this->validate([
             'customer_id' => 'required',
@@ -114,7 +125,7 @@ new #[Layout('components.layouts.app', ['title' => 'Yeni Mesaj Oluştur'])]
             $subject = $rendered['subject'] ?: ($template->subject ?? 'Konu Yok');
             $body = $rendered['content'] ?: ($template->content ?? '');
 
-            // Create message record
+            // Create message record as DRAFT
             Message::create([
                 'id' => Str::uuid()->toString(),
                 'customer_id' => $this->customer_id,
@@ -122,101 +133,119 @@ new #[Layout('components.layouts.app', ['title' => 'Yeni Mesaj Oluştur'])]
                 'mail_template_id' => $this->template_id,
                 'subject' => $subject,
                 'body' => $body,
-                'type' => 'EMAIL',
-                'status' => 'SENT',
-                'sent_at' => now(),
+                'recipient_name' => $contact->name,
+                'recipient_email' => $contact->email,
+                'contact_id' => $contact->id,
+                'type' => $this->message_type,
+                'status' => 'DRAFT',
+                'sent_at' => null,
             ]);
-
-            // Dispatch actual email
-            Mail::to($contact->email)->send(new DynamicCustomerMail($subject, $body));
         }
 
-        $this->success('İşlem Başarılı', count($this->selected_contacts) . ' kişiye mesaj başarıyla oluşturuldu ve gönderildi.');
+        $this->success('İşlem Başarılı', count($this->selected_contacts) . ' adet taslak mesaj oluşturuldu.');
         $this->redirect('/dashboard/customers?tab=messages', navigate: true);
     }
 }; ?>
 
-<div class="p-6 max-w-7xl mx-auto space-y-6">
-    {{-- Back Button --}}
-    <div>
+<div class="p-6 min-h-screen" style="background-color: var(--page-bg);">
+    <div class="max-w-7xl mx-auto">
+        {{-- Back Button --}}
         <a href="/dashboard/customers?tab=messages" wire:navigate
-            class="inline-flex items-center gap-2 text-slate-500 hover:text-slate-800 mb-4 transition-colors">
+            class="inline-flex items-center gap-2 text-skin-base hover:text-skin-heading mb-6 transition-colors">
             <x-mary-icon name="o-arrow-left" class="w-4 h-4" />
-            <span class="text-sm font-medium">Geri</span>
+            <span class="text-sm font-medium">Mesajlar Listesi</span>
         </a>
 
-        <div class="flex items-start justify-between">
+        {{-- Header Section --}}
+        <div class="flex items-start justify-between mb-8">
             <div>
-                <h1 class="text-2xl font-bold text-slate-900">Yeni Mesaj Oluştur</h1>
-                <p class="text-sm text-slate-500 mt-1">
+                <h1 class="text-2xl font-bold tracking-tight text-skin-heading">Yeni Mesaj Oluştur</h1>
+                <p class="text-sm text-skin-muted mt-1">
                     Müşteri için yeni bir mesaj hazırlayın
                 </p>
             </div>
 
-            <div class="flex gap-3">
-                <button wire:click="cancel" class="theme-btn-cancel">İptal</button>
-                <button wire:click="send" wire:loading.attr="disabled" class="theme-btn-save">
+            <div class="flex items-center gap-3">
+                <button wire:click="cancel" class="theme-btn-cancel">
+                    İptal
+                </button>
+                <button wire:click="createDraft" wire:loading.attr="disabled" class="theme-btn-save">
                     <span wire:loading class="loading loading-spinner loading-xs mr-2"></span>
-                    Mesaj Oluştur ({{ count($selected_contacts) }} kişi)
+                    <x-mary-icon name="o-document-plus" class="w-4 h-4" />
+                    Taslak Oluştur ({{ count($selected_contacts) }} kişi)
                 </button>
             </div>
         </div>
-    </div>
 
-    {{-- Form Sections --}}
-    <div class="grid grid-cols-1 gap-6">
-        {{-- Section 1: Teklif Seçimi --}}
-        <div class="rounded-xl border border-[#bfdbfe] bg-[#eff4ff] p-6 shadow-sm">
-            <div class="flex items-center gap-2 mb-6">
-                <h2 class="text-sm font-medium text-slate-700 uppercase tracking-wider">Teklif Seçimi</h2>
+        {{-- Main Layout: 2 Column Grid --}}
+        <div class="grid grid-cols-12 gap-6">
+            {{-- Left Column (8/12) --}}
+            <div class="col-span-8 space-y-6">
+                {{-- Müşteri ve Teklif Seçimi --}}
+                <div class="theme-card p-6 shadow-sm">
+                    <h2 class="text-base font-bold text-skin-heading mb-4">Müşteri ve Teklif Seçimi</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <x-mary-select label="Müşteri *" wire:model.live="customer_id" :options="$this->customers()"
+                            placeholder="Müşteri seçin" icon="o-building-office" />
+
+                        <x-mary-select label="Teklif" wire:model.live="offer_id" :options="$this->offers()"
+                            placeholder="Teklif seçin (opsiyonel)" icon="o-document-text" />
+                    </div>
+                </div>
+
+                {{-- Şablon Seçimi --}}
+                <div class="theme-card p-6 shadow-sm">
+                    <h2 class="text-base font-bold text-skin-heading mb-4">Şablon Seçimi</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <x-mary-select label="Mesaj Tipi *" wire:model.live="message_type" :options="$this->mailTypes()"
+                            placeholder="Mesaj tipi seçin" icon="o-chat-bubble-left-right" />
+
+                        <x-mary-select label="Şablon *" wire:model.live="template_id" :options="$this->templates()"
+                            placeholder="Şablon seçin" icon="o-document-text" />
+                    </div>
+                </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <x-mary-select label="Müşteri *" wire:model.live="customer_id" :options="$this->customers()"
-                    placeholder="Müşteri seçin" icon="o-building-office" />
+            {{-- Right Column (4/12) - Gönderilecek Kişiler --}}
+            <div class="col-span-4 space-y-6">
+                <div class="theme-card p-6 shadow-sm sticky top-6">
+                    <h2 class="text-base font-bold text-skin-heading mb-4">Gönderilecek Kişiler</h2>
 
-                <x-mary-select label="Teklif" wire:model.live="offer_id" :options="$this->offers()"
-                    placeholder="Teklif seçin" icon="o-document-text" />
-            </div>
-        </div>
-
-        {{-- Section 2: Şablon Seçimi --}}
-        <div class="rounded-xl border border-emerald-200 bg-emerald-50/30 p-6 shadow-sm">
-            <h2 class="text-sm font-medium text-slate-700 uppercase tracking-wider mb-6">Şablon Seçimi</h2>
-            <div class="max-w-xl">
-                <x-mary-select label="Mail Şablonu *" wire:model.live="template_id" :options="$this->templates()"
-                    placeholder="Mail şablonu seçin" icon="o-envelope" />
-            </div>
-        </div>
-
-        {{-- Section 3: Gönderilecek Kişiler --}}
-        <div class="rounded-xl border border-purple-200 bg-purple-50/20 p-6 shadow-sm">
-            <h2 class="text-sm font-medium text-slate-700 uppercase tracking-wider mb-6">Gönderilecek Kişiler</h2>
-
-            @if($this->contacts() && count($this->contacts()) > 0)
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                    @foreach($this->contacts() as $contact)
-                        @php $isSelected = in_array((string) $contact->id, array_map('strval', $selected_contacts)); @endphp
-                        <div wire:key="contact-{{ $contact->id }}" wire:click="toggleContact('{{ $contact->id }}')"
-                            class="flex items-center gap-4 p-4 rounded-xl border transition-all cursor-pointer {{ $isSelected ? 'border-rose-400 bg-rose-50 shadow-sm ring-1 ring-rose-400/20' : 'border-slate-200 bg-white hover:border-slate-300' }}">
-                            <div class="flex-shrink-0">
-                                <input type="checkbox" value="{{ $contact->id }}" wire:model.live="selected_contacts"
-                                    class="checkbox checkbox-sm checkbox-primary" @click.stop>
-                            </div>
-                            <div class="min-w-0">
-                                <p class="text-[13px] font-bold text-slate-900 truncate">{{ $contact->name }}</p>
-                                <p class="text-[11px] text-slate-500 truncate">{{ $contact->email }}</p>
-                            </div>
+                    @if($this->contacts() && count($this->contacts()) > 0)
+                        <div class="space-y-2 max-h-[600px] overflow-y-auto pr-2">
+                            @foreach($this->contacts() as $contact)
+                                @php $isSelected = in_array((string) $contact->id, array_map('strval', $selected_contacts)); @endphp
+                                <div wire:key="contact-{{ $contact->id }}" wire:click="toggleContact('{{ $contact->id }}')"
+                                    class="flex items-center gap-3 p-3 rounded-lg border transition-all cursor-pointer {{ $isSelected ? 'border-indigo-400 bg-indigo-50 shadow-sm' : 'border-[var(--card-border)] bg-white hover:border-indigo-200' }}">
+                                    <div class="flex-shrink-0">
+                                        <input type="checkbox" value="{{ $contact->id }}" wire:model.live="selected_contacts"
+                                            class="checkbox checkbox-sm checkbox-primary" @click.stop>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-xs font-bold text-skin-heading truncate">{{ $contact->name }}</p>
+                                        <p class="text-[10px] text-skin-muted truncate">{{ $contact->email }}</p>
+                                    </div>
+                                </div>
+                            @endforeach
                         </div>
-                    @endforeach
+
+                        @if(count($selected_contacts) > 0)
+                            <div class="mt-4 pt-4 border-t border-[var(--card-border)]">
+                                <div class="flex items-center justify-between text-xs">
+                                    <span class="text-skin-muted">Seçili Kişi:</span>
+                                    <span class="font-bold text-skin-heading">{{ count($selected_contacts) }}</span>
+                                </div>
+                            </div>
+                        @endif
+                    @else
+                        <div
+                            class="flex flex-col items-center justify-center py-12 text-skin-muted bg-[var(--card-bg)] rounded-lg border border-dashed border-[var(--card-border)]">
+                            <x-mary-icon name="o-user-group" class="w-12 h-12 opacity-20 mb-3" />
+                            <p class="text-xs italic">Müşteri seçildiğinde kişiler burada listelenir</p>
+                        </div>
+                    @endif
                 </div>
-            @else
-                <div
-                    class="flex flex-col items-center justify-center py-12 text-slate-400 bg-white/50 rounded-xl border border-dashed border-slate-200">
-                    <x-mary-icon name="o-user-group" class="w-12 h-12 opacity-20 mb-3" />
-                    <p class="text-sm italic">Müşteri seçildiğinde kişiler burada listelenir</p>
-                </div>
-            @endif
+            </div>
         </div>
     </div>
 </div>

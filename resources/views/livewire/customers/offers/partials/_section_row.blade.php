@@ -74,15 +74,15 @@
 
         @if(count($section['items']) > 0)
             <div class="overflow-x-auto">
-                <table class="w-full text-sm">
+                <table class="agency-table">
                     <thead>
-                        <tr class="border-b border-slate-200">
-                            <th class="text-left py-2 px-2 font-medium opacity-60">Hizmet Adı</th>
-                            <th class="text-left py-2 px-2 font-medium opacity-60">Açıklama</th>
-                            <th class="text-center py-2 px-2 font-medium opacity-60">Süre</th>
-                            <th class="text-right py-2 px-2 font-medium opacity-60">Fiyat</th>
-                            <th class="text-center py-2 px-2 font-medium opacity-60">Adet</th>
-                            <th class="text-right py-2 px-2 font-medium opacity-60">Toplam</th>
+                        <tr>
+                            <th>Hizmet Adı</th>
+                            <th>Açıklama</th>
+                            <th class="text-center">Süre</th>
+                            <th class="text-right">Fiyat</th>
+                            <th class="text-center">Adet</th>
+                            <th class="text-right">Toplam</th>
                             @if(!$isViewMode)
                                 <th class="w-10"></th>
                             @endif
@@ -90,13 +90,13 @@
                     </thead>
                     <tbody>
                         @foreach($section['items'] as $itemIndex => $item)
-                            <tr class="border-b border-slate-100" wire:key="section-{{ $index }}-item-{{ $itemIndex }}">
-                                <td class="py-3 px-2 font-normal text-xs">
+                            <tr wire:key="section-{{ $index }}-item-{{ $itemIndex }}">
+                                <td class="item-name">
                                     {{ $item['service_name'] }}
                                 </td>
-                                <td class="py-3 px-2 text-xs opacity-70">
-                                    <div class="flex items-center gap-1 text-slate-500">
-                                        <span>{{ Str::limit($item['description'], 30) }}</span>
+                                <td>
+                                    <div class="flex items-center gap-1 text-[11px] opacity-70">
+                                        <span>{{ Str::limit($item['description'], 40) }}</span>
                                         @if(!$isViewMode)
                                             <button type="button"
                                                 wire:click="openItemDescriptionModal({{ $index }}, {{ $itemIndex }})"
@@ -107,13 +107,13 @@
                                         @endif
                                     </div>
                                 </td>
-                                <td class="py-3 px-2 text-center text-xs">
+                                <td class="text-center opacity-70 text-xs">
                                     {{ $item['duration'] ? $item['duration'] . ' Yıl' : '-' }}</td>
-                                <td class="py-3 px-2 text-right text-xs">
+                                <td class="text-right opacity-70 text-xs">
                                     {{ number_format($item['price'], 0, ',', '.') }}
                                     {{ $currency }}
                                 </td>
-                                <td class="py-3 px-2 text-center">
+                                <td class="text-center">
                                     @if(!$isViewMode)
                                         <input type="number" wire:model.live="sections.{{ $index }}.items.{{ $itemIndex }}.quantity"
                                             class="input w-16 text-center bg-white" min="1">
@@ -121,15 +121,15 @@
                                         {{ $item['quantity'] }}
                                     @endif
                                 </td>
-                                <td class="py-3 px-2 text-right text-xs font-normal text-skin-heading">
+                                <td class="text-right text-sm font-bold text-slate-700">
                                     {{ number_format($item['price'] * $item['quantity'], 0, ',', '.') }}
                                     {{ $currency }}
                                 </td>
                                 @if(!$isViewMode)
-                                    <td class="py-3 px-2">
+                                    <td>
                                         <button type="button" wire:click="removeItem({{ $index }}, {{ $itemIndex }})"
                                             class="text-skin-danger hover:opacity-80 cursor-pointer">
-                                            <x-mary-icon name="o-x-mark" class="w-4 h-4" />
+                                            <x-mary-icon name="o-trash" class="w-4 h-4" />
                                         </button>
                                     </td>
                                 @endif

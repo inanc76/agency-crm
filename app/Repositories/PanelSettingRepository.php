@@ -21,8 +21,8 @@ class PanelSettingRepository
             $setting = PanelSetting::where('is_active', true)->first();
 
             // 2. If no active setting found, try to find ANY setting or create new
-            if (!$setting) {
-                $setting = PanelSetting::latest()->first() ?? new PanelSetting();
+            if (! $setting) {
+                $setting = PanelSetting::latest()->first() ?? new PanelSetting;
             }
 
             // Handle favicon upload
@@ -135,6 +135,12 @@ class PanelSettingRepository
             'table_avatar_bg_color' => '#f1f5f9',
             'table_avatar_border_color' => '#e2e8f0',
             'table_avatar_text_color' => '#475569',
+
+            'table_header_bg_color' => '#f8fafc',
+            'table_header_text_color' => '#1e293b',
+            'table_divide_color' => '#f1f5f9',
+            'table_item_name_size' => '13px',
+            'table_item_name_weight' => '500',
 
             // Sidebar Defaults
             'sidebar_bg_color' => '#3D3373',

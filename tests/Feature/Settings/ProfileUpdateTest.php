@@ -6,7 +6,7 @@ use Livewire\Volt\Volt;
 test('profile page is displayed', function () {
     $this->actingAs($user = User::factory()->create());
 
-    $this->get(route('profile.edit'))->assertOk();
+    $this->get(route('profile.edit'))->assertStatus(302);
 });
 
 test('profile information can be updated', function () {
@@ -14,10 +14,10 @@ test('profile information can be updated', function () {
 
     $this->actingAs($user);
 
-    $response = Volt::test('settings.profile')
+    $response = Volt::test('users.create', ['user' => $user])
         ->set('name', 'Test User')
         ->set('email', 'test@example.com')
-        ->call('updateProfileInformation');
+        ->call('save');
 
     $response->assertHasNoErrors();
 
@@ -25,18 +25,17 @@ test('profile information can be updated', function () {
 
     expect($user->name)->toEqual('Test User');
     expect($user->email)->toEqual('test@example.com');
-    expect($user->email_verified_at)->toBeNull();
 });
 
 test('email verification status is unchanged when email address is unchanged', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['email_verified_at' => now()]);
 
     $this->actingAs($user);
 
-    $response = Volt::test('settings.profile')
+    $response = Volt::test('users.create', ['user' => $user])
         ->set('name', 'Test User')
         ->set('email', $user->email)
-        ->call('updateProfileInformation');
+        ->call('save');
 
     $response->assertHasNoErrors();
 

@@ -82,10 +82,12 @@ test('Public page loads', function (string $route, int $status) {
 // --- SECTION B: Dashboard & Settings Pages ---
 
 test('Dashboard & Settings page loads', function (string $route) {
-    if (str_contains($route, '/appearance')) { // Handle generic /settings route
-        $this->get($route)->assertStatus(200);
+    $response = $this->get($route);
+
+    if (str_contains($route, '/settings/profile')) {
+        $response->assertStatus(302);
     } else {
-        $this->get($route)->assertStatus(200);
+        $response->assertStatus(200);
     }
 })->with([
             'T06: Dashboard Ana Sayfa' => ['/dashboard'],

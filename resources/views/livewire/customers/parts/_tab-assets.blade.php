@@ -7,31 +7,30 @@
     </div>
     @if(count($relatedAssets) > 0)
         <div class="overflow-x-auto">
-            <table class="w-full text-sm">
+            <table class="agency-table">
                 <thead>
-                    <tr class="border-b border-[var(--card-border)]">
-                        <th class="text-left py-2 px-2 font-medium opacity-60">Varlık Adı</th>
-                        <th class="text-left py-2 px-2 font-medium opacity-60">Tür</th>
-                        <th class="text-left py-2 px-2 font-medium opacity-60">URL</th>
+                    <tr>
+                        <th>Varlık Adı</th>
+                        <th>Tür</th>
+                        <th>URL</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($relatedAssets as $asset)
-                        <tr class="border-b border-[var(--card-border)]/50 hover:bg-[var(--dropdown-hover-bg)] cursor-pointer transition-colors"
-                            onclick="window.location.href='/dashboard/customers/assets/{{ $asset->id }}'">
-                            <td class="py-3 px-2 font-medium">{{ $asset->name }}</td>
-                            <td class="py-3 px-2">
+                        <tr onclick="window.location.href='/dashboard/customers/assets/{{ $asset->id }}'">
+                            <td class="item-name">{{ $asset->name }}</td>
+                            <td>
                                 @php
                                     $typeLabel = $asset->type_item->label ?? $asset->type ?? 'Diğer';
-                                    $typeClass = $asset->type_item->color_class ?? 'bg-skin-hover text-skin-muted border border-skin-light';
+                                    $statusClass = $asset->type_item->color_class ?? 'bg-slate-100 text-slate-500';
                                 @endphp
-                                <span class="px-2 py-0.5 rounded text-xs font-medium border {{ $typeClass }}">
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold border {{ $statusClass }}">
                                     {{ $typeLabel }}
                                 </span>
                             </td>
-                            <td class="py-3 px-2 opacity-70">
+                            <td class="opacity-70">
                                 @if($asset->url)
-                                    <a href="{{ $asset->url }}" target="_blank" class="text-skin-primary hover:underline"
+                                    <a href="{{ $asset->url }}" target="_blank" class="hover:underline"
                                         onclick="event.stopPropagation();">{{ Str::limit($asset->url, 40) }}</a>
                                 @else
                                     -

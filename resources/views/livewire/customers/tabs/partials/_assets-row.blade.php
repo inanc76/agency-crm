@@ -15,67 +15,61 @@
     $typeClass = $asset->type_item->color_class ?? 'bg-skin-hover text-skin-muted border border-skin-light';
 @endphp
 
-<tr class="group hover:bg-[var(--list-card-hover-bg)] transition-all duration-200 cursor-pointer"
-    onclick="window.location.href='/dashboard/customers/assets/{{ $asset->id }}'">
+<tr onclick="window.location.href='/dashboard/customers/assets/{{ $asset->id }}'">
 
     {{-- Checkbox --}}
-    <td class="px-6 py-4" onclick="event.stopPropagation()">
+    <td onclick="event.stopPropagation()">
         <input type="checkbox" wire:model.live="selected" value="{{ $asset->id }}"
             class="checkbox checkbox-xs rounded border-slate-300">
     </td>
 
     {{-- Asset Name & Avatar --}}
-    <td class="px-6 py-4">
+    <td>
         <div class="flex items-center gap-3">
             <div class="flex-shrink-0">
-                <div class="w-9 h-9 rounded-full flex items-center justify-center text-xs shadow-sm"
-                    style="background-color: var(--table-avatar-bg); color: var(--table-avatar-text); border: 1px solid var(--table-avatar-border);">
+                <div class="avatar-circle">
                     {{ $char }}
                 </div>
             </div>
-            <div>
-                <div class="text-[13px] group-hover:opacity-80 transition-opacity"
-                    style="color: var(--list-card-link-color);">
-                    {{ $asset->name }}
-                </div>
+            <div class="item-name">
+                {{ $asset->name }}
             </div>
         </div>
     </td>
 
     {{-- Type Badge --}}
-    <td class="px-6 py-4">
-        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border {{ $typeClass }}">
+    <td>
+        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border {{ $typeClass }}">
             {{ $typeLabel }}
         </span>
     </td>
 
-    {{-- URL --}}
-    <td class="px-6 py-4 text-[12px]">
-        @if($asset->url)
-            <a href="{{ $asset->url }}" target="_blank" onclick="event.stopPropagation()" class="hover:underline"
-                style="color: var(--action-link-color);">
-                {{ Str::limit($asset->url, 40) }}
-            </a>
-        @else
-            <span class="text-skin-muted italic">-</span>
-        @endif
-    </td>
-
-    {{-- Customer --}}
-    <td class="px-6 py-4 text-[13px]">
+    {{-- Müşteri --}}
+    <td class="text-xs opacity-80 font-medium">
         {{ $asset->customer->name ?? '-' }}
     </td>
 
+    {{-- URL --}}
+    <td class="text-xs">
+        @if($asset->url)
+            <a href="{{ $asset->url }}" target="_blank" onclick="event.stopPropagation()"
+                class="hover:underline text-indigo-600">
+                {{ Str::limit($asset->url, 40) }}
+            </a>
+        @else
+            <span class="opacity-30 italic text-[11px]">-</span>
+        @endif
+    </td>
+
     {{-- Services Count --}}
-    <td class="px-6 py-4 text-center">
-        <span class="inline-flex items-center justify-center w-6 h-6 rounded-full text-[11px]"
-            style="background-color: var(--card-bg); color: var(--color-text-heading); border: 1px solid var(--card-border);">
+    <td class="text-center">
+        <span class="count-badge">
             {{ $asset->services_count ?? 0 }}
         </span>
     </td>
 
     {{-- Created Date --}}
-    <td class="px-6 py-4 text-[12px] font-mono text-center opacity-70">
+    <td class="text-[11px] font-mono text-center opacity-60">
         {{ $asset->created_at->format('d.m.Y') }}
     </td>
 </tr>

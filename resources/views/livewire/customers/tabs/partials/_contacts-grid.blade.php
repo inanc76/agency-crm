@@ -20,44 +20,38 @@ Mühür Koruması: Table styling, gender icons ve hover effects korunmalıdır.
 
 <div class="bg-white rounded-xl border border-skin-light shadow-sm overflow-hidden">
     <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm">
-            <thead class="bg-slate-50 border-b border-skin-light">
+        <table class="agency-table">
+            <thead>
                 <tr>
-                    <th class="px-6 py-3 w-10">
+                    <th class="w-10">
                         <input type="checkbox" wire:model.live="selectAll"
                             class="checkbox checkbox-xs rounded border-slate-300">
                     </th>
                     @foreach(array_slice($headers, 1) as $header)
-                        <th class="px-6 py-3 font-semibold text-skin-base">
+                        <th>
                             {{ $header['label'] }}
                         </th>
                     @endforeach
                 </tr>
             </thead>
-            <tbody class="divide-y divide-slate-100">
+            <tbody>
                 @forelse($contacts as $contact)
-                    @php
-                        $char = mb_substr($contact->name, 0, 1);
-                    @endphp
-                    <tr class="group hover:bg-[var(--list-card-hover-bg)] transition-all duration-200 cursor-pointer"
-                        onclick="window.location.href='/dashboard/customers/contacts/{{ $contact->id }}'">
-                        <td class="px-6 py-4" onclick="event.stopPropagation()">
+                    <tr onclick="window.location.href='/dashboard/customers/contacts/{{ $contact->id }}'">
+                        <td onclick="event.stopPropagation()">
                             <input type="checkbox" wire:model.live="selected" value="{{ $contact->id }}"
                                 class="checkbox checkbox-xs rounded border-slate-300">
                         </td>
-                        <td class="px-6 py-4">
+                        <td>
                             <div class="flex items-center gap-3">
                                 <div class="flex-shrink-0">
                                     @php
                                         $gravatarUrl = $contact->getGravatarUrl(32);
                                     @endphp
-                                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs shadow-sm font-semibold overflow-hidden"
-                                        style="background-color: var(--table-avatar-bg); color: var(--table-avatar-text); border: 1px solid var(--table-avatar-border);">
+                                    <div class="avatar-circle overflow-hidden">
                                         @if($gravatarUrl)
-                                            <img src="{{ $gravatarUrl }}" 
-                                                 alt="{{ $contact->name }}"
-                                                 class="w-full h-full object-cover rounded-full"
-                                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                            <img src="{{ $gravatarUrl }}" alt="{{ $contact->name }}"
+                                                class="w-full h-full object-cover rounded-full"
+                                                onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                             <div class="w-full h-full flex items-center justify-center" style="display: none;">
                                                 {{ $contact->initials() }}
                                             </div>
@@ -66,32 +60,31 @@ Mühür Koruması: Table styling, gender icons ve hover effects korunmalıdır.
                                         @endif
                                     </div>
                                 </div>
-                                <div class="text-[13px] group-hover:opacity-80 transition-opacity font-medium"
-                                    style="color: var(--list-card-link-color);">
+                                <div class="item-name">
                                     {{ $contact->name }}
                                 </div>
                             </div>
                         </td>
-                        <td class="px-6 py-4">
+                        <td>
                             @php
                                 $statusLabel = $contact->status_item->label ?? $contact->status;
-                                $statusClass = $contact->status_item->color_class ?? 'bg-skin-hover text-skin-muted border border-skin-light';
+                                $statusClass = $contact->status_item->color_class ?? 'bg-slate-50 text-slate-500 border border-slate-200';
                             @endphp
                             <span
-                                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border {{ $statusClass }}">
+                                class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border {{ $statusClass }}">
                                 {{ $statusLabel }}
                             </span>
                         </td>
-                        <td class="px-6 py-4 text-[12px] text-skin-muted">
+                        <td class="text-xs opacity-70">
                             {{ $contact->position ?? '-' }}
                         </td>
-                        <td class="px-6 py-4 text-[13px] text-skin-base font-medium">
+                        <td class="text-xs opacity-80 font-medium">
                             {{ $contact->customer->name ?? '-' }}
                         </td>
-                        <td class="px-6 py-4 text-[13px] text-skin-muted">
+                        <td class="text-xs opacity-70">
                             {{ $contact->email ?? '-' }}
                         </td>
-                        <td class="px-6 py-4 text-[12px] text-skin-muted font-mono">
+                        <td class="text-[11px] opacity-60 font-mono">
                             {{ $contact->phone ?? '-' }}
                         </td>
                     </tr>

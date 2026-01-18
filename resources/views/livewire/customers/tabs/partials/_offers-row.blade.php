@@ -15,68 +15,64 @@
     $statusClass = $offer->status_item->color_class ?? 'bg-skin-hover text-skin-muted border border-skin-light';
 @endphp
 
-<tr class="group hover:bg-[var(--list-card-hover-bg)] transition-all duration-200 cursor-pointer"
-    onclick="window.location.href='/dashboard/customers/offers/{{ $offer->id }}'">
+<tr onclick="window.location.href='/dashboard/customers/offers/{{ $offer->id }}'">
 
     {{-- Checkbox --}}
-    <td class="px-6 py-4" onclick="event.stopPropagation()">
+    <td onclick="event.stopPropagation()">
         <input type="checkbox" wire:model.live="selected" value="{{ $offer->id }}"
             class="checkbox checkbox-xs rounded border-slate-300">
     </td>
 
     {{-- Offer Title & Avatar --}}
-    <td class="px-6 py-4">
+    <td>
         <div class="flex items-center gap-3">
             <div class="flex-shrink-0">
-                <div class="w-9 h-9 rounded-full flex items-center justify-center text-xs shadow-sm font-semibold"
-                    style="background-color: var(--table-avatar-bg); color: var(--table-avatar-text); border: 1px solid var(--table-avatar-border);">
+                <div class="avatar-circle">
                     {{ $char }}
                 </div>
             </div>
             <div>
-                <div class="text-[13px] group-hover:opacity-80 transition-opacity font-medium"
-                    style="color: var(--list-card-link-color);">
+                <div class="item-name">
                     {{ $offer->title }}
                 </div>
                 @if(!empty($offer->offer_no))
-                    <div class="text-[11px] font-medium opacity-60">{{ $offer->offer_no }}</div>
+                    <div class="text-[10px] font-medium opacity-50">{{ $offer->offer_no }}</div>
                 @endif
             </div>
         </div>
     </td>
 
     {{-- Status Badge --}}
-    <td class="px-6 py-4">
-        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border {{ $statusClass }}">
+    <td>
+        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border {{ $statusClass }}">
             {{ $statusLabel }}
         </span>
     </td>
 
     {{-- Items Count --}}
-    <td class="px-6 py-4 text-center">
-        <span class="inline-flex items-center justify-center w-6 h-6 rounded-full text-[11px]"
-            style="background-color: var(--card-bg); color: var(--color-text-heading); border: 1px solid var(--card-border);">
+    <td class="text-center">
+        <span class="count-badge">
             {{ $offer->items_count ?? 0 }}
         </span>
     </td>
 
     {{-- Created Date --}}
-    <td class="px-6 py-4 text-[12px] font-mono text-center opacity-70">
+    <td class="text-[11px] font-mono text-center opacity-60">
         {{ $offer->created_at->format('d.m.Y') }}
     </td>
 
     {{-- Valid Until --}}
-    <td class="px-6 py-4 text-[12px] font-mono text-center opacity-70">
+    <td class="text-[11px] font-mono text-center opacity-60">
         {{ $offer->valid_until?->format('d.m.Y') ?? '-' }}
     </td>
 
     {{-- Customer --}}
-    <td class="px-6 py-4 text-[13px] font-medium">
+    <td class="text-xs opacity-80 font-medium">
         {{ $offer->customer->name ?? '-' }}
     </td>
 
     {{-- Price --}}
-    <td class="px-6 py-4 text-right text-[13px] text-skin-heading">
+    <td class="text-right text-xs font-bold text-slate-700">
         {{ number_format($offer->total_amount, 2) }} {{ $offer->currency }}
     </td>
 </tr>

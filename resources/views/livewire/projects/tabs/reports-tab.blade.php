@@ -96,70 +96,62 @@ new class extends Component {
     {{-- Reports Table --}}
     <div class="bg-white rounded-xl border border-skin-light shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-sm">
-                <thead class="bg-slate-50 border-b border-skin-light">
+            <table class="agency-table">
+                <thead>
                     <tr>
-                        <th class="px-6 py-3 w-10">
+                        <th class="w-10">
                             <input type="checkbox" wire:model.live="selectAll"
                                 class="checkbox checkbox-xs rounded border-slate-300">
                         </th>
-                        <th class="px-6 py-3 font-semibold text-skin-base">Tarih</th>
-                        <th class="px-6 py-3 font-semibold text-skin-base">Raporu Giren</th>
-                        <th class="px-6 py-3 font-semibold text-skin-base">Müşteri</th>
-                        <th class="px-6 py-3 font-semibold text-skin-base">Hizmet/Proje</th>
-                        <th class="px-6 py-3 font-semibold text-skin-base">Süre</th>
-                        <th class="px-6 py-3 font-semibold text-skin-base">Rapor Özeti</th>
+                        <th>Tarih</th>
+                        <th>Raporu Giren</th>
+                        <th>Müşteri</th>
+                        <th>Hizmet/Proje</th>
+                        <th>Süre</th>
+                        <th>Rapor Özeti</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100">
+                <tbody>
                     @forelse($this->reports as $report)
-                        <tr wire:key="report-{{ $report->id }}" class="hover:bg-slate-50 transition-colors">
-                            <td class="px-6 py-3" onclick="event.stopPropagation()">
+                        <tr wire:key="report-{{ $report->id }}">
+                            <td onclick="event.stopPropagation()">
                                 <input type="checkbox" wire:model.live="selected" value="{{ $report->id }}"
                                     class="checkbox checkbox-xs rounded border-slate-300">
                             </td>
-                            <td class="px-6 py-3 cursor-pointer"
-                                onclick="window.location.href='{{ route('projects.reports.edit', $report->id) }}'">
-                                <div class="text-skin-base font-medium">
+                            <td onclick="window.location.href='{{ route('projects.reports.edit', $report->id) }}'">
+                                <div class="item-name">
                                     {{ $report->created_at->format('d.m.Y') }}
                                 </div>
                             </td>
-                            <td class="px-6 py-3 cursor-pointer"
-                                onclick="window.location.href='{{ route('projects.reports.edit', $report->id) }}'">
+                            <td onclick="window.location.href='{{ route('projects.reports.edit', $report->id) }}'">
                                 <div class="flex items-center gap-2">
-                                    <div
-                                        class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-500 border border-slate-200">
+                                    <div class="avatar-circle !w-7 !h-7 !text-[10px] bg-slate-100">
                                         {{ substr($report->creator?->name ?? 'S', 0, 1) }}
                                     </div>
-                                    <span
-                                        class="text-sm font-medium text-slate-700">{{ $report->creator?->name ?? '-' }}</span>
+                                    <span class="text-xs font-medium opacity-70">{{ $report->creator?->name ?? '-' }}</span>
                                 </div>
                             </td>
-                            <td class="px-6 py-3 cursor-pointer"
-                                onclick="window.location.href='{{ route('projects.reports.edit', $report->id) }}'">
-                                <div class="text-skin-base">
+                            <td onclick="window.location.href='{{ route('projects.reports.edit', $report->id) }}'">
+                                <div class="opacity-70 text-xs">
                                     {{ $report->customer?->name ?? '-' }}
                                 </div>
                             </td>
-                            <td class="px-6 py-3 cursor-pointer"
-                                onclick="window.location.href='{{ route('projects.reports.edit', $report->id) }}'">
+                            <td onclick="window.location.href='{{ route('projects.reports.edit', $report->id) }}'">
                                 <div
-                                    class="text-xs font-medium px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200 inline-block mb-1">
+                                    class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-50 text-slate-500 border border-slate-200 inline-block mb-1">
                                     {{ $report->report_type === 'PROJECT' ? 'Yapım Projesi' : 'Destek Hizmeti' }}
                                 </div>
-                                <div class="text-sm font-medium">
+                                <div class="text-[13px] font-medium text-slate-700">
                                     {{ $report->report_type === 'PROJECT' ? ($report->project?->name ?? '-') : ($report->service?->service_name ?? '-') }}
                                 </div>
                             </td>
-                            <td class="px-6 py-3 cursor-pointer"
-                                onclick="window.location.href='{{ route('projects.reports.edit', $report->id) }}'">
-                                <div class="text-skin-base font-bold">
+                            <td onclick="window.location.href='{{ route('projects.reports.edit', $report->id) }}'">
+                                <div class="text-slate-700 font-bold text-xs whitespace-nowrap">
                                     {{ $report->hours }}s {{ sprintf('%02d', $report->minutes) }}dk
                                 </div>
                             </td>
-                            <td class="px-6 py-3 cursor-pointer"
-                                onclick="window.location.href='{{ route('projects.reports.edit', $report->id) }}'">
-                                <div class="text-xs text-skin-muted truncate max-w-xs">
+                            <td onclick="window.location.href='{{ route('projects.reports.edit', $report->id) }}'">
+                                <div class="text-[11px] opacity-60 truncate max-w-[200px]">
                                     {{ Str::limit($report->content, 80) }}
                                 </div>
                             </td>

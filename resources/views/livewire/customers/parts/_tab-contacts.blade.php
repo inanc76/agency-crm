@@ -7,53 +7,51 @@
     </div>
     @if(count($relatedContacts) > 0)
         <div class="overflow-x-auto">
-            <table class="w-full text-sm">
+            <table class="agency-table">
                 <thead>
-                    <tr class="border-b border-[var(--card-border)]">
-                        <th class="text-left py-2 px-2 font-medium opacity-60">Ad Soyad</th>
-                        <th class="text-left py-2 px-2 font-medium opacity-60">Pozisyon</th>
-                        <th class="text-left py-2 px-2 font-medium opacity-60">Email</th>
-                        <th class="text-left py-2 px-2 font-medium opacity-60">Telefon</th>
-                        <th class="text-center py-2 px-2 font-medium opacity-60">Durum</th>
+                    <tr>
+                        <th>Ad Soyad</th>
+                        <th>Pozisyon</th>
+                        <th>Email</th>
+                        <th>Telefon</th>
+                        <th class="text-center">Durum</th>
                     </tr>
                 </thead>
                 <tbody>
-
                     @foreach($relatedContacts as $contact)
-                        <tr class="border-b border-[var(--card-border)]/50 hover:bg-[var(--dropdown-hover-bg)] cursor-pointer transition-colors"
-                            onclick="window.location.href='/dashboard/customers/contacts/{{ $contact->id }}'">
-                            <td class="py-3 px-2">
+                        <tr onclick="window.location.href='/dashboard/customers/contacts/{{ $contact->id }}'">
+                            <td>
                                 <div class="flex items-center gap-3">
                                     <div class="flex-shrink-0">
                                         @php
-                                            $gravatarUrl = $contact->getGravatarUrl(28);
+                                            $gravatarUrl = $contact->getGravatarUrl(36);
                                         @endphp
-                                        <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs shadow-sm font-semibold overflow-hidden"
-                                            style="background-color: var(--table-avatar-bg); color: var(--table-avatar-text); border: 1px solid var(--table-avatar-border);">
+                                        <div class="avatar-circle overflow-hidden">
                                             @if($gravatarUrl)
                                                 <img src="{{ $gravatarUrl }}" alt="{{ $contact->name }}"
                                                     class="w-full h-full object-cover rounded-full"
                                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                                                <div class="w-full h-full flex items-center justify-center" style="display: none;">
+                                                <div class="w-full h-full flex items-center justify-center font-bold"
+                                                    style="display: none;">
                                                     {{ $contact->initials() }}
                                                 </div>
                                             @else
-                                                {{ $contact->initials() }}
+                                                <span class="font-bold">{{ $contact->initials() }}</span>
                                             @endif
                                         </div>
                                     </div>
-                                    <div class="font-medium">{{ $contact->name }}</div>
+                                    <div class="item-name">{{ $contact->name }}</div>
                                 </div>
                             </td>
-                            <td class="py-3 px-2 opacity-70">{{ $contact->position ?? '-' }}</td>
-                            <td class="py-3 px-2 opacity-70">{{ $contact->emails[0] ?? '-' }}</td>
-                            <td class="py-3 px-2 opacity-70">{{ $contact->phones[0] ?? '-' }}</td>
-                            <td class="py-3 px-2 text-center">
+                            <td class="opacity-70">{{ $contact->position ?? '-' }}</td>
+                            <td class="opacity-70">{{ $contact->emails[0] ?? '-' }}</td>
+                            <td class="opacity-70">{{ $contact->phones[0] ?? '-' }}</td>
+                            <td class="text-center">
                                 @php
                                     $statusLabel = $contact->status_item->label ?? $contact->status ?? 'Ayrıldı';
-                                    $statusClass = $contact->status_item->color_class ?? 'bg-[var(--dropdown-hover-bg)] text-[var(--color-text-muted)]';
+                                    $statusClass = $contact->status_item->color_class ?? 'bg-slate-100 text-slate-500';
                                 @endphp
-                                <span class="px-2 py-0.5 rounded text-xs font-medium {{ $statusClass }}">
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold border {{ $statusClass }}">
                                     {{ $statusLabel }}
                                 </span>
                             </td>

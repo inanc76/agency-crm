@@ -10,33 +10,50 @@ trait HasContactActions
 {
     // Contact Fields
     public string $customer_id = '';
+
     public string $status = 'WORKING';
+
     public string $gender = '';
+
     public string $name = '';
+
     public string $position = '';
 
     // Contact Details
     public array $emails = [''];
+
     public array $phones = [['number' => '', 'extension' => '']];
+
     public ?string $birth_date = null;
+
     public array $social_profiles = [['name' => '', 'url' => '']];
 
     // State Management
     public bool $isViewMode = false;
+
     public ?string $contactId = null;
+
     public string $activeTab = 'info';
 
     // Reference Data
     public $customers = [];
+
     public $contactStatuses = [];
+
     public $genders = [];
+
+    public $relatedMessages = [];
+
+    public int $messageCount = 0;
+
+    public int $noteCount = 0;
 
     public function mount(?string $contact = null): void
     {
         // Load Customers
         $this->customers = Customer::orderBy('name')
             ->get(['id', 'name'])
-            ->map(fn($c) => ['id' => $c->id, 'name' => $c->name])
+            ->map(fn ($c) => ['id' => $c->id, 'name' => $c->name])
             ->toArray();
 
         // Load Contact Statuses
@@ -44,7 +61,7 @@ trait HasContactActions
             ->where('is_active', true)
             ->orderBy('sort_order')
             ->get(['id', 'display_label', 'key', 'metadata'])
-            ->map(fn($i) => ['id' => $i->id, 'display_label' => $i->display_label, 'key' => $i->key, 'color_class' => $i->color_class])
+            ->map(fn ($i) => ['id' => $i->id, 'display_label' => $i->display_label, 'key' => $i->key, 'color_class' => $i->color_class])
             ->toArray();
 
         // Load Genders from Reference Data if exists, fallback to static
@@ -52,7 +69,7 @@ trait HasContactActions
             ->where('is_active', true)
             ->orderBy('sort_order')
             ->get(['id', 'display_label', 'key'])
-            ->map(fn($i) => ['id' => $i->key, 'name' => $i->display_label])
+            ->map(fn ($i) => ['id' => $i->key, 'name' => $i->display_label])
             ->toArray();
 
         if (empty($this->genders)) {
@@ -76,7 +93,7 @@ trait HasContactActions
             if ($customerId && collect($this->customers)->firstWhere('id', $customerId)) {
                 $this->customer_id = $customerId;
             }
-            if (!empty($this->contactStatuses)) {
+            if (! empty($this->contactStatuses)) {
                 $this->status = $this->contactStatuses[0]['key'];
             }
         }
@@ -98,24 +115,34 @@ trait HasContactActions
         if ($contact->email) {
             $emailList[] = $contact->email;
         }
-        if (!empty($contact->emails)) {
+        if (! empty($contact->emails)) {
             $emailList = array_merge($emailList, (array) $contact->emails);
         }
-        $this->emails = !empty($emailList) ? array_unique($emailList) : [''];
+        $this->emails = ! empty($emailList) ? array_unique($emailList) : [''];
 
         // Parse phones to extract number and extension
-        if (!empty($contact->phones)) {
+        if (! empty($contact->phones)) {
             $this->phones = array_map(function ($phone) {
                 if (preg_match('/^(.*?)\s*\(Dahili:(.*?)\)$/', $phone, $matches)) {
                     return ['number' => trim($matches[1]), 'extension' => trim($matches[2])];
                 }
+
                 return ['number' => $phone, 'extension' => ''];
             }, (array) $contact->phones);
         } else {
             $this->phones = [['number' => '', 'extension' => '']];
         }
 
-        $this->social_profiles = !empty($contact->social_profiles) ? (array) $contact->social_profiles : [['name' => '', 'url' => '']];
+        $this->social_profiles = ! empty($contact->social_profiles) ? (array) $contact->social_profiles : [['name' => '', 'url' => '']];
+
+        // Load Messages for the parent customer
+        $this->relatedMessages = \App\Models\Message::where('customer_id', $this->customer_id)
+            ->with(['customer', 'offer', 'contact'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $this->messageCount = $this->relatedMessages->count();
+        $this->noteCount = $contact->notes()->count();
 
         $this->isViewMode = true;
     }
@@ -153,26 +180,28 @@ trait HasContactActions
             $number = $phone['number'];
             $extension = $phone['extension'] ?? '';
 
-            if (empty($number))
+            if (empty($number)) {
                 return null;
+            }
 
-            if (!empty($extension)) {
+            if (! empty($extension)) {
                 return "{$number} (Dahili:{$extension})";
             }
+
             return $number;
         }, $this->phones);
 
         $data = [
             'customer_id' => $this->customer_id,
             'name' => $this->name,
-            'email' => !empty($this->emails[0]) ? $this->emails[0] : null, // First email as primary
+            'email' => ! empty($this->emails[0]) ? $this->emails[0] : null, // First email as primary
             'status' => $this->status,
             'gender' => $this->gender,
             'position' => $this->position,
             'birth_date' => $this->birth_date,
             'emails' => array_values(array_filter($this->emails)),
             'phones' => array_values(array_filter($formattedPhones)),
-            'social_profiles' => array_values(array_filter($this->social_profiles, fn($s) => !empty($s['name']) || !empty($s['url']))),
+            'social_profiles' => array_values(array_filter($this->social_profiles, fn ($s) => ! empty($s['name']) || ! empty($s['url']))),
         ];
 
         if ($this->contactId) {
@@ -200,7 +229,7 @@ trait HasContactActions
         if ($this->contactId) {
             $this->loadContactData();
         } else {
-            $this->redirect('/dashboard/customers/' . $this->customer_id . '?tab=contacts', navigate: true);
+            $this->redirect('/dashboard/customers/'.$this->customer_id.'?tab=contacts', navigate: true);
         }
     }
 
@@ -222,7 +251,7 @@ trait HasContactActions
             $customer_id = $contact->customer_id;
             $contact->delete();
             $this->success('Kişi Silindi', 'Kişi kaydı başarıyla silindi.');
-            $this->redirect('/dashboard/customers/' . $customer_id . '?tab=contacts');
+            $this->redirect('/dashboard/customers/'.$customer_id.'?tab=contacts');
         }
     }
 
@@ -231,7 +260,7 @@ trait HasContactActions
     {
         $this->emails[] = '';
     }
-    
+
     public function removeEmail($index)
     {
         unset($this->emails[$index]);
@@ -242,7 +271,7 @@ trait HasContactActions
     {
         $this->phones[] = ['number' => '', 'extension' => ''];
     }
-    
+
     public function removePhone($index)
     {
         unset($this->phones[$index]);
@@ -253,7 +282,7 @@ trait HasContactActions
     {
         $this->social_profiles[] = ['name' => '', 'url' => ''];
     }
-    
+
     public function removeSocialProfile($index)
     {
         unset($this->social_profiles[$index]);

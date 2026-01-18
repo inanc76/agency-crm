@@ -153,87 +153,85 @@ new class extends Component {
     {{-- Tasks Table --}}
     <div class="bg-white rounded-xl border border-skin-light shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-sm">
-                <thead class="bg-slate-50 border-b border-skin-light">
+            <table class="agency-table">
+                <thead>
                     <tr>
-                        <th class="px-6 py-3 w-10">
+                        <th class="w-10">
                             <input type="checkbox" wire:model.live="selectAll"
                                 class="checkbox checkbox-xs rounded border-slate-300">
                         </th>
-                        <th class="px-6 py-3 font-semibold text-skin-base">Konu</th>
-                        <th class="px-6 py-3 font-semibold text-skin-base">Proje</th>
-                        <th class="px-6 py-3 font-semibold text-skin-base text-center">Öncelik</th>
-                        <th class="px-6 py-3 font-semibold text-skin-base text-center">Durum</th>
-                        <th class="px-6 py-3 font-semibold text-skin-base text-center">Atanan</th>
+                        <th>Konu</th>
+                        <th>Proje</th>
+                        <th class="text-center">Öncelik</th>
+                        <th class="text-center">Durum</th>
+                        <th class="text-center">Atanan</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100">
+                <tbody>
                     @forelse($this->tasks as $task)
-                        <tr wire:key="task-{{ $task->id }}" class="hover:bg-slate-50 transition-colors">
-                            <td class="px-6 py-3" onclick="event.stopPropagation()">
+                        <tr wire:key="task-{{ $task->id }}">
+                            <td onclick="event.stopPropagation()">
                                 <input type="checkbox" wire:model.live="selected" value="{{ $task->id }}"
                                     class="checkbox checkbox-xs rounded border-slate-300">
                             </td>
-                            <td class="px-6 py-3 cursor-pointer"
-                                onclick="window.location.href='{{ route('projects.tasks.edit', $task->id) }}'">
-                                <div class="font-medium text-[var(--color-text-heading)] mb-0.5">
+                            <td onclick="window.location.href='{{ route('projects.tasks.edit', $task->id) }}'">
+                                <div class="item-name mb-0.5">
                                     {{ $task->name }}
                                 </div>
                                 @if($task->description)
-                                    <div class="text-xs text-skin-muted truncate max-w-xs">
+                                    <div class="text-[10px] opacity-50 truncate max-w-xs">
                                         {{ Str::limit($task->description, 60) }}
                                     </div>
                                 @endif
                             </td>
-                            <td class="px-6 py-3 cursor-pointer"
-                                onclick="window.location.href='{{ route('projects.tasks.edit', $task->id) }}'">
-                                <div class="text-skin-base">
+                            <td onclick="window.location.href='{{ route('projects.tasks.edit', $task->id) }}'">
+                                <div class="opacity-70 text-xs">
                                     {{ $task->project?->name ?? $task->module?->phase?->project?->name ?? '-' }}
                                 </div>
                             </td>
-                            <td class="px-6 py-3 text-center cursor-pointer"
+                            <td class="text-center"
                                 onclick="window.location.href='{{ route('projects.tasks.edit', $task->id) }}'">
                                 @php
                                     $pItem = $task->priority_item;
                                     $label = $pItem->label ?? ucfirst($task->priority);
                                     $colorClass = $pItem->color_class ?? 'bg-slate-100 text-slate-700';
                                 @endphp
-                                <span class="px-2 py-1 rounded-full text-xs font-medium {{ $colorClass }}">
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold border {{ $colorClass }}">
                                     {{ $label }}
                                 </span>
                             </td>
-                            <td class="px-6 py-3 text-center text-skin-base cursor-pointer"
+                            <td class="text-center"
                                 onclick="window.location.href='{{ route('projects.tasks.edit', $task->id) }}'">
                                 @if($task->status)
                                     @php
                                         $sClasses = $task->status->color_class ?? 'bg-slate-100 text-slate-500 border-slate-200';
                                     @endphp
-                                    <span class="px-2 py-1 rounded-full text-xs font-medium border {{ $sClasses }}">
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold border {{ $sClasses }}">
                                         {{ $task->status->display_label }}
                                     </span>
                                 @else
-                                    <span class="text-xs text-slate-400">-</span>
+                                    <span class="text-xs opacity-40">-</span>
                                 @endif
                             </td>
-                            <td class="px-6 py-3 text-center cursor-pointer"
+                            <td class="text-center"
                                 onclick="window.location.href='{{ route('projects.tasks.edit', $task->id) }}'">
                                 @if($task->users->count() > 0)
-                                    <div class="flex -space-x-2 justify-center">
+                                    <div class="flex -space-x-4 justify-center">
                                         @foreach($task->users->take(3) as $user)
-                                            <div class="w-7 h-7 rounded-full bg-slate-200 flex items-center justify-center text-xs font-medium border-2 border-white"
+                                            <div class="avatar-circle !w-7 !h-7 !text-[10px] !font-bold border-2 border-white ring-1 ring-slate-100"
                                                 title="{{ $user->name }}">
                                                 {{ strtoupper(substr($user->name, 0, 1)) }}
                                             </div>
                                         @endforeach
                                         @if($task->users->count() > 3)
                                             <div
-                                                class="w-7 h-7 rounded-full bg-slate-300 flex items-center justify-center text-xs font-medium border-2 border-white">
+                                                class="avatar-circle !w-7 !h-7 !text-[10px] !font-bold border-2 border-white ring-1 ring-slate-100 bg-slate-200">
                                                 +{{ $task->users->count() - 3 }}
                                             </div>
                                         @endif
                                     </div>
                                 @else
-                                    <span class="text-xs text-slate-400">Atanmadı</span>
+                                    <span class="text-xs opacity-40 italic">Atanmadı</span>
                                 @endif
                             </td>
                         </tr>

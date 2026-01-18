@@ -31,12 +31,14 @@ new class extends Component {
     public string $search = '';
     public string $statusFilter = 'all';
     public string $roleFilter = 'all';
+    public string $departmentFilter = 'all';
     public int $perPage = 25;
 
     // Reset pagination when filtering
     public function updatedSearch() { $this->resetPage(); }
     public function updatedStatusFilter() { $this->resetPage(); }
     public function updatedRoleFilter() { $this->resetPage(); }
+    public function updatedDepartmentFilter() { $this->resetPage(); }
     public function updatedPerPage() { $this->resetPage(); }
 
     private function getQuery(): Builder
@@ -54,15 +56,37 @@ new class extends Component {
             ->when($this->roleFilter !== 'all', function (Builder $q) {
                 return $q->where('role_id', $this->roleFilter);
             })
+            ->when($this->departmentFilter !== 'all', function (Builder $q) {
+                return $q->where('department_id', $this->departmentFilter);
+            })
             ->orderBy('name');
     }
 
     public function with(): array
     {
         return [
-            'users' => $this->getQuery()->with('role')->paginate($this->perPage),
+            'users' => $this->getQuery()->with(['role', 'department'])->paginate($this->perPage),
             'roles' => Role::orderBy('name')->get(),
+            'departments' => \App\Models\ReferenceItem::where('category_key', 'DEPARTMENT')
+                ->where('is_active', true)
+                ->orderBy('display_label')
+                ->get(),
         ];
+    }
+
+    private function getTailwindColor(?string $color): string
+    {
+        return match($color) {
+            'blue' => 'bg-blue-50 text-blue-700 border-blue-200',
+            'green' => 'bg-green-50 text-green-700 border-green-200',
+            'yellow' => 'bg-yellow-50 text-yellow-700 border-yellow-200',
+            'red' => 'bg-red-50 text-red-700 border-red-200',
+            'purple' => 'bg-purple-50 text-purple-700 border-purple-200',
+            'indigo' => 'bg-indigo-50 text-indigo-700 border-indigo-200',
+            'pink' => 'bg-pink-50 text-pink-700 border-pink-200',
+            'gray' => 'bg-gray-50 text-gray-700 border-gray-200',
+            default => 'bg-slate-50 text-slate-700 border-slate-200',
+        };
     }
 }; ?>
 
@@ -123,6 +147,16 @@ new class extends Component {
                         option-label="label"
                         class="select-sm" />
                 </div>
+
+                {{-- Department Filter --}}
+                <div class="min-w-32">
+                    <x-mary-select 
+                        wire:model.live="departmentFilter" 
+                        :options="collect([['value' => 'all', 'label' => 'Tüm Departmanlar']])->concat($departments->map(fn($dept) => ['value' => $dept->id, 'label' => $dept->display_label]))"
+                        option-value="value"
+                        option-label="label"
+                        class="select-sm" />
+                </div>
             </div>
         </div>
 
@@ -133,7 +167,7 @@ new class extends Component {
                     <thead class="bg-slate-50 border-b border-slate-200">
                         <tr>
                             <th class="px-6 py-3 font-semibold text-[var(--color-text-base)]">Kullanıcı</th>
-                            <th class="px-6 py-3 font-semibold text-[var(--color-text-base)]">Unvan</th>
+                            <th class="px-6 py-3 font-semibold text-[var(--color-text-base)]">Departman</th>
                             <th class="px-6 py-3 font-semibold text-[var(--color-text-base)]">E-posta</th>
                             <th class="px-6 py-3 font-semibold text-[var(--color-text-base)]">Telefon</th>
                             <th class="px-6 py-3 font-semibold text-[var(--color-text-base)] text-center">Durum</th>
@@ -173,7 +207,13 @@ new class extends Component {
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 text-[var(--color-text-base)]">
-                                    {{ $user->title ?? '-' }}
+                                    @if($user->department)
+                                        <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium border {{ $this->getTailwindColor($user->department->metadata['color'] ?? null) }}">
+                                            {{ $user->department->display_label }}
+                                        </span>
+                                    @else
+                                        <span class="text-[var(--color-text-muted)]">-</span>
+                                    @endif
                                 </td>
                                 <td class="px-6 py-4 text-[var(--color-text-base)]">
                                     {{ $user->email }}

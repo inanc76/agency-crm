@@ -136,6 +136,7 @@ new
                         <livewire:settings.theme.inputs lazy />
                         <livewire:settings.theme.buttons lazy />
                         <livewire:settings.theme.cards lazy />
+                        <livewire:settings.theme.tables lazy />
                     </div>
                 </div>
             </x-mary-tab>

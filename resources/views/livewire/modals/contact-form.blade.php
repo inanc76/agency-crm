@@ -91,19 +91,19 @@ class extends Component
                 <button wire:click="$set('activeTab', 'messages')" 
                     class="cursor-pointer px-5 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors"
                     style="{{ $activeTab === 'messages' ? 'border-color: var(--active-tab-color); color: var(--color-text-heading);' : 'border-color: transparent; color: var(--color-text-base); opacity: 0.6;' }}">
-                    Mesajlar (0)
+                    Mesajlar ({{ $messageCount }})
                 </button>
                 <button wire:click="$set('activeTab', 'notes')" 
                     class="cursor-pointer px-5 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors"
                     style="{{ $activeTab === 'notes' ? 'border-color: var(--active-tab-color); color: var(--color-text-heading);' : 'border-color: transparent; color: var(--color-text-base); opacity: 0.6;' }}">
-                    Notlar (0)
+                    Notlar ({{ $noteCount }})
                 </button>
             </div>
         @else
             <div class="mb-8"></div>
         @endif
 
-        {{-- Main Layout: Full Width --}}
+        {{-- Main Layout --}}
         <div>
             {{-- Content --}}
             <div>
@@ -139,11 +139,11 @@ class extends Component
                         </div>
                         <div class="col-span-4 space-y-6">
                             {{-- Profile Photo Card --}}
+                            @php
+                                $contact = $contactId ? \App\Models\Contact::find($contactId) : null;
+                                $gravatarUrl = $contact && $contact->email ? $contact->getGravatarUrl(256) : '';
+                            @endphp
                             @if($contactId)
-                                @php
-                                    $contact = \App\Models\Contact::find($contactId);
-                                    $gravatarUrl = $contact && $contact->email ? $contact->getGravatarUrl(256) : '';
-                                @endphp
                                 <div class="theme-card p-6 shadow-sm sticky top-6">
                                     <h2 class="text-base font-bold mb-4 text-center text-skin-heading">Profil Fotoğrafı</h2>
                                     
@@ -195,15 +195,12 @@ class extends Component
                         </div>
                     </div>
                 @endif
-            </div>
-        </div>
-    </div>
-</div>
 
                 @if($activeTab === 'messages')
-                    <div class="theme-card p-6 shadow-sm text-center text-[var(--color-text-muted)] py-12">
-                        <x-mary-icon name="o-chat-bubble-left-right" class="w-12 h-12 mx-auto mb-3 opacity-20" />
-                        <div class="font-medium">Henüz mesaj bulunmuyor</div>
+                    <div class="space-y-6">
+                        @include('livewire.customers.parts._tab-messages', [
+                            'relatedMessages' => $relatedMessages
+                        ])
                     </div>
                 @endif
 
@@ -212,7 +209,7 @@ class extends Component
                         @livewire('shared.notes-tab', [
                             'entityType' => 'CONTACT',
                             'entityId' => $contactId
-                        ], key('notes-tab-' . $contactId))
+                        ], key('notes-tab-contact-' . $contactId))
                     @else
                         <div class="theme-card p-6 shadow-sm text-center text-[var(--color-text-muted)] py-12">
                             <x-mary-icon name="o-document-text" class="w-12 h-12 mx-auto mb-3 opacity-20" />

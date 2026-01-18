@@ -18,34 +18,33 @@
 
     @if($filteredProjects->count() > 0)
         <div class="overflow-x-auto">
-            <table class="w-full text-sm">
+            <table class="agency-table">
                 <thead>
-                    <tr class="border-b border-[var(--card-border)]">
-                        <th class="text-left py-2 px-2 font-medium opacity-60">Proje Kodu</th>
-                        <th class="text-left py-2 px-2 font-medium opacity-60">Proje Adı</th>
-                        <th class="text-center py-2 px-2 font-medium opacity-60">Başlangıç</th>
-                        <th class="text-center py-2 px-2 font-medium opacity-60">Hedef Bitiş</th>
-                        <th class="text-center py-2 px-2 font-medium opacity-60">Durum</th>
+                    <tr>
+                        <th>Proje Kodu</th>
+                        <th>Proje Adı</th>
+                        <th class="text-center">Başlangıç</th>
+                        <th class="text-center">Hedef Bitiş</th>
+                        <th class="text-center">Durum</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($filteredProjects as $project)
                         @php
                             $statusLabel = $project->status->display_label ?? 'Taslak';
-                            $badgeClass = $project->status->color_class ?? 'bg-slate-50 text-slate-600 border-slate-100';
+                            $statusClass = $project->status->color_class ?? 'bg-slate-100 text-slate-500';
                         @endphp
-                        <tr class="border-b border-[var(--card-border)]/50 hover:bg-[var(--dropdown-hover-bg)] cursor-pointer transition-colors"
-                            onclick="window.location.href='/dashboard/projects/{{ $project->id }}'">
-                            <td class="py-3 px-2 font-mono text-xs">{{ $project->project_id_code }}</td>
-                            <td class="py-3 px-2 font-medium">{{ $project->name }}</td>
-                            <td class="py-3 px-2 text-center opacity-70">
+                        <tr onclick="window.location.href='/dashboard/projects/{{ $project->id }}'">
+                            <td class="font-mono text-[10px] opacity-50">{{ $project->project_id_code }}</td>
+                            <td class="item-name">{{ $project->name }}</td>
+                            <td class="text-center opacity-70">
                                 {{ $project->start_date ? $project->start_date->format('d.m.Y') : '-' }}
                             </td>
-                            <td class="py-3 px-2 text-center opacity-70">
+                            <td class="text-center opacity-70">
                                 {{ $project->target_end_date ? $project->target_end_date->format('d.m.Y') : '-' }}
                             </td>
-                            <td class="py-3 px-2 text-center">
-                                <span class="px-2 py-0.5 rounded text-xs font-medium border {{ $badgeClass }}">
+                            <td class="text-center">
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold border {{ $statusClass }}">
                                     {{ $statusLabel }}
                                 </span>
                             </td>

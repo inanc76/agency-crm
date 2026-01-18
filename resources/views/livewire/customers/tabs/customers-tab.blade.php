@@ -137,21 +137,21 @@ new class extends Component {
 
     <div class="bg-white rounded-xl border border-skin-light shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-sm">
-                <thead class="bg-slate-50 border-b border-skin-light">
+            <table class="agency-table">
+                <thead>
                     <tr>
-                        <th class="px-6 py-3 w-10">
+                        <th class="w-10">
                             <input type="checkbox" wire:model.live="selectAll"
                                 class="checkbox checkbox-xs rounded border-slate-300">
                         </th>
                         @foreach(array_slice($headers, 1) as $header)
-                            <th class="px-6 py-3 font-semibold text-skin-base {{ isset($header['align']) && $header['align'] == 'center' ? 'text-center' : '' }}">
+                            <th class="{{ isset($header['align']) && $header['align'] == 'center' ? 'text-center' : '' }}">
                                 {{ $header['label'] }}
                             </th>
                         @endforeach
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100">
+                <tbody>
                     @forelse($customers as $customer)
                         @include('livewire.customers.tabs.partials._customers-row', [
                             'customer' => $customer,

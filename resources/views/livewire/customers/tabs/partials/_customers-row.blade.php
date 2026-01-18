@@ -15,27 +15,23 @@
     $cityColor = $cityColorMap[$customer->city_id] ?? 'bg-skin-hover text-skin-muted border-skin-light';
 @endphp
 
-<tr class="group hover:bg-[var(--list-card-hover-bg)] transition-all duration-200 cursor-pointer"
-    onclick="window.location.href='/dashboard/customers/{{ $customer->id }}'">
-
+<tr onclick="window.location.href='/dashboard/customers/{{ $customer->id }}'">
     {{-- Checkbox --}}
-    <td class="px-6 py-4" onclick="event.stopPropagation()">
+    <td onclick="event.stopPropagation()">
         <input type="checkbox" wire:model.live="selected" value="{{ $customer->id }}"
             class="checkbox checkbox-xs rounded border-slate-300">
     </td>
 
     {{-- Customer Name & Avatar --}}
-    <td class="px-6 py-4">
+    <td>
         <div class="flex items-center gap-3">
             <div class="flex-shrink-0">
-                <div class="w-9 h-9 rounded-full flex items-center justify-center text-xs shadow-sm font-semibold"
-                    style="background-color: var(--table-avatar-bg); color: var(--table-avatar-text); border: 1px solid var(--table-avatar-border);">
+                <div class="avatar-circle">
                     {{ $char }}
                 </div>
             </div>
             <div>
-                <div class="text-[13px] group-hover:opacity-80 transition-opacity font-medium"
-                    style="color: var(--list-card-link-color);">
+                <div class="item-name">
                     {{ $customer->name }}
                 </div>
             </div>
@@ -43,21 +39,20 @@
     </td>
 
     {{-- City Badge --}}
-    <td class="px-6 py-4">
+    <td>
         @if($cityName !== 'Belirtilmedi')
-            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border {{ $cityColor }}">
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border {{ $cityColor }}">
                 {{ $cityName }}
             </span>
         @else
-            <span class="text-skin-muted italic text-xs">-</span>
+            <span class="text-xs opacity-40 italic">-</span>
         @endif
     </td>
 
     {{-- Count Badges --}}
     @foreach(['contacts', 'assets', 'services', 'offers', 'sales', 'messages'] as $relation)
-        <td class="px-6 py-4 text-center">
-            <span class="inline-flex items-center justify-center w-6 h-6 rounded-full text-[11px] border"
-                style="background-color: var(--card-bg); color: var(--color-text-heading); border-color: var(--card-border);">
+        <td class="text-center">
+            <span class="count-badge">
                 {{ $customer->{$relation . '_count'} ?? 0 }}
             </span>
         </td>

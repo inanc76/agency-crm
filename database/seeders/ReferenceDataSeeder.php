@@ -97,5 +97,47 @@ class ReferenceDataSeeder extends Seeder
             ['category_key' => 'SERVICE_CATEGORY', 'key' => 'MOBILE_DEVELOPMENT'],
             ['display_label' => 'Mobil Geliştirme', 'sort_order' => 9, 'metadata' => ['color' => 'pink']]
         );
+
+        // Mail Status Category
+        $mailStatus = ReferenceCategory::firstOrCreate(
+            ['key' => 'MAIL_STATUS'],
+            ['name' => 'Mail Durumları', 'description' => 'E-posta gönderim durumları']
+        );
+
+        ReferenceItem::updateOrCreate(
+            ['category_key' => 'MAIL_STATUS', 'key' => 'SENT'],
+            ['display_label' => 'Gönderildi', 'sort_order' => 1, 'metadata' => ['color_class' => 'bg-green-50 text-green-600 border-green-200']]
+        );
+
+        ReferenceItem::updateOrCreate(
+            ['category_key' => 'MAIL_STATUS', 'key' => 'FAILED'],
+            ['display_label' => 'Başarısız', 'sort_order' => 2, 'metadata' => ['color_class' => 'bg-red-50 text-red-600 border-red-200']]
+        );
+
+        ReferenceItem::updateOrCreate(
+            ['category_key' => 'MAIL_STATUS', 'key' => 'PENDING'],
+            ['display_label' => 'Beklemede', 'sort_order' => 3, 'metadata' => ['color_class' => 'bg-yellow-50 text-yellow-600 border-yellow-200']]
+        );
+
+        ReferenceItem::updateOrCreate(
+            ['category_key' => 'MAIL_STATUS', 'key' => 'DRAFT'],
+            ['display_label' => 'Taslak', 'sort_order' => 4, 'metadata' => ['color_class' => 'bg-slate-50 text-slate-600 border-slate-200']]
+        );
+
+        // Mail Type Category
+        $mailType = ReferenceCategory::firstOrCreate(
+            ['key' => 'MAIL_TYPE'],
+            ['name' => 'Mesaj Tipleri', 'description' => 'E-posta ve SMS mesaj tipleri']
+        );
+
+        ReferenceItem::updateOrCreate(
+            ['category_key' => 'MAIL_TYPE', 'key' => 'EMAIL'],
+            ['display_label' => 'Mail', 'sort_order' => 1, 'metadata' => ['icon' => 'o-envelope', 'color_class' => 'bg-blue-50 text-blue-600 border-blue-200']]
+        );
+
+        ReferenceItem::updateOrCreate(
+            ['category_key' => 'MAIL_TYPE', 'key' => 'SMS'],
+            ['display_label' => 'SMS', 'sort_order' => 2, 'metadata' => ['icon' => 'o-device-phone-mobile', 'color_class' => 'bg-purple-50 text-purple-600 border-purple-200']]
+        );
     }
 }

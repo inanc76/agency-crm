@@ -42,7 +42,16 @@ birleştirildiği merkezi yönetim noktasıdır.
         'heading_color' => $heading_color,
         'base_text_color' => $base_text_color,
         'table_hover_bg_color' => $table_hover_bg_color,
-        'table_hover_text_color' => $table_hover_text_color
+        'table_hover_text_color' => $table_hover_text_color,
+        'table_avatar_bg_color' => $table_avatar_bg_color,
+        'table_avatar_text_color' => $table_avatar_text_color,
+        'table_avatar_border_color' => $table_avatar_border_color,
+        'table_header_bg_color' => $table_header_bg_color,
+        'table_header_text_color' => $table_header_text_color,
+        'table_divide_color' => $table_divide_color,
+        'table_item_name_size' => $table_item_name_size,
+        'table_item_name_weight' => $table_item_name_weight,
+        'list_card_link_color' => $list_card_link_color ?? '#4f46e5'
     ])
 
     {{-- 4. Dashboard Visuals --}}

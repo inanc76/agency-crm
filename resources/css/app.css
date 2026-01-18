@@ -731,6 +731,50 @@ select:focus[data-flux-control] {
     .btn.btn-primary .loading {
         color: currentColor !important;
     }
+
+    /* === MARYUI CHOICES FIX === */
+    /* Many selected items in modals fix */
+    .choices__inner {
+        min-height: 42px !important;
+        max-height: 120px !important;
+        overflow-y: auto !important;
+        padding-bottom: 0 !important;
+        background-color: white !important;
+        border-color: var(--card-border) !important;
+        border-radius: var(--input-radius) !important;
+        scrollbar-width: thin !important;
+        scrollbar-color: var(--card-border) transparent !important;
+    }
+
+    .choices__inner::-webkit-scrollbar {
+        width: 4px !important;
+    }
+
+    .choices__inner::-webkit-scrollbar-thumb {
+        background-color: var(--card-border) !important;
+        border-radius: 10px !important;
+    }
+
+    .choices__list--multiple .choices__item {
+        background-color: var(--dropdown-hover-bg) !important;
+        border: 1px solid var(--card-border) !important;
+        color: var(--color-text-base) !important;
+        font-size: 11px !important;
+        font-weight: 500 !important;
+        border-radius: 4px !important;
+        padding: 2px 8px !important;
+        margin-bottom: 4px !important;
+    }
+
+    .choices__list--multiple .choices__item.is-highlighted {
+        background-color: var(--brand-primary) !important;
+        color: white !important;
+        border-color: var(--brand-primary) !important;
+    }
+
+    .choices__list--dropdown {
+        z-index: 100 !important;
+    }
 }
 
 /* Theme toggle */
@@ -1116,4 +1160,84 @@ table tr:hover th {
 
 .border-skin-danger {
     border-color: var(--color-danger-base) !important;
+}
+
+/* ===== AGENCY STANDARD TABLE SYSTEM ===== */
+.agency-table {
+    width: 100%;
+    text-align: left;
+    font-size: 0.875rem !important;
+    /* text-sm */
+    border-collapse: collapse;
+}
+
+.agency-table thead {
+    background-color: var(--table-header-bg) !important;
+    border-bottom: 2px solid var(--table-divide) !important;
+}
+
+.agency-table th {
+    padding: 0.75rem 1.5rem !important;
+    font-weight: 600 !important;
+    color: var(--table-header-text) !important;
+    text-transform: capitalize;
+}
+
+.agency-table tbody tr {
+    border-bottom: 1px solid var(--table-divide) !important;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.agency-table tbody tr:hover {
+    background-color: var(--table-hover-bg) !important;
+    color: var(--table-hover-text) !important;
+}
+
+.agency-table td {
+    padding: 1rem 1.5rem !important;
+    vertical-align: middle;
+}
+
+/* Table Item Name Styling */
+.agency-table .item-name {
+    font-size: var(--table-item-name-size) !important;
+    font-weight: var(--table-item-name-weight) !important;
+    color: var(--list-card-link-color) !important;
+}
+
+/* Avatar Styling */
+.agency-table .avatar-circle {
+    width: 2.25rem;
+    /* w-9 */
+    height: 2.25rem;
+    /* h-9 */
+    background-color: var(--table-avatar-bg) !important;
+    color: var(--table-avatar-text) !important;
+    border: 1px solid var(--table-avatar-border) !important;
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.75rem;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+/* Count Badge Styling */
+.agency-table .count-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    /* w-6 */
+    height: 1.5rem;
+    /* h-6 */
+    background-color: var(--card-bg) !important;
+    /* White usually */
+    color: var(--color-text-heading) !important;
+    border: 1px solid var(--table-divide) !important;
+    border-radius: 9999px;
+    font-size: 11px;
+    font-weight: 500;
 }
