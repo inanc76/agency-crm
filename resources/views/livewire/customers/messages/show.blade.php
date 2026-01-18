@@ -18,9 +18,12 @@ new #[Layout('components.layouts.app', ['title' => 'Mesaj Detayı'])]
 
         public string $renderedBody = '';
 
+        public string $activeTab = 'info';
+
         public function mount(Message $message, MailTemplateService $mailService): void
         {
-            $this->message = $message->load(['customer', 'offer', 'status_item', 'type_item']);
+            $this->activeTab = request()->query('tab', 'info');
+            $this->message = $message->load(['customer', 'offer.downloadLogs', 'status_item', 'type_item']);
 
             // Get first contact for this customer
             $contact = Contact::where('customer_id', $this->message->customer_id)->first();
@@ -76,22 +79,36 @@ new #[Layout('components.layouts.app', ['title' => 'Mesaj Detayı'])]
             $cc = $this->message->cc ? array_map('trim', explode(',', $this->message->cc)) : [];
             $bcc = $this->message->bcc ? array_map('trim', explode(',', $this->message->bcc)) : [];
 
-            // Send email to the recipient
-            Mail::to($this->message->recipient_email)->send(new DynamicCustomerMail(
-                $this->message->subject,
-                $this->renderedBody,
-                $cc,
-                $bcc
-            ));
+            try {
+                // Send email to the recipient
+                Mail::to($this->message->recipient_email)->send(new DynamicCustomerMail(
+                    $this->message->subject,
+                    $this->renderedBody,
+                    $cc,
+                    $bcc
+                ));
 
-            // Update message status
-            $this->message->update([
-                'status' => 'SENT',
-                'sent_at' => now(),
-            ]);
+                // Update message status to SENT
+                $this->message->update([
+                    'status' => 'SENT',
+                    'sent_at' => now(),
+                ]);
 
-            $this->success('Başarılı', 'Mesaj '.$this->message->recipient_email.' adresine gönderildi.');
-            $this->redirect('/dashboard/customers?tab=messages', navigate: true);
+                // Update offer status to SENT if it's DRAFT
+                if ($this->message->offer_id && $this->message->offer?->status === 'DRAFT') {
+                    $this->message->offer->update(['status' => 'SENT']);
+                }
+
+                $this->success('Başarılı', 'Mesaj '.$this->message->recipient_email.' adresine gönderildi.');
+                $this->redirect('/dashboard/customers?tab=messages', navigate: true);
+            } catch (\Exception $e) {
+                // Update message status to FAILED
+                $this->message->update([
+                    'status' => 'FAILED',
+                ]);
+
+                $this->error('Hata', 'Mesaj gönderilemedi: '.$e->getMessage());
+            }
         }
     }; ?>
 
@@ -126,103 +143,188 @@ new #[Layout('components.layouts.app', ['title' => 'Mesaj Detayı'])]
         </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {{-- Left: Message Content (2/3) --}}
-        <div class="md:col-span-2 space-y-6">
-            <div class="theme-card p-8 shadow-sm min-h-[500px]">
-                <div class="mail-content prose prose-sm max-w-none">
-                    {!! $renderedBody !!}
-                </div>
-            </div>
-        </div>
-
-        {{-- Right: Sidebar Info (1/3) --}}
-        <div class="space-y-6">
-            {{-- Customer Card --}}
-            <div class="theme-card p-6 shadow-sm">
-                <h2 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Müşteri Bilgisi</h2>
-                <div class="flex items-center gap-4 mb-4">
-                    <div
-                        class="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-600 font-bold text-xl">
-                        {{ mb_substr($message->customer->name ?? 'M', 0, 1) }}
-                    </div>
-                    <div>
-                        <p class="text-sm font-bold text-slate-900 leading-tight">{{ $message->customer->name ?? '-' }}
-                        </p>
-                        <a href="/dashboard/customers/{{ $message->customer_id }}" wire:navigate
-                            class="text-xs text-blue-600 hover:underline">Profiline Git</a>
-                    </div>
-                </div>
-            </div>
-
-            {{-- Metadata Card --}}
-            <div class="theme-card p-6 shadow-sm space-y-4">
-                <h2 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Gönderim Detayları</h2>
-
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase">Durum</label>
-                    <div class="mt-1">
-                        @php
-                            $statusLabel = $message->status_item->display_label ?? $message->status ?? 'Bilinmiyor';
-                            $statusClass = $message->status_item->metadata['color_class'] ?? 'bg-slate-50 text-slate-500 border-slate-200';
-                        @endphp
-                        <span
-                            class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border {{ $statusClass }}">
-                            {{ $statusLabel }}
-                        </span>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase">Tarih</label>
-                    <p class="text-sm font-medium text-slate-700 mt-0.5">
-                        {{ $message->sent_at?->format('d.m.Y H:i') ?? '-' }}
-                    </p>
-                </div>
-
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase">Tür</label>
-                    <div class="mt-1">
-                        @php
-                            $typeLabel = $message->type_item->display_label ?? $message->type ?? 'Bilinmiyor';
-                            $typeClass = $message->type_item->metadata['color_class'] ?? 'bg-slate-50 text-slate-500 border-slate-200';
-                        @endphp
-                        <span
-                            class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border {{ $typeClass }}">
-                            {{ $typeLabel }}
-                        </span>
-                    </div>
-                </div>
-
-                @if($message->cc)
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase">CC</label>
-                        <p class="text-xs text-slate-600 mt-0.5 break-all">
-                            {{ $message->cc }}
-                        </p>
-                    </div>
-                @endif
-
-                @if($message->bcc)
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase">BCC</label>
-                        <p class="text-xs text-slate-600 mt-0.5 break-all">
-                            {{ $message->bcc }}
-                        </p>
-                    </div>
-                @endif
-
-                @if($message->offer_id)
-                    <div class="pt-4 border-t border-slate-50">
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase">İlgili Teklif</label>
-                        <a href="/dashboard/customers/offers/{{ $message->offer_id }}" wire:navigate
-                            class="flex items-center gap-2 text-sm font-bold text-blue-600 hover:text-blue-700 mt-1 transition-colors">
-                            <x-mary-icon name="o-document-text" class="w-4 h-4" />
-                            {{ $message->offer->number ?? 'Teklife Git' }}
-                        </a>
-                    </div>
-                @endif
-            </div>
-        </div>
+    {{-- Tab Navigation --}}
+    <div class="flex items-center border-b border-slate-200 mb-6 overflow-x-auto scrollbar-hide">
+        <button wire:click="$set('activeTab', 'info')"
+            class="cursor-pointer px-5 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors"
+            style="{{ $activeTab === 'info' ? 'border-color: var(--active-tab-color); color: var(--color-text-heading);' : 'border-color: transparent; color: var(--color-text-base); opacity: 0.6;' }}">
+            Mesaj Bilgileri
+        </button>
+        @if($message->status === 'SENT' && $message->offer_id)
+            <button wire:click="$set('activeTab', 'downloads')"
+                class="cursor-pointer px-5 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors"
+                style="{{ $activeTab === 'downloads' ? 'border-color: var(--active-tab-color); color: var(--color-text-heading);' : 'border-color: transparent; color: var(--color-text-base); opacity: 0.6;' }}">
+                İndirmeler ({{ $message->offer?->downloadLogs->count() ?? 0 }})
+            </button>
+        @endif
     </div>
+
+    @if($activeTab === 'info')
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {{-- Left: Message Content (2/3) --}}
+            <div class="md:col-span-2 space-y-6">
+                <div class="theme-card p-8 shadow-sm min-h-[500px]">
+                    <div class="mail-content prose prose-sm max-w-none">
+                        {!! $renderedBody !!}
+                    </div>
+                </div>
+            </div>
+
+            {{-- Right: Sidebar Info (1/3) --}}
+            <div class="space-y-6">
+                {{-- Customer Card --}}
+                <div class="theme-card p-6 shadow-sm">
+                    <h2 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Müşteri Bilgisi</h2>
+                    <div class="flex items-center gap-4 mb-4">
+                        <div
+                            class="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-600 font-bold text-xl">
+                            {{ mb_substr($message->customer->name ?? 'M', 0, 1) }}
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold text-slate-900 leading-tight">{{ $message->customer->name ?? '-' }}
+                            </p>
+                            <a href="/dashboard/customers/{{ $message->customer_id }}" wire:navigate
+                                class="text-xs text-blue-600 hover:underline">Profiline Git</a>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Metadata Card --}}
+                <div class="theme-card p-6 shadow-sm space-y-4">
+                    <h2 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Gönderim Detayları</h2>
+
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase">Kime</label>
+                        <p class="text-sm font-bold text-slate-700 mt-0.5 break-all">
+                            {{ $message->recipient_email ?? '-' }}
+                        </p>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase">Durum</label>
+                        <div class="mt-1">
+                            @php
+                                $statusLabel = $message->status_item->display_label ?? $message->status ?? 'Bilinmiyor';
+                                $statusClass = $message->status_item->metadata['color_class'] ?? 'bg-slate-50 text-slate-500 border-slate-200';
+                            @endphp
+                            <span
+                                class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border {{ $statusClass }}">
+                                {{ $statusLabel }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase">Tarih</label>
+                        <p class="text-sm font-medium text-slate-700 mt-0.5">
+                            {{ $message->sent_at?->format('d.m.Y H:i') ?? '-' }}
+                        </p>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase">Tür</label>
+                        <div class="mt-1">
+                            @php
+                                $typeLabel = $message->type_item->display_label ?? $message->type ?? 'Bilinmiyor';
+                                $typeClass = $message->type_item->metadata['color_class'] ?? 'bg-slate-50 text-slate-500 border-slate-200';
+                            @endphp
+                            <span
+                                class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border {{ $typeClass }}">
+                                {{ $typeLabel }}
+                            </span>
+                        </div>
+                    </div>
+
+                    @if($message->cc)
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase">CC</label>
+                            <p class="text-xs text-slate-600 mt-0.5 break-all">
+                                {{ $message->cc }}
+                            </p>
+                        </div>
+                    @endif
+
+                    @if($message->bcc)
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase">BCC</label>
+                            <p class="text-xs text-slate-600 mt-0.5 break-all">
+                                {{ $message->bcc }}
+                            </p>
+                        </div>
+                    @endif
+
+                    @if($message->offer_id)
+                        <div class="pt-4 border-t border-slate-50">
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase">İlgili Teklif</label>
+                            <a href="/dashboard/customers/offers/{{ $message->offer_id }}" wire:navigate
+                                class="flex items-center gap-2 text-sm font-bold text-blue-600 hover:text-blue-700 mt-1 transition-colors">
+                                <x-mary-icon name="o-document-text" class="w-4 h-4" />
+                                {{ $message->offer->number ?? 'Teklife Git' }}
+                            </a>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    @elseif($activeTab === 'downloads')
+        <div class="theme-card overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b border-[var(--card-border)] bg-gray-50/50">
+                            <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">E-posta</th>
+                            <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Tarih / Saat
+                            </th>
+                            <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Dosya Adı</th>
+                            <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">IP Adresi</th>
+                            <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Cihaz /
+                                Tarayıcı</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-[var(--card-border)]">
+                        @forelse($message->offer?->downloadLogs ?? [] as $log)
+                            <tr class="hover:bg-slate-50 transition-colors">
+                                <td class="px-6 py-4">
+                                    <div class="text-sm font-medium text-slate-700 break-all">
+                                        {{ $log->downloader_email ?? '-' }}
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="text-sm font-bold text-slate-900">{{ $log->downloaded_at->format('d.m.Y') }}
+                                    </div>
+                                    <div class="text-[10px] text-slate-500 font-medium">
+                                        {{ $log->downloaded_at->format('H:i:s') }}
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="text-xs text-slate-700 truncate max-w-xs" title="{{ $log->file_name ?? '-' }}">
+                                        {{ $log->file_name ?? '-' }}
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span
+                                        class="inline-flex items-center px-2 py-0.5 rounded bg-slate-100 text-slate-600 text-[10px] font-bold border border-slate-200">
+                                        {{ $log->ip_address ?? '-' }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="text-[10px] text-slate-600 line-clamp-1 max-w-sm"
+                                        title="{{ $log->user_agent }}">
+                                        {{ $log->user_agent ?? '-' }}
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="px-6 py-12 text-center">
+                                    <x-mary-icon name="o-arrow-down-tray" class="w-12 h-12 mx-auto mb-3 opacity-20" />
+                                    <p class="text-sm text-slate-500 italic">Henüz indirme kaydı bulunmuyor.</p>
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    @endif
 </div>

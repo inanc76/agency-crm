@@ -401,3 +401,26 @@ test('T35-UI: New Contact button has correct href on customer contacts tab', fun
     $response->assertSee('/dashboard/customers/contacts/create');
     $response->assertSee('customer=' . $customer->id);
 });
+
+// Eksik test (T32)
+
+test('T32-Edge: Special characters in contact name', function () {
+    $customer = Customer::factory()->create();
+    $specialName = 'Müller & Co. "CEO" #1 @2024';
+
+    Volt::test('modals.contact-form')
+        ->set('customer_id', $customer->id)
+        ->set('name', $specialName)
+        ->set('status', 'WORKING')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $this->assertDatabaseHas('contacts', [
+        'name' => $specialName,
+        'customer_id' => $customer->id
+    ]);
+
+    // Verify special characters are preserved
+    $contact = Contact::where('name', $specialName)->first();
+    expect($contact->name)->toBe($specialName);
+});

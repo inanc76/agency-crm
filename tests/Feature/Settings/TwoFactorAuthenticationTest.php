@@ -176,3 +176,36 @@ test('confirmation succeeds with mocked action', function () {
         ->assertSet('twoFactorEnabled', true)
         ->assertSee('Etkin');
 });
+
+// Eksik test (T10)
+
+test('regenerate recovery codes functionality works', function () {
+    // Enabled 2FA user oluştur
+    $user = User::factory()->withoutTwoFactor()->create();
+    $user->forceFill([
+        'two_factor_secret' => encrypt('secret'),
+        'two_factor_recovery_codes' => encrypt(json_encode(['old-code-1', 'old-code-2'])),
+        'two_factor_confirmed_at' => now(),
+    ])->save();
+
+    $this->actingAs($user);
+
+    // Eski kodları al
+    $oldCodes = json_decode(decrypt($user->two_factor_recovery_codes), true);
+
+    // Yeni kodlar üret
+    $component = Volt::test('settings.two-factor')
+        ->call('regenerateRecoveryCodes');
+
+    // Kullanıcıyı yenile ve yeni kodları kontrol et
+    $user->refresh();
+    $newCodes = json_decode(decrypt($user->two_factor_recovery_codes), true);
+
+    // Kodlar değişmiş olmalı
+    expect($newCodes)->not->toBe($oldCodes);
+    expect($newCodes)->toBeArray();
+    expect(count($newCodes))->toBeGreaterThan(0);
+
+    // UI'da başarı mesajı görünmeli
+    $component->assertSee('Kurtarma kodları yenilendi');
+});

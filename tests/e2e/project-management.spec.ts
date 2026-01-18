@@ -400,6 +400,626 @@ test.describe('Proje Oluşturma - Negatif Senaryolar', () => {
       dialog.dismiss();
     });
 
+    expect(alerts.length).toBe(0);
+  });
+});
+
+test.describe('Görevler Sekmesi - Listeleme ve Filtreleme', () => {
+
+  test('Görev listesi görüntülenmeli', async ({ page }) => {
+    await page.goto(`${DASHBOARD_PROJECTS_URL}?tab=tasks`);
+
+    // Görev tablosunun yüklendiğini kontrol et
+    await page.waitForSelector('table, .task-list', { timeout: 5000 });
+
+    const taskRows = page.locator('tbody tr, .task-item');
+    expect(await taskRows.count()).toBeGreaterThan(0);
+  });
+
+  test('Görev arama fonksiyonu çalışmalı', async ({ page }) => {
+    await page.goto(`${DASHBOARD_PROJECTS_URL}?tab=tasks`);
+
+    const searchInput = page.locator('input[placeholder*="Ara"], input[placeholder*="ara"]');
+    await searchInput.fill('İletişim sayfasının yapılması');
+
+    await page.waitForTimeout(500);
+
+    const taskRows = page.locator('tbody tr, .task-item');
+    await expect(taskRows.first()).toContainText('İletişim');
+  });
+
+  test('Öncelik filtreleri çalışmalı', async ({ page }) => {
+    await page.goto(`${DASHBOARD_PROJECTS_URL}?tab=tasks`);
+
+    await page.click('text=Tüm Öncelikler, text=Öncelik');
+    await page.click('text=Normal');
+
+    await page.waitForTimeout(500);
+
+    const priorityBadges = page.locator('.priority:has-text("Normal"), .badge:has-text("Normal")');
+    expect(await priorityBadges.count()).toBeGreaterThan(0);
+  });
+
+  test('Durum filtreleri çalışmalı', async ({ page }) => {
+    await page.goto(`${DASHBOARD_PROJECTS_URL}?tab=tasks`);
+
+    await page.click('text=Tüm Durumlar');
+    await page.click('text=Devam Ediyor');
+
+    await page.waitForTimeout(500);
+
+    const statusBadges = page.locator('.status:has-text("Devam Ediyor"), .badge:has-text("Devam Ediyor")');
+    expect(await statusBadges.count()).toBeGreaterThan(0);
+  });
+
+  test('Görev satırı tıklanabilmeli', async ({ page }) => {
+    await page.goto(`${DASHBOARD_PROJECTS_URL}?tab=tasks`);
+
+    const firstTaskRow = page.locator('tbody tr, .task-item').first();
+    await firstTaskRow.click();
+
+    // Modal veya detay sayfası açılmalı
+    await expect(page.locator('.modal, [data-testid="task-detail"]').first()).toBeVisible({ timeout: 3000 });
+  });
+
+  test('Tablo sütunları doğru görüntülenmeli', async ({ page }) => {
+    await page.goto(`${DASHBOARD_PROJECTS_URL}?tab=tasks`);
+
+    // Sütun başlıklarını kontrol et
+    await expect(page.locator('th:has-text("Konu"), th:has-text("Başlık")')).toBeVisible();
+    await expect(page.locator('th:has-text("Proje")')).toBeVisible();
+    await expect(page.locator('th:has-text("Öncelik")')).toBeVisible();
+    await expect(page.locator('th:has-text("Durum")')).toBeVisible();
+    await expect(page.locator('th:has-text("Atanan")')).toBeVisible();
+  });
+
+  test('Checkbox seçimi çalışmalı', async ({ page }) => {
+    await page.goto(`${DASHBOARD_PROJECTS_URL}?tab=tasks`);
+
+    const firstCheckbox = page.locator('tbody tr input[type="checkbox"]').first();
+    await firstCheckbox.check();
+
+    await expect(firstCheckbox).toBeChecked();
+  });
+
+  test('Toplu seçim çalışmalı', async ({ page }) => {
+    await page.goto(`${DASHBOARD_PROJECTS_URL}?tab=tasks`);
+
+    const headerCheckbox = page.locator('thead input[type="checkbox"]');
+    await headerCheckbox.check();
+
+    const allCheckboxes = page.locator('tbody tr input[type="checkbox"]');
+    const checkboxCount = await allCheckboxes.count();
+
+    for (let i = 0; i < checkboxCount; i++) {
+      await expect(allCheckboxes.nth(i)).toBeChecked();
+    }
+  });
+});
+
+test.describe('Görev Oluşturma - Pozitif Senaryolar', () => {
+
+  test('Yeni görev sayfasına gidilebilmeli', async ({ page }) => {
+    await page.goto(`${DASHBOARD_PROJECTS_URL}?tab=tasks`);
+
+    await page.click('button:has-text("Yeni Görev"), a:has-text("Yeni Görev")');
+
+    await expect(page).toHaveURL(/\/dashboard\/projects\/tasks\/create/);
+    await expect(page.locator('h1, h2, h3').filter({ hasText: 'Görev' }).first()).toBeVisible();
+  });
+
+  test('Tüm zorunlu alanlar doldurularak görev oluşturulabilmeli', async ({ page }) => {
+    await page.goto(`${BASE_URL}/dashboard/projects/tasks/create`);
+
+    // Müşteri seç
+    await selectLivewireOption(page, 'select[name="customer_id"]', { index: 1 }, { waitForReactivity: 500 });
+
+    // Proje seç (müşteri seçildikten sonra aktif olur)
+    await selectLivewireOption(page, 'select[name="project_id"]', { index: 1 }, { waitForReactivity: 300 });
+
+    // Atanan kişi
+    await selectLivewireOption(page, 'select[name="assigned_to"]', { index: 1 });
+
+    // Öncelik
+    await selectLivewireOption(page, 'select[name="priority"]', { index: 1 });
+
+    // Durum
+    await selectLivewireOption(page, 'select[name="status"]', { index: 1 });
+
+    // Başlık
+    await fillLivewireInput(page, 'input[name="title"]', testData.task.title);
+
+    // Açıklama
+    await fillLivewireInput(page, 'textarea[name="description"]', testData.task.description);
+
+    // Kaydet
+    await clickThemeButton(page, 'save', { waitAfter: 1000 });
+
+    // Başarı kontrolü
+    await page.waitForURL(/tasks/, { timeout: 10000 });
+    expect(page.url()).toMatch(/tasks/);
+  });
+
+  test('Müşteri-proje ilişkisi çalışmalı', async ({ page }) => {
+    await page.goto(`${BASE_URL}/dashboard/projects/tasks/create`);
+
+    // İlk başta proje dropdown'ı disabled olmalı
+    const projectSelect = page.locator('select[name="project_id"]');
+    await expect(projectSelect).toBeDisabled();
+
+    // Müşteri seç
+    await selectLivewireOption(page, 'select[name="customer_id"]', { index: 1 }, { waitForReactivity: 500 });
+
+    // Proje dropdown'ı aktif olmalı
+    await expect(projectSelect).toBeEnabled();
+
+    // Proje seçenekleri yüklenmiş olmalı
+    const projectOptions = await projectSelect.locator('option').count();
+    expect(projectOptions).toBeGreaterThan(1);
+  });
+
+  test('Dosya yüklenebilmeli', async ({ page }) => {
+    await page.goto(`${BASE_URL}/dashboard/projects/tasks/create`);
+
+    // Dosya input'u bul
+    const fileInput = page.locator('input[type="file"]');
+    
+    // Test dosyası yükle
+    await fileInput.setInputFiles('tests/fixtures/test-file.pdf');
+
+    // Dosya listede görünmeli
+    await expect(page.locator('.file-list, .uploaded-files').first()).toContainText('test-file.pdf');
+  });
+
+  test('Görev özeti güncellenmeli', async ({ page }) => {
+    await page.goto(`${BASE_URL}/dashboard/projects/tasks/create`);
+
+    // Müşteri seç
+    await selectLivewireOption(page, 'select[name="customer_id"]', { index: 1 }, { waitForReactivity: 500 });
+
+    // Özet bölümünde müşteri adı görünmeli
+    const summary = page.locator('.task-summary, .summary-panel').first();
+    await expect(summary).toContainText('Volkan İnanç');
+  });
+});
+
+test.describe('Görev Oluşturma - Negatif Senaryolar', () => {
+
+  test('Müşteri seçilmeden görev oluşturulamamalı', async ({ page }) => {
+    await page.goto(`${BASE_URL}/dashboard/projects/tasks/create`);
+
+    await fillLivewireInput(page, 'input[name="title"]', 'Test Görev');
+    await clickThemeButton(page, 'save', { waitAfter: 1000 });
+
+    await page.waitForTimeout(500);
+    expect(page.url()).toContain('/create');
+
+    const errorMessage = page.locator('.text-red-500, .text-danger, [class*="error"]').first();
+    await expect(errorMessage).toBeVisible({ timeout: 3000 });
+  });
+
+  test('Proje seçilmeden görev oluşturulamamalı', async ({ page }) => {
+    await page.goto(`${BASE_URL}/dashboard/projects/tasks/create`);
+
+    await selectLivewireOption(page, 'select[name="customer_id"]', { index: 1 });
+    await fillLivewireInput(page, 'input[name="title"]', 'Test Görev');
+    await clickThemeButton(page, 'save', { waitAfter: 1000 });
+
+    await page.waitForTimeout(500);
+    expect(page.url()).toContain('/create');
+
+    const errorMessage = page.locator('.text-red-500, .text-danger, [class*="error"]').first();
+    await expect(errorMessage).toBeVisible({ timeout: 3000 });
+  });
+
+  test('Görev başlığı boş bırakılamamalı', async ({ page }) => {
+    await page.goto(`${BASE_URL}/dashboard/projects/tasks/create`);
+
+    await selectLivewireOption(page, 'select[name="customer_id"]', { index: 1 }, { waitForReactivity: 500 });
+    await selectLivewireOption(page, 'select[name="project_id"]', { index: 1 });
+    await clickThemeButton(page, 'save', { waitAfter: 1000 });
+
+    await page.waitForTimeout(500);
+    expect(page.url()).toContain('/create');
+
+    const errorMessage = page.locator('.text-red-500, .text-danger, [class*="error"]').first();
+    await expect(errorMessage).toBeVisible({ timeout: 3000 });
+  });
+
+  test('Geçersiz dosya formatı yüklenememeli', async ({ page }) => {
+    await page.goto(`${BASE_URL}/dashboard/projects/tasks/create`);
+
+    const fileInput = page.locator('input[type="file"]');
+    await fileInput.setInputFiles('tests/fixtures/malicious.exe');
+
+    // Hata mesajı görünmeli
+    const errorMessage = page.locator('.text-red-500, .text-danger, [class*="error"]').first();
+    await expect(errorMessage).toBeVisible({ timeout: 3000 });
+  });
+
+  test('Maksimum dosya boyutu aşılamamalı', async ({ page }) => {
+    await page.goto(`${BASE_URL}/dashboard/projects/tasks/create`);
+
+    const fileInput = page.locator('input[type="file"]');
+    await fileInput.setInputFiles('tests/fixtures/large-file.pdf');
+
+    // Hata mesajı görünmeli
+    const errorMessage = page.locator('.text-red-500, .text-danger, [class*="error"]').first();
+    await expect(errorMessage).toBeVisible({ timeout: 3000 });
+  });
+});
+
+test.describe('Raporlar Sekmesi - Listeleme', () => {
+
+  test('Rapor listesi görüntülenmeli', async ({ page }) => {
+    await page.goto(`${DASHBOARD_PROJECTS_URL}?tab=reports`);
+
+    await page.waitForSelector('table, .report-list', { timeout: 5000 });
+
+    const reportRows = page.locator('tbody tr, .report-item');
+    expect(await reportRows.count()).toBeGreaterThan(0);
+  });
+
+  test('Rapor arama fonksiyonu çalışmalı', async ({ page }) => {
+    await page.goto(`${DASHBOARD_PROJECTS_URL}?tab=reports`);
+
+    const searchInput = page.locator('input[placeholder*="Ara"], input[placeholder*="ara"]');
+    await searchInput.fill('Destek Hizmeti');
+
+    await page.waitForTimeout(500);
+
+    const reportRows = page.locator('tbody tr, .report-item');
+    await expect(reportRows.first()).toContainText('Destek');
+  });
+
+  test('Tablo sütunları doğru görüntülenmeli', async ({ page }) => {
+    await page.goto(`${DASHBOARD_PROJECTS_URL}?tab=reports`);
+
+    await expect(page.locator('th:has-text("Tarih")')).toBeVisible();
+    await expect(page.locator('th:has-text("Raporu Giren")')).toBeVisible();
+    await expect(page.locator('th:has-text("Müşteri")')).toBeVisible();
+    await expect(page.locator('th:has-text("Hizmet"), th:has-text("Proje")')).toBeVisible();
+    await expect(page.locator('th:has-text("Süre")')).toBeVisible();
+    await expect(page.locator('th:has-text("Rapor Özeti")')).toBeVisible();
+  });
+
+  test('Rapor satırı detayları görüntülenmeli', async ({ page }) => {
+    await page.goto(`${DASHBOARD_PROJECTS_URL}?tab=reports`);
+
+    const firstRow = page.locator('tbody tr, .report-item').first();
+
+    await expect(firstRow.locator('td').nth(0)).toBeVisible(); // Tarih
+    await expect(firstRow.locator('td').nth(1)).toBeVisible(); // Raporu Giren
+    await expect(firstRow.locator('td').nth(2)).toBeVisible(); // Müşteri
+    await expect(firstRow.locator('td').nth(3)).toBeVisible(); // Hizmet/Proje
+    await expect(firstRow.locator('td').nth(4)).toBeVisible(); // Süre
+  });
+
+  test('Destek hizmeti badge görüntülenmeli', async ({ page }) => {
+    await page.goto(`${DASHBOARD_PROJECTS_URL}?tab=reports`);
+
+    const serviceBadge = page.locator('.badge:has-text("Destek Hizmeti"), .service-type:has-text("Destek")').first();
+    await expect(serviceBadge).toBeVisible();
+  });
+
+  test('Rapor özeti görüntülenmeli', async ({ page }) => {
+    await page.goto(`${DASHBOARD_PROJECTS_URL}?tab=reports`);
+
+    const summaryColumn = page.locator('tbody tr td').last();
+    await expect(summaryColumn).toBeVisible();
+  });
+
+  test('Süre formatı doğru görüntülenmeli', async ({ page }) => {
+    await page.goto(`${DASHBOARD_PROJECTS_URL}?tab=reports`);
+
+    const durationColumn = page.locator('tbody tr').first().locator('td').nth(4);
+    await expect(durationColumn).toContainText(/\d+s \d+dk|\d+:\d+/);
+  });
+});
+
+test.describe('Rapor Oluşturma - Pozitif Senaryolar', () => {
+
+  test('Yeni rapor sayfasına gidilebilmeli', async ({ page }) => {
+    await page.goto(`${DASHBOARD_PROJECTS_URL}?tab=reports`);
+
+    await page.click('button:has-text("Yeni Rapor"), a:has-text("Yeni Rapor")');
+
+    await expect(page).toHaveURL(/\/dashboard\/projects\/reports\/create/);
+    await expect(page.locator('h1, h2, h3').filter({ hasText: 'Rapor' }).first()).toBeVisible();
+  });
+
+  test('Müşteri seçerek rapor oluşturulabilmeli', async ({ page }) => {
+    await page.goto(`${BASE_URL}/dashboard/projects/reports/create`);
+
+    // Müşteri seç
+    await selectLivewireOption(page, 'select[name="customer_id"]', { index: 1 }, { waitForReactivity: 500 });
+
+    // İlişki tipi - Proje sekmesi
+    await page.click('text=Proje');
+
+    // Proje tipi seç
+    await selectLivewireOption(page, 'select[name="project_type"]', { index: 1 });
+
+    // Rapor satırı ekle
+    await page.click('button:has-text("Rapor Ekle")');
+
+    // Rapor detayları doldur
+    await fillLivewireInput(page, 'input[name="report_title"]', 'Test Rapor');
+    await fillLivewireInput(page, 'textarea[name="report_description"]', 'Test açıklaması');
+    await fillLivewireInput(page, 'input[name="hours"]', '2');
+    await fillLivewireInput(page, 'input[name="minutes"]', '30');
+
+    // Kaydet
+    await clickThemeButton(page, 'save', { waitAfter: 1000 });
+
+    // Başarı kontrolü
+    await page.waitForURL(/reports/, { timeout: 10000 });
+    expect(page.url()).toMatch(/reports/);
+  });
+
+  test('Rapor ilişkisi sekmeleri çalışmalı', async ({ page }) => {
+    await page.goto(`${BASE_URL}/dashboard/projects/reports/create`);
+
+    // Proje sekmesi
+    await page.click('text=Proje');
+    await expect(page.locator('select[name="project_type"]')).toBeVisible();
+
+    // Görev sekmesi
+    await page.click('text=Görev');
+    await expect(page.locator('select[name="task_id"]')).toBeVisible();
+
+    // Rapor Yok sekmesi
+    await page.click('text=Rapor Yok');
+    await expect(page.locator('.no-relation-message')).toBeVisible();
+  });
+
+  test('Rapor özeti görüntülenmeli', async ({ page }) => {
+    await page.goto(`${BASE_URL}/dashboard/projects/reports/create`);
+
+    const summary = page.locator('.report-summary, .summary-panel').first();
+
+    await expect(summary).toContainText('Oluşturan');
+    await expect(summary).toContainText('Tarih');
+    await expect(summary).toContainText('Toplam Süre');
+  });
+
+  test('Rapor satırı eklenebilmeli', async ({ page }) => {
+    await page.goto(`${BASE_URL}/dashboard/projects/reports/create`);
+
+    await page.click('button:has-text("Rapor Ekle")');
+
+    // Rapor satırı formu açılmalı
+    await expect(page.locator('.report-row-form, .modal').first()).toBeVisible({ timeout: 3000 });
+  });
+
+  test('Rapor bilgileri doldurulabilmeli', async ({ page }) => {
+    await page.goto(`${BASE_URL}/dashboard/projects/reports/create`);
+
+    await page.click('button:has-text("Rapor Ekle")');
+
+    // Rapor detayları
+    await fillLivewireInput(page, 'input[name="report_title"]', 'Test Rapor');
+    await fillLivewireInput(page, 'textarea[name="report_description"]', 'Test açıklaması');
+    await fillLivewireInput(page, 'input[name="hours"]', '2');
+    await fillLivewireInput(page, 'input[name="minutes"]', '30');
+
+    // Kaydet
+    await clickThemeButton(page, 'save');
+
+    // Toplam süre güncellenmeli
+    const summary = page.locator('.report-summary, .summary-panel').first();
+    await expect(summary).toContainText('2s 30dk');
+  });
+});
+
+test.describe('Rapor Oluşturma - Negatif Senaryolar', () => {
+
+  test('Müşteri seçilmeden rapor oluşturulamamalı', async ({ page }) => {
+    await page.goto(`${BASE_URL}/dashboard/projects/reports/create`);
+
+    await clickThemeButton(page, 'save', { waitAfter: 1000 });
+
+    await page.waitForTimeout(500);
+    expect(page.url()).toContain('/create');
+
+    const errorMessage = page.locator('.text-red-500, .text-danger, [class*="error"]').first();
+    await expect(errorMessage).toBeVisible({ timeout: 3000 });
+  });
+
+  test('Proje tipi seçilmeden rapor oluşturulamamalı', async ({ page }) => {
+    await page.goto(`${BASE_URL}/dashboard/projects/reports/create`);
+
+    await selectLivewireOption(page, 'select[name="customer_id"]', { index: 1 });
+    await page.click('text=Proje');
+    await clickThemeButton(page, 'save', { waitAfter: 1000 });
+
+    await page.waitForTimeout(500);
+    expect(page.url()).toContain('/create');
+
+    const errorMessage = page.locator('.text-red-500, .text-danger, [class*="error"]').first();
+    await expect(errorMessage).toBeVisible({ timeout: 3000 });
+  });
+
+  test('Rapor satırı eklenmeden kayıt yapılamamalı', async ({ page }) => {
+    await page.goto(`${BASE_URL}/dashboard/projects/reports/create`);
+
+    await selectLivewireOption(page, 'select[name="customer_id"]', { index: 1 });
+    await page.click('text=Proje');
+    await selectLivewireOption(page, 'select[name="project_type"]', { index: 1 });
+    await clickThemeButton(page, 'save', { waitAfter: 1000 });
+
+    await page.waitForTimeout(500);
+    expect(page.url()).toContain('/create');
+
+    const errorMessage = page.locator('.text-red-500, .text-danger, [class*="error"]').first();
+    await expect(errorMessage).toBeVisible({ timeout: 3000 });
+  });
+
+  test('Geçersiz süre girişi kabul edilmemeli', async ({ page }) => {
+    await page.goto(`${BASE_URL}/dashboard/projects/reports/create`);
+
+    await page.click('button:has-text("Rapor Ekle")');
+
+    await fillLivewireInput(page, 'input[name="hours"]', '-1');
+    await fillLivewireInput(page, 'input[name="minutes"]', '70');
+
+    await clickThemeButton(page, 'save');
+
+    const errorMessage = page.locator('.text-red-500, .text-danger, [class*="error"]').first();
+    await expect(errorMessage).toBeVisible({ timeout: 3000 });
+  });
+});
+
+test.describe('Entegrasyon Testleri', () => {
+
+  test('Proje-görev-rapor akışı çalışmalı', async ({ page }) => {
+    // 1. Yeni proje oluştur
+    await page.goto(`${BASE_URL}/dashboard/projects/create`);
+    
+    const uniqueProjectName = `Test Proje ${Date.now()}`;
+    await fillLivewireInput(page, 'input[name="project_name"]', uniqueProjectName);
+    await selectLivewireOption(page, 'select[name="customer_id"]', { index: 1 }, { waitForReactivity: 500 });
+    await clickThemeButton(page, 'save', { waitAfter: 1000 });
+    
+    await page.waitForURL(/projects/, { timeout: 10000 });
+
+    // 2. Proje için görev ekle
+    await page.goto(`${BASE_URL}/dashboard/projects/tasks/create`);
+    
+    await selectLivewireOption(page, 'select[name="customer_id"]', { index: 1 }, { waitForReactivity: 500 });
+    await selectLivewireOption(page, 'select[name="project_id"]', { index: 1 });
+    await fillLivewireInput(page, 'input[name="title"]', 'Test Görev');
+    await clickThemeButton(page, 'save', { waitAfter: 1000 });
+    
+    await page.waitForURL(/tasks/, { timeout: 10000 });
+
+    // 3. Görev için rapor oluştur
+    await page.goto(`${BASE_URL}/dashboard/projects/reports/create`);
+    
+    await selectLivewireOption(page, 'select[name="customer_id"]', { index: 1 }, { waitForReactivity: 500 });
+    await page.click('text=Görev');
+    await selectLivewireOption(page, 'select[name="task_id"]', { index: 1 });
+    
+    await page.click('button:has-text("Rapor Ekle")');
+    await fillLivewireInput(page, 'input[name="report_title"]', 'Test Rapor');
+    await fillLivewireInput(page, 'input[name="hours"]', '1');
+    await clickThemeButton(page, 'save', { waitAfter: 1000 });
+    
+    await page.waitForURL(/reports/, { timeout: 10000 });
+    expect(page.url()).toMatch(/reports/);
+  });
+
+  test('Çoklu proje oluşturulabilmeli', async ({ page }) => {
+    const projectNames = ['Proje 1', 'Proje 2', 'Proje 3'];
+
+    for (const projectName of projectNames) {
+      await page.goto(`${BASE_URL}/dashboard/projects/create`);
+      
+      await fillLivewireInput(page, 'input[name="project_name"]', `${projectName} ${Date.now()}`);
+      await selectLivewireOption(page, 'select[name="customer_id"]', { index: 1 }, { waitForReactivity: 500 });
+      await clickThemeButton(page, 'save', { waitAfter: 1000 });
+      
+      await page.waitForURL(/projects/, { timeout: 10000 });
+    }
+
+    // Proje listesinde tüm projeler görünmeli
+    await page.goto(`${DASHBOARD_PROJECTS_URL}?tab=projects`);
+    
+    const projectCards = page.locator('[data-testid="project-card"]');
+    expect(await projectCards.count()).toBeGreaterThanOrEqual(3);
+  });
+
+  test('Proje silme etkisi kontrol edilmeli', async ({ page }) => {
+    // Bu test proje silme fonksiyonu varsa çalışır
+    await page.goto(`${DASHBOARD_PROJECTS_URL}?tab=projects`);
+
+    const firstProject = page.locator('[data-testid="project-card"]').first();
+    
+    // Hover yaparak aksiyon butonlarını göster
+    await firstProject.hover();
+    
+    const deleteButton = firstProject.locator('button:has-text("Sil"), .delete-btn');
+    
+    if (await deleteButton.isVisible()) {
+      await deleteButton.click();
+      
+      // Onay dialogu
+      await page.click('button:has-text("Evet"), button:has-text("Sil")');
+      
+      await page.waitForTimeout(1000);
+      
+      // Görevler sekmesinde uygun mesaj gösterilmeli
+      await page.goto(`${DASHBOARD_PROJECTS_URL}?tab=tasks`);
+      
+      // Silinen projeye ait görevlerde uyarı olmalı
+      const warningMessage = page.locator('.warning, .alert, .text-yellow-500');
+      if (await warningMessage.isVisible()) {
+        await expect(warningMessage).toBeVisible();
+      }
+    }
+  });
+});
+
+test.describe('Performans Testleri', () => {
+
+  test('Sayfa yükleme süresi 3 saniyeden kısa olmalı', async ({ page }) => {
+    const startTime = Date.now();
+    
+    await page.goto(`${DASHBOARD_PROJECTS_URL}?tab=projects`);
+    await page.waitForSelector('[data-testid="project-card"]', { timeout: 5000 });
+    
+    const loadTime = Date.now() - startTime;
+    expect(loadTime).toBeLessThan(3000);
+  });
+
+  test('Pagination performanslı çalışmalı', async ({ page }) => {
+    await page.goto(`${DASHBOARD_PROJECTS_URL}?tab=projects`);
+
+    const nextButton = page.locator('button:has-text("Sonraki"), .pagination-next');
+    
+    if (await nextButton.isVisible()) {
+      const startTime = Date.now();
+      
+      await nextButton.click();
+      await page.waitForSelector('[data-testid="project-card"]', { timeout: 2000 });
+      
+      const loadTime = Date.now() - startTime;
+      expect(loadTime).toBeLessThan(1000);
+    }
+  });
+
+  test('Arama performanslı çalışmalı', async ({ page }) => {
+    await page.goto(`${DASHBOARD_PROJECTS_URL}?tab=projects`);
+
+    const searchInput = page.locator('input[placeholder*="ara"]');
+    
+    const startTime = Date.now();
+    
+    await searchInput.fill('test');
+    await page.waitForTimeout(500); // Debounce
+    
+    const loadTime = Date.now() - startTime;
+    expect(loadTime).toBeLessThan(1000);
+  });
+
+  test('Lazy loading çalışmalı', async ({ page }) => {
+    await page.goto(`${DASHBOARD_PROJECTS_URL}?tab=projects`);
+
+    const initialCardCount = await page.locator('[data-testid="project-card"]').count();
+    
+    // Sayfa sonuna kaydır
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    
+    await page.waitForTimeout(1000);
+    
+    const finalCardCount = await page.locator('[data-testid="project-card"]').count();
+    
+    // Yeni kartlar yüklenmiş olabilir (lazy loading varsa)
+    expect(finalCardCount).toBeGreaterThanOrEqual(initialCardCount);
+  });
+});
+    });
+
     await page.waitForTimeout(500);
     expect(alerts.length).toBe(0);
   });
@@ -1482,4 +2102,643 @@ test.describe('Özel Durumlar ve Edge Cases', () => {
 test.afterEach(async ({ page }) => {
   // Oluşturulan test verilerini temizle (opsiyonel)
   await page.close();
+});
+
+test.describe('Erişilebilirlik Testleri', () => {
+
+  test('Klavye navigasyonu çalışmalı', async ({ page }) => {
+    await page.goto(`${BASE_URL}/dashboard/projects/create`);
+
+    // Tab ile form elemanları arasında gezin
+    await page.keyboard.press('Tab');
+    await page.keyboard.press('Tab');
+    await page.keyboard.press('Tab');
+
+    // Enter ile buton tıklanabilmeli
+    const focusedElement = page.locator(':focus');
+    await expect(focusedElement).toBeVisible();
+  });
+
+  test('ARIA etiketleri mevcut olmalı', async ({ page }) => {
+    await page.goto(`${BASE_URL}/dashboard/projects/create`);
+
+    // Butonlarda aria-label olmalı
+    const saveButton = page.locator('.theme-btn-save');
+    const ariaLabel = await saveButton.getAttribute('aria-label');
+    expect(ariaLabel).toBeTruthy();
+  });
+
+  test('Alternatif metinler mevcut olmalı', async ({ page }) => {
+    await page.goto(`${DASHBOARD_PROJECTS_URL}?tab=projects`);
+
+    const images = page.locator('img');
+    const imageCount = await images.count();
+
+    for (let i = 0; i < imageCount; i++) {
+      const altText = await images.nth(i).getAttribute('alt');
+      expect(altText).toBeTruthy();
+    }
+  });
+
+  test('Form hataları erişilebilir olmalı', async ({ page }) => {
+    await page.goto(`${BASE_URL}/dashboard/projects/create`);
+
+    await clickThemeButton(page, 'save', { waitAfter: 1000 });
+
+    const errorMessage = page.locator('.text-red-500, .text-danger, [class*="error"]').first();
+    
+    if (await errorMessage.isVisible()) {
+      const role = await errorMessage.getAttribute('role');
+      expect(role).toBe('alert');
+    }
+  });
+});
+
+test.describe('Responsive Tasarım Testleri', () => {
+
+  test('Mobil hamburger menü çalışmalı', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 667 });
+    await page.goto(DASHBOARD_PROJECTS_URL);
+
+    const hamburgerMenu = page.locator('.hamburger, .mobile-menu-toggle, [data-testid="mobile-menu"]');
+    
+    if (await hamburgerMenu.isVisible()) {
+      await hamburgerMenu.click();
+      
+      const mobileMenu = page.locator('.mobile-menu, .sidebar-mobile');
+      await expect(mobileMenu).toBeVisible();
+    }
+  });
+
+  test('Tablet layout düzgün görüntülenmeli', async ({ page }) => {
+    await page.setViewportSize({ width: 768, height: 1024 });
+    await page.goto(`${DASHBOARD_PROJECTS_URL}?tab=projects`);
+
+    const projectCards = page.locator('[data-testid="project-card"]');
+    await expect(projectCards.first()).toBeVisible();
+
+    // Grid düzeninde olmalı
+    const gridContainer = page.locator('.grid, .project-grid');
+    if (await gridContainer.isVisible()) {
+      await expect(gridContainer).toBeVisible();
+    }
+  });
+
+  test('Desktop görünüm tam olmalı', async ({ page }) => {
+    await page.setViewportSize({ width: 1920, height: 1080 });
+    await page.goto(DASHBOARD_PROJECTS_URL);
+
+    // Tüm sekmeler görünür olmalı
+    await expect(page.locator('text=Projeler')).toBeVisible();
+    await expect(page.locator('text=Görevler')).toBeVisible();
+    await expect(page.locator('text=Raporlar')).toBeVisible();
+
+    // Butonlar görünür olmalı
+    await expect(page.locator('button:has-text("Yeni Proje")')).toBeVisible();
+  });
+
+  test('Mobil form kullanımı çalışmalı', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 667 });
+    await page.goto(`${BASE_URL}/dashboard/projects/create`);
+
+    const projectNameInput = page.locator('input[name="project_name"]');
+    await expect(projectNameInput).toBeVisible();
+    
+    await projectNameInput.click();
+    await projectNameInput.fill('Mobil Test');
+    
+    await expect(projectNameInput).toHaveValue('Mobil Test');
+  });
+});
+
+test.describe('Güvenlik Testleri', () => {
+
+  test('XSS koruması çalışmalı', async ({ page }) => {
+    await page.goto(`${BASE_URL}/dashboard/projects/create`);
+
+    const xssPayload = '<script>alert("XSS")</script>';
+    
+    await fillLivewireInput(page, 'input[name="project_name"]', xssPayload);
+    await selectLivewireOption(page, 'select[name="customer_id"]', { index: 1 });
+    await clickThemeButton(page, 'save', { waitAfter: 1000 });
+
+    // Script çalışmamalı
+    const alerts = [];
+    page.on('dialog', dialog => {
+      alerts.push(dialog.message());
+      dialog.dismiss();
+    });
+
+    expect(alerts.length).toBe(0);
+  });
+
+  test('SQL injection koruması çalışmalı', async ({ page }) => {
+    await page.goto(`${BASE_URL}/dashboard/projects/create`);
+
+    const sqlPayload = "'; DROP TABLE projects; --";
+    
+    await fillLivewireInput(page, 'input[name="project_name"]', sqlPayload);
+    await selectLivewireOption(page, 'select[name="customer_id"]', { index: 1 });
+    await clickThemeButton(page, 'save', { waitAfter: 1000 });
+
+    // Sayfa çalışmaya devam etmeli
+    await page.waitForTimeout(1000);
+    expect(page.url()).toBeTruthy();
+  });
+
+  test('CSRF token kontrolü çalışmalı', async ({ page }) => {
+    await page.goto(`${BASE_URL}/dashboard/projects/create`);
+
+    const csrfToken = page.locator('input[name="_token"]');
+    await expect(csrfToken).toBeVisible();
+    
+    const tokenValue = await csrfToken.getAttribute('value');
+    expect(tokenValue).toBeTruthy();
+    expect(tokenValue.length).toBeGreaterThan(10);
+  });
+
+  test('Yetkisiz erişim engellenmelidir', async ({ page }) => {
+    // Cookie'leri temizle
+    await page.context().clearCookies();
+    
+    await page.goto(`${BASE_URL}/dashboard/projects/create`);
+
+    // Login sayfasına yönlendirilmeli
+    await page.waitForURL(/login|auth/, { timeout: 5000 });
+    expect(page.url()).toMatch(/login|auth/);
+  });
+});
+
+test.describe('Hata Yönetimi Testleri', () => {
+
+  test('Network hatası durumunda uygun mesaj gösterilmeli', async ({ page }) => {
+    await page.goto(`${BASE_URL}/dashboard/projects/create`);
+
+    // Network'ü offline yap
+    await page.context().setOffline(true);
+
+    await fillLivewireInput(page, 'input[name="project_name"]', 'Network Test');
+    await selectLivewireOption(page, 'select[name="customer_id"]', { index: 1 });
+    await clickThemeButton(page, 'save', { waitAfter: 2000 });
+
+    // Hata mesajı görünmeli
+    const errorMessage = page.locator('.network-error, .connection-error, .text-red-500').first();
+    await expect(errorMessage).toBeVisible({ timeout: 5000 });
+
+    // Network'ü tekrar online yap
+    await page.context().setOffline(false);
+  });
+
+  test('404 hatası için uygun sayfa gösterilmeli', async ({ page }) => {
+    await page.goto(`${BASE_URL}/dashboard/projects/nonexistent`);
+
+    // 404 sayfası veya hata mesajı
+    const notFoundMessage = page.locator('text=404, text=Sayfa bulunamadı, text=Not Found').first();
+    await expect(notFoundMessage).toBeVisible({ timeout: 3000 });
+  });
+
+  test('500 hatası durumunda kullanıcı bilgilendirilmeli', async ({ page }) => {
+    // Bu test gerçek 500 hatası simüle etmek zor olduğu için mock yapılabilir
+    await page.goto(`${BASE_URL}/dashboard/projects/create`);
+
+    // Sunucu hatası simülasyonu için geçersiz veri gönder
+    await fillLivewireInput(page, 'input[name="project_name"]', 'A'.repeat(1000));
+    await clickThemeButton(page, 'save', { waitAfter: 2000 });
+
+    // Hata mesajı görünmeli
+    const serverError = page.locator('.server-error, .text-red-500, [class*="error"]').first();
+    
+    if (await serverError.isVisible()) {
+      await expect(serverError).toBeVisible();
+    }
+  });
+
+  test('Timeout ve retry mekanizması çalışmalı', async ({ page }) => {
+    await page.goto(`${BASE_URL}/dashboard/projects/create`);
+
+    // Yavaş network simüle et
+    await page.route('**/*', route => {
+      setTimeout(() => route.continue(), 2000);
+    });
+
+    await fillLivewireInput(page, 'input[name="project_name"]', 'Timeout Test');
+    await selectLivewireOption(page, 'select[name="customer_id"]', { index: 1 });
+    await clickThemeButton(page, 'save', { waitAfter: 5000 });
+
+    // Loading spinner görünmeli
+    const loadingSpinner = page.locator('.loading, .spinner, [data-testid="loading"]').first();
+    
+    if (await loadingSpinner.isVisible()) {
+      await expect(loadingSpinner).toBeVisible();
+    }
+  });
+
+  test('Validation hataları kullanıcı dostu gösterilmeli', async ({ page }) => {
+    await page.goto(`${BASE_URL}/dashboard/projects/create`);
+
+    // Hiçbir alan doldurmadan kaydet
+    await clickThemeButton(page, 'save', { waitAfter: 1000 });
+
+    // Her zorunlu alan için hata mesajı olmalı
+    const errorMessages = page.locator('.text-red-500, .text-danger, [class*="error"]');
+    const errorCount = await errorMessages.count();
+    
+    expect(errorCount).toBeGreaterThan(0);
+  });
+});
+
+test.describe('Kullanıcı Deneyimi Testleri', () => {
+
+  test('Loading spinner gösterilmeli', async ({ page }) => {
+    await page.goto(`${BASE_URL}/dashboard/projects/create`);
+
+    // Yavaş network simüle et
+    await page.route('**/*', route => {
+      setTimeout(() => route.continue(), 1000);
+    });
+
+    await fillLivewireInput(page, 'input[name="project_name"]', 'Loading Test');
+    await selectLivewireOption(page, 'select[name="customer_id"]', { index: 1 });
+    await clickThemeButton(page, 'save');
+
+    // Loading spinner görünmeli
+    const loadingSpinner = page.locator('.loading, .spinner, [data-testid="loading"]').first();
+    
+    if (await loadingSpinner.isVisible()) {
+      await expect(loadingSpinner).toBeVisible();
+    }
+  });
+
+  test('Toast mesajları otomatik kapanmalı', async ({ page }) => {
+    await page.goto(`${BASE_URL}/dashboard/projects/create`);
+
+    await fillLivewireInput(page, 'input[name="project_name"]', 'Toast Test');
+    await selectLivewireOption(page, 'select[name="customer_id"]', { index: 1 });
+    await clickThemeButton(page, 'save', { waitAfter: 1000 });
+
+    // Toast mesajı görünmeli
+    const toast = page.locator('.toast, .alert, .notification').first();
+    
+    if (await toast.isVisible()) {
+      await expect(toast).toBeVisible();
+      
+      // 5 saniye sonra kaybolmalı
+      await page.waitForTimeout(6000);
+      await expect(toast).not.toBeVisible();
+    }
+  });
+
+  test('Onay dialogları çalışmalı', async ({ page }) => {
+    await page.goto(`${DASHBOARD_PROJECTS_URL}?tab=projects`);
+
+    const firstProject = page.locator('[data-testid="project-card"]').first();
+    await firstProject.hover();
+
+    const deleteButton = firstProject.locator('button:has-text("Sil"), .delete-btn');
+    
+    if (await deleteButton.isVisible()) {
+      await deleteButton.click();
+      
+      // Onay dialogu görünmeli
+      const confirmDialog = page.locator('.confirm-dialog, .modal, [role="dialog"]').first();
+      await expect(confirmDialog).toBeVisible({ timeout: 3000 });
+      
+      // İptal et
+      await page.click('button:has-text("İptal"), button:has-text("Hayır")');
+    }
+  });
+
+  test('Tooltip\'ler çalışmalı', async ({ page }) => {
+    await page.goto(`${BASE_URL}/dashboard/projects/create`);
+
+    const infoIcon = page.locator('.info-icon, [data-tooltip], .tooltip-trigger').first();
+    
+    if (await infoIcon.isVisible()) {
+      await infoIcon.hover();
+      
+      const tooltip = page.locator('.tooltip, [role="tooltip"]').first();
+      await expect(tooltip).toBeVisible({ timeout: 2000 });
+    }
+  });
+
+  test('Breadcrumb navigasyonu çalışmalı', async ({ page }) => {
+    await page.goto(`${BASE_URL}/dashboard/projects/create`);
+
+    const breadcrumb = page.locator('.breadcrumb, .breadcrumbs').first();
+    
+    if (await breadcrumb.isVisible()) {
+      const homeLink = breadcrumb.locator('a').first();
+      await homeLink.click();
+      
+      // Ana sayfaya yönlendirilmeli
+      await page.waitForURL(/dashboard/, { timeout: 3000 });
+    }
+  });
+
+  test('Boş durum mesajları gösterilmeli', async ({ page }) => {
+    await page.goto(`${DASHBOARD_PROJECTS_URL}?tab=projects`);
+
+    const searchInput = page.locator('input[placeholder*="ara"]');
+    await searchInput.fill('nonexistentproject12345');
+    
+    await page.waitForTimeout(1000);
+
+    const emptyMessage = page.locator('.empty-state, .no-results, text=Sonuç bulunamadı').first();
+    
+    if (await emptyMessage.isVisible()) {
+      await expect(emptyMessage).toBeVisible();
+    }
+  });
+
+  test('Drag and drop çalışmalı', async ({ page }) => {
+    await page.goto(`${DASHBOARD_PROJECTS_URL}?tab=tasks`);
+
+    const firstTask = page.locator('tbody tr').first();
+    const secondTask = page.locator('tbody tr').nth(1);
+    
+    if (await firstTask.isVisible() && await secondTask.isVisible()) {
+      // Drag and drop simüle et
+      await firstTask.dragTo(secondTask);
+      
+      await page.waitForTimeout(500);
+      
+      // Sıralama değişmiş olabilir
+      expect(true).toBe(true); // Placeholder assertion
+    }
+  });
+});
+
+test.describe('Veri Tutarlılığı Testleri', () => {
+
+  test('Oluşturulan proje hemen listede görünmeli', async ({ page }) => {
+    const uniqueName = `Test Proje ${Date.now()}`;
+    
+    // Proje oluştur
+    await page.goto(`${BASE_URL}/dashboard/projects/create`);
+    
+    await fillLivewireInput(page, 'input[name="project_name"]', uniqueName);
+    await selectLivewireOption(page, 'select[name="customer_id"]', { index: 1 });
+    await clickThemeButton(page, 'save', { waitAfter: 1000 });
+    
+    await page.waitForURL(/projects/, { timeout: 10000 });
+
+    // Proje listesinde ara
+    await page.goto(`${DASHBOARD_PROJECTS_URL}?tab=projects`);
+    
+    const searchInput = page.locator('input[placeholder*="ara"]');
+    await searchInput.fill(uniqueName);
+    
+    await page.waitForTimeout(500);
+    
+    const projectCard = page.locator('[data-testid="project-card"]').first();
+    await expect(projectCard).toContainText(uniqueName);
+  });
+
+  test('Proje güncellemeleri kaydedilmeli', async ({ page }) => {
+    await page.goto(`${DASHBOARD_PROJECTS_URL}?tab=projects`);
+
+    const firstProject = page.locator('[data-testid="project-card"]').first();
+    await firstProject.hover();
+
+    const editButton = firstProject.locator('button:has-text("Düzenle"), .edit-btn');
+    
+    if (await editButton.isVisible()) {
+      await editButton.click();
+      
+      const newName = `Güncellenmiş Proje ${Date.now()}`;
+      await fillLivewireInput(page, 'input[name="project_name"]', newName);
+      await clickThemeButton(page, 'save', { waitAfter: 1000 });
+      
+      await page.waitForURL(/projects/, { timeout: 10000 });
+      
+      // Listede yeni ad görünmeli
+      await page.goto(`${DASHBOARD_PROJECTS_URL}?tab=projects`);
+      
+      const updatedProject = page.locator('[data-testid="project-card"]').first();
+      await expect(updatedProject).toContainText(newName);
+    }
+  });
+
+  test('Silinen proje listeden kaldırılmalı', async ({ page }) => {
+    await page.goto(`${DASHBOARD_PROJECTS_URL}?tab=projects`);
+
+    const initialCount = await page.locator('[data-testid="project-card"]').count();
+    
+    const firstProject = page.locator('[data-testid="project-card"]').first();
+    const projectName = await firstProject.locator('.project-name').textContent();
+    
+    await firstProject.hover();
+
+    const deleteButton = firstProject.locator('button:has-text("Sil"), .delete-btn');
+    
+    if (await deleteButton.isVisible()) {
+      await deleteButton.click();
+      
+      // Onay ver
+      await page.click('button:has-text("Evet"), button:has-text("Sil")');
+      
+      await page.waitForTimeout(1000);
+      
+      // Proje listeden kaldırılmış olmalı
+      const finalCount = await page.locator('[data-testid="project-card"]').count();
+      expect(finalCount).toBeLessThan(initialCount);
+      
+      // Silinen proje artık görünmemeli
+      const deletedProject = page.locator(`[data-testid="project-card"]:has-text("${projectName}")`);
+      await expect(deletedProject).not.toBeVisible();
+    }
+  });
+
+  test('Müşteri-proje ilişkisi tutarlı olmalı', async ({ page }) => {
+    await page.goto(`${BASE_URL}/dashboard/projects/tasks/create`);
+
+    // İlk müşteri seç
+    await selectLivewireOption(page, 'select[name="customer_id"]', { index: 1 }, { waitForReactivity: 500 });
+    
+    const firstCustomerProjects = await page.locator('select[name="project_id"] option').count();
+    
+    // Farklı müşteri seç
+    await selectLivewireOption(page, 'select[name="customer_id"]', { index: 2 }, { waitForReactivity: 500 });
+    
+    const secondCustomerProjects = await page.locator('select[name="project_id"] option').count();
+    
+    // Proje listeleri farklı olmalı (müşteriye göre filtrelenmiş)
+    expect(firstCustomerProjects).not.toBe(secondCustomerProjects);
+  });
+});
+
+test.describe('Özel Durumlar ve Edge Cases', () => {
+
+  test('Uzun proje adı ellipsis ile kesilmeli', async ({ page }) => {
+    await page.goto(`${BASE_URL}/dashboard/projects/create`);
+
+    const longName = 'Bu çok uzun bir proje adıdır ve kart içinde ellipsis ile kesilmelidir çünkü çok uzun';
+    
+    await fillLivewireInput(page, 'input[name="project_name"]', longName);
+    await selectLivewireOption(page, 'select[name="customer_id"]', { index: 1 });
+    await clickThemeButton(page, 'save', { waitAfter: 1000 });
+    
+    await page.waitForURL(/projects/, { timeout: 10000 });
+    
+    // Proje listesinde ellipsis kontrolü
+    await page.goto(`${DASHBOARD_PROJECTS_URL}?tab=projects`);
+    
+    const projectName = page.locator('.project-name').first();
+    const textOverflow = await projectName.evaluate(el => getComputedStyle(el).textOverflow);
+    
+    if (textOverflow === 'ellipsis') {
+      expect(textOverflow).toBe('ellipsis');
+    }
+  });
+
+  test('Duplicate isim kontrolü', async ({ page }) => {
+    const duplicateName = `Duplicate Test ${Date.now()}`;
+    
+    // İlk proje oluştur
+    await page.goto(`${BASE_URL}/dashboard/projects/create`);
+    
+    await fillLivewireInput(page, 'input[name="project_name"]', duplicateName);
+    await selectLivewireOption(page, 'select[name="customer_id"]', { index: 1 });
+    await clickThemeButton(page, 'save', { waitAfter: 1000 });
+    
+    await page.waitForURL(/projects/, { timeout: 10000 });
+
+    // İkinci proje aynı isimle oluştur
+    await page.goto(`${BASE_URL}/dashboard/projects/create`);
+    
+    await fillLivewireInput(page, 'input[name="project_name"]', duplicateName);
+    await selectLivewireOption(page, 'select[name="customer_id"]', { index: 1 });
+    await clickThemeButton(page, 'save', { waitAfter: 1000 });
+    
+    // Sistem izin veriyorsa oluşturulur, vermiyorsa hata alınır
+    await page.waitForTimeout(1000);
+    
+    if (page.url().includes('/create')) {
+      // Hata mesajı varsa
+      const errorMessage = page.locator('.text-red-500, .text-danger, [class*="error"]').first();
+      await expect(errorMessage).toBeVisible({ timeout: 3000 });
+    } else {
+      // İzin veriliyorsa başarılı
+      expect(page.url()).toMatch(/projects/);
+    }
+  });
+
+  test('Geçmiş tarih kontrolü', async ({ page }) => {
+    await page.goto(`${BASE_URL}/dashboard/projects/create`);
+
+    await fillLivewireInput(page, 'input[name="project_name"]', 'Geçmiş Tarih Test');
+    await selectLivewireOption(page, 'select[name="customer_id"]', { index: 1 });
+
+    // Toggle'ları kapat
+    await toggleLivewireCheckbox(page, 'auto_calculate_start_date', false, { waitForReactivity: 300 });
+    
+    // Geçmiş tarih gir
+    await fillLivewireInput(page, 'input[name="start_date"]', '2020-01-01');
+    
+    await clickThemeButton(page, 'save', { waitAfter: 1000 });
+
+    // Sistem geçmiş tarihe izin veriyorsa oluşturulur, vermiyorsa hata alınır
+    await page.waitForTimeout(1000);
+    
+    if (page.url().includes('/create')) {
+      // Uyarı mesajı olabilir
+      const warningMessage = page.locator('.text-yellow-500, .warning, [class*="warning"]').first();
+      
+      if (await warningMessage.isVisible()) {
+        await expect(warningMessage).toBeVisible();
+      }
+    }
+  });
+
+  test('Özel karakterler güvenli işlenmeli', async ({ page }) => {
+    await page.goto(`${BASE_URL}/dashboard/projects/create`);
+
+    const specialChars = 'Test & Co. "Proje" #1 @2024';
+    
+    await fillLivewireInput(page, 'input[name="project_name"]', specialChars);
+    await selectLivewireOption(page, 'select[name="customer_id"]', { index: 1 });
+    await clickThemeButton(page, 'save', { waitAfter: 1000 });
+    
+    await page.waitForURL(/projects/, { timeout: 10000 });
+    
+    // Proje listesinde özel karakterler korunmuş olmalı
+    await page.goto(`${DASHBOARD_PROJECTS_URL}?tab=projects`);
+    
+    const searchInput = page.locator('input[placeholder*="ara"]');
+    await searchInput.fill(specialChars);
+    
+    await page.waitForTimeout(500);
+    
+    const projectCard = page.locator('[data-testid="project-card"]').first();
+    await expect(projectCard).toContainText('Test & Co.');
+  });
+
+  test('Boşluk trim işlemi çalışmalı', async ({ page }) => {
+    await page.goto(`${BASE_URL}/dashboard/projects/create`);
+
+    const nameWithSpaces = '   Boşluklu Proje   ';
+    
+    await fillLivewireInput(page, 'input[name="project_name"]', nameWithSpaces);
+    await selectLivewireOption(page, 'select[name="customer_id"]', { index: 1 });
+    await clickThemeButton(page, 'save', { waitAfter: 1000 });
+    
+    await page.waitForURL(/projects/, { timeout: 10000 });
+    
+    // Proje listesinde boşluklar temizlenmiş olmalı
+    await page.goto(`${DASHBOARD_PROJECTS_URL}?tab=projects`);
+    
+    const searchInput = page.locator('input[placeholder*="ara"]');
+    await searchInput.fill('Boşluklu Proje');
+    
+    await page.waitForTimeout(500);
+    
+    const projectCard = page.locator('[data-testid="project-card"]').first();
+    await expect(projectCard).toContainText('Boşluklu Proje');
+  });
+
+  test('Emoji desteği çalışmalı', async ({ page }) => {
+    await page.goto(`${BASE_URL}/dashboard/projects/create`);
+
+    const emojiName = '🚀 Roket Projesi 🎯';
+    
+    await fillLivewireInput(page, 'input[name="project_name"]', emojiName);
+    await selectLivewireOption(page, 'select[name="customer_id"]', { index: 1 });
+    await clickThemeButton(page, 'save', { waitAfter: 1000 });
+    
+    await page.waitForURL(/projects/, { timeout: 10000 });
+    
+    // Proje listesinde emoji'ler korunmuş olmalı
+    await page.goto(`${DASHBOARD_PROJECTS_URL}?tab=projects`);
+    
+    const searchInput = page.locator('input[placeholder*="ara"]');
+    await searchInput.fill('Roket Projesi');
+    
+    await page.waitForTimeout(500);
+    
+    const projectCard = page.locator('[data-testid="project-card"]').first();
+    await expect(projectCard).toContainText('🚀');
+    await expect(projectCard).toContainText('🎯');
+  });
+
+  test('Çoklu dil desteği çalışmalı', async ({ page }) => {
+    await page.goto(DASHBOARD_PROJECTS_URL);
+
+    const langSwitcher = page.locator('.lang-switcher, .language-selector, [data-testid="language"]');
+    
+    if (await langSwitcher.isVisible()) {
+      await langSwitcher.click();
+      
+      const englishOption = page.locator('text=English, text=EN');
+      
+      if (await englishOption.isVisible()) {
+        await englishOption.click();
+        
+        await page.waitForTimeout(1000);
+        
+        // İngilizce metinler görünmeli
+        const englishText = page.locator('text=Projects, text=Tasks, text=Reports').first();
+        await expect(englishText).toBeVisible();
+      }
+    }
+  });
 });

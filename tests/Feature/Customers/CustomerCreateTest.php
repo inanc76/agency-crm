@@ -274,3 +274,173 @@ test('T41-UI: New Customer button has correct href on customers tab', function (
         ->assertSee('Yeni Müşteri')
         ->assertSee('/dashboard/customers/create');
 });
+
+// Eksik testler (T06-T10, T20-T25)
+
+test('T06: İlişkili firma seçimi yetkisi', function () {
+    $user = User::factory()->create();
+    $user->givePermissionTo('customers.create');
+    // customers.view yetkisi yok
+
+    $component = Volt::actingAs($user)
+        ->test('customers.create');
+
+    // İlişkili firma listesi boş olmalı (yetki yok)
+    expect($component->get('availableCustomers'))->toBeEmpty();
+});
+
+test('T07: Ülke listesi görüntüleme yetkisi', function () {
+    $user = User::factory()->create();
+    $user->givePermissionTo('customers.create');
+
+    $component = Volt::actingAs($user)
+        ->test('customers.create');
+
+    // Ülke listesi yüklenmeli
+    expect($component->get('countries'))->toBeArray();
+});
+
+test('T08: Şehir listesi görüntüleme yetkisi', function () {
+    $user = User::factory()->create();
+    $user->givePermissionTo('customers.create');
+
+    $component = Volt::actingAs($user)
+        ->test('customers.create')
+        ->set('country_id', 'TR');
+
+    // Şehir listesi yüklenmeli
+    expect($component->get('cities'))->toBeArray();
+});
+
+test('T10: Müşteri oluşturma sonrası redirect yetkisi', function () {
+    $user = User::factory()->create();
+    $user->givePermissionTo('customers.create');
+
+    Volt::actingAs($user)
+        ->test('customers.create')
+        ->set('name', 'Test Customer')
+        ->set('country_id', 'TR')
+        ->set('city_id', '34')
+        ->set('customer_type', 'CUSTOMER')
+        ->call('save')
+        ->assertRedirect();
+});
+
+test('T20: Şehir yükleme performansı (N+1 Query Check)', function () {
+    $user = User::factory()->create();
+    $user->givePermissionTo('customers.create');
+
+    DB::enableQueryLog();
+
+    $component = Volt::actingAs($user)
+        ->test('customers.create')
+        ->set('country_id', 'TR');
+
+    $queries = DB::getQueryLog();
+    $cityQueries = collect($queries)->filter(function ($query) {
+        return str_contains($query['query'], 'cities') || str_contains($query['query'], 'reference_items');
+    });
+
+    // Şehir yükleme için sadece 1-2 query olmalı
+    expect($cityQueries->count())->toBeLessThanOrEqual(3);
+});
+
+test('T21: İlişkili firma yükleme performansı', function () {
+    $user = User::factory()->create();
+    $user->givePermissionTo(['customers.create', 'customers.view']);
+
+    Customer::factory()->count(10)->create();
+
+    DB::enableQueryLog();
+
+    Volt::actingAs($user)
+        ->test('customers.create');
+
+    $queries = DB::getQueryLog();
+    $customerQueries = collect($queries)->filter(function ($query) {
+        return str_contains($query['query'], 'customers');
+    });
+
+    // İlişkili firma listesi için sadece 1-2 query olmalı
+    expect($customerQueries->count())->toBeLessThanOrEqual(3);
+});
+
+test('T22: Logo yükleme performansı', function () {
+    $user = User::factory()->create();
+    $user->givePermissionTo('customers.create');
+
+    $logoFile = \Illuminate\Http\UploadedFile::fake()->image('logo.jpg', 200, 200)->size(500);
+
+    DB::enableQueryLog();
+
+    Volt::actingAs($user)
+        ->test('customers.create')
+        ->set('logo', $logoFile)
+        ->set('name', 'Logo Test')
+        ->set('country_id', 'TR')
+        ->set('city_id', '34')
+        ->call('save');
+
+    $queries = DB::getQueryLog();
+
+    // Logo yükleme ve müşteri oluşturma için makul sayıda query
+    expect(count($queries))->toBeLessThan(15);
+});
+
+test('T23: Müşteri güncelleme performansı', function () {
+    $user = User::factory()->create();
+    $user->givePermissionTo(['customers.view', 'customers.edit']);
+
+    $customer = Customer::factory()->create();
+
+    DB::enableQueryLog();
+
+    Volt::actingAs($user)
+        ->test('customers.create', ['customer' => $customer->id])
+        ->set('name', 'Updated Name')
+        ->call('save');
+
+    $queries = DB::getQueryLog();
+
+    // Güncelleme için makul sayıda query
+    expect(count($queries))->toBeLessThan(20);
+});
+
+test('T24: İlişkili firma ekleme performansı', function () {
+    $user = User::factory()->create();
+    $user->givePermissionTo(['customers.create', 'customers.view']);
+
+    $relatedCustomer = Customer::factory()->create();
+
+    DB::enableQueryLog();
+
+    $component = Volt::actingAs($user)
+        ->test('customers.create')
+        ->call('addRelatedCustomer', $relatedCustomer->id);
+
+    $queries = DB::getQueryLog();
+
+    // İlişkili firma ekleme için sadece birkaç query
+    expect(count($queries))->toBeLessThan(10);
+});
+
+test('T25: Müşteri silme performansı', function () {
+    $user = User::factory()->create();
+    $user->givePermissionTo(['customers.view', 'customers.delete']);
+
+    $customer = Customer::factory()->create();
+
+    DB::enableQueryLog();
+
+    Volt::actingAs($user)
+        ->test('customers.create', ['customer' => $customer->id])
+        ->call('delete');
+
+    $queries = DB::getQueryLog();
+
+    // Silme işlemi için makul sayıda query
+    expect(count($queries))->toBeLessThan(15);
+});
+
+// Add missing use statement
+use Illuminate\Support\Facades\DB;

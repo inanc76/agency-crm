@@ -46,8 +46,8 @@ new class extends Component {
         return User::query()
             ->when($this->search, function (Builder $q) {
                 return $q->where(function ($query) {
-                    $query->where('name', 'ilike', '%' . $this->search . '%')
-                          ->orWhere('email', 'ilike', '%' . $this->search . '%');
+                    $query->where('name', 'like', '%' . $this->search . '%')
+                          ->orWhere('email', 'like', '%' . $this->search . '%');
                 });
             })
             ->when($this->statusFilter !== 'all', function (Builder $q) {

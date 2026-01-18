@@ -16,11 +16,15 @@
         });
     @endphp
 
-    @if($filteredProjects->count() > 0)
+    <div class="bg-white rounded-xl border border-skin-light shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
             <table class="agency-table">
                 <thead>
                     <tr>
+                        <th class="w-10">
+                            <input type="checkbox" disabled
+                                class="checkbox checkbox-xs rounded border-slate-300 opacity-50">
+                        </th>
                         <th>Proje Kodu</th>
                         <th>Proje Adı</th>
                         <th class="text-center">Başlangıç</th>
@@ -29,36 +33,57 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($filteredProjects as $project)
+                    @forelse($filteredProjects as $project)
                         @php
                             $statusLabel = $project->status->display_label ?? 'Taslak';
                             $statusClass = $project->status->color_class ?? 'bg-slate-100 text-slate-500';
                         @endphp
                         <tr onclick="window.location.href='/dashboard/projects/{{ $project->id }}'">
+                            <td onclick="event.stopPropagation()">
+                                <input type="checkbox" disabled
+                                    class="checkbox checkbox-xs rounded border-slate-300 opacity-50">
+                            </td>
                             <td class="font-mono text-[10px] opacity-50">{{ $project->project_id_code }}</td>
                             <td class="item-name">{{ $project->name }}</td>
-                            <td class="text-center opacity-70">
+                            <td class="text-center opacity-70 text-xs font-mono">
                                 {{ $project->start_date ? $project->start_date->format('d.m.Y') : '-' }}
                             </td>
-                            <td class="text-center opacity-70">
+                            <td class="text-center opacity-70 text-xs font-mono">
                                 {{ $project->target_end_date ? $project->target_end_date->format('d.m.Y') : '-' }}
                             </td>
                             <td class="text-center">
-                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold border {{ $statusClass }}">
+                                <span
+                                    class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border {{ $statusClass }}">
                                     {{ $statusLabel }}
                                 </span>
                             </td>
                         </tr>
-                    @endforeach
+                    @empty
+                        <tr>
+                            <td colspan="6" class="px-6 py-12 text-center text-skin-muted">
+                                <div class="flex flex-col items-center justify-center">
+                                    <x-mary-icon name="o-folder" class="w-12 h-12 opacity-20 mb-4" />
+                                    <div class="font-medium">
+                                        {{ $projectsStatusFilter ? 'Seçilen duruma uygun proje bulunamadı.' : 'Bu müşteriye ait proje bulunmuyor.' }}
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
-    @else
-        <div class="text-center py-8 text-[var(--color-text-muted)]">
-            <x-mary-icon name="o-folder" class="w-12 h-12 mx-auto mb-2 opacity-30" />
-            <p class="text-sm">
-                {{ $projectsStatusFilter ? 'Seçilen duruma uygun proje bulunamadı.' : 'Bu müşteriye ait proje bulunmuyor.' }}
-            </p>
+
+        {{-- Footer --}}
+        <div class="px-6 py-4 border-t border-skin-light flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <span class="text-xs text-skin-muted">Göster:</span>
+                <div class="px-2 py-1 border border-skin-light rounded text-xs bg-white">25</div>
+            </div>
+
+            <div class="text-[10px] text-skin-muted font-mono">
+                {{ $filteredProjects->count() }} kayıt listelendi
+            </div>
         </div>
-    @endif
+    </div>
 </div>

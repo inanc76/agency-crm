@@ -246,3 +246,27 @@ test('T28-UI: New Asset button has correct href on global assets tab', function 
     $response->assertSee('Yeni Varlık');
     $response->assertSee('/dashboard/customers/assets/create');
 });
+
+// Eksik test (T22)
+
+test('T22-Validation: URL format validation', function () {
+    $customer = Customer::factory()->create();
+
+    // Geçersiz URL formatı
+    Volt::test('modals.asset-form')
+        ->set('customer_id', $customer->id)
+        ->set('name', 'Test Asset')
+        ->set('type', 'WEBSITE')
+        ->set('url', 'invalid-url-format')
+        ->call('save')
+        ->assertHasErrors(['url' => 'url']);
+
+    // Geçerli URL formatı
+    Volt::test('modals.asset-form')
+        ->set('customer_id', $customer->id)
+        ->set('name', 'Test Asset')
+        ->set('type', 'WEBSITE')
+        ->set('url', 'https://example.com')
+        ->call('save')
+        ->assertHasNoErrors();
+});

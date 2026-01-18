@@ -19,29 +19,47 @@ trait HasOfferDataLoader
 
     // Offer Primary State
     public $customer_id = '';
+
     public $number = '';
+
     public $title = '';
+
     public $status = 'DRAFT';
+
     public $description = '';
+
     public $valid_days = 30;
+
     public $valid_until = null;
+
     public $created_at = null;
+
     public $discount_value = 0;
+
     public $discount_type = 'AMOUNT'; // PERCENTAGE or AMOUNT
+
     public $vat_rate = 20;
+
     public $currency = 'USD';
 
     // UI State
     public $isViewMode = false;
+
     public $offerId = null;
+
     public ?Offer $offerModel = null;
+
     public string $activeTab = 'info';
+
     public $showServiceModal = false;
+
     public $selectedYear = 0;
 
     // Download Settings
     public $is_pdf_downloadable = true;
+
     public $is_attachments_downloadable = true;
+
     public $is_downloadable_after_expiry = false;
 
     public function mount(?string $offer = null): void
@@ -83,7 +101,7 @@ trait HasOfferDataLoader
 
     protected function loadOfferData(): void
     {
-        $this->offerModel = Offer::with(['sections.items', 'attachments', 'status_item', 'currency_item'])->findOrFail($this->offerId);
+        $this->offerModel = Offer::with(['sections.items', 'attachments', 'status_item', 'currency_item', 'downloadLogs', 'messages'])->findOrFail($this->offerId);
         $offer = $this->offerModel;
 
         $this->customer_id = $offer->customer_id;
@@ -117,11 +135,11 @@ trait HasOfferDataLoader
             $this->valid_days = (int) $created->diffInDays($validUntil);
         }
 
-        $this->sections = $offer->sections->map(fn($section) => [
+        $this->sections = $offer->sections->map(fn ($section) => [
             'id' => $section->id,
             'title' => $section->title,
             'description' => $section->description,
-            'items' => $section->items->map(fn($item) => [
+            'items' => $section->items->map(fn ($item) => [
                 'service_id' => $item->service_id,
                 'service_name' => $item->service_name,
                 'description' => $item->description,
@@ -132,7 +150,7 @@ trait HasOfferDataLoader
             ])->toArray(),
         ])->toArray();
 
-        $this->attachments = $offer->attachments->map(fn($att) => [
+        $this->attachments = $offer->attachments->map(fn ($att) => [
             'id' => $att->id,
             'title' => $att->title,
             'description' => $att->description,

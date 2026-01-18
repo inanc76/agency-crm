@@ -153,9 +153,51 @@ new class extends Component
                 @endif
 
                 @if($activeTab === 'messages')
-                    <div class="theme-card p-6 shadow-sm text-center text-[var(--color-text-muted)] py-12">
-                        <x-mary-icon name="o-chat-bubble-left-right" class="w-12 h-12 mx-auto mb-3 opacity-20" />
-                        <div class="font-medium">Henüz mesaj bulunmuyor</div>
+                    <div class="theme-card p-6 shadow-sm">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-base font-bold text-skin-heading">Mesajlar</h2>
+                        </div>
+
+                        <div class="bg-white rounded-xl border border-skin-light shadow-sm overflow-hidden">
+                            <div class="overflow-x-auto">
+                                <table class="agency-table">
+                                    <thead>
+                                        <tr>
+                                            <th class="w-10">
+                                                <input type="checkbox" disabled
+                                                    class="checkbox checkbox-xs rounded border-slate-300 opacity-50">
+                                            </th>
+                                            <th>Konu</th>
+                                            <th>Alıcı</th>
+                                            <th>Durum</th>
+                                            <th class="text-right">Tarih</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td colspan="5" class="px-6 py-12 text-center text-skin-muted">
+                                                <div class="flex flex-col items-center justify-center">
+                                                    <x-mary-icon name="o-chat-bubble-left-right" class="w-12 h-12 opacity-20 mb-4" />
+                                                    <div class="font-medium">Henüz mesaj bulunmuyor</div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            {{-- Footer --}}
+                            <div class="px-6 py-4 border-t border-skin-light flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs text-skin-muted">Göster:</span>
+                                    <div class="px-2 py-1 border border-skin-light rounded text-xs bg-white">25</div>
+                                </div>
+
+                                <div class="text-[10px] text-skin-muted font-mono">
+                                    0 kayıt listelendi
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 @endif
 

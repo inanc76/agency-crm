@@ -142,3 +142,73 @@ test('13. dashboard card colors persistence', function () {
     expect($settings->dashboard_card_bg_color)->toBe('#eeeeee');
     expect($settings->dashboard_card_text_color)->toBe('#333333');
 });
+
+// Eksik testler (T14-T18)
+
+test('14. sidebar settings persistence', function () {
+    Volt::test('settings.theme.sidebar')
+        ->set('sidebar_bg_color', '#2d3748')
+        ->set('sidebar_text_color', '#ffffff')
+        ->set('sidebar_width', 280)
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $settings = PanelSetting::first();
+    expect($settings->sidebar_bg_color)->toBe('#2d3748');
+    expect($settings->sidebar_text_color)->toBe('#ffffff');
+    expect($settings->sidebar_width)->toBe(280);
+});
+
+test('15. sidebar width range validation', function () {
+    Volt::test('settings.theme.sidebar')
+        ->set('sidebar_width', 401) // Max 400
+        ->call('save')
+        ->assertHasErrors(['sidebar_width' => 'max']);
+
+    Volt::test('settings.theme.sidebar')
+        ->set('sidebar_width', 199) // Min 200
+        ->call('save')
+        ->assertHasErrors(['sidebar_width' => 'min']);
+});
+
+test('16. form settings persistence', function () {
+    Volt::test('settings.theme.forms')
+        ->set('form_input_bg_color', '#f7fafc')
+        ->set('form_input_border_color', '#e2e8f0')
+        ->set('form_label_color', '#4a5568')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $settings = PanelSetting::first();
+    expect($settings->form_input_bg_color)->toBe('#f7fafc');
+    expect($settings->form_input_border_color)->toBe('#e2e8f0');
+    expect($settings->form_label_color)->toBe('#4a5568');
+});
+
+test('17. table settings persistence', function () {
+    Volt::test('settings.theme.tables')
+        ->set('table_header_bg_color', '#f7fafc')
+        ->set('table_row_hover_color', '#edf2f7')
+        ->set('table_border_color', '#e2e8f0')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $settings = PanelSetting::first();
+    expect($settings->table_header_bg_color)->toBe('#f7fafc');
+    expect($settings->table_row_hover_color)->toBe('#edf2f7');
+    expect($settings->table_border_color)->toBe('#e2e8f0');
+});
+
+test('18. authorization check for settings access', function () {
+    $unauthorizedUser = User::factory()->create();
+    // No permissions given
+
+    $this->actingAs($unauthorizedUser)
+        ->get(route('settings.panel'))
+        ->assertForbidden();
+
+    // Test component access
+    Volt::actingAs($unauthorizedUser)
+        ->test('settings.panel')
+        ->assertForbidden();
+});

@@ -11,8 +11,8 @@
 
 @php
     $char = mb_substr($offer->title, 0, 1);
-    $statusLabel = $offer->status_item->label ?? $offer->status;
-    $statusClass = $offer->status_item->color_class ?? 'bg-skin-hover text-skin-muted border border-skin-light';
+    $statusLabel = $offer->status_item->display_label ?? $offer->status;
+    $statusClass = $offer->status_item->metadata['color_class'] ?? 'bg-skin-hover text-skin-muted border border-skin-light';
 @endphp
 
 <tr onclick="window.location.href='/dashboard/customers/offers/{{ $offer->id }}'">

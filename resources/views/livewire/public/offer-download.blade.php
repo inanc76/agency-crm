@@ -22,174 +22,253 @@ namespace App\Livewire\Public;
  * -------------------------------------------------------------------------
  */
 
+use App\Mail\NewOfferRequestMail;
 use App\Models\Offer;
 use App\Models\PanelSetting;
 use App\Models\User;
 use App\Services\MinioService;
+use Illuminate\Support\Facades\Mail;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\Mail;
-use App\Mail\NewOfferRequestMail;
 
 new
     #[Layout('components.layouts.public', ['title' => 'Teklif İndir'])]
-    class extends Component {
-    public string $token = '';
-    public ?Offer $offer = null;
-    public ?PanelSetting $settings = null;
-    public ?string $logoUrl = null;
-
-    // Contact Form Fields
-    public string $company_name = '';
-    public string $name = '';
-    public string $phone = '';
-    public string $email = '';
-    public string $note = '';
-
-    // State
-    public bool $isExpired = false;
-    public bool $isBlocked = false;
-    public bool $formSent = false;
-    public bool $showRequestModal = false;
-    public int $remainingDays = 0;
-
-    public ?string $favicon = null;
-
-    public function mount(string $token): void
+    class extends Component
     {
-        $this->token = $token;
+        public string $token = '';
 
-        $this->offer = Offer::where('tracking_token', $token)
-            ->with(['customer', 'items', 'attachments'])
-            ->firstOrFail();
+        public ?Offer $offer = null;
 
-        $this->settings = PanelSetting::where('is_active', true)->first() ?? new PanelSetting;
+        public ?PanelSetting $settings = null;
 
-        // Settings and Logo
-        if ($this->settings->pdf_logo_path) {
-            $this->logoUrl = app(MinioService::class)->getFileAsBase64($this->settings->pdf_logo_path);
-        }
+        public ?string $logoUrl = null;
 
-        // Expiry Logic
-        $validUntil = $this->offer->valid_until;
-        if ($validUntil) {
-            $this->isExpired = $validUntil->isPast();
-            $this->remainingDays = max(0, (int) now()->diffInDays($validUntil, false));
-        }
+        // Contact Form Fields
+        public string $company_name = '';
 
-        // Block Logic
-        // is_downloadable_after_expiry = true -> Allow download even if expired
-        // is_downloadable_after_expiry = false -> Block if expired
-        if ($this->isExpired && !$this->offer->is_downloadable_after_expiry) {
-            $this->isBlocked = true;
-        }
+        public string $name = '';
 
-        // Do NOT pre-fill form info as per user request, user will enter manually.
+        public string $phone = '';
 
-        // Share Favicon
-        if ($this->settings && $this->settings->favicon_path) {
-            // First try verify if it exists on public disk (common for theme settings)
-            if (\Illuminate\Support\Facades\Storage::disk('public')->exists($this->settings->favicon_path)) {
-                $this->favicon = \Illuminate\Support\Facades\Storage::disk('public')->url($this->settings->favicon_path);
-            } else {
-                // Fallback to Minio/S3 Base64
-                $this->favicon = app(MinioService::class)->getFileAsBase64($this->settings->favicon_path);
+        public string $email = '';
+
+        public string $note = '';
+
+        // State
+        public bool $isExpired = false;
+
+        public bool $isBlocked = false;
+
+        public bool $formSent = false;
+
+        public bool $showRequestModal = false;
+
+        public int $remainingDays = 0;
+
+        public ?string $favicon = null;
+
+        public function mount(string $token): void
+        {
+            $this->token = $token;
+
+            $this->offer = Offer::where('tracking_token', $token)
+                ->with(['customer', 'items', 'attachments'])
+                ->firstOrFail();
+
+            $this->settings = PanelSetting::where('is_active', true)->first() ?? new PanelSetting;
+
+            // Settings and Logo
+            if ($this->settings->pdf_logo_path) {
+                $this->logoUrl = app(MinioService::class)->getFileAsBase64($this->settings->pdf_logo_path);
+            }
+
+            // Expiry Logic
+            $validUntil = $this->offer->valid_until;
+            if ($validUntil) {
+                $this->isExpired = $validUntil->isPast();
+                $this->remainingDays = max(0, (int) now()->diffInDays($validUntil, false));
+            }
+
+            // Block Logic
+            // is_downloadable_after_expiry = true -> Allow download even if expired
+            // is_downloadable_after_expiry = false -> Block if expired
+            if ($this->isExpired && ! $this->offer->is_downloadable_after_expiry) {
+                $this->isBlocked = true;
+            }
+
+            // Do NOT pre-fill form info as per user request, user will enter manually.
+
+            // Share Favicon
+            if ($this->settings && $this->settings->favicon_path) {
+                // First try verify if it exists on public disk (common for theme settings)
+                if (\Illuminate\Support\Facades\Storage::disk('public')->exists($this->settings->favicon_path)) {
+                    $this->favicon = \Illuminate\Support\Facades\Storage::disk('public')->url($this->settings->favicon_path);
+                } else {
+                    // Fallback to Minio/S3 Base64
+                    $this->favicon = app(MinioService::class)->getFileAsBase64($this->settings->favicon_path);
+                }
             }
         }
-    }
 
-    public function downloadPdf()
-    {
-        if ($this->isBlocked) {
-            return;
+        public function downloadPdf()
+        {
+            if ($this->isBlocked) {
+                return;
+            }
+
+            if (! $this->offer->is_pdf_downloadable) {
+                return;
+            }
+
+            // Generate or get PDF URL
+            // Currently assuming pdf_url is stored or we generate on fly.
+            // For public download, best to generate on fly to ensure fresh data or check existence.
+            // Re-using the action used in preview.
+
+            $action = app(\App\Actions\Offers\GenerateOfferPdfAction::class);
+            $pdfPath = $action->execute($this->offer);
+            $fileName = 'Teklif-'.$this->offer->number.'.pdf';
+
+            // Get email from offer's customer contact
+            $downloaderEmail = null;
+            if ($this->offer->customer) {
+                $contact = \App\Models\Contact::where('customer_id', $this->offer->customer_id)->first();
+                $downloaderEmail = $contact?->email;
+            }
+
+            // Log the download
+            \App\Models\OfferDownloadLog::create([
+                'id' => \Illuminate\Support\Str::uuid()->toString(),
+                'offer_id' => $this->offer->id,
+                'downloader_email' => $downloaderEmail,
+                'downloaded_at' => now(),
+                'file_name' => $fileName,
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+                'is_read_log' => true,
+            ]);
+
+            // Update related message status to DOWNLOAD
+            \App\Models\Message::where('offer_id', $this->offer->id)
+                ->where('status', 'SENT')
+                ->update(['status' => 'DOWNLOAD']);
+
+            // Update offer status to DOWNLOAD if it's DRAFT or SENT (preserve manual states like APPROVED/REJECTED)
+            if (in_array($this->offer->status, ['DRAFT', 'SENT'])) {
+                $this->offer->update(['status' => 'DOWNLOAD']);
+            }
+
+            return response()->download($pdfPath, $fileName, [
+                'Content-Type' => 'application/pdf',
+            ]);
         }
 
-        if (!$this->offer->is_pdf_downloadable) {
-            return;
+        public function requestNewOffer()
+        {
+            $this->validate([
+                'company_name' => 'required|string|max:255',
+                'name' => 'required|string|max:255',
+                'email' => 'required|email',
+                'phone' => 'nullable|string|max:50',
+                'note' => 'nullable|string|max:1000',
+            ]);
+
+            // Notify the offer creator or admin
+            // Find who created the offer or default to admin
+            // Database does not track created_by currently.
+            // FALLBACK: Send to first Admin.
+            $recipient = User::whereHas('role', fn ($q) => $q->where('name', 'Admin')->orWhere('name', 'Super Admin'))->first() ?? User::first();
+
+            if ($recipient) {
+                Mail::to($recipient->email)->send(new NewOfferRequestMail(
+                    $this->offer,
+                    [
+                        'company_name' => $this->company_name,
+                        'name' => $this->name,
+                        'email' => $this->email,
+                        'phone' => $this->phone,
+                        'note' => $this->note,
+                    ]
+                ));
+            }
+
+            $this->formSent = true;
+            $this->showRequestModal = false;
         }
 
-        // Generate or get PDF URL
-        // Currently assuming pdf_url is stored or we generate on fly. 
-        // For public download, best to generate on fly to ensure fresh data or check existence.
-        // Re-using the action used in preview.
+        public function downloadAttachment($attachmentId)
+        {
+            if ($this->isBlocked || ! $this->offer->is_attachments_downloadable) {
+                return;
+            }
 
-        $action = app(\App\Actions\Offers\GenerateOfferPdfAction::class);
-        $pdfPath = $action->execute($this->offer);
-        $fileName = 'Teklif-' . $this->offer->number . '.pdf';
+            $attachment = $this->offer->attachments()->findOrFail($attachmentId);
 
-        return response()->download($pdfPath, $fileName, [
-            'Content-Type' => 'application/pdf',
-        ]);
-    }
+            // Get email from offer's customer contact
+            $downloaderEmail = null;
+            if ($this->offer->customer) {
+                $contact = \App\Models\Contact::where('customer_id', $this->offer->customer_id)->first();
+                $downloaderEmail = $contact?->email;
+            }
 
-    public function requestNewOffer()
-    {
-        $this->validate([
-            'company_name' => 'required|string|max:255',
-            'name' => 'required|string|max:255',
-            'email' => 'required|email',
-            'phone' => 'nullable|string|max:50',
-            'note' => 'nullable|string|max:1000',
-        ]);
+            // Log the download
+            \App\Models\OfferDownloadLog::create([
+                'id' => \Illuminate\Support\Str::uuid()->toString(),
+                'offer_id' => $this->offer->id,
+                'downloader_email' => $downloaderEmail,
+                'downloaded_at' => now(),
+                'file_name' => $attachment->file_name,
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+                'is_read_log' => false,
+            ]);
 
-        // Notify the offer creator or admin
-        // Find who created the offer or default to admin
-        // Database does not track created_by currently.
-        // FALLBACK: Send to first Admin.
-        $recipient = User::whereHas('role', fn($q) => $q->where('name', 'Admin')->orWhere('name', 'Super Admin'))->first() ?? User::first();
-
-        if ($recipient) {
-            Mail::to($recipient->email)->send(new NewOfferRequestMail(
-                $this->offer,
-                [
-                    'company_name' => $this->company_name,
-                    'name' => $this->name,
-                    'email' => $this->email,
-                    'phone' => $this->phone,
-                    'note' => $this->note
-                ]
-            ));
+            try {
+                return app(MinioService::class)->downloadFile($attachment->file_path, $attachment->file_name);
+            } catch (\Exception $e) {
+                // Handle file not found or other errors
+                session()->flash('error', 'Dosya indirilemedi: '.$e->getMessage());
+            }
         }
 
-        $this->formSent = true;
-        $this->showRequestModal = false;
-    }
-    public function downloadAttachment($attachmentId)
-    {
-        if ($this->isBlocked || !$this->offer->is_attachments_downloadable) {
-            return;
+        public function downloadIntroFile($index)
+        {
+            if ($this->isBlocked) {
+                return;
+            }
+
+            $file = $this->settings->introduction_files[$index] ?? null;
+
+            if (! $file) {
+                return;
+            }
+
+            // Get email from offer's customer contact
+            $downloaderEmail = null;
+            if ($this->offer->customer) {
+                $contact = \App\Models\Contact::where('customer_id', $this->offer->customer_id)->first();
+                $downloaderEmail = $contact?->email;
+            }
+
+            // Log the download
+            \App\Models\OfferDownloadLog::create([
+                'id' => \Illuminate\Support\Str::uuid()->toString(),
+                'offer_id' => $this->offer->id,
+                'downloader_email' => $downloaderEmail,
+                'downloaded_at' => now(),
+                'file_name' => $file['name'],
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+                'is_read_log' => false,
+            ]);
+
+            try {
+                return app(MinioService::class)->downloadFile($file['path'], $file['name']);
+            } catch (\Exception $e) {
+                session()->flash('error', 'Dosya indirilemedi: '.$e->getMessage());
+            }
         }
-
-        $attachment = $this->offer->attachments()->findOrFail($attachmentId);
-
-        try {
-            return app(MinioService::class)->downloadFile($attachment->file_path, $attachment->file_name);
-        } catch (\Exception $e) {
-            // Handle file not found or other errors
-            session()->flash('error', 'Dosya indirilemedi: ' . $e->getMessage());
-        }
-    }
-
-    public function downloadIntroFile($index)
-    {
-        if ($this->isBlocked) {
-            return;
-        }
-
-        $file = $this->settings->introduction_files[$index] ?? null;
-
-        if (!$file) {
-            return;
-        }
-
-        try {
-            return app(MinioService::class)->downloadFile($file['path'], $file['name']);
-        } catch (\Exception $e) {
-            session()->flash('error', 'Dosya indirilemedi: ' . $e->getMessage());
-        }
-    }
-};
+    };
 ?>
 
 <div>

@@ -164,7 +164,12 @@ boyutlandırma sağlar.
             </div>
 
             {{-- Copyable CSS Block --}}
-            <div x-data="{ showCode: false, copied: false, cssCode: `/* Agency Standart Tablo Sınıfı */
+            <div x-data="{ showCode: false, copied: false, cssCode: `/* 
+   🎨 AGENCY TABLE CSS
+   Aşağıdaki CSS sınıfları 'resources/css/app.css' dosyasına eklenmelidir.
+*/
+
+/* 1. Standart Tablo Sınıfı */
 .agency-table {
     width: 100%;
     text-align: left;
@@ -172,6 +177,7 @@ boyutlandırma sağlar.
     border-collapse: collapse;
 }
 
+/* 2. Başlık (Makas/Header) */
 .agency-table thead {
     background-color: {{ $table_header_bg_color }};
     border-bottom: 2px solid {{ $table_divide_color }};
@@ -181,8 +187,12 @@ boyutlandırma sağlar.
     padding: 0.75rem 1.5rem;
     font-weight: 600;
     color: {{ $table_header_text_color }};
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
+/* 3. Satırlar & Hover Etkileşimi */
 .agency-table tbody tr {
     border-bottom: 1px solid {{ $table_divide_color }};
     transition: all 0.2s ease;
@@ -191,22 +201,21 @@ boyutlandırma sağlar.
 
 .agency-table tbody tr:hover {
     background-color: {{ $table_hover_bg_color }} !important;
-    color: {{ $table_hover_text_color }} !important;
 }
 
+/* 4. Hücre Yapısı */
 .agency-table td {
     padding: 1rem 1.5rem;
     vertical-align: middle;
 }
 
-/* Tablo İsim & Link Stili */
+/* 5. Özel Bileşenler */
 .agency-table .item-name {
     font-size: {{ $table_item_name_size }};
     font-weight: {{ $table_item_name_weight }};
     color: {{ $list_card_link_color }};
 }
 
-/* Avatar Çemberi */
 .agency-table .avatar-circle {
     width: 2.25rem;
     height: 2.25rem;
@@ -218,7 +227,29 @@ boyutlandırma sağlar.
     align-items: center;
     justify-content: center;
     font-weight: 600;
-}` }" class="space-y-3">
+    font-size: 12px;
+}
+
+/*
+   🏗️ HTML YAPISI (Edge-to-Edge Görünüm İçin)
+   Tablonun kartın kenarlarına tam oturması için aşağıdaki kapsayıcı yapısını kullanın:
+   
+   <div class='theme-card shadow-sm overflow-hidden'> <!-- p-6 YOK -->
+       
+       <!-- Başlık Alanı (Varsa) -->
+       <div class='flex items-center justify-between p-6 pb-4'>
+           <h2>Başlık</h2>
+       </div>
+
+       <!-- Tablo Alanı: Padding Yok -->
+       <div class='overflow-x-auto'>
+           <table class='agency-table'>
+               ...
+           </table>
+       </div>
+       
+   </div>
+*/` }" class="space-y-3">
                 <div class="flex items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-200">
                     <div class="flex items-center gap-2">
                         <x-mary-icon name="o-code-bracket-square" class="w-5 h-5 text-indigo-500" />

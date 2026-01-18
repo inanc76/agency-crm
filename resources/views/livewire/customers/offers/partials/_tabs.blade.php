@@ -16,7 +16,7 @@
         <button wire:click="$set('activeTab', 'messages')"
             class="cursor-pointer px-5 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors"
             style="{{ $activeTab === 'messages' ? 'border-color: var(--active-tab-color); color: var(--color-text-heading);' : 'border-color: transparent; color: var(--color-text-base); opacity: 0.6;' }}">
-            Mesajlar (0)
+            Mesajlar ({{ $offerModel?->messages?->count() ?? 0 }})
         </button>
         <button wire:click="$set('activeTab', 'notes')"
             class="cursor-pointer px-5 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors"
@@ -26,7 +26,7 @@
         <button wire:click="$set('activeTab', 'downloads')"
             class="cursor-pointer px-5 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors"
             style="{{ $activeTab === 'downloads' ? 'border-color: var(--active-tab-color); color: var(--color-text-heading);' : 'border-color: transparent; color: var(--color-text-base); opacity: 0.6;' }}">
-            İndirmeler (0)
+            İndirmeler ({{ $offerModel?->downloadLogs?->count() ?? 0 }})
         </button>
     </div>
 @else

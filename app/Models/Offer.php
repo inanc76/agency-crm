@@ -166,6 +166,16 @@ class Offer extends Model
         return $this->hasMany(OfferAttachment::class);
     }
 
+    public function messages()
+    {
+        return $this->hasMany(Message::class);
+    }
+
+    public function downloadLogs()
+    {
+        return $this->hasMany(OfferDownloadLog::class)->orderBy('downloaded_at', 'desc');
+    }
+
     /**
      * Get the reference item for the current status.
      */
