@@ -1,4 +1,22 @@
 <?php
+/**
+ * ╔══════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+ * ║                                    🛡️ MİSYON LIGHTHOUSE - MESAJ DETAYI                                          ║
+ * ║                                                                                                                  ║
+ * ║  📋 SORUMLULUK ALANI: Mesaj Detay Görünümü ve Yönetimi                                                           ║
+ * ║  🎯 ANA GÖREV: Mesaj içeriğinin render edilmesi, şablon değişkenlerinin işlenmesi ve e-posta gönderimi           ║
+ * ║                                                                                                                  ║
+ * ║  🔧 TEMEL YETKİNLİKLER:                                                                                         ║
+ * ║  • Render: Mail şablonu veya düz metin üzerinden dinamik değişkenlerin (placeholder) değiştirilmesi              ║
+ * ║  • Gönderim: DynamicCustomerMail üzerinden SMTP gönderimi ve durum (SENT/FAILED) güncelleme                     ║
+ * ║  • Takip: Teklif indirme loglarının (DownloadLogs) mesaj detayı içinde gösterilmesi                             ║
+ * ║                                                                                                                  ║
+ * ║  📦 BAĞIMLILIKLAR:                                                                                              ║
+ * ║  • App\Services\MailTemplateService: Şablon render motoru                                                       ║
+ * ║  • App\Mail\DynamicCustomerMail: Mailable sınıfı                                                                 ║
+ * ║                                                                                                                  ║
+ * ╚══════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+ */
 
 use App\Mail\DynamicCustomerMail;
 use App\Models\Contact;
@@ -10,110 +28,123 @@ use Livewire\Volt\Component;
 use Mary\Traits\Toast;
 
 new #[Layout('components.layouts.app', ['title' => 'Mesaj Detayı'])]
-    class extends Component
+    class extends Component {
+
+    use Toast;
+
+    public Message $message;
+
+    public string $renderedBody = '';
+
+    public string $activeTab = 'info';
+
+    /**
+     * Başlatma İşlemi: Veri yükleme ve mesaj içeriğinin dinamik render edilmesi.
+     * 
+     * @param Message $message
+     * @param MailTemplateService $mailService
+     * @return void
+     */
+    public function mount(Message $message, MailTemplateService $mailService): void
     {
-        use Toast;
+        $this->activeTab = request()->query('tab', 'info');
+        $this->message = $message->load(['customer', 'offer.downloadLogs', 'status_item', 'type_item']);
 
-        public Message $message;
+        // İş Kuralı: Mesaj değişkenleri alıcı kişi (Contact) ve teklif detaylarından beslenir.
+        $contact = Contact::where('customer_id', $this->message->customer_id)->first();
 
-        public string $renderedBody = '';
+        // Prizma Değişken Haritası: Veritabanındaki {{...}} etiketlerini gerçek verilerle eşleştirir.
+        $variables = [
+            '{{name}}' => $contact?->name ?? 'Kullanıcı',
+            '{{contact.name}}' => $contact?->name ?? 'Kullanıcı',
+            '{{customer.name}}' => $this->message->customer?->name ?? '',
+            '{{offer.download_link}}' => $this->message->offer?->tracking_token
+                ? url('/offer/' . $this->message->offer->tracking_token)
+                : '#',
+            '{{offer.number}}' => $this->message->offer?->number ?? '',
+            '{{offer.title}}' => $this->message->offer?->title ?? '',
+        ];
 
-        public string $activeTab = 'info';
+        // Render Stratejisi: MailTemplateService varsa gelişmiş render (HTML + Style), yoksa basit replace kullanılır.
+        if ($this->message->mail_template_id) {
+            $rendered = $mailService->renderById($this->message->mail_template_id, $variables);
+            $this->renderedBody = $rendered['content'] ?? $this->message->body;
+        } else {
+            $this->renderedBody = str_replace(
+                array_keys($variables),
+                array_values($variables),
+                $this->message->body
+            );
+        }
+    }
 
-        public function mount(Message $message, MailTemplateService $mailService): void
-        {
-            $this->activeTab = request()->query('tab', 'info');
-            $this->message = $message->load(['customer', 'offer.downloadLogs', 'status_item', 'type_item']);
+    /**
+     * Mesaj Kaydını Silme
+     * İş Kuralı: Kayıt silindiğinde müşteri listesindeki mesajlar sekmesine yönlendirilir.
+     */
+    public function delete(): void
+    {
+        $this->message->delete();
+        $this->success('Başarılı', 'Mesaj silindi.');
+        $this->redirect('/dashboard/customers?tab=messages', navigate: true);
+    }
 
-            // Get first contact for this customer
-            $contact = Contact::where('customer_id', $this->message->customer_id)->first();
+    /**
+     * E-Posta Gönderim Protokolü
+     * İş Kuralı: SENT durumundaki mesajlar tekrar gönderilemez.
+     */
+    public function sendMessage(): void
+    {
+        if ($this->message->status === 'SENT') {
+            $this->error('Hata', 'Bu mesaj zaten gönderilmiş.');
 
-            // Prepare replacement variables
-            $variables = [
-                '{{name}}' => $contact?->name ?? 'Kullanıcı',
-                '{{contact.name}}' => $contact?->name ?? 'Kullanıcı',
-                '{{customer.name}}' => $this->message->customer?->name ?? '',
-                '{{offer.download_link}}' => $this->message->offer?->tracking_token
-                    ? url('/offer/'.$this->message->offer->tracking_token)
-                    : '#',
-                '{{offer.number}}' => $this->message->offer?->number ?? '',
-                '{{offer.title}}' => $this->message->offer?->title ?? '',
-            ];
-
-            // Render message body with variables replaced
-            if ($this->message->mail_template_id) {
-                $rendered = $mailService->renderById($this->message->mail_template_id, $variables);
-                $this->renderedBody = $rendered['content'] ?? $this->message->body;
-            } else {
-                // If no template, do simple string replacement
-                $this->renderedBody = str_replace(
-                    array_keys($variables),
-                    array_values($variables),
-                    $this->message->body
-                );
-            }
+            return;
         }
 
-        public function delete(): void
-        {
-            $this->message->delete();
-            $this->success('Başarılı', 'Mesaj silindi.');
+        if (!$this->message->recipient_email) {
+            $this->error('Hata', 'Alıcı e-posta adresi bulunamadı.');
+
+            return;
+        }
+
+        // CC/BCC Ayrıştırma: Virgülle ayrılmış string değerleri diziye dönüştürür.
+        $cc = $this->message->cc ? array_map('trim', explode(',', $this->message->cc)) : [];
+        $bcc = $this->message->bcc ? array_map('trim', explode(',', $this->message->bcc)) : [];
+
+        try {
+            // SMTP Gönderim ve Durum Güncelleme (Atomic Operation)
+            Mail::to($this->message->recipient_email)->send(new DynamicCustomerMail(
+                $this->message->subject,
+                $this->renderedBody,
+                $cc,
+                $bcc
+            ));
+
+            $this->message->update([
+                'status' => 'SENT',
+                'sent_at' => now(),
+            ]);
+
+            // Bağlantılı Kaynak Güncelleme: Teklif durumunu 'SENT' (Gönderildi) olarak mühürler.
+            if ($this->message->offer_id && $this->message->offer?->status === 'DRAFT') {
+                $this->message->offer->update(['status' => 'SENT']);
+            }
+
+            $this->success('Başarılı', 'Mesaj ' . $this->message->recipient_email . ' adresine gönderildi.');
             $this->redirect('/dashboard/customers?tab=messages', navigate: true);
+        } catch (\Exception $e) {
+            $this->message->update([
+                'status' => 'FAILED',
+            ]);
+
+            $this->error('Hata', 'Mesaj gönderilemedi: ' . $e->getMessage());
         }
-
-        public function sendMessage(): void
-        {
-            if ($this->message->status === 'SENT') {
-                $this->error('Hata', 'Bu mesaj zaten gönderilmiş.');
-
-                return;
-            }
-
-            if (! $this->message->recipient_email) {
-                $this->error('Hata', 'Alıcı e-posta adresi bulunamadı.');
-
-                return;
-            }
-
-            // Parse CC and BCC
-            $cc = $this->message->cc ? array_map('trim', explode(',', $this->message->cc)) : [];
-            $bcc = $this->message->bcc ? array_map('trim', explode(',', $this->message->bcc)) : [];
-
-            try {
-                // Send email to the recipient
-                Mail::to($this->message->recipient_email)->send(new DynamicCustomerMail(
-                    $this->message->subject,
-                    $this->renderedBody,
-                    $cc,
-                    $bcc
-                ));
-
-                // Update message status to SENT
-                $this->message->update([
-                    'status' => 'SENT',
-                    'sent_at' => now(),
-                ]);
-
-                // Update offer status to SENT if it's DRAFT
-                if ($this->message->offer_id && $this->message->offer?->status === 'DRAFT') {
-                    $this->message->offer->update(['status' => 'SENT']);
-                }
-
-                $this->success('Başarılı', 'Mesaj '.$this->message->recipient_email.' adresine gönderildi.');
-                $this->redirect('/dashboard/customers?tab=messages', navigate: true);
-            } catch (\Exception $e) {
-                // Update message status to FAILED
-                $this->message->update([
-                    'status' => 'FAILED',
-                ]);
-
-                $this->error('Hata', 'Mesaj gönderilemedi: '.$e->getMessage());
-            }
-        }
-    }; ?>
+    }
+}; ?>
 
 <div class="p-6 max-w-7xl mx-auto space-y-6">
-    {{-- Navigation & Actions --}}
+    {{-- SECTION: Navigation & Actions --}}
+    {{-- Sayfa başlığı ve global aksiyon butonlarının (Gönder, Sil) bulunduğu alan. --}}
     <div class="flex items-start justify-between">
         <div>
             <a href="/dashboard/customers?tab=messages" wire:navigate
@@ -127,6 +158,7 @@ new #[Layout('components.layouts.app', ['title' => 'Mesaj Detayı'])]
 
         <div class="flex gap-3">
             @if($message->status !== 'SENT')
+                {{-- İş Kuralı: Gönderilmemiş mesajlar için gönderim tetikleyicisi. --}}
                 <button wire:click="sendMessage" wire:loading.attr="disabled"
                     wire:confirm="Bu mesajı göndermek istediğinize emin misiniz?"
                     class="theme-btn-save flex items-center gap-2">
@@ -160,8 +192,11 @@ new #[Layout('components.layouts.app', ['title' => 'Mesaj Detayı'])]
     </div>
 
     @if($activeTab === 'info')
+        {{-- SECTION: Message Info Tab --}}
+        {{-- Mesajın asıl içeriği ve sağ sidebar verilerinin listelendiği ana yapı. --}}
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {{-- Left: Message Content (2/3) --}}
+            {{-- BLOCK: Message Content (2/3) --}}
+            {{-- Render edilmiş (HTML/Plain Text) mesaj gövdesi. --}}
             <div class="md:col-span-2 space-y-6">
                 <div class="theme-card p-8 shadow-sm min-h-[500px]">
                     <div class="mail-content prose prose-sm max-w-none">
@@ -170,7 +205,8 @@ new #[Layout('components.layouts.app', ['title' => 'Mesaj Detayı'])]
                 </div>
             </div>
 
-            {{-- Right: Sidebar Info (1/3) --}}
+            {{-- BLOCK: Sidebar Info (1/3) --}}
+            {{-- Müşteri bilgisi ve mesaj metadatası (Durum, Tarih, Tür). --}}
             <div class="space-y-6">
                 {{-- Customer Card --}}
                 <div class="theme-card p-6 shadow-sm">
@@ -255,6 +291,7 @@ new #[Layout('components.layouts.app', ['title' => 'Mesaj Detayı'])]
 
                     @if($message->offer_id)
                         <div class="pt-4 border-t border-slate-50">
+                            {{-- İş Kuralı: Mesaj bir teklife bağlıysa, teklif detayına hızlı erişim sağlar. --}}
                             <label class="block text-[10px] font-bold text-slate-400 uppercase">İlgili Teklif</label>
                             <a href="/dashboard/customers/offers/{{ $message->offer_id }}" wire:navigate
                                 class="flex items-center gap-2 text-sm font-bold text-blue-600 hover:text-blue-700 mt-1 transition-colors">
@@ -267,6 +304,8 @@ new #[Layout('components.layouts.app', ['title' => 'Mesaj Detayı'])]
             </div>
         </div>
     @elseif($activeTab === 'downloads')
+        {{-- SECTION: Download Logs Tab --}}
+        {{-- Mesaj üzerinden gönderilen teklifin müşteri tarafından indirilme kayıtlarını listeler. --}}
         <div class="theme-card overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
@@ -308,6 +347,7 @@ new #[Layout('components.layouts.app', ['title' => 'Mesaj Detayı'])]
                                     </span>
                                 </td>
                                 <td class="px-6 py-4">
+                                    {{-- İş Kuralı: User Agent verisi güvenlik takibi için ham haliyle saklanır. --}}
                                     <div class="text-[10px] text-slate-600 line-clamp-1 max-w-sm"
                                         title="{{ $log->user_agent }}">
                                         {{ $log->user_agent ?? '-' }}

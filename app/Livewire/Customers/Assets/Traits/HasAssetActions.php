@@ -3,59 +3,33 @@
 namespace App\Livewire\Customers\Assets\Traits;
 
 use App\Models\Asset;
-use App\Models\Customer;
 use Illuminate\Support\Str;
 
+/**
+ * 🛡️ ZIRHLI BELGELEME KARTI (V12.2)
+ * -------------------------------------------------------------------------
+ * TRAIT      : HasAssetActions
+ * SORUMLULUK : Müşteri varlıklarının (Asset) CRUD operasyonlarını ve
+ *              URL bazlı varlık yönetimini sağlar.
+ *
+ * BAĞIMLILIKLAR:
+ * - Mary\Traits\Toast (Bileşen seviyesinde)
+ *
+ * METODLAR:
+ * - loadAssetData(): Mevcut varlık bilgilerini form alanlarına yükler.
+ * - save(): Yeni varlık oluşturur veya mevcut olanı günceller.
+ * - cancel(): İşlemi durdurur ve geri yönlendirir.
+ * - toggleEditMode(): Görüntüleme ve düzenleme modları arasında geçiş yapar.
+ * - delete(): Varlığı sistemden siler.
+ * - updatedUrl(): URL formatını otomatik düzeltir.
+ * -------------------------------------------------------------------------
+ */
 trait HasAssetActions
 {
-    // Varlık Bilgileri
-    public string $customer_id = '';
-    public string $name = '';
-    public string $type = '';
-    public string $url = '';
-
-    // State Management
-    public bool $isViewMode = false;
-    public ?string $assetId = null;
-    public string $activeTab = 'info';
-
-    // Reference Data
-    public $customers = [];
-    public $assetTypes = [];
-
-    public function mount(?string $asset = null): void
-    {
-        // Load Customers
-        $this->customers = Customer::orderBy('name')
-            ->get(['id', 'name'])
-            ->map(fn($c) => ['id' => $c->id, 'name' => $c->name])
-            ->toArray();
-
-        // Load Asset Types
-        $this->assetTypes = \App\Models\ReferenceItem::where('category_key', 'ASSET_TYPE')
-            ->where('is_active', true)
-            ->orderBy('sort_order')
-            ->get(['id', 'display_label', 'key'])
-            ->map(fn($i) => ['id' => $i->key, 'name' => $i->display_label])
-            ->toArray();
-
-        // If asset ID is provided, load data
-        if ($asset) {
-            $this->assetId = $asset;
-            $this->loadAssetData();
-
-            // Set active tab from URL if present
-            $this->activeTab = request()->query('tab', 'info');
-        } else {
-            // Check for customer query parameter
-            $customerId = request()->query('customer');
-            if ($customerId && collect($this->customers)->firstWhere('id', $customerId)) {
-                $this->customer_id = $customerId;
-            }
-        }
-    }
-
-    private function loadAssetData(): void
+    /**
+     * Mevcut bir varlığın verilerini form alanlarına yükler.
+     */
+    public function loadAssetData(): void
     {
         $asset = Asset::findOrFail($this->assetId);
 
@@ -67,6 +41,10 @@ trait HasAssetActions
         $this->isViewMode = true;
     }
 
+    /**
+     * Varlığı kaydeder veya günceller.
+     * Güvenlik: Asset yönetimi form seviyesinde yetki denetimine tabidir.
+     */
     public function save(): void
     {
         $typeKeys = collect($this->assetTypes)->pluck('id')->implode(',');
@@ -107,10 +85,12 @@ trait HasAssetActions
         $this->success('İşlem Başarılı', $message);
         $this->isViewMode = true;
 
-        // Dispatch event
         $this->dispatch('asset-saved');
     }
 
+    /**
+     * İşlemi iptal eder ve müşteri detaylarındaki varlıklar sekmesine döner.
+     */
     public function cancel(): void
     {
         if ($this->assetId) {
@@ -120,11 +100,17 @@ trait HasAssetActions
         }
     }
 
+    /**
+     * Düzenleme modunu açar.
+     */
     public function toggleEditMode(): void
     {
         $this->isViewMode = false;
     }
 
+    /**
+     * Kaydı siler.
+     */
     public function delete(): void
     {
         if ($this->assetId) {
@@ -136,11 +122,14 @@ trait HasAssetActions
         }
     }
 
-    // Auto-prefix URL with https://
+    /**
+     * URL güncellendiğinde protokol yoksa otomatik https:// ekler.
+     * İş Kuralı: Kullanıcının protokol yazma zahmetini azaltır.
+     */
     public function updatedUrl()
     {
         $val = trim($this->url);
-        if ($val && !preg_match('/^https?:\/\//', $val)) {
+        if ($val && !preg_match('/^https?:\/\//', $val) && str_contains($val, '.')) {
             $this->url = 'https://' . $val;
         }
     }

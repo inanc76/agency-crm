@@ -1,4 +1,22 @@
 <?php
+/**
+ * ╔══════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+ * ║                                    🛡️ MİSYON LIGHTHOUSE - PROJE HİYERARŞİSİ                                    ║
+ * ║                                                                                                                  ║
+ * ║  📋 SORUMLULUK ALANI: Proje Hiyerarşik Yapı Yönetimi (Phases & Modules)                                          ║
+ * ║  🎯 ANA GÖREV: Faz (Phase) ve Modül (Module) sisteminin koordinasyonu, tarih hesaplamaları ve sıralama          ║
+ * ║                                                                                                                  ║
+ * ║  🔧 TEMEL YETKİNLİKLER:                                                                                         ║
+ * ║  • Otomatik Tarih Yönetimi: Modül tarihlerine göre Faz ve Proje tarihlerinin otomatik güncellenmesi              ║
+ * ║  • Dinamik Sıralama: Modüllerin başlangıç tarihine göre usort() algoritması ile dizilmesi                        ║
+ * ║  • State Sync: Modallar üzerinden gelen geçici verilerin ana faz dizisi ile senkronizasyonu                       ║
+ * ║                                                                                                                  ║
+ * ║  ⚠️ KRİTİK İŞ KURALI:                                                                                            ║
+ * ║  • Bir projeye en fazla 20 faz eklenebilir (Performans ve UI sınırı).                                            ║
+ * ║  • Modülü olmayan fazların tarihleri manuel kontrol edilmedikçe 'fullDateRecalculation' ile güncellenmez.        ║
+ * ║                                                                                                                  ║
+ * ╚══════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+ */
 
 namespace App\Livewire\Projects\Traits;
 
@@ -7,6 +25,7 @@ use Illuminate\Support\Str;
 
 trait HasProjectHierarchy
 {
+
     // Hierarchical Form - Phases & Modules
     public array $phases = [];
     public array $phaseStatuses = [];
@@ -110,6 +129,10 @@ trait HasProjectHierarchy
         $this->phaseModalOpen = true;
     }
 
+    /**
+     * Faz Verisini Kaydetme/Güncelleme
+     * İş Kuralı: Yeni fazlar için döngüsel renk ataması yapılır.
+     */
     public function savePhase(): void
     {
         $this->validate(['phaseForm.name' => 'required|string|max:255']);
@@ -117,12 +140,12 @@ trait HasProjectHierarchy
         $colors = ['#3b82f6', '#14b8a6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
         if ($this->editingPhaseIndex !== null) {
-            // Update existing phase
+            // Mevcut fazı güncelle
             $this->phases[$this->editingPhaseIndex]['name'] = $this->phaseForm['name'];
             $this->phases[$this->editingPhaseIndex]['description'] = $this->phaseForm['description'];
             $this->phases[$this->editingPhaseIndex]['status_id'] = $this->phaseForm['status_id'] ?: null;
         } else {
-            // Create new phase
+            // MİMARİ NOT: Renk indeksi, mevcut faz sayısının renk paleti uzunluğuna modu alınarak belirlenir.
             $colorIndex = count($this->phases) % count($colors);
 
             $this->phases[] = [
@@ -201,6 +224,10 @@ trait HasProjectHierarchy
         $this->moduleModalOpen = true;
     }
 
+    /**
+     * Modül Verisini Kaydetme ve Kronolojik Sıralama
+     * İş Kuralı: Modüller her zaman başlangıç tarihine göre artan sırada (ASC) durmalıdır.
+     */
     public function saveModule(): void
     {
         $this->validate([
@@ -231,7 +258,12 @@ trait HasProjectHierarchy
             $modules[] = $moduleData;
         }
 
-        // Sort modules by date
+        /**
+         * KRONOLOJİK SIRALAMA ALGORİTMASI
+         * 1. Tarihler eşitse sırayı bozma.
+         * 2. Tarihi olmayan (null) modülleri listenin en sonuna it.
+         * 3. Tarihi olan modülleri kendi aralarında karşılaştır.
+         */
         usort($modules, function ($a, $b) {
             $dateA = $a['start_date'] ?? null;
             $dateB = $b['start_date'] ?? null;
@@ -262,6 +294,11 @@ trait HasProjectHierarchy
         $this->fullDateRecalculation();
     }
 
+    /**
+     * Faz Tarihlerini Modüllere Göre Hesaplama
+     * İş Kuralı: Bir fazın başlangıç tarihi, içindeki en erken modülün tarihidir. 
+     * Bitiş tarihi ise en geç biten modülün tarihidir.
+     */
     private function calculatePhaseDates(int $phaseIndex): void
     {
         $modules = $this->phases[$phaseIndex]['modules'] ?? [];
@@ -278,6 +315,7 @@ trait HasProjectHierarchy
                 $endDates[] = $m['end_date'];
         }
 
+        // MİMARİ NOT: min() ve max() fonksiyonları ile fazın kapsadığı zaman aralığı mühürlenir.
         if (!empty($startDates)) {
             $this->phases[$phaseIndex]['start_date'] = min($startDates);
         }

@@ -1,22 +1,89 @@
 <?php
 /**
- * 🛡️ SERVICE FORM MODAL (ORCHESTRA SHELL)
- * ---------------------------------------------------------
- * ARCHITECTURE: MVVM (Model-View-ViewModel) through Livewire Volt.
- * LOGIC HOOK: App\Livewire\Customers\Services\Traits\HasServiceActions.
- * UI DESIGN: Two-Part Balanced Architecture (parts/service/).
- * SECURITY: Restricted to authorized users via web.php 'can' middleware.
- * ---------------------------------------------------------
+ * 🛡️ ZIRHLI BELGELEME KARTI (V12.2)
+ * -------------------------------------------------------------------------
+ * COMPONENT   : ServiceForm (Orchestra Shell)
+ * SORUMLULUK  : Müşteri hizmetlerini (Service) yöneten ViewModel.
+ *               Toplu hizmet ekleme ve proje entegrasyonu sağlar.
+ *
+ * BAĞIMLILIKLAR:
+ * - App\Livewire\Customers\Services\Traits\HasServiceActions
+ * - App\Livewire\Traits\HasServiceCalculations
+ * - Mary\Traits\Toast
+ * -------------------------------------------------------------------------
  */
-
 use App\Livewire\Customers\Services\Traits\HasServiceActions;
 use Livewire\Volt\Component;
 use Mary\Traits\Toast;
+use App\Models\Customer;
+use App\Models\ReferenceItem;
+use Carbon\Carbon;
 
 new class extends Component
 {
-    use HasServiceActions;
-    use Toast;
+    use HasServiceActions, Toast;
+
+    // --- Hizmet Verileri (State Management) ---
+    public string $customer_id = '';
+    public string $asset_id = '';
+    public ?string $start_date = null;
+    public array $services = [];
+    public array $projectSummary = [];
+
+    // --- UI ve Sistem Durumu ---
+    public bool $isViewMode = false;
+    public ?string $serviceId = null;
+    public string $activeTab = 'info';
+
+    // --- Referans Verileri (ReferenceData) ---
+    public array $customers = [];
+    public array $assets = [];
+    public array $projects = [];
+    public array $categories = [];
+    public array $serviceStatuses = [];
+
+    /**
+     * Bileşen yaşam döngüsü başlangıcı.
+     * Gerekli tüm referans verileri hazırlar ve başlangıç durumunu belirler.
+     */
+    public function mount(?string $service = null): void
+    {
+        // Temel referans verileri yükle
+        $this->customers = Customer::orderBy('name')
+            ->get(['id', 'name'])
+            ->map(fn($c) => ['id' => $c->id, 'name' => $c->name])
+            ->toArray();
+
+        $this->categories = ReferenceItem::where('category_key', 'SERVICE_CATEGORY')
+            ->orderBy('sort_order')
+            ->get(['key', 'display_label'])
+            ->map(fn($item) => ['key' => $item->key, 'label' => $item->display_label])
+            ->toArray();
+
+        $this->serviceStatuses = ReferenceItem::where('category_key', 'SERVICE_STATUS')
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->get(['id', 'display_label', 'key', 'metadata'])
+            ->map(fn($i) => ['id' => $i->id, 'display_label' => $i->display_label, 'key' => $i->key])
+            ->toArray();
+
+        $this->start_date = Carbon::now()->format('Y-m-d');
+
+        if ($service) {
+            $this->serviceId = $service;
+            $this->loadServiceData();
+            $this->activeTab = request()->query('tab', 'info');
+        } else {
+            // Yeni kayıt için ön hazırlık
+            $customerId = request()->query('customer');
+            if ($customerId && collect($this->customers)->firstWhere('id', $customerId)) {
+                $this->customer_id = $customerId;
+                $this->loadAssets();
+                $this->loadProjects();
+            }
+            $this->addService();
+        }
+    }
 }; ?>
 
 <div>

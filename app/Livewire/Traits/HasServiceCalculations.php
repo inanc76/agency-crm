@@ -1,17 +1,20 @@
 <?php
 
 /**
- * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- * 🎯 IDENTITY CARD
- * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- * Trait: HasServiceCalculations
- * Purpose: Service Data Loading & Price Calculations with N+1 Prevention
- * Layer: Livewire Trait (Data & Business Logic)
- * Dependencies: Service, Asset, Customer, PriceDefinition Models
- * Created: 2026-01-10
- * Refactored From: customers/services/create.blade.php (604 lines → decomposed)
- * Performance: 2 queries → 1 query (eager loading)
- * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ * 🛡️ ZIRHLI BELGELEME KARTI (V12.2)
+ * -------------------------------------------------------------------------
+ * TRAIT      : HasServiceCalculations
+ * SORUMLULUK : Hizmet verilerinin N+1 problemi olmadan yüklenmesi, birim
+ *              fiyat eşleştirmeleri ve proje saat özetlerinin hesaplanması.
+ *
+ * BAĞIMLILIKLAR:
+ * - Service, Asset, Customer, PriceDefinition, ProjectReport Modelleri
+ *
+ * METODLAR:
+ * - loadServiceData(): Eager loading ile asenkron veri yükler.
+ * - loadAssets() / loadProjects(): Dinamik seçim listelerini hazırlar.
+ * - calculateProjectSummary(): Proje bazlı harcanan/kalan zamanı hesaplar.
+ * -------------------------------------------------------------------------
  */
 
 namespace App\Livewire\Traits;

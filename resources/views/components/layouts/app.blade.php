@@ -20,6 +20,7 @@
 
     <x-mary-toast />
     @livewireScripts
+    @stack('scripts')
 </body>
 
 </html>

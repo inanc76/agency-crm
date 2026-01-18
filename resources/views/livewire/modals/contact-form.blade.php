@@ -1,24 +1,105 @@
 <?php
 /**
- * 🛡️ CONTACT FORM MODAL (ORCHESTRA SHELL)
- * ---------------------------------------------------------
- * ARCHITECTURE: MVVM (Model-View-ViewModel) through Livewire Volt.
- * LOGIC HOOK: App\Livewire\Customers\Contacts\Traits\HasContactActions.
- * UI DESIGN: Ultra-Atomic Structure (Divided into parts/contact/).
- * SECURITY: Restricted to authorized users via web.php 'can' middleware.
- * ---------------------------------------------------------
+ * 🛡️ ZIRHLI BELGELEME KARTI (V12.2)
+ * -------------------------------------------------------------------------
+ * COMPONENT   : ContactForm (Orchestra Shell)
+ * SORUMLULUK  : Kontak kişisi ekleme/düzenleme formu için ViewModel görevi görür.
+ *               Trait üzerindeki CRUD aksiyonlarını yönetir.
+ *
+ * BAĞIMLILIKLAR:
+ * - App\Livewire\Customers\Contacts\Traits\HasContactActions
+ * - Mary\Traits\Toast
+ * -------------------------------------------------------------------------
  */
 use App\Livewire\Customers\Contacts\Traits\HasContactActions;
 use Livewire\Volt\Component;
 use Livewire\Attributes\Layout;
 use Mary\Traits\Toast;
+use App\Models\Customer;
+use App\Models\ReferenceItem;
 
 new 
 #[Layout('components.layouts.app')]
 class extends Component
 {
-    use HasContactActions;
-    use Toast;
+    use HasContactActions, Toast;
+
+    // --- Kontak Verileri (State Management) ---
+    public string $customer_id = '';
+    public string $name = '';
+    public string $status = 'WORKING';
+    public string $gender = '';
+    public string $position = '';
+    
+    public array $emails = [''];
+    public array $phones = [['number' => '', 'extension' => '']];
+    public ?string $birth_date = null;
+    public array $social_profiles = [['name' => '', 'url' => '']];
+
+    // --- UI ve Sistem Durumu ---
+    public bool $isViewMode = false;
+    public ?string $contactId = null;
+    public string $activeTab = 'info';
+
+    // --- Referans Verileri (ReferenceData) ---
+    public array $customers = [];
+    public array $contactStatuses = [];
+    public array $genders = [];
+    public $relatedMessages = [];
+    public int $messageCount = 0;
+    public int $noteCount = 0;
+
+    /**
+     * Bileşen yaşam döngüsü başlangıcı.
+     * Referans dataları hazırlar ve varsa mevcut kontağı yükler.
+     */
+    public function mount(?string $contact = null): void
+    {
+        // Müşteri listesini yükle (Arama/Seçim için)
+        $this->customers = Customer::orderBy('name')
+            ->get(['id', 'name'])
+            ->map(fn ($c) => ['id' => $c->id, 'name' => $c->name])
+            ->toArray();
+
+        // Sistemdeki İletişim Durum kodlarını yükle
+        $this->contactStatuses = ReferenceItem::where('category_key', 'CONTACT_STATUS')
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->get(['id', 'display_label', 'key', 'metadata'])
+            ->map(fn ($i) => ['id' => $i->id, 'display_label' => $i->display_label, 'key' => $i->key])
+            ->toArray();
+
+        // Cinsiyet tanımlarını yükle (Fallback statik matris içerir)
+        $this->genders = ReferenceItem::where('category_key', 'GENDER')
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->get(['id', 'display_label', 'key'])
+            ->map(fn ($i) => ['id' => $i->key, 'name' => $i->display_label])
+            ->toArray();
+
+        if (empty($this->genders)) {
+            $this->genders = [
+                ['id' => 'male', 'name' => 'Erkek'],
+                ['id' => 'female', 'name' => 'Kadın'],
+                ['id' => 'other', 'name' => 'Diğer'],
+            ];
+        }
+
+        if ($contact) {
+            $this->contactId = $contact;
+            $this->loadContactData();
+            $this->activeTab = request()->query('tab', 'info');
+        } else {
+            // Query string ile gelen müşteri verisi varsa yakala
+            $customerId = request()->query('customer');
+            if ($customerId && collect($this->customers)->firstWhere('id', $customerId)) {
+                $this->customer_id = $customerId;
+            }
+            if (! empty($this->contactStatuses)) {
+                $this->status = $this->contactStatuses[0]['key'];
+            }
+        }
+    }
 }; ?>
 
 <div>

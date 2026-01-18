@@ -1,23 +1,20 @@
 {{--
-🛡️ ZIRHLI BELGELEME KARTI (V12.2)
--------------------------------------------------------------------------
-MODÜL : Customers / Offers / PDF Preview
-SORUMLULUK : Tekliflerin PDF'e dönüştürülmeden önceki son "canlı" önizleme hali.
-MİMARİ : Monolitik -> Partial Tabanlı (Mission Zeta).
-
-YAPI HİYERARŞİSİ:
-1. _styles.blade.php : PDF ve Print'e özel CSS kuralları (DomPDF uyumlu).
-2. _executive-summary.blade.php: Yönetici özeti, kapak sayfası ve genel toplam kartı.
-3. _items-detail.blade.php : Sayfalandırılmış teklif detay tablosu (Items Loop).
-
-VERİ KAYNAĞI:
-- Veriler `Offer` modeli ve `PanelSetting` üzerinden beslenir.
-- Hesaplamalar (KDV, Ara Toplam) `mount()` metodunda yapılarak `$sections` dizisine atanır.
-
-⚠️ MİMARIN NOTU:
-Bu sayfa hem tarayıcıda (HTML) hem de PDF motorunda (DomPDF/Browsershot) render edilir.
-CSS değişikliklerinde "Print" modunu (media print) mutlaka test ediniz.
--------------------------------------------------------------------------
+* ╔══════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+* ║ 🛡️ MİSYON LIGHTHOUSE - TEKLİF PDF ÖNİZLEME ║
+* ║ ║
+* ║ 📋 SORUMLULUK ALANI: Teklif PDF Canlı Önizleme ve İndirme Yönetimi ║
+* ║ 🎯 ANA GÖREV: Teklif detaylarının HTML/PDF formatında render edilmesi ve indirme yetkilerinin mühürlenmesi ║
+* ║ ║
+* ║ 🔧 TEMEL YETKİNLİKLER: ║
+* ║ • Dinamik Render: _executive-summary ve _items-detail partials ile modüler yapı ║
+* ║ • Finansal Hesaplama: mount() içinde KDV, Ara Toplam ve Satır Başı toplamların hesaplanması ║
+* ║ • Güvenlik Kontrolü: İndirme sayfası ayarları (isPdfDownloadable, blockAfterExpiry) ile erişim kısıtlama ║
+* ║ ║
+* ║ 📦 BAĞIMLILIKLAR: ║
+* ║ • GenerateOfferPdfAction: PDF üretim motoru ║
+* ║ • MinioService: Logo ve ek dosya yönetimi ║
+* ║ ║
+* ╚══════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 --}}
 <?php
 
@@ -69,8 +66,15 @@ new
 
 
 
+    /**
+     * Başlatma: Teklif verisini yükleme, finansal hesaplamalar ve ayarları senkronize etme.
+     * 
+     * @param mixed $offer
+     * @return void
+     */
     public function mount($offer): void
     {
+        // Polymorphic Input: $offer bir Model örneği veya ID (veya JSON ID) olabilir.
         if ($offer instanceof Offer) {
             $this->offer = $offer->load(['customer', 'sections.items']);
         } else {
@@ -86,11 +90,12 @@ new
 
         $this->settings = PanelSetting::where('is_active', true)->first() ?? new PanelSetting;
 
+        // Müşteri Logosu: Minio üzerinden dinamik (temporary) URL alınır.
         if ($this->settings->pdf_logo_path) {
             try {
                 $this->logoUrl = app(MinioService::class)->getFileUrl($this->settings->pdf_logo_path);
             } catch (\Exception $e) {
-                // Fail silently
+                // Sessiz hata: Logo yüklenemezse isim gösterilir.
             }
         }
 
@@ -103,6 +108,11 @@ new
         $this->vatRate = $offer->vat_rate ?? 20;
         $this->preparedBy = auth()->user()?->name ?? 'Belirtilmemiş';
 
+        /**
+         * FİNANSAL MOTOR (FINANCIAL ENGINE)
+         * Teklif bölümlerini (Sections) ve içindeki kalemleri (Items) döner,
+         * her bölüm için Ara Toplam, KDV ve Genel Toplam hesaplar.
+         */
         $this->sections = $this->offer->sections->map(function ($section) {
             $subtotal = $section->items->sum(fn($item) => ($item->quantity ?? 1) * ($item->price ?? 0));
             $vatAmount = $subtotal * ($this->vatRate / 100);
@@ -126,8 +136,8 @@ new
             ];
         })->toArray();
 
+        // İndirme Sayfası İzinleri
         $this->isPdfDownloadable = $this->offer->is_pdf_downloadable ?? true;
-        $this->isAttachmentsDownloadable = $this->offer->is_attachments_downloadable ?? true;
         $this->isAttachmentsDownloadable = $this->offer->is_attachments_downloadable ?? true;
         $this->blockAfterExpiry = !($this->offer->is_downloadable_after_expiry ?? false);
 
@@ -173,29 +183,29 @@ new
     <div class="max-w-7xl mx-auto">
         {{-- Main Container with Flex Layout --}}
         <div class="flex gap-6">
-            {{-- Sol Kolon - Teklif İçeriği (Geniş) --}}
+            {{-- BLOCK: Sol Kolon - Teklif İçeriği (Geniş) --}}
+            {{-- Bu alan DomPDF tarafından render edilen ana teklif gövdesidir. --}}
             <div class="w-9/12 min-w-0">
                 <div class="theme-card overflow-hidden"
                     style="font-family: '{{ $settings->pdf_font_family ?? 'Segoe UI' }}', sans-serif; background-color: #f8fafc;">
 
-                    {{-- İçerik (Sayfa Yapıları) --}}
+                    {{-- Sayfa Yapıları: Partial tabanlı mimari (Mission Zeta) --}}
                     <div class="p-8 space-y-12">
-                        {{-- YÖNETİCİ ÖZETİ SAYFASI --}}
                         {{-- YÖNETİCİ ÖZETİ SAYFASI --}}
                         @include('livewire.customers.offers.partials.pdf-preview._executive-summary')
 
-                        {{-- Detay Bölümleri --}}
                         {{-- Detay Bölümleri --}}
                         @include('livewire.customers.offers.partials.pdf-preview._items-detail')
                     </div>
                 </div>
             </div>
 
-            {{-- Sağ Kolon - Butonlar (Dar) --}}
+            {{-- BLOCK: Sağ Kolon - Kontrol Paneli (Dar) --}}
+            {{-- PDF indirme, Gönderim ve İndirme sayfası yetkilerinin yönetildiği sidebar. --}}
             <div class="w-3/12 flex-shrink-0">
                 <div class="theme-card p-4 sticky top-6">
                     <div class="space-y-3">
-                        {{-- Üst Butonlar: PDF İndir & Print --}}
+                        {{-- Alt-Blok: Hızlı Aksiyonlar --}}
                         <div class="flex gap-2">
                             <button wire:click="downloadPdf" wire:loading.attr="disabled"
                                 class="flex-1 theme-btn-save flex items-center justify-center gap-2">
@@ -229,7 +239,7 @@ new
                             <span>Teklifi Gönder</span>
                         </button>
 
-                        {{-- İndirme Sayfası (Yeni Buton) --}}
+                        {{-- İndirme Sayfası (Önizleme) --}}
                         <a href="{{ route('offer.download', $offer->tracking_token ?? '') }}" target="_blank"
                             class="w-full theme-btn-delete flex items-center justify-center gap-2 no-underline">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

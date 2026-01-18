@@ -9,6 +9,15 @@ new class extends Component {
     use HasNoteActions;
     use Toast;
 
+    // --- Note Modal State ---
+    public bool $showNoteModal = false;
+    public ?string $editingNoteId = null;
+    public string $noteContent = '';
+    public array $noteVisibleToDepartments = [];
+
+    // --- Notes Data ---
+    public $notes = [];
+
     // Entity bilgileri (parent component'ten gelecek)
     public string $entityType;
     public string $entityId;

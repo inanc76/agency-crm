@@ -1,15 +1,75 @@
 <?php
-
+/**
+ * 🛡️ ZIRHLI BELGELEME KARTI (V12.2)
+ * -------------------------------------------------------------------------
+ * COMPONENT   : AssetForm (Orchestra Shell)
+ * SORUMLULUK  : Müşteri varlıkları (Asset) için ViewModel görevi görür.
+ *               Trait üzerindeki CRUD aksiyonlarını yönetir.
+ *
+ * BAĞIMLILIKLAR:
+ * - App\Livewire\Customers\Assets\Traits\HasAssetActions
+ * - Mary\Traits\Toast
+ * -------------------------------------------------------------------------
+ */
 use App\Livewire\Customers\Assets\Traits\HasAssetActions;
 use Livewire\Volt\Component;
-use Livewire\Attributes\Layout; // Import Layout attribute
+use Livewire\Attributes\Layout;
 use Mary\Traits\Toast;
+use App\Models\Customer;
+use App\Models\ReferenceItem;
 
 new 
-#[Layout('components.layouts.app')] // Explicitly use app layout
+#[Layout('components.layouts.app')]
 class extends Component {
-    use HasAssetActions;
-    use Toast;
+    use HasAssetActions, Toast;
+
+    // --- Varlık Verileri (State Management) ---
+    public string $customer_id = '';
+    public string $name = '';
+    public string $type = '';
+    public string $url = '';
+
+    // --- UI ve Sistem Durumu ---
+    public bool $isViewMode = false;
+    public ?string $assetId = null;
+    public string $activeTab = 'info';
+
+    // --- Referans Verileri (ReferenceData) ---
+    public array $customers = [];
+    public array $assetTypes = [];
+
+    /**
+     * Bileşen yaşam döngüsü başlangıcı.
+     * Referans dataları hazırlar ve varsa mevcut varlığı yükler.
+     */
+    public function mount(?string $asset = null): void
+    {
+        // Müşteri listesini yükle
+        $this->customers = Customer::orderBy('name')
+            ->get(['id', 'name'])
+            ->map(fn($c) => ['id' => $c->id, 'name' => $c->name])
+            ->toArray();
+
+        // Sistemdeki Varlık Türlerini yükle
+        $this->assetTypes = ReferenceItem::where('category_key', 'ASSET_TYPE')
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->get(['id', 'display_label', 'key'])
+            ->map(fn($i) => ['id' => $i->key, 'name' => $i->display_label])
+            ->toArray();
+
+        if ($asset) {
+            $this->assetId = $asset;
+            $this->loadAssetData();
+            $this->activeTab = request()->query('tab', 'info');
+        } else {
+            // Query string ile gelen müşteri verisi varsa yakala
+            $customerId = request()->query('customer');
+            if ($customerId && collect($this->customers)->firstWhere('id', $customerId)) {
+                $this->customer_id = $customerId;
+            }
+        }
+    }
 }; ?>
 
 <div>

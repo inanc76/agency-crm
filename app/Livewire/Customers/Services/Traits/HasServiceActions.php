@@ -9,39 +9,36 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 /**
- * ╔══════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
- * ║                                    🏛️ MİMARIN NOTU - CONSTITUTION V11                                            ║
- * ║                                                                                                                  ║
- * ║  📋 SORUMLULUK ALANI: HasServiceActions Trait (Execution & Persistence)                                          ║
- * ║  🎯 ANA GÖREV: Hizmetlerin kaydedilmesi, güncellenmesi ve silinmesi sürecini kontrol eder                       ║
- * ╚══════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+ * 🛡️ ZIRHLI BELGELEME KARTI (V12.2)
+ * -------------------------------------------------------------------------
+ * TRAIT      : HasServiceActions
+ * SORUMLULUK : Müşteri hizmetlerinin (Service) CRUD operasyonlarını, toplu
+ *              hizmet ekleme ve proje entegrasyon süreçlerini yönetir.
+ *
+ * BAĞIMLILIKLAR:
+ * - App\Livewire\Traits\HasServiceCalculations (Hesaplama ve Veri Yükleme)
+ * - Mary\Traits\Toast (Bileşen seviyesinde)
+ *
+ * METODLAR:
+ * - save(): Yeni hizmet(ler) oluşturur veya mevcut olanı günceller.
+ * - cancel(): İşlemi durdurur ve geri yönlendirir.
+ * - toggleEditMode(): Görüntüleme ve düzenleme modları arasında geçiş yapar.
+ * - delete(): Hizmeti sistemden siler (Arşivleme).
+ * - addService(): Forma yeni bir hizmet satırı ekler (Toplu kayıt için).
+ * - removeService(): Formdan bir hizmet satırını çıkartır.
+ * -------------------------------------------------------------------------
  */
 trait HasServiceActions
 {
-    use HasServiceCalculations, HasServiceDataLoader;
-
-    // State Fields
-    public string $customer_id = '';
-    public string $asset_id = '';
-    public ?string $start_date = null;
-    public array $services = [];
-    public array $projectSummary = [];
-    public bool $isViewMode = false;
-    public ?string $serviceId = null;
-    public string $activeTab = 'info';
-
-    // Reference Data
-    public $customers = [];
-    public $assets = [];
-    public $projects = [];
-    public $categories = [];
-    public $serviceStatuses = [];
+    use HasServiceCalculations;
 
     /**
-     * @purpose Hizmet kaydetme (UPSERT)
+     * Hizmet verilerini valide eder ve veritabanına kaydeder.
+     * İş Kuralı: Tekli güncelleme veya toplu oluşturma (Bulk Insert) destekler.
      */
     public function save(): void
     {
+        // 🔐 Security: Yetki denetimi operasyon tipine göre yapılır
         $this->authorize($this->serviceId ? 'services.edit' : 'services.create');
 
         $this->validate([
@@ -66,6 +63,10 @@ trait HasServiceActions
         }
     }
 
+    /**
+     * Tek bir hizmet kaydını günceller.
+     * İş Kuralı: Bitiş tarihi süre tanımına göre otomatik hesaplanır.
+     */
     private function updateSingleService(Carbon $startDate): void
     {
         $service = Service::findOrFail($this->serviceId);
@@ -94,6 +95,10 @@ trait HasServiceActions
         $this->isViewMode = true;
     }
 
+    /**
+     * Birden fazla hizmet kaydını tek bir işlemde (Transaction) oluşturur.
+     * Performans: Bulk insert ile DB yükü optimize edilmiştir.
+     */
     private function createMultipleServices(Carbon $startDate): void
     {
         DB::transaction(function () use ($startDate) {
@@ -132,6 +137,9 @@ trait HasServiceActions
         $this->redirect('/dashboard/customers?tab=services');
     }
 
+    /**
+     * Hizmet süresine göre (Ay/Yıl) bitiş tarihini hesaplar.
+     */
     private function calculateEndDate(Carbon $startDate, string $duration): Carbon
     {
         return str_contains(strtolower($duration), 'month')
@@ -139,6 +147,9 @@ trait HasServiceActions
             : $startDate->copy()->addYear();
     }
 
+    /**
+     * İşlemi iptal eder ve ilgili sekmeye döner.
+     */
     public function cancel(): void
     {
         if ($this->serviceId) {
@@ -148,19 +159,59 @@ trait HasServiceActions
         }
     }
 
+    /**
+     * Düzenleme moduna geçiş yetkisini kontrol eder.
+     */
     public function toggleEditMode(): void
     {
         $this->authorize('services.edit');
         $this->isViewMode = false;
     }
 
+    /**
+     * Hizmet kaydını siler.
+     */
     public function delete(): void
     {
         $this->authorize('services.delete');
         if ($this->serviceId) {
-            Service::findOrFail($this->serviceId)->delete();
+            Service::where('id', $this->serviceId)->delete();
             $this->success('Silindi', 'Hizmet arşive taşındı.');
             $this->redirect('/dashboard/customers?tab=services');
+        }
+    }
+
+    /**
+     * Forma yeni bir boş hizmet satırı ekler (Maksimum 5 satır).
+     */
+    public function addService(): void
+    {
+        if (count($this->services) < 5) {
+            $this->services[] = [
+                'category' => '',
+                'service_name' => '',
+                'price_definition_id' => '',
+                'status' => !empty($this->serviceStatuses) ? $this->serviceStatuses[0]['key'] : 'ACTIVE',
+                'service_price' => 0.0,
+                'description' => '',
+                'service_duration' => '',
+                'service_currency' => 'TRY',
+                'services_list' => [],
+                'project_id' => '',
+                'project_phase_id' => '',
+                'phases_list' => [],
+            ];
+        }
+    }
+
+    /**
+     * Formdaki bir hizmet satırını siler (En az 1 satır kalmalı).
+     */
+    public function removeService(int $index): void
+    {
+        if (count($this->services) > 1) {
+            unset($this->services[$index]);
+            $this->services = array_values($this->services);
         }
     }
 }

@@ -1,17 +1,20 @@
 <?php
 /**
  * ╔══════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
- * ║                                    🛡️ MİSYON SİGMA - KULLANICI YÖNETİMİ                                         ║
+ * ║                                    🛡️ MİSYON LIGHTHOUSE - KULLANICI YÖNETİMİ                                    ║
  * ║                                                                                                                  ║
- * ║  📋 SORUMLULUK ALANI: Kullanıcı Yönetim Paneli                                                                  ║
- * ║  🎯 ANA GÖREV: Kullanıcı listeleme, ekleme, düzenleme ve yönetici işlemleri                                    ║
+ * ║  📋 SORUMLULUK ALANI: Kullanıcı Yönetim Paneli (Admin Portal)                                                    ║
+ * ║  🎯 ANA GÖREV: Sistem kullanıcılarının listelenmesi, rollerine göre filtrelenmesi ve mühürlenmesi                ║
  * ║                                                                                                                  ║
  * ║  🔧 TEMEL YETKİNLİKLER:                                                                                         ║
- * ║  • Arama: İsim ve e-posta ile arama                                                                             ║
- * ║  • Filtreleme: Aktif/Pasif durum filtresi                                                                       ║
- * ║  • 2FA Reset: Kullanıcının 2FA ayarlarını sıfırlama                                                            ║
- * ║  • Status Toggle: Kullanıcıyı aktif/pasif yapma                                                                 ║
- * ║  • CRUD: Kullanıcı ekleme, düzenleme                                                                            ║
+ * ║  • Arama & Filtreleme: Multi-input (Search, Status, Role, Dept) ile dinamik sorgu oluşturma                     ║
+ * ║  • Dinamik UI: Tailwind match() fonksiyonu ile departman renklerinin mühürlenmesi                                ║
+ * ║  • Gravatar Entegrasyonu: Kullanıcı avatarı için URL üretimi ve fallback mekanizması                            ║
+ * ║                                                                                                                  ║
+ * ║  📦 BAĞIMLILIKLAR:                                                                                              ║
+ * ║  • App\Models\User: Ana veri modeli                                                                             ║
+ * ║  • App\Models\Role: Yetki ve rol hiyerarşisi                                                                    ║
+ * ║  • ReferenceItem (DEPARTMENT): Departman bazlı gruplama                                                         ║
  * ║                                                                                                                  ║
  * ╚══════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
  */
@@ -99,12 +102,14 @@ new class extends Component {
             <span class="text-sm font-medium">Geri</span>
         </a>
 
-        {{-- Page Header --}}
+        {{-- SECTION: Header & Global Actions --}}
+        {{-- Liste görünümünün başlığı ve yeni kayıt oluşturma yetkisi olan kullanıcılar için aksiyon butonu. --}}
         <div class="mb-6 flex items-center justify-between">
             <div>
                 <h1 class="text-2xl font-bold text-[var(--color-text-heading)]">Kullanıcı Yönetimi</h1>
                 <p class="text-[var(--color-text-base)] text-sm mt-1">Sistem kullanıcılarını yönetin</p>
             </div>
+            {{-- İş Kuralı: Yeni kullanıcı ekleme 'users.create' rotasına mühürlenmiştir. --}}
             <button onclick="window.location.href='{{ route('users.create') }}'" 
                 class="theme-btn-save gap-2">
                 <x-mary-icon name="o-plus" class="w-4 h-4" />
@@ -112,10 +117,11 @@ new class extends Component {
             </button>
         </div>
 
-        {{-- Filter Panel --}}
+        {{-- SECTION: Filter Panel --}}
+        {{-- Arama, Durum, Rol ve Departman filtrelerinin bulunduğu dinamik panel. --}}
         <div class="theme-card p-4 mb-6 shadow-sm">
             <div class="flex flex-wrap items-center gap-4">
-                {{-- Search --}}
+                {{-- Block: Search Input --}}
                 <div class="flex-1 min-w-64">
                     <x-mary-input 
                         wire:model.live.debounce.300ms="search" 
@@ -124,7 +130,7 @@ new class extends Component {
                         class="input-sm" />
                 </div>
 
-                {{-- Status Filter --}}
+                {{-- Block: Status Select --}}
                 <div class="min-w-32">
                     <x-mary-select 
                         wire:model.live="statusFilter" 
@@ -138,7 +144,7 @@ new class extends Component {
                         class="select-sm" />
                 </div>
 
-                {{-- Role Filter --}}
+                {{-- Block: Role Select --}}
                 <div class="min-w-32">
                     <x-mary-select 
                         wire:model.live="roleFilter" 
@@ -148,7 +154,7 @@ new class extends Component {
                         class="select-sm" />
                 </div>
 
-                {{-- Department Filter --}}
+                {{-- Block: Department Select --}}
                 <div class="min-w-32">
                     <x-mary-select 
                         wire:model.live="departmentFilter" 
@@ -160,7 +166,8 @@ new class extends Component {
             </div>
         </div>
 
-        {{-- Users Table --}}
+        {{-- SECTION: Users Table --}}
+        {{-- Kullanıcı listesini içeren ana tablo. --}}
         <div class="theme-card shadow-sm overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-sm">
@@ -176,12 +183,14 @@ new class extends Component {
                     </thead>
                     <tbody class="divide-y divide-slate-100">
                         @forelse($users as $user)
+                            {{-- İş Kuralı: Satıra tıklama kullanıcıyı düzenleme ekranına yönlendirir. --}}
                             <tr class="group hover:bg-[var(--list-card-hover-bg)] transition-all duration-200 cursor-pointer"
                                 onclick="window.location.href='{{ route('users.edit', $user) }}'">
                                 <td class="px-6 py-4">
                                     <div class="flex items-center gap-3">
                                         <div class="flex-shrink-0">
                                             @php
+                                                // MİMARİ NOT: Gravatar kullanımı global bir User helper üzerinden sağlanır.
                                                 $gravatarUrl = $user->getGravatarUrl(36);
                                             @endphp
                                             <div class="w-9 h-9 rounded-full flex items-center justify-center text-xs shadow-sm font-semibold overflow-hidden"
@@ -235,6 +244,7 @@ new class extends Component {
                                 <td class="px-6 py-4" onclick="event.stopPropagation()">
                                     <div class="flex items-center justify-center gap-2">
                                         {{-- 2FA Status Icon (Bilgilendirme) --}}
+                                        {{-- İş Kuralı: 2FA durumu güvenlik denetimi için görselleştirilir. --}}
                                         <span class="inline-flex items-center justify-center w-6 h-6 rounded-full text-orange-600" 
                                             title="2FA Durumu">
                                             <x-mary-icon name="o-shield-exclamation" class="w-4 h-4" />
