@@ -52,6 +52,8 @@ class Message extends Model
         'body',
         'recipient_name',
         'recipient_email',
+        'cc',
+        'bcc',
         'contact_id',
         'type',
         'status',

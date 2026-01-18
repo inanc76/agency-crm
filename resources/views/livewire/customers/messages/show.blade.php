@@ -1,96 +1,99 @@
 <?php
 
-use Livewire\Volt\Component;
-use Livewire\Attributes\Layout;
-use App\Models\Message;
-use App\Models\Contact;
-use App\Services\MailTemplateService;
 use App\Mail\DynamicCustomerMail;
+use App\Models\Contact;
+use App\Models\Message;
+use App\Services\MailTemplateService;
 use Illuminate\Support\Facades\Mail;
+use Livewire\Attributes\Layout;
+use Livewire\Volt\Component;
 use Mary\Traits\Toast;
 
 new #[Layout('components.layouts.app', ['title' => 'Mesaj Detayı'])]
-    class extends Component {
-    use Toast;
-
-    public Message $message;
-    public string $renderedBody = '';
-
-    public function mount(Message $message, MailTemplateService $mailService): void
+    class extends Component
     {
-        $this->message = $message->load(['customer', 'offer', 'status_item', 'type_item']);
+        use Toast;
 
-        // Get first contact for this customer
-        $contact = Contact::where('customer_id', $this->message->customer_id)->first();
+        public Message $message;
 
-        // Prepare replacement variables
-        $variables = [
-            '{{name}}' => $contact?->name ?? 'Kullanıcı',
-            '{{contact.name}}' => $contact?->name ?? 'Kullanıcı',
-            '{{customer.name}}' => $this->message->customer?->name ?? '',
-            '{{offer.download_link}}' => $this->message->offer?->download_page_id
-                ? url('/offer/' . $this->message->offer->download_page_id)
-                : '#',
-            '{{offer.number}}' => $this->message->offer?->number ?? '',
-            '{{offer.title}}' => $this->message->offer?->title ?? '',
-        ];
+        public string $renderedBody = '';
 
-        // Render message body with variables replaced
-        if ($this->message->mail_template_id) {
-            $rendered = $mailService->renderById($this->message->mail_template_id, $variables);
-            $this->renderedBody = $rendered['content'] ?? $this->message->body;
-        } else {
-            // If no template, do simple string replacement
-            $this->renderedBody = str_replace(
-                array_keys($variables),
-                array_values($variables),
-                $this->message->body
-            );
-        }
-    }
+        public function mount(Message $message, MailTemplateService $mailService): void
+        {
+            $this->message = $message->load(['customer', 'offer', 'status_item', 'type_item']);
 
-    public function delete(): void
-    {
-        $this->message->delete();
-        $this->success('Başarılı', 'Mesaj silindi.');
-        $this->redirect('/dashboard/customers?tab=messages', navigate: true);
-    }
+            // Get first contact for this customer
+            $contact = Contact::where('customer_id', $this->message->customer_id)->first();
 
-    public function sendMessage(): void
-    {
-        if ($this->message->status === 'SENT') {
-            $this->error('Hata', 'Bu mesaj zaten gönderilmiş.');
-            return;
-        }
+            // Prepare replacement variables
+            $variables = [
+                '{{name}}' => $contact?->name ?? 'Kullanıcı',
+                '{{contact.name}}' => $contact?->name ?? 'Kullanıcı',
+                '{{customer.name}}' => $this->message->customer?->name ?? '',
+                '{{offer.download_link}}' => $this->message->offer?->tracking_token
+                    ? url('/offer/'.$this->message->offer->tracking_token)
+                    : '#',
+                '{{offer.number}}' => $this->message->offer?->number ?? '',
+                '{{offer.title}}' => $this->message->offer?->title ?? '',
+            ];
 
-        // Get all contacts for this customer
-        $contacts = Contact::where('customer_id', $this->message->customer_id)->get();
-
-        if ($contacts->isEmpty()) {
-            $this->error('Hata', 'Bu müşteriye ait kişi bulunamadı.');
-            return;
-        }
-
-        // Send email to all contacts
-        foreach ($contacts as $contact) {
-            if ($contact->email) {
-                Mail::to($contact->email)->send(new DynamicCustomerMail(
-                    $this->message->subject,
-                    $this->renderedBody
-                ));
+            // Render message body with variables replaced
+            if ($this->message->mail_template_id) {
+                $rendered = $mailService->renderById($this->message->mail_template_id, $variables);
+                $this->renderedBody = $rendered['content'] ?? $this->message->body;
+            } else {
+                // If no template, do simple string replacement
+                $this->renderedBody = str_replace(
+                    array_keys($variables),
+                    array_values($variables),
+                    $this->message->body
+                );
             }
         }
 
-        // Update message status
-        $this->message->update([
-            'status' => 'SENT',
-            'sent_at' => now(),
-        ]);
+        public function delete(): void
+        {
+            $this->message->delete();
+            $this->success('Başarılı', 'Mesaj silindi.');
+            $this->redirect('/dashboard/customers?tab=messages', navigate: true);
+        }
 
-        $this->success('Başarılı', 'Mesaj ' . $contacts->count() . ' kişiye gönderildi.');
-        $this->redirect('/dashboard/customers?tab=messages', navigate: true);
-    }
-}; ?>
+        public function sendMessage(): void
+        {
+            if ($this->message->status === 'SENT') {
+                $this->error('Hata', 'Bu mesaj zaten gönderilmiş.');
+
+                return;
+            }
+
+            if (! $this->message->recipient_email) {
+                $this->error('Hata', 'Alıcı e-posta adresi bulunamadı.');
+
+                return;
+            }
+
+            // Parse CC and BCC
+            $cc = $this->message->cc ? array_map('trim', explode(',', $this->message->cc)) : [];
+            $bcc = $this->message->bcc ? array_map('trim', explode(',', $this->message->bcc)) : [];
+
+            // Send email to the recipient
+            Mail::to($this->message->recipient_email)->send(new DynamicCustomerMail(
+                $this->message->subject,
+                $this->renderedBody,
+                $cc,
+                $bcc
+            ));
+
+            // Update message status
+            $this->message->update([
+                'status' => 'SENT',
+                'sent_at' => now(),
+            ]);
+
+            $this->success('Başarılı', 'Mesaj '.$this->message->recipient_email.' adresine gönderildi.');
+            $this->redirect('/dashboard/customers?tab=messages', navigate: true);
+        }
+    }; ?>
 
 <div class="p-6 max-w-7xl mx-auto space-y-6">
     {{-- Navigation & Actions --}}
@@ -190,6 +193,24 @@ new #[Layout('components.layouts.app', ['title' => 'Mesaj Detayı'])]
                         </span>
                     </div>
                 </div>
+
+                @if($message->cc)
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase">CC</label>
+                        <p class="text-xs text-slate-600 mt-0.5 break-all">
+                            {{ $message->cc }}
+                        </p>
+                    </div>
+                @endif
+
+                @if($message->bcc)
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase">BCC</label>
+                        <p class="text-xs text-slate-600 mt-0.5 break-all">
+                            {{ $message->bcc }}
+                        </p>
+                    </div>
+                @endif
 
                 @if($message->offer_id)
                     <div class="pt-4 border-t border-slate-50">

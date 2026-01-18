@@ -1,151 +1,169 @@
 <?php
 
-use Livewire\Volt\Component;
-use Livewire\Attributes\Layout;
-use App\Models\Customer;
-use App\Models\Offer;
-use App\Models\MailTemplate;
 use App\Models\Contact;
+use App\Models\Customer;
+use App\Models\MailTemplate;
 use App\Models\Message;
+use App\Models\Offer;
 use App\Services\MailTemplateService;
-use App\Mail\DynamicCustomerMail;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use Livewire\Attributes\Layout;
+use Livewire\Volt\Component;
 use Mary\Traits\Toast;
 
 new #[Layout('components.layouts.app', ['title' => 'Yeni Mesaj Oluştur'])]
-    class extends Component {
-    use Toast;
-
-    public ?string $customer_id = null;
-    public ?string $offer_id = null;
-    public ?string $template_id = null;
-    public string $message_type = 'EMAIL';
-    public array $selected_contacts = [];
-
-    public function mount(): void
+    class extends Component
     {
-        $this->customer_id = (string) request()->query('customer') ?: null;
-        $this->offer_id = (string) request()->query('offer') ?: null;
+        use Toast;
 
-        if ($this->offer_id && !$this->customer_id) {
-            $offer = Offer::find($this->offer_id);
-            if ($offer) {
-                $this->customer_id = (string) $offer->customer_id;
+        public ?string $customer_id = null;
+
+        public ?string $offer_id = null;
+
+        public ?string $template_id = null;
+
+        public string $message_type = 'EMAIL';
+
+        public array $selected_contacts = [];
+
+        public ?string $cc = null;
+
+        public ?string $bcc = null;
+
+        public function mount(): void
+        {
+            $this->customer_id = (string) request()->query('customer') ?: null;
+            $this->offer_id = (string) request()->query('offer') ?: null;
+
+            if ($this->offer_id && ! $this->customer_id) {
+                $offer = Offer::find($this->offer_id);
+                if ($offer) {
+                    $this->customer_id = (string) $offer->customer_id;
+                }
             }
         }
-    }
 
-    public function toggleContact(string $id): void
-    {
-        if (in_array($id, $this->selected_contacts)) {
-            $this->selected_contacts = array_values(array_diff($this->selected_contacts, [$id]));
-        } else {
-            $this->selected_contacts[] = $id;
-        }
-    }
-
-    public function updatedCustomerId(): void
-    {
-        $this->offer_id = null;
-        $this->selected_contacts = [];
-    }
-
-    public function customers()
-    {
-        return Customer::orderBy('name')->get(['id', 'name'])->toArray();
-    }
-
-    public function offers()
-    {
-        if (!$this->customer_id) {
-            return [];
+        public function toggleContact(string $id): void
+        {
+            if (in_array($id, $this->selected_contacts)) {
+                $this->selected_contacts = array_values(array_diff($this->selected_contacts, [$id]));
+            } else {
+                $this->selected_contacts[] = $id;
+            }
         }
 
-        return Offer::where('customer_id', $this->customer_id)
-            ->orderBy('created_at', 'desc')
-            ->get()
-            ->map(fn($o) => ['id' => $o->id, 'name' => $o->title])
-            ->toArray();
-    }
-
-    public function mailTypes()
-    {
-        return \App\Models\ReferenceItem::where('category_key', 'MAIL_TYPE')
-            ->where('is_active', true)
-            ->orderBy('sort_order')
-            ->get(['id', 'key', 'display_label'])
-            ->map(fn($item) => ['id' => $item->key, 'name' => $item->display_label])
-            ->toArray();
-    }
-
-    public function templates()
-    {
-        return MailTemplate::where('is_system', false)
-            ->orderBy('name')
-            ->get(['id', 'name'])
-            ->toArray();
-    }
-
-    public function contacts()
-    {
-        if (!$this->customer_id) {
-            return collect();
+        public function updatedCustomerId(): void
+        {
+            $this->offer_id = null;
+            $this->selected_contacts = [];
         }
 
-        return Contact::where('customer_id', $this->customer_id)->orderBy('name')->get();
-    }
+        public function customers()
+        {
+            return Customer::orderBy('name')->get(['id', 'name'])->toArray();
+        }
 
-    public function cancel(): void
-    {
-        $this->redirect('/dashboard/customers?tab=messages', navigate: true);
-    }
+        public function offers()
+        {
+            if (! $this->customer_id) {
+                return [];
+            }
 
-    public function createDraft(MailTemplateService $mailService): void
-    {
-        $this->validate([
-            'customer_id' => 'required',
-            'template_id' => 'required',
-            'selected_contacts' => 'required|array|min:1',
-        ]);
+            return Offer::where('customer_id', $this->customer_id)
+                ->orderBy('created_at', 'desc')
+                ->get()
+                ->map(fn ($o) => ['id' => $o->id, 'name' => $o->title])
+                ->toArray();
+        }
 
-        $template = MailTemplate::find($this->template_id);
+        public function mailTypes()
+        {
+            return \App\Models\ReferenceItem::where('category_key', 'MAIL_TYPE')
+                ->where('is_active', true)
+                ->orderBy('sort_order')
+                ->get(['id', 'key', 'display_label'])
+                ->map(fn ($item) => ['id' => $item->key, 'name' => $item->display_label])
+                ->toArray();
+        }
 
-        foreach ($this->selected_contacts as $contactId) {
-            $contact = Contact::find($contactId);
-            if (!$contact)
-                continue;
+        public function templates()
+        {
+            return MailTemplate::where('is_system', false)
+                ->orderBy('name')
+                ->get(['id', 'name'])
+                ->toArray();
+        }
 
-            // Render template
-            $rendered = $mailService->renderById($this->template_id, [
-                '{{name}}' => $contact->name,
-                '{{customer.name}}' => $contact->customer?->name,
+        public function contacts()
+        {
+            if (! $this->customer_id) {
+                return collect();
+            }
+
+            return Contact::where('customer_id', $this->customer_id)->orderBy('name')->get();
+        }
+
+        public function cancel(): void
+        {
+            $this->redirect('/dashboard/customers?tab=messages', navigate: true);
+        }
+
+        public function createDraft(MailTemplateService $mailService): void
+        {
+            $this->validate([
+                'customer_id' => 'required',
+                'template_id' => 'required',
+                'selected_contacts' => 'required|array|min:1',
             ]);
 
-            $subject = $rendered['subject'] ?: ($template->subject ?? 'Konu Yok');
-            $body = $rendered['content'] ?: ($template->content ?? '');
+            $template = MailTemplate::find($this->template_id);
 
-            // Create message record as DRAFT
-            Message::create([
-                'id' => Str::uuid()->toString(),
-                'customer_id' => $this->customer_id,
-                'offer_id' => $this->offer_id,
-                'mail_template_id' => $this->template_id,
-                'subject' => $subject,
-                'body' => $body,
-                'recipient_name' => $contact->name,
-                'recipient_email' => $contact->email,
-                'contact_id' => $contact->id,
-                'type' => $this->message_type,
-                'status' => 'DRAFT',
-                'sent_at' => null,
-            ]);
+            foreach ($this->selected_contacts as $contactId) {
+                $contact = Contact::find($contactId);
+                if (! $contact) {
+                    continue;
+                }
+
+                // Prepare variables
+                $offer = $this->offer_id ? Offer::find($this->offer_id) : null;
+                $variables = [
+                    '{{name}}' => $contact->name,
+                    '{{contact.name}}' => $contact->name,
+                    '{{customer.name}}' => $contact->customer?->name,
+                    '{{offer.download_link}}' => $offer?->tracking_token ? url('/offer/'.$offer->tracking_token) : '#',
+                    '{{offer.number}}' => $offer?->number ?? '',
+                    '{{offer.title}}' => $offer?->title ?? '',
+                ];
+
+                // Render template
+                $rendered = $mailService->renderById($this->template_id, $variables);
+
+                $subject = $rendered['subject'] ?: ($template->subject ?? 'Konu Yok');
+                $body = $rendered['content'] ?: ($template->content ?? '');
+
+                // Create message record as DRAFT
+                Message::create([
+                    'id' => Str::uuid()->toString(),
+                    'customer_id' => $this->customer_id,
+                    'offer_id' => $this->offer_id,
+                    'mail_template_id' => $this->template_id,
+                    'subject' => $subject,
+                    'body' => $body,
+                    'recipient_name' => $contact->name,
+                    'recipient_email' => $contact->email,
+                    'cc' => $this->cc,
+                    'bcc' => $this->bcc,
+                    'contact_id' => $contact->id,
+                    'type' => $this->message_type,
+                    'status' => 'DRAFT',
+                    'sent_at' => null,
+                ]);
+            }
+
+            $this->success('İşlem Başarılı', count($this->selected_contacts).' adet taslak mesaj oluşturuldu.');
+            $this->redirect('/dashboard/customers?tab=messages', navigate: true);
         }
-
-        $this->success('İşlem Başarılı', count($this->selected_contacts) . ' adet taslak mesaj oluşturuldu.');
-        $this->redirect('/dashboard/customers?tab=messages', navigate: true);
-    }
-}; ?>
+    }; ?>
 
 <div class="p-6 min-h-screen" style="background-color: var(--page-bg);">
     <div class="max-w-7xl mx-auto">
@@ -227,6 +245,14 @@ new #[Layout('components.layouts.app', ['title' => 'Yeni Mesaj Oluştur'])]
                                     </div>
                                 </div>
                             @endforeach
+                        </div>
+
+                        {{-- CC & BCC Inputs --}}
+                        <div class="mt-6 space-y-4 border-t border-[var(--card-border)] pt-4">
+                            <x-mary-input label="CC (Virgül ile ayırın)" wire:model="cc"
+                                placeholder="ornek1@mail.com, ornek2@mail.com" icon="o-envelope" />
+                            <x-mary-input label="BCC (Virgül ile ayırın)" wire:model="bcc"
+                                placeholder="hidden1@mail.com, hidden2@mail.com" icon="o-eye-slash" />
                         </div>
 
                         @if(count($selected_contacts) > 0)

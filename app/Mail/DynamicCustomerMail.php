@@ -17,7 +17,9 @@ class DynamicCustomerMail extends Mailable
      */
     public function __construct(
         public string $mailSubject,
-        public string $mailContent
+        public string $mailContent,
+        public array $ccAddresses = [],
+        public array $bccAddresses = []
     ) {}
 
     /**
@@ -27,6 +29,8 @@ class DynamicCustomerMail extends Mailable
     {
         return new Envelope(
             subject: $this->mailSubject,
+            cc: $this->ccAddresses,
+            bcc: $this->bccAddresses,
         );
     }
 
