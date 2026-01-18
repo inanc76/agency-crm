@@ -12,6 +12,7 @@ use App\Models\ReferenceCategory;
 use Livewire\Volt\Volt;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\View;
+use Illuminate\Http\UploadedFile;
 
 uses(RefreshDatabase::class);
 
@@ -266,7 +267,7 @@ test('T75: Authenticated user can access dashboard', function () {
 test('T76: User without permission cannot access restricted routes', function () {
     $user = User::factory()->create();
     $this->actingAs($user);
-    
+
     $this->get('/dashboard/settings/panel')->assertForbidden();
 });
 
@@ -307,10 +308,10 @@ test('T84: Reference data is seeded correctly', function () {
 test('T85: User roles and permissions are working', function () {
     $role = \App\Models\Role::factory()->create(['name' => 'Test Role']);
     $permission = \App\Models\Permission::factory()->create(['name' => 'test.permission']);
-    
+
     $role->givePermissionTo($permission);
     $user = User::factory()->create(['role_id' => $role->id]);
-    
+
     expect($user->hasPermissionTo('test.permission'))->toBeTrue();
 });
 
@@ -331,11 +332,11 @@ test('T87: Public disk is accessible', function () {
 test('T88: File upload functionality works', function () {
     Storage::fake('public');
     $file = UploadedFile::fake()->create('test.pdf', 100);
-    
+
     $response = $this->post('/dashboard/upload', [
         'file' => $file
     ]);
-    
+
     expect($response->status())->toBeLessThan(500);
 });
 
@@ -343,18 +344,18 @@ test('T88: File upload functionality works', function () {
 
 test('T89: Mail configuration is working', function () {
     Mail::fake();
-    
+
     Mail::to('test@example.com')->send(new \App\Mail\TestMail());
-    
+
     Mail::assertSent(\App\Mail\TestMail::class);
 });
 
 test('T90: Notification system is working', function () {
     Notification::fake();
-    
+
     $user = User::factory()->create();
     $user->notify(new \App\Notifications\TestNotification());
-    
+
     Notification::assertSentTo($user, \App\Notifications\TestNotification::class);
 });
 
@@ -374,7 +375,7 @@ test('T93: Redis connection is working', function () {
     if (!extension_loaded('redis')) {
         $this->markTestSkipped('Redis extension not loaded');
     }
-    
+
     try {
         Redis::ping();
         expect(true)->toBeTrue();
@@ -387,16 +388,16 @@ test('T93: Redis connection is working', function () {
 
 test('T94: Queue system is working', function () {
     Queue::fake();
-    
+
     dispatch(new \App\Jobs\TestJob());
-    
+
     Queue::assertPushed(\App\Jobs\TestJob::class);
 });
 
 test('T95: Job processing works', function () {
     $job = new \App\Jobs\TestJob();
     $job->handle();
-    
+
     expect(true)->toBeTrue(); // Job completed without error
 });
 
@@ -404,16 +405,16 @@ test('T95: Job processing works', function () {
 
 test('T96: API returns valid JSON responses', function () {
     $response = $this->getJson('/api/customers');
-    
+
     $response->assertHeader('Content-Type', 'application/json');
     expect($response->json())->toBeArray();
 });
 
 test('T97: API pagination works', function () {
     Customer::factory()->count(20)->create();
-    
+
     $response = $this->getJson('/api/customers?page=1&per_page=10');
-    
+
     $response->assertJsonStructure([
         'data',
         'meta' => ['current_page', 'per_page', 'total']
@@ -423,9 +424,9 @@ test('T97: API pagination works', function () {
 test('T98: API filtering works', function () {
     Customer::factory()->create(['name' => 'Test Customer']);
     Customer::factory()->create(['name' => 'Another Customer']);
-    
+
     $response = $this->getJson('/api/customers?search=Test');
-    
+
     expect(count($response->json('data')))->toBe(1);
 });
 
@@ -433,25 +434,25 @@ test('T98: API filtering works', function () {
 
 test('T99: Memory usage is within acceptable limits', function () {
     $initialMemory = memory_get_usage();
-    
+
     // Perform some operations
     Customer::factory()->count(100)->create();
     $customers = Customer::all();
-    
+
     $finalMemory = memory_get_usage();
     $memoryUsed = $finalMemory - $initialMemory;
-    
+
     // Should use less than 50MB for 100 customers
     expect($memoryUsed)->toBeLessThan(50 * 1024 * 1024);
 });
 
 test('T100: Database queries are optimized', function () {
     DB::enableQueryLog();
-    
+
     $customers = Customer::with(['projects', 'offers'])->limit(10)->get();
-    
+
     $queries = DB::getQueryLog();
-    
+
     // Should not have N+1 queries
     expect(count($queries))->toBeLessThan(5);
 });
@@ -460,19 +461,19 @@ test('T100: Database queries are optimized', function () {
 
 test('T101: XSS protection is working', function () {
     $maliciousInput = '<script>alert("XSS")</script>';
-    
+
     $customer = Customer::factory()->create(['name' => $maliciousInput]);
-    
+
     $response = $this->get('/dashboard/customers/' . $customer->id);
-    
+
     $response->assertDontSee('<script>', false);
 });
 
 test('T102: SQL injection protection is working', function () {
     $maliciousInput = "'; DROP TABLE customers; --";
-    
+
     $response = $this->getJson('/api/customers?search=' . urlencode($maliciousInput));
-    
+
     expect(Customer::count())->toBeGreaterThan(0); // Table should still exist
 });
 
@@ -480,7 +481,7 @@ test('T103: CSRF protection is enabled', function () {
     $response = $this->post('/dashboard/customers', [
         'name' => 'Test Customer'
     ]);
-    
+
     $response->assertStatus(419); // CSRF token mismatch
 });
 
@@ -519,24 +520,24 @@ test('T109: Mail configuration is set', function () {
 
 test('T110: Authentication middleware works', function () {
     auth()->logout();
-    
+
     $response = $this->get('/dashboard/customers');
-    
+
     $response->assertRedirect('/login');
 });
 
 test('T111: Permission middleware works', function () {
     $user = User::factory()->create();
     $this->actingAs($user);
-    
+
     $response = $this->get('/dashboard/settings/panel');
-    
+
     $response->assertForbidden();
 });
 
 test('T112: CORS middleware works', function () {
     $response = $this->options('/api/customers');
-    
+
     $response->assertHeader('Access-Control-Allow-Origin');
 });
 
@@ -544,19 +545,19 @@ test('T112: CORS middleware works', function () {
 
 test('T113: Events are fired correctly', function () {
     Event::fake();
-    
+
     Customer::factory()->create();
-    
+
     Event::assertDispatched(\App\Events\CustomerCreated::class);
 });
 
 test('T114: Listeners handle events correctly', function () {
     Event::fake();
-    
+
     $customer = Customer::factory()->create();
-    
+
     event(new \App\Events\CustomerCreated($customer));
-    
+
     Event::assertListening(
         \App\Events\CustomerCreated::class,
         \App\Listeners\SendCustomerWelcomeEmail::class
@@ -567,7 +568,7 @@ test('T114: Listeners handle events correctly', function () {
 
 test('T115: Form validation works correctly', function () {
     $response = $this->post('/dashboard/customers', []);
-    
+
     $response->assertSessionHasErrors(['name']);
 });
 
@@ -576,7 +577,7 @@ test('T116: Custom validation rules work', function () {
         'name' => 'a', // Too short
         'email' => 'invalid-email'
     ]);
-    
+
     $response->assertSessionHasErrors(['name', 'email']);
 });
 
@@ -584,7 +585,7 @@ test('T116: Custom validation rules work', function () {
 
 test('T117: Application logging works', function () {
     Log::info('Test log message');
-    
+
     expect(true)->toBeTrue(); // No exception thrown
 });
 
@@ -594,7 +595,7 @@ test('T118: Error logging works', function () {
     } catch (\Exception $e) {
         Log::error('Test error', ['exception' => $e]);
     }
-    
+
     expect(true)->toBeTrue(); // No exception thrown
 });
 
@@ -602,14 +603,14 @@ test('T118: Error logging works', function () {
 
 test('T119: Artisan commands are registered', function () {
     $commands = Artisan::all();
-    
+
     expect($commands)->toHaveKey('migrate');
     expect($commands)->toHaveKey('db:seed');
 });
 
 test('T120: Custom artisan commands work', function () {
     $exitCode = Artisan::call('app:test-command');
-    
+
     expect($exitCode)->toBe(0);
 });
 
@@ -618,7 +619,7 @@ test('T120: Custom artisan commands work', function () {
 test('T121: Customer relationships work', function () {
     $customer = Customer::factory()->create();
     $project = Project::factory()->create(['customer_id' => $customer->id]);
-    
+
     expect($customer->projects)->toHaveCount(1);
     expect($project->customer->id)->toBe($customer->id);
 });
@@ -626,7 +627,7 @@ test('T121: Customer relationships work', function () {
 test('T122: Project relationships work', function () {
     $project = Project::factory()->create();
     $task = \App\Models\Task::factory()->create(['project_id' => $project->id]);
-    
+
     expect($project->tasks)->toHaveCount(1);
     expect($task->project->id)->toBe($project->id);
 });
@@ -635,14 +636,14 @@ test('T122: Project relationships work', function () {
 
 test('T123: Model factories work correctly', function () {
     $customer = Customer::factory()->create();
-    
+
     expect($customer)->toBeInstanceOf(Customer::class);
     expect($customer->name)->not->toBeNull();
 });
 
 test('T124: Database seeders work correctly', function () {
     Artisan::call('db:seed', ['--class' => 'ReferenceDataSeeder']);
-    
+
     expect(ReferenceCategory::count())->toBeGreaterThan(0);
 });
 
@@ -650,13 +651,13 @@ test('T124: Database seeders work correctly', function () {
 
 test('T125: All routes are accessible', function () {
     $routes = Route::getRoutes();
-    
+
     expect(count($routes))->toBeGreaterThan(0);
 });
 
 test('T126: API routes are properly versioned', function () {
     $response = $this->getJson('/api/v1/customers');
-    
+
     expect($response->status())->toBeLessThan(500);
 });
 
@@ -668,9 +669,9 @@ test('T127: Full customer creation workflow', function () {
         'email' => 'test@example.com',
         'phone' => '+90 555 123 4567'
     ];
-    
+
     $response = $this->post('/dashboard/customers', $customerData);
-    
+
     $response->assertRedirect();
     $this->assertDatabaseHas('customers', ['name' => 'Test Customer']);
 });
@@ -682,9 +683,9 @@ test('T128: Full project creation workflow', function () {
         'leader_id' => $this->user->id,
         'status_id' => ReferenceItem::where('key', 'ACTIVE')->first()->id
     ];
-    
+
     $response = $this->post('/dashboard/projects', $projectData);
-    
+
     $response->assertRedirect();
     $this->assertDatabaseHas('projects', ['name' => 'Test Project']);
 });
@@ -693,7 +694,7 @@ test('T128: Full project creation workflow', function () {
 
 test('T129: 404 errors are handled gracefully', function () {
     $response = $this->get('/non-existent-route');
-    
+
     $response->assertStatus(404);
 });
 
@@ -702,11 +703,11 @@ test('T130: 500 errors are handled gracefully', function () {
     $this->mock(\App\Services\CustomerService::class, function ($mock) {
         $mock->shouldReceive('create')->andThrow(new \Exception('Test error'));
     });
-    
+
     $response = $this->post('/dashboard/customers', [
         'name' => 'Test Customer'
     ]);
-    
+
     expect($response->status())->toBeLessThan(600);
 });
 
@@ -714,22 +715,22 @@ test('T130: 500 errors are handled gracefully', function () {
 
 test('T131: Response times are acceptable', function () {
     $start = microtime(true);
-    
+
     $this->get('/dashboard');
-    
+
     $end = microtime(true);
     $responseTime = ($end - $start) * 1000; // Convert to milliseconds
-    
+
     expect($responseTime)->toBeLessThan(1000); // Less than 1 second
 });
 
 test('T132: Database query count is optimized', function () {
     DB::enableQueryLog();
-    
+
     $this->get('/dashboard/customers');
-    
+
     $queries = DB::getQueryLog();
-    
+
     expect(count($queries))->toBeLessThan(20); // Reasonable query count
 });
 
@@ -747,11 +748,11 @@ test('T134: CSS assets are compiled', function () {
 
 test('T135: Application health check passes', function () {
     $response = $this->get('/health');
-    
+
     if ($response->status() === 404) {
         $this->markTestSkipped('Health check endpoint not implemented');
     }
-    
+
     $response->assertStatus(200);
 });
 
@@ -772,16 +773,16 @@ test('T137: Complete user journey works', function () {
         'email' => $this->user->email,
         'password' => 'password'
     ]);
-    
+
     // 2. Create customer
     $customer = Customer::factory()->create();
-    
+
     // 3. Create project
     $project = Project::factory()->create(['customer_id' => $customer->id]);
-    
+
     // 4. Create offer
     $offer = Offer::factory()->create(['customer_id' => $customer->id]);
-    
+
     // 5. Verify all created
     expect($customer->exists)->toBeTrue();
     expect($project->exists)->toBeTrue();
@@ -790,12 +791,12 @@ test('T137: Complete user journey works', function () {
 
 test('T138: System can handle concurrent requests', function () {
     $responses = [];
-    
+
     // Simulate concurrent requests
     for ($i = 0; $i < 5; $i++) {
         $responses[] = $this->get('/dashboard');
     }
-    
+
     foreach ($responses as $response) {
         $response->assertStatus(200);
     }
@@ -806,11 +807,13 @@ test('T138: System can handle concurrent requests', function () {
 test('T139: Temporary files are cleaned up', function () {
     // Create a temporary file
     $tempFile = storage_path('app/temp/test.txt');
+    if (!is_dir(dirname($tempFile)))
+        mkdir(dirname($tempFile), 0777, true);
     file_put_contents($tempFile, 'test content');
-    
+
     // Run cleanup command
     Artisan::call('app:cleanup-temp-files');
-    
+
     expect(file_exists($tempFile))->toBeFalse();
 });
 
@@ -825,11 +828,11 @@ test('T140: Old logs are rotated', function () {
 test('T141: All critical services are running', function () {
     // Database
     expect(DB::connection()->getPdo())->not->toBeNull();
-    
+
     // Cache
     Cache::put('test', 'value');
     expect(Cache::get('test'))->toBe('value');
-    
+
     // Session
     session(['test' => 'value']);
     expect(session('test'))->toBe('value');
@@ -839,11 +842,11 @@ test('T142: System is ready for production', function () {
     // Check critical configurations
     expect(config('app.key'))->not->toBeNull();
     expect(config('database.connections.mysql.host'))->not->toBeNull();
-    
+
     // Check critical directories exist
     expect(is_dir(storage_path('app')))->toBeTrue();
     expect(is_dir(storage_path('logs')))->toBeTrue();
-    
+
     // Check permissions
     expect(is_writable(storage_path()))->toBeTrue();
 });

@@ -184,7 +184,7 @@ class User extends Authenticatable
     public function hasGravatar(): bool
     {
         $gravatarUrl = $this->getGravatarUrl();
-        
+
         // Use get_headers to check if Gravatar exists (returns 200) or not (returns 404)
         $headers = @get_headers($gravatarUrl);
         return $headers && strpos($headers[0], '200') !== false;
@@ -222,9 +222,17 @@ class User extends Authenticatable
 
     /**
      * Grants a permission to the user's current role (for testing/setup)
+     * Supports single permission string or array of permissions
      */
-    public function givePermissionTo(string $permissionName): void
+    public function givePermissionTo(string|array $permissionName): void
     {
+        if (is_array($permissionName)) {
+            foreach ($permissionName as $perm) {
+                $this->givePermissionTo($perm);
+            }
+            return;
+        }
+
         $permission = Permission::firstOrCreate(
             ['name' => $permissionName],
             ['type' => 'ACTION', 'resource' => explode('.', $permissionName)[0] ?? 'global']
